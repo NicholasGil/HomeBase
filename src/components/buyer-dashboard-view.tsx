@@ -26,10 +26,10 @@ export function OwedTodayFigure({
     case "estimate":
       return (
         <div className="space-y-2">
-          <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-            {display.statusLabel}
-          </p>
           <p className="text-2xl font-normal text-muted-foreground italic tabular-nums">
+            <span className="mr-2 align-middle text-xs font-semibold not-italic tracking-[0.18em] uppercase">
+              {display.statusLabel}
+            </span>
             {display.amountText}
           </p>
           <p className="text-xs text-muted-foreground">
@@ -41,9 +41,6 @@ export function OwedTodayFigure({
     case "issued":
       return (
         <div className="space-y-2">
-          <p className="text-xs font-semibold tracking-[0.18em] uppercase">
-            {display.statusLabel}
-          </p>
           <p className="font-mono text-3xl font-semibold tracking-tight tabular-nums">
             {display.amountText}
           </p>

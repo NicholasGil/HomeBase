@@ -7,13 +7,57 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { BuyerDashboardView } from "../../convex/lib/dashboardView";
-import { isIssuedMoney } from "../../convex/lib/dashboardView";
+import { owedTodayDisplay } from "@/lib/owed-today-display";
 
-function formatMoney(amountCents: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(amountCents / 100);
+export function OwedTodayFigure({
+  owed,
+}: {
+  owed: BuyerDashboardView["owedToday"];
+}) {
+  const display = owedTodayDisplay(owed);
+
+  switch (display.kind) {
+    case "missing":
+      return (
+        <div className="space-y-1">
+          <p className="text-lg text-muted-foreground">{display.statusLabel}</p>
+        </div>
+      );
+    case "estimate":
+      return (
+        <div className="space-y-2">
+          <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+            {display.statusLabel}
+          </p>
+          <p className="text-2xl font-normal text-muted-foreground italic tabular-nums">
+            {display.amountText}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {display.label ? `${display.label}. ` : null}
+            Provenance {display.provenance}.
+          </p>
+        </div>
+      );
+    case "issued":
+      return (
+        <div className="space-y-2">
+          <p className="text-xs font-semibold tracking-[0.18em] uppercase">
+            {display.statusLabel}
+          </p>
+          <p className="font-mono text-3xl font-semibold tracking-tight tabular-nums">
+            {display.amountText}
+          </p>
+          <p className="text-xs">
+            {display.label ? `${display.label}. ` : null}
+            Provenance {display.provenance}.
+          </p>
+        </div>
+      );
+    default: {
+      const _exhaustive: never = display;
+      return _exhaustive;
+    }
+  }
 }
 
 export function BuyerDashboardViewPanel({
@@ -26,7 +70,6 @@ export function BuyerDashboardViewPanel({
   eyebrow?: string;
 }) {
   const owed = view.owedToday;
-  const issued = owed !== null && isIssuedMoney(owed);
 
   return (
     <div className="space-y-8">
@@ -96,23 +139,11 @@ export function BuyerDashboardViewPanel({
           <CardHeader>
             <CardTitle>What you owe today</CardTitle>
             <CardDescription>
-              {owed?.label ?? "No amount on this file"}
+              {owed?.label ?? "No sourced figure on this file"}
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-2">
-            <p className="text-2xl font-semibold">
-              {owed ? formatMoney(owed.amountCents) : "$0.00"}
-            </p>
-            {owed ? (
-              <div className="flex flex-wrap gap-2">
-                <Badge variant={issued ? "default" : "outline"}>
-                  {owed.provenance}
-                </Badge>
-                <Badge variant="secondary">
-                  {issued ? "issued" : "estimate"}
-                </Badge>
-              </div>
-            ) : null}
+          <CardContent>
+            <OwedTodayFigure owed={owed} />
           </CardContent>
         </Card>
       </section>

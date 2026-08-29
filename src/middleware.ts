@@ -1,20 +1,19 @@
 import { NextResponse, type NextFetchEvent, type NextRequest } from "next/server";
 
-import {
-  clerkKeysPresent,
-  isProductionDeploy,
-  isProtectedPath,
-} from "@/lib/auth-config";
+import { unauthenticatedAuthAction } from "@/lib/auth-config";
 import { serviceUnavailableResponse } from "@/lib/service-unavailable";
 
 export default async function middleware(
   request: NextRequest,
   event: NextFetchEvent,
 ) {
-  if (!clerkKeysPresent()) {
-    if (isProductionDeploy() && isProtectedPath(request.nextUrl.pathname)) {
-      return serviceUnavailableResponse();
-    }
+  const action = unauthenticatedAuthAction();
+
+  if (action === "unavailable") {
+    return serviceUnavailableResponse();
+  }
+
+  if (action === "skip") {
     return NextResponse.next();
   }
 

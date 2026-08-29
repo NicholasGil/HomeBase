@@ -52,6 +52,25 @@ export function mustFailClosed(env: AuthEnv = process.env) {
   return isProductionDeploy(env) && !clerkKeysPresent(env);
 }
 
+export type UnauthenticatedAuthAction = "unavailable" | "skip" | "clerk";
+
+/**
+ * Production without Clerk keys is always 503. That path never returns
+ * "skip", so middleware cannot fall through past auth.protect().
+ * Local, CI, and Vercel preview may skip Clerk and use the seed preview.
+ */
+export function unauthenticatedAuthAction(
+  env: AuthEnv = process.env,
+): UnauthenticatedAuthAction {
+  if (mustFailClosed(env)) {
+    return "unavailable";
+  }
+  if (!clerkKeysPresent(env)) {
+    return "skip";
+  }
+  return "clerk";
+}
+
 export function dashboardRenderMode(
   env: AuthEnv = process.env,
 ): DashboardRenderMode {

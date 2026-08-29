@@ -8,6 +8,7 @@ import {
   isProtectedPath,
   mustFailClosed,
   ProductionAuthMisconfiguredError,
+  unauthenticatedAuthAction,
 } from "@/lib/auth-config";
 
 const local = {};
@@ -36,6 +37,15 @@ describe("production fail-closed", () => {
     expect(mustFailClosed(local)).toBe(false);
     expect(mustFailClosed(preview)).toBe(false);
     expect(mustFailClosed({ ...preview, ...keys })).toBe(false);
+  });
+
+  it("never skips Clerk in production when keys are missing", () => {
+    expect(unauthenticatedAuthAction(production)).toBe("unavailable");
+    expect(unauthenticatedAuthAction(local)).toBe("skip");
+    expect(unauthenticatedAuthAction(preview)).toBe("skip");
+    expect(unauthenticatedAuthAction({ ...production, ...keys })).toBe("clerk");
+    expect(unauthenticatedAuthAction(configured)).toBe("clerk");
+    expect(dashboardRenderMode(production)).not.toBe("seed");
   });
 
   it("does not use NODE_ENV to decide fail-closed", () => {

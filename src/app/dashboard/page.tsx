@@ -4,6 +4,7 @@ import { LiveBuyerDashboard } from "@/components/live-buyer-dashboard";
 import { QueryErrorBoundary } from "@/components/query-error-boundary";
 import {
   dashboardRenderMode,
+  mustFailClosed,
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
 import { seedDashboardForBuyerA } from "@/lib/seed-dashboard";
@@ -12,6 +13,10 @@ import { SEED_PLAN } from "../../../convex/seedPlan";
 export const dynamic = "force-dynamic";
 
 export default function DashboardPage() {
+  if (mustFailClosed()) {
+    throw new ProductionAuthMisconfiguredError();
+  }
+
   const mode = dashboardRenderMode();
 
   if (mode === "unavailable") {

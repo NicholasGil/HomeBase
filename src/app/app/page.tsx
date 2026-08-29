@@ -1,9 +1,10 @@
 import { AppShell } from "@/components/app-shell";
 import { RoleRouter } from "@/components/role-router";
-import { isAuthConfigured } from "@/lib/auth-config";
+import { assertCanRenderWithoutAuth, isAuthConfigured } from "@/lib/auth-config";
 
 export default function AppPage() {
   if (!isAuthConfigured()) {
+    assertCanRenderWithoutAuth();
     return (
       <AppShell>
         <div className="space-y-3">

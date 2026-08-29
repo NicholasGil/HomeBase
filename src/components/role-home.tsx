@@ -1,4 +1,5 @@
 import { AppShell } from "@/components/app-shell";
+import { assertCanRenderWithoutAuth } from "@/lib/auth-config";
 
 export function RoleHome({
   role,
@@ -7,6 +8,8 @@ export function RoleHome({
   role: "agent" | "broker" | "admin" | "vendor";
   phase: string;
 }) {
+  assertCanRenderWithoutAuth();
+
   return (
     <AppShell>
       <div className="space-y-3">

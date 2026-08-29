@@ -1,7 +1,7 @@
 import { AppShell } from "@/components/app-shell";
 import { LiveTransactionPage } from "@/components/live-transaction-page";
 import { QueryErrorBoundary } from "@/components/query-error-boundary";
-import { isAuthConfigured } from "@/lib/auth-config";
+import { assertCanRenderWithoutAuth, isAuthConfigured } from "@/lib/auth-config";
 
 export default async function TransactionPage({
   params,
@@ -9,6 +9,7 @@ export default async function TransactionPage({
   const { transactionId } = await params;
 
   if (!isAuthConfigured()) {
+    assertCanRenderWithoutAuth();
     return (
       <AppShell>
         <div className="space-y-3">

@@ -91,7 +91,9 @@ export default async function HomePage() {
             </h2>
             <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
               The buyer dashboard has to answer these five questions on first
-              paint. That is the P0 gate, not a later polish pass.
+              paint. That is the product intent, shown here as an early signal.
+              The P0 gate is isolation: a seeded buyer sees their own
+              transaction and cannot load another by URL.
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">

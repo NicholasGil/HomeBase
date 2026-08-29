@@ -60,10 +60,10 @@ export default async function HomePage() {
                 See the ten-second test
               </Link>
               <Link
-                href="#journey"
+                href="/foundation"
                 className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
               >
-                Walk the journey
+                Foundation data
               </Link>
             </div>
           </div>

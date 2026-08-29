@@ -1,5 +1,7 @@
-import { BuyerDashboardViewPanel } from "@/components/buyer-dashboard-view";
+import { getTestSession } from "@/app/actions/test-session";
 import { AppShell } from "@/components/app-shell";
+import { BuyerDashboardViewPanel } from "@/components/buyer-dashboard-view";
+import { FixtureLoginPrompt } from "@/components/fixture-login-prompt";
 import { LiveBuyerDashboard } from "@/components/live-buyer-dashboard";
 import { QueryErrorBoundary } from "@/components/query-error-boundary";
 import {
@@ -7,30 +9,40 @@ import {
   mustFailClosed,
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
-import { seedDashboardForBuyerA } from "@/lib/seed-dashboard";
-import { SEED_PLAN } from "../../../convex/seedPlan";
+import { seedDashboardForBuyer } from "@/lib/seed-dashboard";
 
 export const dynamic = "force-dynamic";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
   if (mustFailClosed()) {
     throw new ProductionAuthMisconfiguredError();
   }
 
-  const mode = dashboardRenderMode();
+  const session = await getTestSession();
+  const mode = dashboardRenderMode(process.env, session);
 
   if (mode === "unavailable") {
     throw new ProductionAuthMisconfiguredError();
   }
 
-  if (mode === "seed") {
-    const buyer = SEED_PLAN.buyers.find((row) => row.clerkId === "clerk_buyer_a");
+  if (mode === "login") {
+    return (
+      <AppShell>
+        <FixtureLoginPrompt />
+      </AppShell>
+    );
+  }
+
+  if (mode === "fixture") {
+    if (session === null) {
+      throw new Error("fixture mode requires a test session");
+    }
     return (
       <AppShell>
         <BuyerDashboardViewPanel
-          view={seedDashboardForBuyerA()}
-          buyerName={buyer?.name}
-          eyebrow="Local seed preview · Clerk is not configured"
+          view={seedDashboardForBuyer(session.clerkId)}
+          buyerName={session.name}
+          eyebrow="Fixture session · not Clerk"
         />
       </AppShell>
     );

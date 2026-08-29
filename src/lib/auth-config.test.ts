@@ -51,12 +51,15 @@ describe("production fail-closed", () => {
   it("does not use NODE_ENV to decide fail-closed", () => {
     expect(mustFailClosed({ VERCEL_ENV: undefined })).toBe(false);
     expect(clerkKeysPresent(local)).toBe(false);
-    expect(dashboardRenderMode(local)).toBe("seed");
+    expect(dashboardRenderMode(local)).toBe("login");
   });
 
-  it("renders seed locally and on preview, live when configured, 503 in prod", () => {
-    expect(dashboardRenderMode(local)).toBe("seed");
-    expect(dashboardRenderMode(preview)).toBe("seed");
+  it("renders login or fixture locally, live when configured, 503 in prod", () => {
+    expect(dashboardRenderMode(local)).toBe("login");
+    expect(dashboardRenderMode(preview)).toBe("login");
+    expect(
+      dashboardRenderMode(local, { clerkId: "clerk_buyer_a" }),
+    ).toBe("fixture");
     expect(dashboardRenderMode({ ...production, ...configured })).toBe("live");
     expect(dashboardRenderMode(production)).toBe("unavailable");
     expect(dashboardRenderMode({ ...production, ...keys })).toBe("unavailable");

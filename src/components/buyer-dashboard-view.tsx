@@ -19,35 +19,31 @@ export function OwedTodayFigure({
   switch (display.kind) {
     case "missing":
       return (
-        <div className="space-y-1">
-          <p className="text-lg text-muted-foreground">{display.statusLabel}</p>
-        </div>
+        <p className={display.amountClassName}>{display.amountText}</p>
       );
     case "estimate":
       return (
         <div className="space-y-2">
-          <p className="text-2xl font-normal text-muted-foreground italic tabular-nums">
-            <span className="mr-2 align-middle text-xs font-semibold not-italic tracking-[0.18em] uppercase">
-              {display.statusLabel}
+          <p className={display.amountClassName}>
+            <span className="mr-2 align-middle text-xs font-semibold not-italic tracking-[0.18em]">
+              {display.estimateLabel}
             </span>
             {display.amountText}
           </p>
-          <p className="text-xs text-muted-foreground">
-            {display.label ? `${display.label}. ` : null}
-            Provenance {display.provenance}.
-          </p>
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="outline">{display.provenance}</Badge>
+            <Badge variant="secondary">estimate</Badge>
+          </div>
         </div>
       );
     case "issued":
       return (
         <div className="space-y-2">
-          <p className="font-mono text-3xl font-semibold tracking-tight tabular-nums">
-            {display.amountText}
-          </p>
-          <p className="text-xs">
-            {display.label ? `${display.label}. ` : null}
-            Provenance {display.provenance}.
-          </p>
+          <p className={display.amountClassName}>{display.amountText}</p>
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="default">{display.provenance}</Badge>
+            <Badge variant="secondary">issued</Badge>
+          </div>
         </div>
       );
     default: {

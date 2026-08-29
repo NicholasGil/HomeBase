@@ -1,25 +1,39 @@
 import type { DashboardMoney } from "../../convex/lib/dashboardView";
 
+export const MISSING_OWED_TODAY_TEXT = "None";
+export const ESTIMATE_LABEL = "ESTIMATE";
+export const ISSUED_AMOUNT_CLASS_NAME =
+  "font-mono text-3xl font-semibold tracking-tight tabular-nums";
+export const ESTIMATE_AMOUNT_CLASS_NAME =
+  "text-2xl font-normal text-muted-foreground italic tabular-nums";
+
 export type OwedTodayDisplay =
   | {
       kind: "missing";
-      amountText: null;
+      amountText: typeof MISSING_OWED_TODAY_TEXT;
+      amountClassName: "text-lg text-muted-foreground";
+      estimateLabel: null;
       provenance: null;
-      statusLabel: "Not yet issued";
     }
   | {
       kind: "issued";
       amountText: string;
-      provenance: Extract<DashboardMoney["provenance"], "lender_issued" | "title_issued">;
-      statusLabel: "Issued";
-      label: string | undefined;
+      amountClassName: typeof ISSUED_AMOUNT_CLASS_NAME;
+      estimateLabel: null;
+      provenance: Extract<
+        DashboardMoney["provenance"],
+        "lender_issued" | "title_issued"
+      >;
     }
   | {
       kind: "estimate";
       amountText: string;
-      provenance: Extract<DashboardMoney["provenance"], "ai_estimate" | "user_entered">;
-      statusLabel: "ESTIMATE" | "Entered";
-      label: string | undefined;
+      amountClassName: typeof ESTIMATE_AMOUNT_CLASS_NAME;
+      estimateLabel: typeof ESTIMATE_LABEL;
+      provenance: Extract<
+        DashboardMoney["provenance"],
+        "ai_estimate" | "user_entered"
+      >;
     };
 
 export function formatUsd(amountCents: number) {
@@ -35,9 +49,10 @@ export function owedTodayDisplay(
   if (owed === null || owed === undefined) {
     return {
       kind: "missing",
-      amountText: null,
+      amountText: MISSING_OWED_TODAY_TEXT,
+      amountClassName: "text-lg text-muted-foreground",
+      estimateLabel: null,
       provenance: null,
-      statusLabel: "Not yet issued",
     };
   }
 
@@ -48,25 +63,18 @@ export function owedTodayDisplay(
       return {
         kind: "issued",
         amountText,
+        amountClassName: ISSUED_AMOUNT_CLASS_NAME,
+        estimateLabel: null,
         provenance: owed.provenance,
-        statusLabel: "Issued",
-        label: owed.label,
       };
     case "ai_estimate":
-      return {
-        kind: "estimate",
-        amountText,
-        provenance: owed.provenance,
-        statusLabel: "ESTIMATE",
-        label: owed.label,
-      };
     case "user_entered":
       return {
         kind: "estimate",
         amountText,
+        amountClassName: ESTIMATE_AMOUNT_CLASS_NAME,
+        estimateLabel: ESTIMATE_LABEL,
         provenance: owed.provenance,
-        statusLabel: "Entered",
-        label: owed.label,
       };
     default: {
       const _exhaustive: never = owed.provenance;

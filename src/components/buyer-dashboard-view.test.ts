@@ -6,22 +6,26 @@ import {
   BuyerDashboardViewPanel,
   OwedTodayFigure,
 } from "@/components/buyer-dashboard-view";
+import {
+  ESTIMATE_AMOUNT_CLASS_NAME,
+  ESTIMATE_LABEL,
+  ISSUED_AMOUNT_CLASS_NAME,
+} from "@/lib/owed-today-display";
 import { seedDashboardForBuyerA } from "@/lib/seed-dashboard";
 
 describe("BuyerDashboardViewPanel owedToday", () => {
-  it("does not render $0.00 when owedToday is null", () => {
+  it("does not render a dollar amount when owedToday is null", () => {
     const view = { ...seedDashboardForBuyerA(), owedToday: null };
     const html = renderToStaticMarkup(
       createElement(BuyerDashboardViewPanel, { view }),
     );
 
-    expect(html).toContain("Not yet issued");
-    expect(html).toContain("No sourced figure on this file");
+    expect(html).toContain("None");
+    expect(html).not.toMatch(/\$\d/);
     expect(html).not.toContain("$0.00");
-    expect(html).not.toContain("Provenance");
   });
 
-  it("keeps provenance on the surface for issued and estimate figures", () => {
+  it("styles estimate and issued amounts differently", () => {
     const issuedHtml = renderToStaticMarkup(
       createElement(OwedTodayFigure, {
         owed: {
@@ -33,15 +37,6 @@ describe("BuyerDashboardViewPanel owedToday", () => {
         },
       }),
     );
-    const issuedAmount = issuedHtml.match(/<p class="[^"]*tabular-nums[^"]*">[\s\S]*?<\/p>/)?.[0];
-    expect(issuedAmount).toBeDefined();
-    expect(issuedAmount).toContain("$450.00");
-    expect(issuedAmount).toContain("font-mono");
-    expect(issuedAmount).toContain("font-semibold");
-    expect(issuedAmount).not.toContain("ESTIMATE");
-    expect(issuedAmount).not.toMatch(/class="[^"]*italic/);
-    expect(issuedHtml).toContain("Provenance title_issued");
-
     const estimateHtml = renderToStaticMarkup(
       createElement(OwedTodayFigure, {
         owed: {
@@ -52,14 +47,34 @@ describe("BuyerDashboardViewPanel owedToday", () => {
         },
       }),
     );
-    const estimateAmount = estimateHtml.match(/<p class="[^"]*tabular-nums[^"]*">[\s\S]*?<\/p>/)?.[0];
-    expect(estimateAmount).toBeDefined();
-    expect(estimateAmount).toContain("ESTIMATE");
-    expect(estimateAmount).toContain("$1,200.00");
-    expect(estimateAmount).toContain("italic");
-    expect(estimateAmount).toContain("text-muted-foreground");
-    expect(estimateAmount).not.toContain("font-mono");
-    expect(estimateHtml).toContain("Provenance ai_estimate");
-    expect(estimateAmount).not.toBe(issuedAmount);
+    const enteredHtml = renderToStaticMarkup(
+      createElement(OwedTodayFigure, {
+        owed: {
+          amountCents: 0,
+          currency: "USD",
+          provenance: "user_entered",
+          asOf: 0,
+          label: "Nothing due today",
+        },
+      }),
+    );
+
+    expect(issuedHtml).toContain("$450.00");
+    expect(issuedHtml).toContain(ISSUED_AMOUNT_CLASS_NAME);
+    expect(issuedHtml).toContain("title_issued");
+    expect(issuedHtml).not.toContain(ESTIMATE_LABEL);
+    expect(issuedHtml).not.toContain(ESTIMATE_AMOUNT_CLASS_NAME);
+
+    expect(estimateHtml).toContain("$1,200.00");
+    expect(estimateHtml).toContain(ESTIMATE_LABEL);
+    expect(estimateHtml).toContain(ESTIMATE_AMOUNT_CLASS_NAME);
+    expect(estimateHtml).toContain("ai_estimate");
+    expect(estimateHtml).not.toContain(ISSUED_AMOUNT_CLASS_NAME);
+
+    expect(enteredHtml).toContain("$0.00");
+    expect(enteredHtml).toContain(ESTIMATE_LABEL);
+    expect(enteredHtml).toContain(ESTIMATE_AMOUNT_CLASS_NAME);
+    expect(enteredHtml).toContain("user_entered");
+    expect(estimateHtml).not.toBe(issuedHtml);
   });
 });

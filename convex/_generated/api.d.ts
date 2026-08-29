@@ -8,10 +8,13 @@
  * @module
  */
 
+import type * as dashboard from "../dashboard.js";
 import type * as journey from "../journey.js";
 import type * as lib_audit from "../lib/audit.js";
 import type * as lib_authz from "../lib/authz.js";
+import type * as lib_dashboardView from "../lib/dashboardView.js";
 import type * as lib_validators from "../lib/validators.js";
+import type * as me from "../me.js";
 import type * as orgs from "../orgs.js";
 import type * as seed from "../seed.js";
 import type * as seedPlan from "../seedPlan.js";
@@ -25,10 +28,13 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  dashboard: typeof dashboard;
   journey: typeof journey;
   "lib/audit": typeof lib_audit;
   "lib/authz": typeof lib_authz;
+  "lib/dashboardView": typeof lib_dashboardView;
   "lib/validators": typeof lib_validators;
+  me: typeof me;
   orgs: typeof orgs;
   seed: typeof seed;
   seedPlan: typeof seedPlan;

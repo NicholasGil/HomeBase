@@ -6,9 +6,9 @@ Buyer-side operating system for one brokerage and one market. A buyer should ope
 
 ## Stack
 
-Next.js 16 App Router, TypeScript strict, Tailwind, shadcn/ui, Convex. Clerk lands in the next P0 slice.
+Next.js 16 App Router, TypeScript strict, Tailwind, shadcn/ui, Convex, Clerk.
 
-Convex functions live in `convex/`. `npx convex codegen` writes `convex/_generated`. Seed and permission tests run in `convex-test` without a cloud project.
+Convex functions live in `convex/`. `npx convex codegen` writes `convex/_generated`. Seed, permission, and isolation tests run in `convex-test` without a cloud project. Clerk and a hosted Convex project are needs-human. Until those exist, `/dashboard` renders the seeded buyer preview and queries still enforce isolation in tests.
 
 ## Scripts
 
@@ -28,6 +28,6 @@ CI runs lint, typecheck, and unit tests on every pull request.
 
 ## P0
 
-1. This scaffold.
+1. Scaffold, flags, home page.
 2. Convex schema, seed, and permission tests.
-3. Clerk, role routing, buyer dashboard, and transaction isolation.
+3. Clerk wiring, role routing, buyer dashboard, transaction isolation.

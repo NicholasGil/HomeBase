@@ -13,6 +13,9 @@ const READ_FUNCTIONS = [
   "transactions.get",
   "tasks.listMine",
   "tasks.listForTransaction",
+  "me.getSession",
+  "dashboard.getBuyerDashboard",
+  "dashboard.getById",
 ] as const;
 
 async function seeded() {
@@ -49,7 +52,7 @@ async function buyerATransactionId(t: ReturnType<typeof convexTest>) {
 
 describe("permission tests for data-reading functions", () => {
   it("lists every public read function so coverage cannot drift silently", () => {
-    expect(READ_FUNCTIONS).toHaveLength(7);
+    expect(READ_FUNCTIONS).toHaveLength(10);
   });
 
   it.each([
@@ -71,6 +74,14 @@ describe("permission tests for data-reading functions", () => {
       const id = await buyerATransactionId(t);
       return t.query(api.tasks.listForTransaction, { transactionId: id });
     }],
+    ["me.getSession", async (t: ReturnType<typeof convexTest>) =>
+      t.query(api.me.getSession, {})],
+    ["dashboard.getBuyerDashboard", async (t: ReturnType<typeof convexTest>) =>
+      t.query(api.dashboard.getBuyerDashboard, {})],
+    ["dashboard.getById", async (t: ReturnType<typeof convexTest>) => {
+      const id = await buyerATransactionId(t);
+      return t.query(api.dashboard.getById, { transactionId: id });
+    }],
   ] as const)("%s denies an unauthenticated caller", async (_name, call) => {
     const t = await seeded();
     await expect(call(t)).rejects.toThrow("UNAUTHENTICATED");
@@ -87,6 +98,10 @@ describe("permission tests for data-reading functions", () => {
       asVendor.query(api.transactions.listMine, {}), true],
     ["tasks.listMine", async (asVendor: ReturnType<ReturnType<typeof convexTest>["withIdentity"]>) =>
       asVendor.query(api.tasks.listMine, {}), true],
+    ["me.getSession", async (asVendor: ReturnType<ReturnType<typeof convexTest>["withIdentity"]>) =>
+      asVendor.query(api.me.getSession, {}), false],
+    ["dashboard.getBuyerDashboard", async (asVendor: ReturnType<ReturnType<typeof convexTest>["withIdentity"]>) =>
+      asVendor.query(api.dashboard.getBuyerDashboard, {}), true],
   ] as const)(
     "%s denies vendor when the function is transaction-scoped",
     async (_name, call, vendorDenied) => {
@@ -110,6 +125,9 @@ describe("permission tests for data-reading functions", () => {
     await expect(
       asVendor.query(api.tasks.listForTransaction, { transactionId: id }),
     ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      asVendor.query(api.dashboard.getById, { transactionId: id }),
+    ).rejects.toThrow("FORBIDDEN");
   });
 
   it("denies a signed-in user with no membership", async () => {
@@ -130,5 +148,11 @@ describe("permission tests for data-reading functions", () => {
     await expect(asStranger.query(api.tasks.listMine, {})).rejects.toThrow(
       "FORBIDDEN",
     );
+    await expect(asStranger.query(api.me.getSession, {})).rejects.toThrow(
+      "FORBIDDEN",
+    );
+    await expect(
+      asStranger.query(api.dashboard.getBuyerDashboard, {}),
+    ).rejects.toThrow("FORBIDDEN");
   });
 });

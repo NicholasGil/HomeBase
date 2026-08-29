@@ -58,7 +58,7 @@ describe("BuyerDashboardViewPanel owedToday", () => {
     expect(estimateAmount).toContain("$1,200.00");
     expect(estimateAmount).toContain("italic");
     expect(estimateAmount).toContain("text-muted-foreground");
-    expect(estimateAmount).not.toContain("font-semibold");
+    expect(estimateAmount).not.toContain("font-mono");
     expect(estimateHtml).toContain("Provenance ai_estimate");
     expect(estimateAmount).not.toBe(issuedAmount);
   });

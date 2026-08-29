@@ -1,26 +1,45 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse, type NextFetchEvent, type NextRequest } from "next/server";
 
-const isProtectedRoute = createRouteMatcher([
-  "/app(.*)",
-  "/dashboard(.*)",
-  "/transactions(.*)",
-  "/agent(.*)",
-  "/broker(.*)",
-  "/admin(.*)",
-  "/vendor(.*)",
-]);
+const PROTECTED_PREFIXES = [
+  "/app",
+  "/dashboard",
+  "/transactions",
+  "/agent",
+  "/broker",
+  "/admin",
+  "/vendor",
+];
 
-export default clerkMiddleware(async (auth, req) => {
-  if (
-    process.env.CLERK_SECRET_KEY === undefined ||
-    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY === undefined
-  ) {
-    return;
+function clerkKeysPresent() {
+  return (
+    process.env.CLERK_SECRET_KEY !== undefined &&
+    process.env.CLERK_SECRET_KEY.length > 0 &&
+    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY !== undefined &&
+    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.length > 0
+  );
+}
+
+export default async function middleware(
+  request: NextRequest,
+  event: NextFetchEvent,
+) {
+  if (!clerkKeysPresent()) {
+    return NextResponse.next();
   }
-  if (isProtectedRoute(req)) {
-    await auth.protect();
-  }
-});
+
+  const { clerkMiddleware, createRouteMatcher } = await import(
+    "@clerk/nextjs/server"
+  );
+  const isProtectedRoute = createRouteMatcher(
+    PROTECTED_PREFIXES.map((prefix) => `${prefix}(.*)`),
+  );
+
+  return clerkMiddleware(async (auth, req) => {
+    if (isProtectedRoute(req)) {
+      await auth.protect();
+    }
+  })(request, event);
+}
 
 export const config = {
   matcher: [

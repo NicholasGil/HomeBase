@@ -9,6 +9,8 @@ import {
 } from "@/lib/seed-homeownership";
 import type { TestSession } from "@/lib/test-session";
 
+export const HUB_REENGAGE_COOKIE = "hb_hub_reengage";
+
 export type HubLoadResult =
   | { ok: true; view: HomeownershipHubView }
   | { ok: false; reason: "UNAUTHENTICATED" | "FORBIDDEN" };

@@ -5,11 +5,10 @@ import { redirect } from "next/navigation";
 
 import { getTestSession } from "@/app/actions/test-session";
 import {
+  HUB_REENGAGE_COOKIE,
   loadSeedHubForViewer,
   reengageSeedVendorForViewer,
 } from "@/lib/homeownership-access";
-
-export const HUB_REENGAGE_COOKIE = "hb_hub_reengage";
 
 async function readReengagedVendorIds() {
   const store = await cookies();

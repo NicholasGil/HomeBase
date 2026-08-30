@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { OfferCenterView } from "@/lib/offer-access";
+import { tripHeadingClassName } from "@/lib/trip-ui";
 
 export function OfferCenterViewPanel({
   center,
@@ -38,7 +39,7 @@ export function OfferCenterViewPanel({
     <section className="space-y-8" data-testid="offer-center">
       <div className="flex items-end justify-between gap-3">
         <div>
-          <h2 className="text-xl font-semibold tracking-tight">Offer center</h2>
+          <h2 className={tripHeadingClassName}>Offer center</h2>
           <p className="text-sm text-muted-foreground">
             Market context from seeded comps and listing fields. Sample data
             only.

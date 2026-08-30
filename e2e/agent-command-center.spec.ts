@@ -10,6 +10,13 @@ test("agent sees eight clients with exceptions first", async ({ page }) => {
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Casey Holt" }).click();
   await expect(page).toHaveURL(/\/agent$/);
+  await expect(page.getByTestId("app-nav")).toHaveAttribute(
+    "data-nav-role",
+    "agent",
+  );
+  await expect(
+    page.getByTestId("app-nav").getByRole("link", { name: "Command center" }),
+  ).toBeVisible();
   await expect(page.getByTestId("command-center")).toBeVisible();
   await expect(page.getByTestId("command-center-roster")).toBeVisible();
   await expect(page.getByTestId("command-center-priority")).toBeVisible();

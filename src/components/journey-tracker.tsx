@@ -1,41 +1,43 @@
-import { Badge } from "@/components/ui/badge";
 import type { BuyerDashboardView } from "../../convex/lib/dashboardView";
+import { cn } from "@/lib/utils";
 
 export function JourneyTracker({
   stages,
 }: {
   stages: BuyerDashboardView["stages"];
 }) {
+  const current = stages.find((stage) => stage.state === "current");
+
   return (
-    <ol
-      data-testid="journey-tracker"
-      className="flex gap-2 overflow-x-auto pb-1"
-    >
-      {stages.map((stage) => (
-        <li
-          key={stage.key}
-          data-testid={`journey-stage-${stage.key}`}
-          data-state={stage.state}
-          className={
-            stage.state === "current"
-              ? "min-w-36 rounded-lg border-2 border-foreground bg-card px-3 py-2"
-              : stage.state === "complete"
-                ? "min-w-36 rounded-lg border bg-muted/40 px-3 py-2"
-                : "min-w-36 rounded-lg border border-dashed px-3 py-2"
-          }
-        >
-          <p className="font-mono text-[10px] tracking-wide text-muted-foreground">
-            {String(stage.order).padStart(2, "0")}
-          </p>
-          <p className="text-sm font-medium">{stage.label}</p>
-          <Badge
-            variant={stage.state === "current" ? "default" : "outline"}
-            className="mt-1"
+    <div className="min-w-0 sm:max-w-xs sm:text-right">
+      {current ? (
+        <p className="text-sm text-muted-foreground">
+          {current.label} · {current.order} of {stages.length}
+        </p>
+      ) : null}
+      <ol
+        data-testid="journey-tracker"
+        className="mt-2 flex items-center gap-1"
+      >
+        {stages.map((stage) => (
+          <li
+            key={stage.key}
+            data-testid={`journey-stage-${stage.key}`}
+            data-state={stage.state}
+            title={`${stage.label} · ${stage.state}`}
+            className={cn(
+              "h-1.5 min-w-0 flex-1 rounded-full",
+              stage.state === "current" && "bg-next",
+              stage.state === "complete" && "bg-foreground/55",
+              stage.state === "upcoming" && "bg-foreground/12",
+            )}
           >
-            {stage.state}
-          </Badge>
-        </li>
-      ))}
-    </ol>
+            <span className="sr-only">
+              {String(stage.order).padStart(2, "0")} {stage.label} {stage.state}
+            </span>
+          </li>
+        ))}
+      </ol>
+    </div>
   );
 }

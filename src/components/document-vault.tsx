@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/card";
 import { listFixtureDocuments } from "@/lib/document-access";
 import { seedDocumentTitle } from "@/lib/seed-documents";
+import { tripHeadingClassName } from "@/lib/trip-ui";
 
 export async function FixtureVault() {
   const { session, grants, audit } = await loadFixtureVault();
@@ -26,7 +27,7 @@ export async function FixtureVault() {
     <section className="space-y-4" data-testid="document-vault">
       <div className="flex items-end justify-between gap-3">
         <div>
-          <h2 className="text-xl font-semibold tracking-tight">Document vault</h2>
+          <h2 className={tripHeadingClassName}>Document vault</h2>
           <p className="text-sm text-muted-foreground">
             Access is decided in a server function. The page does not filter.
           </p>

@@ -23,7 +23,7 @@ export default function TestLoginPage() {
 
   return (
     <AppShell>
-      <Card className="max-w-lg">
+      <Card className="mx-auto max-w-md">
         <CardHeader>
           <CardTitle>Fixture sign in</CardTitle>
           <CardDescription>

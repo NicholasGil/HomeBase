@@ -8,6 +8,7 @@ import { LiveOfferCenter } from "@/components/live-offer-center";
 import { LiveTourBuilder } from "@/components/live-tour-builder";
 import { LiveHomeownershipHub } from "@/components/live-homeownership-hub";
 import { LiveVendorDirectory } from "@/components/live-vendor-directory";
+import { tripStackClassName } from "@/lib/trip-ui";
 import { api } from "../../convex/_generated/api";
 
 export function LiveBuyerDashboard({ buyerName }: { buyerName?: string }) {
@@ -26,7 +27,7 @@ export function LiveBuyerDashboard({ buyerName }: { buyerName?: string }) {
   }
 
   return (
-    <div className="space-y-10">
+    <div className={tripStackClassName}>
       <BuyerDashboardViewPanel view={view} buyerName={buyerName} />
       {view.where.status === "closed" ? (
         <LiveHomeownershipHub transactionId={view.transactionId} />

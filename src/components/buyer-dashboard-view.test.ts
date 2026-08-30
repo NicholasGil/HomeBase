@@ -27,6 +27,8 @@ describe("BuyerDashboardViewPanel ten-second answers", () => {
     expect(html).toContain("Schedule inspection");
     expect(html).toContain("data-state=\"current\"");
     expect(html).toContain("Cannot leave Inspection");
+    expect(html).toContain('data-testid="journey-stage-inspection"');
+    expect(html).toContain('data-testid="journey-tracker"');
   });
 });
 

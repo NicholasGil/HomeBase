@@ -5,6 +5,9 @@ test("closed buyer sees the four hub surfaces", async ({ page }) => {
   await page.getByRole("button", { name: "Sign in as Indira Shah" }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
   await expect(page.getByText("Indira Shah")).toBeVisible();
+  await expect(
+    page.getByTestId("app-nav").getByRole("link", { name: "Hub" }),
+  ).toBeVisible();
   await expect(page.getByTestId("homeownership-hub")).toBeVisible();
   await page.goto("/homeownership/seed:buyer-h");
   await expect(page.getByTestId("homeownership-hub")).toBeVisible();

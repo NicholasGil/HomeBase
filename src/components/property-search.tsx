@@ -3,18 +3,13 @@ import Link from "next/link";
 import {
   recordSearchSignalFromForm,
 } from "@/app/actions/search";
+import { ListingCardFrame } from "@/components/listing-card";
 import { MoneyFigureView } from "@/components/money-figure-view";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { CANONICAL_SEARCH_QUERY } from "../../convex/lib/propertySearch";
 import type { FixtureSearchView } from "@/lib/search-access";
+import { tripHeadingClassName } from "@/lib/trip-ui";
 import { cn } from "@/lib/utils";
 
 function criteriaLine(view: FixtureSearchView) {
@@ -57,7 +52,7 @@ export function PropertySearch({
     <section className="space-y-6" data-testid="property-search">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="text-xl font-semibold tracking-tight">
+          <h2 className={tripHeadingClassName}>
             Property search
           </h2>
           <p className="text-sm text-muted-foreground">
@@ -103,88 +98,69 @@ export function PropertySearch({
         {criteriaLine(view)}
       </p>
 
-      <ol className="space-y-4">
+      <ol className="space-y-3">
         {view.results.map((row, index) => {
           const signal = view.signals[row.id];
           return (
             <li key={row.id}>
-              <Card
-                data-testid={`search-result-${row.id}`}
-                data-property-id={row.id}
-                data-rank={index + 1}
-                data-score={row.score}
+              <ListingCardFrame
+                testId={`search-result-${row.id}`}
+                propertyId={row.id}
+                rank={index + 1}
+                score={row.score}
+                addressLine={row.listing.address.line1}
+                cityState={`${row.listing.address.city}, ${row.listing.address.state}`}
+                sample={row.sampleData}
+                sampleTestId="search-sample-label"
               >
-                <CardHeader>
-                  <div className="flex flex-wrap items-start justify-between gap-2">
-                    <div>
-                      <CardTitle>{row.listing.address.line1}</CardTitle>
-                      <CardDescription>
-                        {row.listing.address.city}, {row.listing.address.state}
-                      </CardDescription>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {row.sampleData ? (
-                        <Badge variant="secondary" data-testid="search-sample-label">
-                          sample data
-                        </Badge>
-                      ) : null}
-                      <Badge variant="outline">#{index + 1}</Badge>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {row.listing.brief ? (
-                    <p className="text-sm">{row.listing.brief}</p>
-                  ) : null}
+                <p
+                  className="text-sm"
+                  data-testid={`search-reason-${row.id}`}
+                >
+                  {row.reason}
+                </p>
+                {row.listing.listPrice ? (
+                  <MoneyFigureView
+                    figure={row.listing.listPrice}
+                    testId={`search-price-${row.id}`}
+                  />
+                ) : (
                   <p
-                    className="text-sm"
-                    data-testid={`search-reason-${row.id}`}
+                    className="text-sm text-muted-foreground"
+                    data-testid={`search-price-missing-${row.id}`}
                   >
-                    {row.reason}
+                    None
                   </p>
-                  {row.listing.listPrice ? (
-                    <MoneyFigureView
-                      figure={row.listing.listPrice}
-                      testId={`search-price-${row.id}`}
-                    />
-                  ) : (
-                    <p
-                      className="text-sm text-muted-foreground"
-                      data-testid={`search-price-missing-${row.id}`}
+                )}
+                <div className="flex flex-wrap gap-2">
+                  <form action={recordSearchSignalFromForm}>
+                    <input type="hidden" name="propertyId" value={row.id} />
+                    <input type="hidden" name="kind" value="save" />
+                    <input type="hidden" name="query" value={view.query} />
+                    <Button
+                      type="submit"
+                      variant={signal === "save" ? "default" : "outline"}
+                      size="sm"
+                      data-testid={`search-save-${row.id}`}
                     >
-                      None
-                    </p>
-                  )}
-                  <div className="flex flex-wrap gap-2">
-                    <form action={recordSearchSignalFromForm}>
-                      <input type="hidden" name="propertyId" value={row.id} />
-                      <input type="hidden" name="kind" value="save" />
-                      <input type="hidden" name="query" value={view.query} />
-                      <Button
-                        type="submit"
-                        variant={signal === "save" ? "default" : "outline"}
-                        size="sm"
-                        data-testid={`search-save-${row.id}`}
-                      >
-                        Save
-                      </Button>
-                    </form>
-                    <form action={recordSearchSignalFromForm}>
-                      <input type="hidden" name="propertyId" value={row.id} />
-                      <input type="hidden" name="kind" value="dislike" />
-                      <input type="hidden" name="query" value={view.query} />
-                      <Button
-                        type="submit"
-                        variant={signal === "dislike" ? "destructive" : "outline"}
-                        size="sm"
-                        data-testid={`search-dislike-${row.id}`}
-                      >
-                        Dislike
-                      </Button>
-                    </form>
-                  </div>
-                </CardContent>
-              </Card>
+                      Save
+                    </Button>
+                  </form>
+                  <form action={recordSearchSignalFromForm}>
+                    <input type="hidden" name="propertyId" value={row.id} />
+                    <input type="hidden" name="kind" value="dislike" />
+                    <input type="hidden" name="query" value={view.query} />
+                    <Button
+                      type="submit"
+                      variant={signal === "dislike" ? "destructive" : "outline"}
+                      size="sm"
+                      data-testid={`search-dislike-${row.id}`}
+                    >
+                      Dislike
+                    </Button>
+                  </form>
+                </div>
+              </ListingCardFrame>
             </li>
           );
         })}

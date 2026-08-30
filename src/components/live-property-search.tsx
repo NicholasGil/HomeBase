@@ -3,19 +3,14 @@
 import { useMutation, useQuery } from "convex/react";
 import { useState } from "react";
 
+import { ListingCardFrame } from "@/components/listing-card";
 import { MoneyFigureView } from "@/components/money-figure-view";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { CANONICAL_SEARCH_QUERY } from "../../convex/lib/propertySearch";
+import { tripHeadingClassName } from "@/lib/trip-ui";
 
 export function LivePropertySearch() {
   const [query, setQuery] = useState(CANONICAL_SEARCH_QUERY);
@@ -31,7 +26,7 @@ export function LivePropertySearch() {
     <section className="space-y-6" data-testid="property-search">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="text-xl font-semibold tracking-tight">
+          <h2 className={tripHeadingClassName}>
             Property search
           </h2>
           <p className="text-sm text-muted-foreground">
@@ -83,67 +78,56 @@ export function LivePropertySearch() {
         </div>
       </form>
 
-      <ol className="space-y-4">
+      <ol className="space-y-3">
         {result.results.map((row, index) => (
           <li key={row.id}>
-            <Card
-              data-testid={`search-result-${row.id}`}
-              data-property-id={row.id}
-              data-rank={index + 1}
-              data-score={row.score}
+            <ListingCardFrame
+              testId={`search-result-${row.id}`}
+              propertyId={row.id}
+              rank={index + 1}
+              score={row.score}
+              addressLine={row.listing.address.line1}
+              cityState={`${row.listing.address.city}, ${row.listing.address.state}`}
+              sample={row.sampleData}
+              sampleTestId="search-sample-label"
             >
-              <CardHeader>
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                  <div>
-                    <CardTitle>{row.listing.address.line1}</CardTitle>
-                    <CardDescription>
-                      {row.listing.address.city}, {row.listing.address.state}
-                    </CardDescription>
-                  </div>
-                  {row.sampleData ? (
-                    <Badge variant="secondary">sample data</Badge>
-                  ) : null}
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p className="text-sm" data-testid={`search-reason-${row.id}`}>
-                  {row.reason}
-                </p>
-                {row.listing.listPrice ? (
-                  <MoneyFigureView figure={row.listing.listPrice} />
-                ) : (
-                  <p className="text-sm text-muted-foreground">None</p>
-                )}
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      void recordSignal({
-                        propertyId: row.id as Id<"properties">,
-                        kind: "save",
-                      })
-                    }
-                  >
-                    Save
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      void recordSignal({
-                        propertyId: row.id as Id<"properties">,
-                        kind: "dislike",
-                      })
-                    }
-                  >
-                    Dislike
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+              <p className="text-sm" data-testid={`search-reason-${row.id}`}>
+                {row.reason}
+              </p>
+              {row.listing.listPrice ? (
+                <MoneyFigureView figure={row.listing.listPrice} />
+              ) : (
+                <p className="text-sm text-muted-foreground">None</p>
+              )}
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    void recordSignal({
+                      propertyId: row.id as Id<"properties">,
+                      kind: "save",
+                    })
+                  }
+                >
+                  Save
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    void recordSignal({
+                      propertyId: row.id as Id<"properties">,
+                      kind: "dislike",
+                    })
+                  }
+                >
+                  Dislike
+                </Button>
+              </div>
+            </ListingCardFrame>
           </li>
         ))}
       </ol>

@@ -1,55 +1,52 @@
 import Link from "next/link";
 
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { getTestSession } from "@/app/actions/test-session";
+import { AppNavLinks } from "@/components/app-nav";
+import { LiveAppNav } from "@/components/live-app-nav";
+import {
+  navContextFromFixtureSession,
+  navLinksFor,
+  wordmarkHrefFor,
+} from "@/lib/app-nav";
+import { isAuthConfigured } from "@/lib/auth-config";
 
-export function AppShell({
+export async function AppShell({
   children,
   nav,
 }: {
   children: React.ReactNode;
   nav?: React.ReactNode;
 }) {
+  const session = await getTestSession();
+  const live = isAuthConfigured();
+  const context = navContextFromFixtureSession(session);
+  const links = navLinksFor(context);
+
   return (
     <div className="min-h-full bg-background">
-      <header className="border-b">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-          <Link href="/" className="text-sm font-semibold tracking-tight">
+      <header className="border-b border-border/70">
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-5 py-3">
+          <Link
+            href={wordmarkHrefFor(context.role)}
+            className="shrink-0 text-sm font-semibold tracking-tight"
+          >
             HomeBase
           </Link>
-          <div className="flex items-center gap-2">
+          <div className="flex min-w-0 items-center gap-2">
             {nav}
-            <Link href="/agent" className={cn(buttonVariants({ variant: "ghost" }))}>
-              Command center
-            </Link>
-            <Link href="/search" className={cn(buttonVariants({ variant: "ghost" }))}>
-              Search
-            </Link>
-            <Link href="/tours" className={cn(buttonVariants({ variant: "ghost" }))}>
-              Tours
-            </Link>
-            <Link href="/offers" className={cn(buttonVariants({ variant: "ghost" }))}>
-              Offers
-            </Link>
-            <Link href="/sign" className={cn(buttonVariants({ variant: "ghost" }))}>
-              Sign
-            </Link>
-            <Link href="/identity" className={cn(buttonVariants({ variant: "ghost" }))}>
-              Identity
-            </Link>
-            <Link href="/homeownership/seed:buyer-h" className={cn(buttonVariants({ variant: "ghost" }))}>
-              Hub
-            </Link>
-            <Link href="/vendor" className={cn(buttonVariants({ variant: "ghost" }))}>
-              Vendor portal
-            </Link>
-            <Link href="/" className={cn(buttonVariants({ variant: "ghost" }))}>
-              Home
-            </Link>
+            {live && session === null ? (
+              <LiveAppNav />
+            ) : (
+              <AppNavLinks
+                links={links}
+                role={context.role}
+                viewerName={context.name}
+              />
+            )}
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-5xl px-6 py-12">{children}</main>
+      <main className="mx-auto max-w-5xl px-5 py-10">{children}</main>
     </div>
   );
 }

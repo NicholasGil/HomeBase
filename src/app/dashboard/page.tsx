@@ -27,6 +27,7 @@ import {
 } from "@/app/actions/homeownership";
 import { seedDashboardForBuyer } from "@/lib/seed-dashboard";
 import { fixtureBuyerIsClosed } from "@/lib/homeownership-access";
+import { tripStackClassName } from "@/lib/trip-ui";
 
 export const dynamic = "force-dynamic";
 
@@ -71,7 +72,7 @@ export default async function DashboardPage() {
       : null;
     return (
       <AppShell>
-        <div className="space-y-10">
+        <div className={tripStackClassName}>
           <BuyerDashboardViewPanel
             view={seedDashboardForBuyer(session.clerkId)}
             buyerName={session.name}

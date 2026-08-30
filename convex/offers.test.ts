@@ -174,5 +174,8 @@ describe("offer center", () => {
       expect(figure.provenance).toBe("ai_estimate");
       expect(figure.label).toMatch(/Estimated/);
     }
+    expect(moved.formula.closingCostBps).toBe(300);
+    expect(moved.formula.annualTaxInsuranceBps).toBe(155);
+    expect(moved.formula.termMonths).toBe(360);
   });
 });

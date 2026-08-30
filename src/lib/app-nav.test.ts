@@ -73,4 +73,24 @@ describe("navContextFromFixtureSession", () => {
     expect(wordmarkHrefFor("buyer")).toBe("/dashboard");
     expect(wordmarkHrefFor("guest")).toBe("/");
   });
+
+  it("gives every fixture identity a name so AppNav can render the avatar", () => {
+    const local = { VERCEL_ENV: "development" };
+    const ids = [
+      SEED_CLERK_IDS.buyerA,
+      SEED_CLERK_IDS.buyerB,
+      SEED_CLERK_IDS.buyerH,
+      SEED_CLERK_IDS.agent,
+      SEED_CLERK_IDS.lender,
+    ];
+    for (const clerkId of ids) {
+      const started = startTestSessionDecision(clerkId, local);
+      if (!started.ok) {
+        throw new Error(`seed session ${clerkId}`);
+      }
+      expect(navContextFromFixtureSession(started.session).name).toEqual(
+        started.session.name,
+      );
+    }
+  });
 });

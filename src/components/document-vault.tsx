@@ -14,13 +14,24 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { listFixtureDocuments } from "@/lib/document-access";
+import { ActionNotice } from "@/components/action-notice";
+import {
+  listFixtureDocuments,
+  vaultAuditForViewer,
+  vaultGrantsForViewer,
+} from "@/lib/document-access";
 import { seedDocumentTitle } from "@/lib/seed-documents";
 import { tripHeadingClassName } from "@/lib/trip-ui";
 
-export async function FixtureVault() {
+export async function FixtureVault({ notice }: { notice?: string }) {
   const { session, grants, audit } = await loadFixtureVault();
   const documents = listFixtureDocuments({ viewer: session, grants });
+  const visibleGrants = vaultGrantsForViewer({ viewer: session, grants });
+  const visibleAudit = vaultAuditForViewer({
+    viewer: session,
+    grants,
+    audit,
+  });
   const canGrant = session?.role === "buyer";
 
   return (
@@ -37,6 +48,8 @@ export async function FixtureVault() {
         </Link>
       </div>
 
+      <ActionNotice notice={notice} />
+
       <div className="grid gap-4 md:grid-cols-2">
         {documents.length === 0 ? (
           <Card>
@@ -49,7 +62,7 @@ export async function FixtureVault() {
           </Card>
         ) : (
           documents.map((document) => {
-            const documentGrants = grants.filter(
+            const documentGrants = visibleGrants.filter(
               (grant) => grant.documentId === document.id,
             );
             return (
@@ -125,11 +138,11 @@ export async function FixtureVault() {
           <CardDescription>Every view, grant, and revoke.</CardDescription>
         </CardHeader>
         <CardContent>
-          {audit.length === 0 ? (
+          {visibleAudit.length === 0 ? (
             <p className="text-sm text-muted-foreground">No access yet.</p>
           ) : (
             <ul className="space-y-1 text-sm">
-              {audit.map((entry, index) => (
+              {visibleAudit.map((entry, index) => (
                 <li key={`${entry.at}-${index}`}>
                   {entry.action} · {entry.documentId} · {entry.actorClerkId}
                 </li>

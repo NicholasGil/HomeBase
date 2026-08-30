@@ -3,6 +3,7 @@ import {
   removeStopFromForm,
   submitFeedbackFromForm,
 } from "@/app/actions/tours";
+import { ActionNotice } from "@/components/action-notice";
 import { ListingCardFrame } from "@/components/listing-card";
 import { TourMap } from "@/components/tour-map";
 import { Badge } from "@/components/ui/badge";
@@ -23,10 +24,12 @@ export function FixtureTourBuilder({
   denied,
   tours,
   notice,
+  returnTo = "/tours",
 }: {
   denied?: boolean;
   tours: FixtureTour[];
   notice?: string;
+  returnTo?: string;
 }) {
   const listings = seedTourListings();
   const tour = tours[0];
@@ -62,9 +65,12 @@ export function FixtureTourBuilder({
         >
           Feedback saved.
         </p>
-      ) : null}
+      ) : (
+        <ActionNotice notice={notice} />
+      )}
 
       <form action={buildTourFromForm} className="space-y-4">
+        <input type="hidden" name="returnTo" value={returnTo} />
         <div className="grid gap-5 sm:grid-cols-2">
           {listings.map((listing) => (
             <label key={listing.id} className="block cursor-pointer">

@@ -190,6 +190,21 @@ export function loadSeedPortalForViewer(
   };
 }
 
+export function recoverLiveSeedAssignment(
+  session: TestSession | null,
+  input: { expired: boolean; state: FixtureVendorPortalState },
+) {
+  const portal = loadSeedPortalForViewer(session, input);
+  if (!portal.ok) {
+    return portal;
+  }
+  const assignment = portal.assignments[0];
+  if (assignment === undefined) {
+    return { ok: false as const, reason: "FORBIDDEN" as const };
+  }
+  return { ok: true as const, assignment, state: portal.state };
+}
+
 export function loadSeedAssignmentForViewer(
   session: TestSession | null,
   assignmentId: string,
@@ -199,9 +214,9 @@ export function loadSeedAssignmentForViewer(
   if (!portal.ok) {
     return portal;
   }
-  const assignment = portal.assignments.find(
-    (row) => row.assignmentId === assignmentId,
-  );
+  const assignment =
+    portal.assignments.find((row) => row.assignmentId === assignmentId) ??
+    portal.assignments[0];
   if (assignment === undefined) {
     return { ok: false as const, reason: "FORBIDDEN" as const };
   }
@@ -213,6 +228,10 @@ export function sendSeedVendorMessage(
   input: { assignmentId: string; body: string; expired: boolean },
   state: FixtureVendorPortalState,
 ) {
+  const body = input.body.trim();
+  if (body.length === 0) {
+    return { ok: false as const, reason: "EMPTY" as const };
+  }
   const loaded = loadSeedAssignmentForViewer(session, input.assignmentId, {
     expired: input.expired,
     state,
@@ -220,9 +239,8 @@ export function sendSeedVendorMessage(
   if (!loaded.ok) {
     return loaded;
   }
-  const body = input.body.trim();
-  if (body.length === 0 || session === null) {
-    return { ok: false as const, reason: "FORBIDDEN" as const };
+  if (session === null) {
+    return { ok: false as const, reason: "UNAUTHENTICATED" as const };
   }
   return {
     ok: true as const,

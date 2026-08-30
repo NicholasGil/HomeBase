@@ -13,12 +13,12 @@ test("grant, third-party view, then revoke is denied", async ({ page }) => {
     .getByTestId("vault-doc-preapproval")
     .getByRole("button", { name: "Grant to Jordan Hale" })
     .click();
-  await expect(page).toHaveURL(/\/vault$/);
   await expect(page.getByText("Granted to lender")).toBeVisible();
 
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Jordan Hale" }).click();
-  await expect(page).toHaveURL(/\/vault$/);
+  await expect(page).toHaveURL(/\/vendor$/);
+  await page.goto("/vault");
   await expect(page.getByTestId("vault-doc-preapproval")).toBeVisible();
   await expect(page.getByTestId("vault-doc-inspection_report")).toHaveCount(0);
   await expect(page.getByText("Lender issued a $450,000")).toHaveCount(0);
@@ -50,7 +50,7 @@ test("grant, third-party view, then revoke is denied", async ({ page }) => {
 
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Jordan Hale" }).click();
-  await expect(page).toHaveURL(/\/vault$/);
+  await expect(page).toHaveURL(/\/vendor$/);
   await page.goto("/documents/seed-doc-preapproval");
   await expect(page.getByTestId("document-denied")).toBeVisible();
 });

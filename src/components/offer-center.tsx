@@ -1,4 +1,6 @@
 import { submitOfferFromForm } from "@/app/actions/offers";
+import { ESIGN_NOT_ENABLED } from "../../convex/lib/esign";
+import { getFeatureFlags } from "@/lib/flags";
 import { MoneyFigureView } from "@/components/money-figure-view";
 import { OfferCostSimulator } from "@/components/offer-cost-simulator";
 import { Badge } from "@/components/ui/badge";
@@ -32,8 +34,13 @@ export function OfferCenterViewPanel({
     );
   }
 
+  const esignOn = getFeatureFlags().FLAG_ESIGN;
   const gateReason =
-    gateFromSubmit ?? center.offer?.gate.reason ?? "LICENSEE_REVIEW_REQUIRED";
+    gateFromSubmit === ESIGN_NOT_ENABLED
+      ? (center.offer?.gate.reason ?? "LICENSEE_REVIEW_REQUIRED")
+      : (gateFromSubmit ??
+        center.offer?.gate.reason ??
+        "LICENSEE_REVIEW_REQUIRED");
 
   return (
     <section className="space-y-8" data-testid="offer-center">
@@ -198,15 +205,26 @@ export function OfferCenterViewPanel({
               ? "A licensee must review this offer before it can leave draft."
               : gateReason === "already_submitted"
                 ? "This offer is already submitted."
+                : gateReason === "denied"
+                  ? "You cannot submit this offer."
                 : "Ready for licensee-approved submit."}
           </p>
-          {submitControl ?? (
-            <form action={submitOfferFromForm}>
-              <Button type="submit" data-testid="submit-offer">
-                Submit offer
-              </Button>
-            </form>
-          )}
+          {submitControl ??
+            (esignOn ? (
+              <form action={submitOfferFromForm}>
+                <Button type="submit" data-testid="submit-offer">
+                  Submit offer
+                </Button>
+              </form>
+            ) : (
+              <p
+                data-testid="submit-offer-gated"
+                className="rounded-lg border bg-muted/40 px-4 py-3 text-sm text-muted-foreground"
+              >
+                E-signature is off. Offers cannot be submitted until FLAG_ESIGN
+                is enabled.
+              </p>
+            ))}
         </CardContent>
       </Card>
 

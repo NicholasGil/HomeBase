@@ -14,7 +14,11 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export default async function VaultPage() {
+export default async function VaultPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ notice?: string }>;
+}) {
   if (mustFailClosed()) {
     throw new ProductionAuthMisconfiguredError();
   }
@@ -38,6 +42,7 @@ export default async function VaultPage() {
     if (session === null) {
       redirect("/test-login");
     }
+    const params = await searchParams;
     return (
       <AppShell>
         <h1 className="mb-6 text-3xl font-semibold tracking-tight">
@@ -46,7 +51,7 @@ export default async function VaultPage() {
         <p className="mb-8 text-sm text-muted-foreground">
           Signed in as {session.name} · {session.role}
         </p>
-        <FixtureVault />
+        <FixtureVault notice={params.notice} />
       </AppShell>
     );
   }

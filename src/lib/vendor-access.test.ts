@@ -9,6 +9,7 @@ import {
   loadSeedDirectoryForViewer,
   loadSeedPortalForViewer,
   requestSeedAppointmentForViewer,
+  recoverLiveSeedAssignment,
   sendSeedVendorMessage,
   writeFixtureCompensation,
 } from "@/lib/vendor-access";
@@ -157,6 +158,37 @@ describe("fixture vendor portal", () => {
         emptyVendorPortalState(),
       ),
     ).toEqual({ ok: false, reason: "FORBIDDEN" });
+    expect(
+      sendSeedVendorMessage(
+        jordan(),
+        {
+          assignmentId: SEED_ASSIGNMENT_IDS.lenderAlex,
+          body: "   ",
+          expired: false,
+        },
+        emptyVendorPortalState(),
+      ),
+    ).toEqual({ ok: false, reason: "EMPTY" });
+    const recovered = recoverLiveSeedAssignment(jordan(), {
+      expired: false,
+      state: emptyVendorPortalState(),
+    });
+    expect(recovered.ok).toBe(true);
+    if (recovered.ok) {
+      expect(recovered.assignment.assignmentId).toBe(
+        SEED_ASSIGNMENT_IDS.lenderAlex,
+      );
+    }
+    const staleId = sendSeedVendorMessage(
+      jordan(),
+      {
+        assignmentId: "missing-assignment",
+        body: "Recovered the live file.",
+        expired: false,
+      },
+      emptyVendorPortalState(),
+    );
+    expect(staleId.ok).toBe(true);
   });
 
   it("rejects a non-none compensation write", () => {

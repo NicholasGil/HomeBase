@@ -202,7 +202,7 @@ export function buildFixtureTour(input: {
   state: FixtureTourState;
 }):
   | { ok: true; state: FixtureTourState; tour: FixtureTour }
-  | { ok: false; reason: "UNAUTHENTICATED" | "FORBIDDEN" | "INFEASIBLE" } {
+  | { ok: false; reason: "UNAUTHENTICATED" | "FORBIDDEN" | "INFEASIBLE" | "EMPTY" } {
   assertCanUseFixtureDriveTimes();
   const access = canBuildTours(input.viewer);
   if (!access.ok) {
@@ -210,7 +210,7 @@ export function buildFixtureTour(input: {
   }
   const propertyIds = input.propertyIds.filter(isSeedTourPropertyId);
   if (propertyIds.length === 0) {
-    return { ok: false, reason: "FORBIDDEN" };
+    return { ok: false, reason: "EMPTY" };
   }
   const result = optimizeIds(propertyIds);
   if (result.kind !== "feasible") {

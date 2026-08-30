@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { ESIGN_NOT_ENABLED } from "../../convex/lib/esign";
 import { LICENSEE_REVIEW_REQUIRED } from "../../convex/lib/offerModel";
 import { SEED_CLERK_IDS } from "../../convex/seedPlan";
 import { collectScenarioFigures, everyFigureHasProvenance } from "../../convex/lib/offerModel";
@@ -63,7 +64,8 @@ describe("fixture offer access", () => {
     if (submitted.ok) {
       throw new Error("gate should hold");
     }
-    expect(submitted.reason).toBe(LICENSEE_REVIEW_REQUIRED);
+    expect(submitted.reason).toBe(ESIGN_NOT_ENABLED);
+    expect(drafted.center.offer?.gate.reason).toBe(LICENSEE_REVIEW_REQUIRED);
   });
 
   it("keeps the seeded Alex offer unsigned and denies vendor and the other buyer", () => {

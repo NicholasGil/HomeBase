@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { getTestSession } from "@/app/actions/test-session";
+import { pathWithNotice, safeReturnPath } from "@/lib/form-notices";
 import {
   buildFixtureTour,
   FIXTURE_TOUR_COOKIE,
@@ -39,18 +40,26 @@ export async function loadFixtureTours() {
   return { session, candidates, tours };
 }
 
+function tourReturnPath(formData: FormData) {
+  return safeReturnPath(formData.get("returnTo"), "/tours");
+}
+
 export async function buildTourFromForm(formData: FormData) {
   const session = await getTestSession();
   const propertyIds = formData
     .getAll("propertyIds")
     .filter((value): value is string => typeof value === "string");
+  const returnTo = tourReturnPath(formData);
   const result = buildFixtureTour({
     viewer: sessionAsViewer(session),
     propertyIds,
     state: await readState(),
   });
   if (!result.ok) {
-    throw new Error(result.reason);
+    if (result.reason === "EMPTY") {
+      redirect(pathWithNotice(returnTo, "select-listing"));
+    }
+    redirect(pathWithNotice(returnTo, "denied"));
   }
   await writeState(result.state);
   redirect("/tours");
@@ -59,8 +68,9 @@ export async function buildTourFromForm(formData: FormData) {
 export async function removeStopFromForm(formData: FormData) {
   const tourId = formData.get("tourId");
   const stopId = formData.get("stopId");
+  const returnTo = tourReturnPath(formData);
   if (typeof tourId !== "string" || typeof stopId !== "string") {
-    throw new Error("FORBIDDEN");
+    redirect(pathWithNotice(returnTo, "denied"));
   }
   const session = await getTestSession();
   const result = removeFixtureStop({
@@ -70,7 +80,7 @@ export async function removeStopFromForm(formData: FormData) {
     stopId,
   });
   if (!result.ok) {
-    throw new Error(result.reason);
+    redirect(pathWithNotice(returnTo, "denied"));
   }
   await writeState(result.state);
   redirect("/tours");
@@ -80,12 +90,13 @@ export async function submitFeedbackFromForm(formData: FormData) {
   const tourId = formData.get("tourId");
   const stopId = formData.get("stopId");
   const verdict = formData.get("verdict");
+  const returnTo = tourReturnPath(formData);
   if (
     typeof tourId !== "string" ||
     typeof stopId !== "string" ||
     (verdict !== "love" && verdict !== "maybe" && verdict !== "no")
   ) {
-    throw new Error("FORBIDDEN");
+    redirect(pathWithNotice(returnTo, "denied"));
   }
   const rating = (name: string) => {
     const raw = formData.get(name);
@@ -113,7 +124,7 @@ export async function submitFeedbackFromForm(formData: FormData) {
         : undefined,
   });
   if (!result.ok) {
-    throw new Error(result.reason);
+    redirect(pathWithNotice(returnTo, "denied"));
   }
   await writeState(result.state);
   redirect("/tours?notice=feedback");

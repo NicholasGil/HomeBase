@@ -74,7 +74,7 @@ export async function recordSearchSignalFromForm(formData: FormData) {
     typeof propertyId !== "string" ||
     (kind !== "save" && kind !== "dislike" && kind !== "clear")
   ) {
-    throw new Error("FORBIDDEN");
+    redirect("/search?notice=denied");
   }
   const session = await getTestSession();
   const result = recordFixtureSignal({
@@ -84,7 +84,7 @@ export async function recordSearchSignalFromForm(formData: FormData) {
     kind,
   });
   if (!result.ok) {
-    throw new Error(result.reason);
+    redirect("/search?notice=denied");
   }
   await writeSearchState(result.state);
   const nextQuery =

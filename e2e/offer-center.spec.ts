@@ -17,14 +17,16 @@ test("offer draft is blocked by the licensee gate", async ({ page }) => {
     "LICENSEE_REVIEW_REQUIRED",
   );
 
-  await page.getByTestId("submit-offer").click();
-  await expect(page).toHaveURL(/gate=LICENSEE_REVIEW_REQUIRED/);
+  await expect(page.getByTestId("submit-offer")).toHaveCount(0);
+  await expect(page.getByTestId("submit-offer-gated")).toContainText(
+    "FLAG_ESIGN",
+  );
   await expect(page.getByTestId("licensee-gate")).toHaveAttribute(
     "data-gate",
     "LICENSEE_REVIEW_REQUIRED",
   );
   await expect(page.getByTestId("licensee-gate")).toContainText("licensee");
-  await expect(page.getByTestId("offer-status")).toContainText("draft");
+  await expect(page.getByTestId("offer-status")).toContainText("No draft yet");
 });
 
 test("another buyer cannot submit Blair's draft", async ({ page }) => {

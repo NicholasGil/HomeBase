@@ -10,6 +10,7 @@ import {
   TEST_SESSION_COOKIE,
   type TestSession,
 } from "@/lib/test-session";
+import { VENDOR_EXPIRY_COOKIE } from "@/lib/vendor-access";
 
 export async function getTestSession(): Promise<TestSession | null> {
   const store = await cookies();
@@ -19,7 +20,7 @@ export async function getTestSession(): Promise<TestSession | null> {
 export async function startTestSession(input: { clerkId: string }) {
   const started = startTestSessionDecision(input.clerkId);
   if (!started.ok) {
-    throw new Error(started.reason);
+    return started;
   }
   const store = await cookies();
   store.set(TEST_SESSION_COOKIE, started.session.clerkId, {
@@ -27,16 +28,22 @@ export async function startTestSession(input: { clerkId: string }) {
     sameSite: "lax",
     path: "/",
   });
-  return started.session;
+  if (started.session.role === "vendor") {
+    store.delete(VENDOR_EXPIRY_COOKIE);
+  }
+  return started;
 }
 
 export async function startTestSessionFromForm(formData: FormData) {
   const clerkId = formData.get("clerkId");
   if (typeof clerkId !== "string") {
-    throw new Error("FORBIDDEN");
+    redirect("/test-login");
   }
-  const session = await startTestSession({ clerkId });
-  redirect(fixtureHomePath(session));
+  const started = await startTestSession({ clerkId });
+  if (!started.ok) {
+    redirect("/test-login");
+  }
+  redirect(fixtureHomePath(started.session));
 }
 
 export async function endTestSessionFromForm() {

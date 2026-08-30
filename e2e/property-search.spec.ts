@@ -62,7 +62,7 @@ test("canonical search ranks sample listings and feedback changes order", async 
 test("vendor cannot open search", async ({ page }) => {
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Jordan Hale" }).click();
-  await expect(page).toHaveURL(/\/vault$/);
+  await expect(page).toHaveURL(/\/vendor$/);
   await page.goto("/search");
   await expect(page.getByTestId("search-denied")).toBeVisible();
 });
@@ -70,7 +70,7 @@ test("vendor cannot open search", async ({ page }) => {
 test("vendor cannot open a listing by url", async ({ page }) => {
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Jordan Hale" }).click();
-  await expect(page).toHaveURL(/\/vault$/);
+  await expect(page).toHaveURL(/\/vendor$/);
   await page.goto(`/listings/${SEED_TOUR_PROPERTY_IDS.madison}`);
   await expect(page.getByTestId("listing-denied")).toBeVisible();
   await expect(page.getByTestId("listing-denied")).toHaveText(

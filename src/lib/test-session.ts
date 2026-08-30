@@ -142,7 +142,7 @@ export function loadSeedTransactionForViewer(
 
 export function fixtureHomePath(session: TestSession) {
   if (session.role === "vendor") {
-    return "/vault";
+    return "/vendor";
   }
   if (session.role === "agent") {
     return "/agent";

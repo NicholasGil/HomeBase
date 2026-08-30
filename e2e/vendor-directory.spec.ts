@@ -38,8 +38,7 @@ test("showings stage does not surface inspectors", async ({ page }) => {
 test("vendor portal is one assigned file and expires", async ({ page }) => {
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Jordan Hale" }).click();
-  await expect(page).toHaveURL(/\/vault$/);
-  await page.goto("/vendor");
+  await expect(page).toHaveURL(/\/vendor$/);
   await expect(page.getByTestId("vendor-portal")).toBeVisible();
   await expect(page.getByTestId("vendor-assignment")).toBeVisible();
   await expect(page.getByTestId("vendor-assignment-file")).toContainText(

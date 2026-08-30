@@ -71,6 +71,7 @@ describe("navContextFromFixtureSession", () => {
     expect(navContextFromFixtureSession(casey.session).role).toBe("agent");
     expect(navContextFromFixtureSession(jordan.session).role).toBe("vendor");
     expect(wordmarkHrefFor("buyer")).toBe("/dashboard");
+    expect(wordmarkHrefFor("vendor")).toBe("/vendor");
     expect(wordmarkHrefFor("guest")).toBe("/");
   });
 

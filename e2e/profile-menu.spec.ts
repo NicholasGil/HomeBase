@@ -5,7 +5,7 @@ const FIXTURE_ACCOUNTS = [
   { name: "Blair Chen", role: "buyer", home: /\/dashboard$/ },
   { name: "Indira Shah", role: "buyer", home: /\/dashboard$/ },
   { name: "Casey Holt", role: "agent", home: /\/agent$/ },
-  { name: "Jordan Hale", role: "vendor", home: /\/vault$/ },
+  { name: "Jordan Hale", role: "vendor", home: /\/vendor$/ },
 ] as const;
 
 async function signInAs(page: Page, name: string) {

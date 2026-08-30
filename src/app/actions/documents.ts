@@ -1,9 +1,11 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { getTestSession } from "@/app/actions/test-session";
+import { pathWithNotice } from "@/lib/form-notices";
 import {
   DOCUMENT_AUDIT_COOKIE,
   DOCUMENT_GRANTS_COOKIE,
@@ -52,6 +54,11 @@ function appendAudit(
   return [...audit, { ...entry, at: Date.now() }];
 }
 
+function refreshVault() {
+  revalidatePath("/vault");
+  revalidatePath("/dashboard");
+}
+
 export async function loadFixtureVault() {
   const session = await getTestSession();
   const grants = await readGrants();
@@ -86,7 +93,7 @@ export async function openSeedDocument(input: { documentId: string }) {
 export async function grantSeedDocumentFromForm(formData: FormData) {
   const documentId = formData.get("documentId");
   if (typeof documentId !== "string") {
-    throw new Error("FORBIDDEN");
+    redirect(pathWithNotice("/vault", "denied"));
   }
   const session = await getTestSession();
   const grants = await readGrants();
@@ -97,7 +104,7 @@ export async function grantSeedDocumentFromForm(formData: FormData) {
     grants,
   });
   if (!result.ok) {
-    throw new Error(result.reason);
+    redirect(pathWithNotice("/vault", "denied"));
   }
   const audit = appendAudit(await readAudit(), {
     actorClerkId: session?.clerkId ?? "unknown",
@@ -106,13 +113,13 @@ export async function grantSeedDocumentFromForm(formData: FormData) {
   });
   await writeGrants(result.grants);
   await writeAudit(audit);
-  redirect("/vault");
+  refreshVault();
 }
 
 export async function revokeSeedGrantFromForm(formData: FormData) {
   const grantId = formData.get("grantId");
   if (typeof grantId !== "string") {
-    throw new Error("FORBIDDEN");
+    redirect(pathWithNotice("/vault", "denied"));
   }
   const session = await getTestSession();
   const grants = await readGrants();
@@ -122,7 +129,7 @@ export async function revokeSeedGrantFromForm(formData: FormData) {
     grants,
   });
   if (!result.ok) {
-    throw new Error(result.reason);
+    redirect(pathWithNotice("/vault", "denied"));
   }
   const grant = grants.find((row) => row.id === grantId);
   const audit = appendAudit(await readAudit(), {
@@ -132,5 +139,5 @@ export async function revokeSeedGrantFromForm(formData: FormData) {
   });
   await writeGrants(result.grants);
   await writeAudit(audit);
-  redirect("/vault");
+  refreshVault();
 }

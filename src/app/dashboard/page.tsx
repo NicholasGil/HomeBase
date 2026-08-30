@@ -6,6 +6,7 @@ import { BuyerDashboardViewPanel } from "@/components/buyer-dashboard-view";
 import { FixtureLoginPrompt } from "@/components/fixture-login-prompt";
 import { LiveBuyerDashboard } from "@/components/live-buyer-dashboard";
 import { QueryErrorBoundary } from "@/components/query-error-boundary";
+import { ConciergeChat } from "@/components/concierge-chat";
 import { FixtureVault } from "@/components/document-vault";
 import {
   dashboardRenderMode,
@@ -52,6 +53,7 @@ export default async function DashboardPage() {
             eyebrow="Fixture session · not Clerk"
           />
           <FixtureVault />
+          <ConciergeChat />
         </div>
       </AppShell>
     );

@@ -39,3 +39,5 @@ CI runs lint, typecheck, unit tests, and the P0 Playwright job on every pull req
 M1 journey roadmap: org-configurable stages, blocking tasks hold stage advance, transitions append to auditLog. Seeded mid-flight buyer (Alex Rivera, inspection) passes the ten-second test.
 
 M2 document vault: upload/classify, grants with scope and expiry, immediate revoke. Every open goes through documentGrants or a transaction principal check inside Convex. A lender granted the preapproval cannot load the inspection report by id.
+
+M3 concierge: `lib/llm/` is the only model path. Prompts live in `lib/llm/prompts/`. Answers are scoped to one transaction, PII is redacted first, and dollar figures must already exist on the file with provenance.

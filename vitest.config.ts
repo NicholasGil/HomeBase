@@ -18,7 +18,7 @@ export default defineConfig({
         },
         test: {
           name: "frontend",
-          include: ["src/**/*.test.ts"],
+          include: ["src/**/*.test.ts", "lib/**/*.test.ts"],
           environment: "node",
         },
       },

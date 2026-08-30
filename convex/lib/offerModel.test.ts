@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   LICENSEE_REVIEW_REQUIRED,
   SIMULATOR_DERIVED_KEYS,
+  SIMULATOR_FORMULA,
   STRATEGY_TABLE,
   UNSOURCED_MONEY,
   assertCanSubmit,
@@ -12,6 +13,7 @@ import {
   estimateClosingCostsCents,
   estimateLoanCents,
   estimateMonthlyPaymentCents,
+  estimateMonthlyTaxesInsuranceCents,
   estimatedPosition,
   everyFigureHasProvenance,
   modelAllStrategies,
@@ -133,6 +135,8 @@ describe("offer model", () => {
       asOf: AS_OF,
     });
     expect(SIMULATOR_DERIVED_KEYS).toHaveLength(6);
+    expect(base.formula).toEqual(SIMULATOR_FORMULA);
+    expect(moved.formula).toEqual(SIMULATOR_FORMULA);
     for (const key of SIMULATOR_DERIVED_KEYS) {
       expect(base.derived[key].provenance).toBe("ai_estimate");
       expect(moved.derived[key].provenance).toBe("ai_estimate");
@@ -148,6 +152,22 @@ describe("offer model", () => {
     );
     expect(moved.derived.cashToClose.amountCents).toBe(
       base.derived.cashToClose.amountCents + 30_000,
+    );
+    expect(moved.derived.monthlyTaxesInsurance.amountCents).toBe(
+      estimateMonthlyTaxesInsuranceCents(42000000),
+    );
+    expect(moved.derived.monthlyPayment.amountCents).toBe(
+      estimateMonthlyPaymentCents({
+        loanCents: moved.derived.estimatedLoan.amountCents,
+        rateBps: 675,
+      }),
+    );
+    expect(moved.derived.totalMonthly.amountCents).toBe(
+      moved.derived.monthlyPayment.amountCents +
+        moved.derived.monthlyTaxesInsurance.amountCents,
+    );
+    expect(moved.derived.monthlyTaxesInsurance.amountCents).toBeGreaterThan(
+      base.derived.monthlyTaxesInsurance.amountCents,
     );
     expect(everyFigureHasProvenance(Object.values(moved.derived))).toBe(true);
   });

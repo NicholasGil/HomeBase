@@ -162,9 +162,14 @@ export const OFFER_STRATEGIES = [
 ] as const satisfies readonly OfferStrategy[];
 
 const DAY_MS = 86_400_000;
-const DEFAULT_TERM_MONTHS = 360;
-const CLOSING_COST_BPS = 300;
-const ANNUAL_TAX_INSURANCE_BPS = 155;
+
+export const SIMULATOR_FORMULA = {
+  closingCostBps: 300,
+  annualTaxInsuranceBps: 155,
+  termMonths: 360,
+} as const;
+
+export type SimulatorFormula = typeof SIMULATOR_FORMULA;
 
 export const SIMULATOR_DERIVED_KEYS = [
   "estimatedLoan",
@@ -187,6 +192,7 @@ export type OfferSimulationAssumptions = {
 
 export type OfferSimulation = {
   assumptions: OfferSimulationAssumptions;
+  formula: SimulatorFormula;
   derived: Record<SimulatorDerivedKey, MoneyFigure>;
 };
 
@@ -249,7 +255,7 @@ export function estimateLoanCents(priceCents: number, downPaymentCents: number) 
 }
 
 export function estimateClosingCostsCents(priceCents: number) {
-  return applyBps(priceCents, CLOSING_COST_BPS);
+  return applyBps(priceCents, SIMULATOR_FORMULA.closingCostBps);
 }
 
 export function estimateCashToCloseCents(input: {
@@ -264,7 +270,9 @@ export function estimateCashToCloseCents(input: {
 }
 
 export function estimateMonthlyTaxesInsuranceCents(priceCents: number) {
-  return Math.round(applyBps(priceCents, ANNUAL_TAX_INSURANCE_BPS) / 12);
+  return Math.round(
+    applyBps(priceCents, SIMULATOR_FORMULA.annualTaxInsuranceBps) / 12,
+  );
 }
 
 export function simulateOfferCost(input: {
@@ -318,6 +326,7 @@ export function simulateOfferCost(input: {
       rateBps: input.rateBps,
       program: input.program,
     },
+    formula: SIMULATOR_FORMULA,
     derived: {
       estimatedLoan: moneyFigure({
         amountCents: loanCents,
@@ -364,7 +373,7 @@ export function estimateMonthlyPaymentCents(input: {
   rateBps: number;
   termMonths?: number;
 }) {
-  const termMonths = input.termMonths ?? DEFAULT_TERM_MONTHS;
+  const termMonths = input.termMonths ?? SIMULATOR_FORMULA.termMonths;
   if (input.loanCents <= 0) {
     return 0;
   }

@@ -149,14 +149,37 @@ export function OfferCostSimulator({
               ))}
             </select>
           </label>
-          <div className="md:col-span-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
-            <Badge variant="outline">
-              {simulation.assumptions.program}
-            </Badge>
-            <Badge variant="outline">{rateBps} bps</Badge>
-            <span data-testid="simulator-assumptions">
+          <div className="md:col-span-2 space-y-2 text-xs text-muted-foreground">
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="outline">
+                {simulation.assumptions.program}
+              </Badge>
+              <Badge variant="outline">{rateBps} bps</Badge>
+            </div>
+            <p data-testid="simulator-assumptions">
               Price, down payment, concessions, rate, and program stay visible.
-            </span>
+            </p>
+            <dl
+              data-testid="simulator-formula"
+              className="grid gap-1 sm:grid-cols-2"
+            >
+              <div>
+                Closing costs assumption: {simulation.formula.closingCostBps} bps
+                of purchase price
+              </div>
+              <div>
+                Taxes and insurance assumption:{" "}
+                {simulation.formula.annualTaxInsuranceBps} bps of purchase price
+                per year, divided by 12
+              </div>
+              <div>
+                Loan term assumption: {simulation.formula.termMonths} months
+              </div>
+              <div>
+                Rate assumption: {simulation.assumptions.rateBps} bps · program{" "}
+                {simulation.assumptions.program}
+              </div>
+            </dl>
           </div>
         </CardContent>
       </Card>

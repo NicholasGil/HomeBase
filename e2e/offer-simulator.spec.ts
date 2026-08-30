@@ -14,6 +14,11 @@ test("a $10k price change updates all six estimates", async ({ page }) => {
   await page.getByRole("button", { name: "Sign in as Blair Chen" }).click();
   await expect(page.getByTestId("offer-simulator")).toBeVisible();
   await expect(page.getByTestId("assumptions-panel")).toBeVisible();
+  const formula = page.getByTestId("simulator-formula");
+  await expect(formula).toBeVisible();
+  await expect(formula).toContainText("300 bps");
+  await expect(formula).toContainText("155 bps");
+  await expect(formula).toContainText("360 months");
 
   const before: Record<string, string> = {};
   for (const id of DERIVED) {

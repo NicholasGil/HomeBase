@@ -1,3 +1,4 @@
+import type { Id } from "./_generated/dataModel";
 import { internalMutation } from "./_generated/server";
 import { appendAuditLog } from "./lib/audit";
 import { DEFAULT_FEATURE_FLAGS } from "./lib/validators";
@@ -7,6 +8,7 @@ import {
   SEED_OFFER_MARKET,
   SEED_PLAN,
   SEED_TOUR,
+  SEED_VENDORS,
 } from "./seedPlan";
 
 const DAY_MS = 86_400_000;
@@ -102,6 +104,21 @@ export const run = internalMutation({
       orgId,
       role: "vendor",
     });
+
+    const vendorIdsBySeed: Record<string, Id<"vendors">> = {};
+    for (const vendor of SEED_VENDORS) {
+      const vendorId = await ctx.db.insert("vendors", {
+        orgId,
+        category: vendor.category,
+        name: vendor.name,
+        contact: { ...vendor.contact },
+        notes: vendor.notes,
+        credentials: vendor.credentials,
+        userId: vendor.clerkId === SEED_PLAN.lender.clerkId ? lenderId : undefined,
+        compensationModel: "none",
+      });
+      vendorIdsBySeed[vendor.id] = vendorId;
+    }
 
     const transactionIds: string[] = [];
 
@@ -272,15 +289,12 @@ export const run = internalMutation({
           },
           status: "draft",
         });
-        const vendorId = await ctx.db.insert("vendors", {
-          orgId,
-          category: "lender",
-          name: SEED_CONCIERGE.lenderName,
-          contact: { email: SEED_PLAN.lender.email },
-          compensationModel: "none",
-        });
+        const lenderVendorId = vendorIdsBySeed["seed-vendor-lender"];
+        if (lenderVendorId === undefined) {
+          throw new Error("seed lender vendor missing");
+        }
         await ctx.db.insert("vendorAssignments", {
-          vendorId,
+          vendorId: lenderVendorId,
           transactionId,
           scope: "preapproval",
           expiresAt: now + 30 * 24 * 60 * 60 * 1000,

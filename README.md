@@ -55,3 +55,7 @@ M5–M7 offer center, cost simulator, and contract explainer. Seeded offers stay
 ## P4
 
 M8 agent command center: Casey Holt's eight assigned clients, stage at a glance, and a daily list that puts exception files first. Buyers and vendors cannot load `/agent`. Flags stay off.
+
+## P5
+
+M10 vendor directory and portal. Inspection-stage buyers see inspectors with compare and request-appointment. Jordan Hale's portal is one assigned file, granted documents only, and access that ends on expiry. `compensationModel` writes other than `none` are rejected while `FLAG_VENDOR_COMP` is off. No payment flow. Flags stay off.

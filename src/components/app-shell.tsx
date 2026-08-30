@@ -28,6 +28,9 @@ export function AppShell({
             <Link href="/offers" className={cn(buttonVariants({ variant: "ghost" }))}>
               Offers
             </Link>
+            <Link href="/vendor" className={cn(buttonVariants({ variant: "ghost" }))}>
+              Vendor portal
+            </Link>
             <Link href="/" className={cn(buttonVariants({ variant: "ghost" }))}>
               Home
             </Link>

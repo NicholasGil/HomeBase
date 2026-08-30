@@ -6,6 +6,7 @@ import { BuyerDashboardViewPanel } from "@/components/buyer-dashboard-view";
 import { LiveContractExplainer } from "@/components/live-contract-explainer";
 import { LiveOfferCenter } from "@/components/live-offer-center";
 import { LiveTourBuilder } from "@/components/live-tour-builder";
+import { LiveVendorDirectory } from "@/components/live-vendor-directory";
 import { api } from "../../convex/_generated/api";
 
 export function LiveBuyerDashboard({ buyerName }: { buyerName?: string }) {
@@ -26,6 +27,7 @@ export function LiveBuyerDashboard({ buyerName }: { buyerName?: string }) {
   return (
     <div className="space-y-10">
       <BuyerDashboardViewPanel view={view} buyerName={buyerName} />
+      <LiveVendorDirectory transactionId={view.transactionId} />
       <LiveTourBuilder />
       <LiveOfferCenter />
       <LiveContractExplainer />

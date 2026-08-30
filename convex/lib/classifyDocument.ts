@@ -6,6 +6,7 @@ export const DOCUMENT_TYPES = [
   "appraisal",
   "title",
   "insurance",
+  "invoice",
   "other",
 ] as const;
 
@@ -13,6 +14,7 @@ export type DocumentType = (typeof DOCUMENT_TYPES)[number];
 
 const FILE_HINTS: { match: RegExp; type: DocumentType }[] = [
   { match: /pre-?approv|prequal/i, type: "preapproval" },
+  { match: /invoice|bill/i, type: "invoice" },
   { match: /inspect/i, type: "inspection_report" },
   { match: /purchase|psa|contract/i, type: "purchase_agreement" },
   { match: /earnest|emd/i, type: "earnest_money" },

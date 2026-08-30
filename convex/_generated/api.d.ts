@@ -33,6 +33,9 @@ import type * as transactions from "../transactions.js";
 import type * as lib_driveTimes from "../lib/driveTimes.js";
 import type * as lib_offerModel from "../lib/offerModel.js";
 import type * as lib_tourOptimizer from "../lib/tourOptimizer.js";
+import type * as lib_vendors from "../lib/vendors.js";
+import type * as lib_vendorAccess from "../lib/vendorAccess.js";
+import type * as vendors from "../vendors.js";
 
 import type {
   ApiFromModules,
@@ -66,6 +69,9 @@ declare const fullApi: ApiFromModules<{
   "lib/driveTimes": typeof lib_driveTimes;
   "lib/offerModel": typeof lib_offerModel;
   "lib/tourOptimizer": typeof lib_tourOptimizer;
+  "lib/vendors": typeof lib_vendors;
+  "lib/vendorAccess": typeof lib_vendorAccess;
+  vendors: typeof vendors;
 }>;
 
 /**

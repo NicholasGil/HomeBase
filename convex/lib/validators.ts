@@ -177,6 +177,54 @@ export const STAGE_ADVANCE_ROLES = ["agent", "broker", "admin"] as const;
 
 export const TASK_WRITE_ROLES = ["agent", "broker", "admin"] as const;
 
+export const VENDOR_WRITE_ROLES = ["agent", "broker", "admin"] as const;
+
+export const VENDOR_CATEGORIES = [
+  "lenders",
+  "inspectors",
+  "insurance",
+  "title",
+  "surveyors",
+  "pest",
+  "hvac",
+  "plumbing",
+  "electrical",
+  "roofing",
+  "movers",
+  "locksmiths",
+  "cleaners",
+  "internet",
+] as const;
+
+export const vendorCategoryValidator = v.union(
+  v.literal("lenders"),
+  v.literal("inspectors"),
+  v.literal("insurance"),
+  v.literal("title"),
+  v.literal("surveyors"),
+  v.literal("pest"),
+  v.literal("hvac"),
+  v.literal("plumbing"),
+  v.literal("electrical"),
+  v.literal("roofing"),
+  v.literal("movers"),
+  v.literal("locksmiths"),
+  v.literal("cleaners"),
+  v.literal("internet"),
+);
+
+export const vendorAssignmentStatusValidator = v.union(
+  v.literal("active"),
+  v.literal("expired"),
+  v.literal("complete"),
+  v.literal("revoked"),
+);
+
+export const vendorWorkProductValidator = v.union(
+  v.literal("report"),
+  v.literal("invoice"),
+);
+
 export const defaultTaskValidator = v.object({
   title: v.string(),
   assigneeRole: roleValidator,

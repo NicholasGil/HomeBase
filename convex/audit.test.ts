@@ -27,6 +27,7 @@ describe("auditLog", () => {
       "documents.ts",
       "me.ts",
       "concierge.ts",
+      "vendors.ts",
     ];
     const banned = /\.(patch|replace|delete)\(\s*["']auditLog["']/;
     for (const file of files) {

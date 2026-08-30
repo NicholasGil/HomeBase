@@ -1,6 +1,8 @@
 import type { Doc } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
 
+import { isLenderCategory } from "./vendors";
+
 type DbCtx = QueryCtx | MutationCtx;
 
 export type ConciergeFact = {
@@ -132,7 +134,7 @@ export async function gatherConciergeFacts(
 
   for (const assignment of assignments) {
     const vendor = await ctx.db.get(assignment.vendorId);
-    if (vendor !== null && vendor.category === "lender") {
+    if (vendor !== null && isLenderCategory(vendor.category)) {
       facts.push({
         key: "lender",
         text: `${vendor.name} is the lender on this file.`,

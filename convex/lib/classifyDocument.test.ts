@@ -12,5 +12,8 @@ describe("classifyDocumentType", () => {
       classifyDocumentType({ fileName: "inspection-report.pdf" }),
     ).toBe("inspection_report");
     expect(classifyDocumentType({ fileName: "notes.txt" })).toBe("other");
+    expect(classifyDocumentType({ fileName: "vendor-invoice.pdf" })).toBe(
+      "invoice",
+    );
   });
 });

@@ -32,6 +32,15 @@ const READ_FUNCTIONS = [
   "explainer.listMine",
   "explainer.listSections",
   "commandCenter.getMine",
+  "vendors.listDirectory",
+  "vendors.listForStage",
+  "vendors.compare",
+  "vendors.listAssignmentsForTransaction",
+  "vendors.getPortal",
+  "vendors.getAssignment",
+  "vendors.listMessages",
+  "vendors.listDocumentRequests",
+  "vendors.listGrantedDocuments",
 ] as const;
 
 async function seeded() {
@@ -68,7 +77,7 @@ async function buyerATransactionId(t: ReturnType<typeof convexTest>) {
 
 describe("permission tests for data-reading functions", () => {
   it("lists every public read function so coverage cannot drift silently", () => {
-    expect(READ_FUNCTIONS).toHaveLength(26);
+    expect(READ_FUNCTIONS).toHaveLength(35);
   });
 
   it.each([
@@ -165,6 +174,82 @@ describe("permission tests for data-reading functions", () => {
     }],
     ["commandCenter.getMine", async (t: ReturnType<typeof convexTest>) =>
       t.query(api.commandCenter.getMine, {})],
+    ["vendors.listDirectory", async (t: ReturnType<typeof convexTest>) =>
+      t.query(api.vendors.listDirectory, {})],
+    ["vendors.listForStage", async (t: ReturnType<typeof convexTest>) => {
+      const id = await buyerATransactionId(t);
+      return t.query(api.vendors.listForStage, { transactionId: id });
+    }],
+    ["vendors.compare", async (t: ReturnType<typeof convexTest>) => {
+      const id = await buyerATransactionId(t);
+      const directory = await t
+        .withIdentity({ subject: "clerk_buyer_a" })
+        .query(api.vendors.listForStage, { transactionId: id });
+      const first = directory.vendors[0];
+      if (first === undefined) {
+        throw new Error("seed vendors missing");
+      }
+      return t.query(api.vendors.compare, {
+        transactionId: id,
+        vendorIds: [first._id],
+      });
+    }],
+    ["vendors.listAssignmentsForTransaction", async (t: ReturnType<typeof convexTest>) => {
+      const id = await buyerATransactionId(t);
+      return t.query(api.vendors.listAssignmentsForTransaction, {
+        transactionId: id,
+      });
+    }],
+    ["vendors.getPortal", async (t: ReturnType<typeof convexTest>) =>
+      t.query(api.vendors.getPortal, {})],
+    ["vendors.getAssignment", async (t: ReturnType<typeof convexTest>) => {
+      const portal = await t
+        .withIdentity({ subject: "clerk_lender" })
+        .query(api.vendors.getPortal, {});
+      const first = portal.assignments[0];
+      if (first === undefined) {
+        throw new Error("seed assignment missing");
+      }
+      return t.query(api.vendors.getAssignment, {
+        assignmentId: first.assignmentId,
+      });
+    }],
+    ["vendors.listMessages", async (t: ReturnType<typeof convexTest>) => {
+      const portal = await t
+        .withIdentity({ subject: "clerk_lender" })
+        .query(api.vendors.getPortal, {});
+      const first = portal.assignments[0];
+      if (first === undefined) {
+        throw new Error("seed assignment missing");
+      }
+      return t.query(api.vendors.listMessages, {
+        assignmentId: first.assignmentId,
+      });
+    }],
+    ["vendors.listDocumentRequests", async (t: ReturnType<typeof convexTest>) => {
+      const portal = await t
+        .withIdentity({ subject: "clerk_lender" })
+        .query(api.vendors.getPortal, {});
+      const first = portal.assignments[0];
+      if (first === undefined) {
+        throw new Error("seed assignment missing");
+      }
+      return t.query(api.vendors.listDocumentRequests, {
+        assignmentId: first.assignmentId,
+      });
+    }],
+    ["vendors.listGrantedDocuments", async (t: ReturnType<typeof convexTest>) => {
+      const portal = await t
+        .withIdentity({ subject: "clerk_lender" })
+        .query(api.vendors.getPortal, {});
+      const first = portal.assignments[0];
+      if (first === undefined) {
+        throw new Error("seed assignment missing");
+      }
+      return t.query(api.vendors.listGrantedDocuments, {
+        assignmentId: first.assignmentId,
+      });
+    }],
   ] as const)("%s denies an unauthenticated caller", async (_name, call) => {
     const t = await seeded();
     await expect(call(t)).rejects.toThrow("UNAUTHENTICATED");
@@ -189,6 +274,10 @@ describe("permission tests for data-reading functions", () => {
       asVendor.query(api.me.listOrgDirectory, {}), true],
     ["documents.listMine", async (asVendor: ReturnType<ReturnType<typeof convexTest>["withIdentity"]>) =>
       asVendor.query(api.documents.listMine, {}), false],
+    ["vendors.getPortal", async (asVendor: ReturnType<ReturnType<typeof convexTest>["withIdentity"]>) =>
+      asVendor.query(api.vendors.getPortal, {}), false],
+    ["vendors.listDirectory", async (asVendor: ReturnType<ReturnType<typeof convexTest>["withIdentity"]>) =>
+      asVendor.query(api.vendors.listDirectory, {}), true],
   ] as const)(
     "%s denies vendor when the function is transaction-scoped",
     async (_name, call, vendorDenied) => {
@@ -307,6 +396,57 @@ describe("permission tests for data-reading functions", () => {
     await expect(asVendor.query(api.commandCenter.getMine, {})).rejects.toThrow(
       "FORBIDDEN",
     );
+    await expect(asVendor.query(api.vendors.listDirectory, {})).rejects.toThrow(
+      "FORBIDDEN",
+    );
+    await expect(
+      asVendor.query(api.vendors.listForStage, { transactionId: id }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      asVendor.query(api.vendors.listAssignmentsForTransaction, {
+        transactionId: id,
+      }),
+    ).rejects.toThrow("FORBIDDEN");
+    const alexDirectory = await t
+      .withIdentity({ subject: "clerk_buyer_a" })
+      .query(api.vendors.listForStage, { transactionId: id });
+    const firstVendor = alexDirectory.vendors[0];
+    if (firstVendor === undefined) {
+      throw new Error("seed vendors missing");
+    }
+    await expect(
+      asVendor.query(api.vendors.compare, {
+        transactionId: id,
+        vendorIds: [firstVendor._id],
+      }),
+    ).rejects.toThrow("FORBIDDEN");
+    const jordanPortal = await t
+      .withIdentity({ subject: "clerk_lender" })
+      .query(api.vendors.getPortal, {});
+    const jordanAssignment = jordanPortal.assignments[0];
+    if (jordanAssignment === undefined) {
+      throw new Error("seed assignment missing");
+    }
+    await expect(
+      asVendor.query(api.vendors.getAssignment, {
+        assignmentId: jordanAssignment.assignmentId,
+      }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      asVendor.query(api.vendors.listMessages, {
+        assignmentId: jordanAssignment.assignmentId,
+      }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      asVendor.query(api.vendors.listDocumentRequests, {
+        assignmentId: jordanAssignment.assignmentId,
+      }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      asVendor.query(api.vendors.listGrantedDocuments, {
+        assignmentId: jordanAssignment.assignmentId,
+      }),
+    ).rejects.toThrow("FORBIDDEN");
   });
 
   it("denies a signed-in user with no membership", async () => {
@@ -435,6 +575,60 @@ describe("permission tests for data-reading functions", () => {
     ).rejects.toThrow("FORBIDDEN");
     await expect(
       asStranger.query(api.commandCenter.getMine, {}),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(asStranger.query(api.vendors.listDirectory, {})).rejects.toThrow(
+      "FORBIDDEN",
+    );
+    await expect(asStranger.query(api.vendors.getPortal, {})).rejects.toThrow(
+      "FORBIDDEN",
+    );
+    await expect(
+      asStranger.query(api.vendors.listForStage, { transactionId: id }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      asStranger.query(api.vendors.listAssignmentsForTransaction, {
+        transactionId: id,
+      }),
+    ).rejects.toThrow("FORBIDDEN");
+    const strangerDirectory = await t
+      .withIdentity({ subject: "clerk_buyer_a" })
+      .query(api.vendors.listForStage, { transactionId: id });
+    const strangerVendor = strangerDirectory.vendors[0];
+    if (strangerVendor === undefined) {
+      throw new Error("seed vendors missing");
+    }
+    await expect(
+      asStranger.query(api.vendors.compare, {
+        transactionId: id,
+        vendorIds: [strangerVendor._id],
+      }),
+    ).rejects.toThrow("FORBIDDEN");
+    const strangerPortal = await t
+      .withIdentity({ subject: "clerk_lender" })
+      .query(api.vendors.getPortal, {});
+    const strangerAssignment = strangerPortal.assignments[0];
+    if (strangerAssignment === undefined) {
+      throw new Error("seed assignment missing");
+    }
+    await expect(
+      asStranger.query(api.vendors.getAssignment, {
+        assignmentId: strangerAssignment.assignmentId,
+      }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      asStranger.query(api.vendors.listMessages, {
+        assignmentId: strangerAssignment.assignmentId,
+      }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      asStranger.query(api.vendors.listDocumentRequests, {
+        assignmentId: strangerAssignment.assignmentId,
+      }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      asStranger.query(api.vendors.listGrantedDocuments, {
+        assignmentId: strangerAssignment.assignmentId,
+      }),
     ).rejects.toThrow("FORBIDDEN");
   });
 

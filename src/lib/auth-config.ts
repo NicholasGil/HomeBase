@@ -8,6 +8,8 @@ export const PROTECTED_PATH_PREFIXES = [
   "/broker",
   "/admin",
   "/vendor",
+  "/vault",
+  "/documents",
 ] as const;
 
 export type DashboardRenderMode = "live" | "fixture" | "login" | "unavailable";

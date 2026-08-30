@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import {
+  fixtureHomePath,
   parseTestSessionCookie,
   startTestSessionDecision,
   TEST_SESSION_COOKIE,
@@ -34,6 +35,6 @@ export async function startTestSessionFromForm(formData: FormData) {
   if (typeof clerkId !== "string") {
     throw new Error("FORBIDDEN");
   }
-  await startTestSession({ clerkId });
-  redirect("/dashboard");
+  const session = await startTestSession({ clerkId });
+  redirect(fixtureHomePath(session));
 }

@@ -31,6 +31,7 @@ export const replaceStages = mutation({
         label: v.string(),
         order: v.number(),
         defaultTasks: v.array(defaultTaskValidator),
+        requiredDocuments: v.array(v.string()),
       }),
     ),
   },
@@ -55,6 +56,7 @@ export const replaceStages = mutation({
         label: stage.label,
         order: stage.order,
         defaultTasks: stage.defaultTasks,
+        requiredDocuments: stage.requiredDocuments,
       });
       ids.push(id);
     }

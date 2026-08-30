@@ -14,8 +14,13 @@ const READ_FUNCTIONS = [
   "tasks.listMine",
   "tasks.listForTransaction",
   "me.getSession",
+  "me.listOrgDirectory",
   "dashboard.getBuyerDashboard",
   "dashboard.getById",
+  "documents.listMine",
+  "documents.listForTransaction",
+  "documents.missingForStage",
+  "documents.listGrants",
 ] as const;
 
 async function seeded() {
@@ -52,7 +57,7 @@ async function buyerATransactionId(t: ReturnType<typeof convexTest>) {
 
 describe("permission tests for data-reading functions", () => {
   it("lists every public read function so coverage cannot drift silently", () => {
-    expect(READ_FUNCTIONS).toHaveLength(10);
+    expect(READ_FUNCTIONS).toHaveLength(15);
   });
 
   it.each([
@@ -82,6 +87,28 @@ describe("permission tests for data-reading functions", () => {
       const id = await buyerATransactionId(t);
       return t.query(api.dashboard.getById, { transactionId: id });
     }],
+    ["me.listOrgDirectory", async (t: ReturnType<typeof convexTest>) =>
+      t.query(api.me.listOrgDirectory, {})],
+    ["documents.listMine", async (t: ReturnType<typeof convexTest>) =>
+      t.query(api.documents.listMine, {})],
+    ["documents.listForTransaction", async (t: ReturnType<typeof convexTest>) => {
+      const id = await buyerATransactionId(t);
+      return t.query(api.documents.listForTransaction, { transactionId: id });
+    }],
+    ["documents.missingForStage", async (t: ReturnType<typeof convexTest>) => {
+      const id = await buyerATransactionId(t);
+      return t.query(api.documents.missingForStage, { transactionId: id });
+    }],
+    ["documents.listGrants", async (t: ReturnType<typeof convexTest>) => {
+      const docs = await t
+        .withIdentity({ subject: "clerk_buyer_a" })
+        .query(api.documents.listMine, {});
+      const first = docs[0];
+      if (first === undefined) {
+        throw new Error("seed documents missing");
+      }
+      return t.query(api.documents.listGrants, { documentId: first._id });
+    }],
   ] as const)("%s denies an unauthenticated caller", async (_name, call) => {
     const t = await seeded();
     await expect(call(t)).rejects.toThrow("UNAUTHENTICATED");
@@ -102,6 +129,10 @@ describe("permission tests for data-reading functions", () => {
       asVendor.query(api.me.getSession, {}), false],
     ["dashboard.getBuyerDashboard", async (asVendor: ReturnType<ReturnType<typeof convexTest>["withIdentity"]>) =>
       asVendor.query(api.dashboard.getBuyerDashboard, {}), true],
+    ["me.listOrgDirectory", async (asVendor: ReturnType<ReturnType<typeof convexTest>["withIdentity"]>) =>
+      asVendor.query(api.me.listOrgDirectory, {}), true],
+    ["documents.listMine", async (asVendor: ReturnType<ReturnType<typeof convexTest>["withIdentity"]>) =>
+      asVendor.query(api.documents.listMine, {}), false],
   ] as const)(
     "%s denies vendor when the function is transaction-scoped",
     async (_name, call, vendorDenied) => {
@@ -128,6 +159,12 @@ describe("permission tests for data-reading functions", () => {
     await expect(
       asVendor.query(api.dashboard.getById, { transactionId: id }),
     ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      asVendor.query(api.documents.listForTransaction, { transactionId: id }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      asVendor.query(api.documents.missingForStage, { transactionId: id }),
+    ).rejects.toThrow("FORBIDDEN");
   });
 
   it("denies a signed-in user with no membership", async () => {
@@ -153,6 +190,54 @@ describe("permission tests for data-reading functions", () => {
     );
     await expect(
       asStranger.query(api.dashboard.getBuyerDashboard, {}),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(asStranger.query(api.documents.listMine, {})).rejects.toThrow(
+      "FORBIDDEN",
+    );
+    await expect(asStranger.query(api.me.listOrgDirectory, {})).rejects.toThrow(
+      "FORBIDDEN",
+    );
+    const docs = await t
+      .withIdentity({ subject: "clerk_buyer_a" })
+      .query(api.documents.listMine, {});
+    const first = docs[0];
+    if (first === undefined) {
+      throw new Error("seed documents missing");
+    }
+    await expect(
+      asStranger.query(api.documents.listGrants, { documentId: first._id }),
+    ).rejects.toThrow("FORBIDDEN");
+  });
+
+  it("refuses listGrants for a vendor who holds an active grant", async () => {
+    const t = await seeded();
+    const asBuyer = t.withIdentity({ subject: "clerk_buyer_a" });
+    const docs = await asBuyer.query(api.documents.listMine, {});
+    const preapproval = docs.find((row) => row.type === "preapproval");
+    if (preapproval === undefined) {
+      throw new Error("seed documents missing");
+    }
+    const lenderId = await t.run(async (ctx) => {
+      const user = await ctx.db
+        .query("users")
+        .withIndex("by_clerkId", (q) => q.eq("clerkId", "clerk_lender"))
+        .unique();
+      if (user === null) {
+        throw new Error("lender missing");
+      }
+      return user._id;
+    });
+    await asBuyer.mutation(api.documents.grant, {
+      documentId: preapproval._id,
+      granteeId: lenderId,
+      scope: "view",
+      expiresAt: Date.now() + 60_000,
+    });
+    const asLender = t.withIdentity({ subject: "clerk_lender" });
+    await expect(
+      asLender.query(api.documents.listGrants, {
+        documentId: preapproval._id,
+      }),
     ).rejects.toThrow("FORBIDDEN");
   });
 });

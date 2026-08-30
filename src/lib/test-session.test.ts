@@ -25,6 +25,12 @@ describe("test session permission", () => {
       ok: false,
       reason: "FORBIDDEN",
     });
+    const lender = startTestSessionDecision(SEED_CLERK_IDS.lender);
+    expect(lender.ok).toBe(true);
+    if (lender.ok) {
+      expect(lender.session.role).toBe("vendor");
+      expect(lender.session.name).toBe("Jordan Hale");
+    }
     expect(startTestSessionDecision("clerk_stranger")).toEqual({
       ok: false,
       reason: "FORBIDDEN",
@@ -34,7 +40,7 @@ describe("test session permission", () => {
   it("starts a buyer session outside production", () => {
     const started = startTestSessionDecision(SEED_CLERK_IDS.buyerA);
     expect(started.ok).toBe(true);
-    if (started.ok) {
+    if (started.ok && started.session.role === "buyer") {
       expect(started.session.name).toBe("Alex Rivera");
       expect(started.session.transactionId).toBe("seed:buyer-a");
     }

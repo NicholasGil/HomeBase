@@ -46,6 +46,7 @@ const READ_FUNCTIONS = [
   "esign.getPacket",
   "idv.listMine",
   "idv.getGating",
+  "search.run",
 ] as const;
 
 async function seeded() {
@@ -82,7 +83,7 @@ async function buyerATransactionId(t: ReturnType<typeof convexTest>) {
 
 describe("permission tests for data-reading functions", () => {
   it("lists every public read function so coverage cannot drift silently", () => {
-    expect(READ_FUNCTIONS).toHaveLength(40);
+    expect(READ_FUNCTIONS).toHaveLength(41);
   });
 
   it.each([
@@ -275,6 +276,8 @@ describe("permission tests for data-reading functions", () => {
       t.query(api.idv.listMine, {})],
     ["idv.getGating", async (t: ReturnType<typeof convexTest>) =>
       t.query(api.idv.getGating, {})],
+    ["search.run", async (t: ReturnType<typeof convexTest>) =>
+      t.query(api.search.run, {})],
   ] as const)("%s denies an unauthenticated caller", async (_name, call) => {
     const t = await seeded();
     await expect(call(t)).rejects.toThrow("UNAUTHENTICATED");
@@ -494,6 +497,9 @@ describe("permission tests for data-reading functions", () => {
     await expect(asVendor.query(api.idv.getGating, {})).rejects.toThrow(
       "FORBIDDEN",
     );
+    await expect(asVendor.query(api.search.run, {})).rejects.toThrow(
+      "FORBIDDEN",
+    );
   });
 
   it("denies a signed-in user with no membership", async () => {
@@ -697,6 +703,9 @@ describe("permission tests for data-reading functions", () => {
       "FORBIDDEN",
     );
     await expect(asStranger.query(api.idv.getGating, {})).rejects.toThrow(
+      "FORBIDDEN",
+    );
+    await expect(asStranger.query(api.search.run, {})).rejects.toThrow(
       "FORBIDDEN",
     );
   });

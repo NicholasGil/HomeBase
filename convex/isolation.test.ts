@@ -2,6 +2,7 @@ import { convexTest } from "convex-test";
 import { describe, expect, it } from "vitest";
 
 import { api, internal } from "./_generated/api";
+import type { Id } from "./_generated/dataModel";
 import schema from "./schema";
 import { modules } from "./test.setup";
 
@@ -142,6 +143,26 @@ describe("transaction isolation", () => {
     await expect(
       asBuyerB.query(api.esign.getPacket, { packetId: first._id }),
     ).rejects.toThrow("FORBIDDEN");
+  });
+
+  it("buyer A saves do not change buyer B's search rank", async () => {
+    const t = convexTest(schema, modules);
+    await t.mutation(internal.seed.run, {});
+    const asBuyerA = t.withIdentity({ subject: "clerk_buyer_a" });
+    const asBuyerB = t.withIdentity({ subject: "clerk_buyer_b" });
+    const baseline = await asBuyerB.query(api.search.run, {});
+    const first = baseline.results[0];
+    if (first === undefined) {
+      throw new Error("search missing results");
+    }
+    await asBuyerA.mutation(api.search.recordSignal, {
+      propertyId: first.id as Id<"properties">,
+      kind: "dislike",
+    });
+    const blair = await asBuyerB.query(api.search.run, {});
+    expect(blair.results[0]?.id).toBe(first.id);
+    const alex = await asBuyerA.query(api.search.run, {});
+    expect(alex.results[0]?.id).not.toBe(first.id);
   });
 
   it("buyer cannot load the agent command center", async () => {

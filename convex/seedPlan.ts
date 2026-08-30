@@ -605,7 +605,7 @@ export const SEED_TOUR = {
         postalCode: "35801",
       },
       coordinates: { lat: 34.73037, lng: -86.5861 },
-      specs: { beds: 3, baths: 2, sqft: 1680 },
+      specs: { beds: 3, baths: 2, sqft: 1680, lotAcres: 0.12, garageSpaces: 0 },
       brief: "Downtown bungalow two blocks from the square. Sample listing.",
     },
     {
@@ -617,7 +617,7 @@ export const SEED_TOUR = {
         postalCode: "35758",
       },
       coordinates: { lat: 34.69926, lng: -86.74833 },
-      specs: { beds: 4, baths: 3, sqft: 2420 },
+      specs: { beds: 4, baths: 3, sqft: 2420, lotAcres: 0.18, garageSpaces: 2 },
       brief: "Madison subdivision with a two-car garage. Sample listing.",
     },
     {
@@ -629,7 +629,7 @@ export const SEED_TOUR = {
         postalCode: "35749",
       },
       coordinates: { lat: 34.85564, lng: -86.75083 },
-      specs: { beds: 4, baths: 2, sqft: 2100 },
+      specs: { beds: 4, baths: 2, sqft: 2100, lotAcres: 0.5, garageSpaces: 2 },
       brief: "Harvest ranch on a half acre. Sample listing.",
     },
     {
@@ -641,8 +641,63 @@ export const SEED_TOUR = {
         postalCode: "35601",
       },
       coordinates: { lat: 34.60593, lng: -86.98334 },
-      specs: { beds: 3, baths: 2, sqft: 1900 },
+      specs: { beds: 3, baths: 2, sqft: 1900, lotAcres: 0.22, garageSpaces: 1 },
       brief: "Decatur craftsman near the river. Longest hop on this loop. Sample listing.",
+    },
+  ],
+} as const;
+
+export const SEED_SEARCH_PROPERTY_IDS = {
+  jonesValley: "seed-listing-jones-valley",
+  athens: "seed-listing-athens",
+  mlsHidden: "seed-listing-mls-hidden",
+} as const;
+
+export const SEED_SEARCH = {
+  town: SEED_TOUR.origin,
+  properties: [
+    {
+      id: SEED_SEARCH_PROPERTY_IDS.jonesValley,
+      address: {
+        line1: "109 Valley Wind Dr",
+        city: "Owens Cross Roads",
+        state: "AL",
+        postalCode: "35763",
+      },
+      coordinates: { lat: 34.5788, lng: -86.5861 },
+      specs: { beds: 4, baths: 3, sqft: 2280, lotAcres: 0.6, garageSpaces: 2 },
+      brief: "Jones Valley four-bed on over half an acre with a two-car garage. Sample listing.",
+      source: "manual" as const,
+      listPrice: sampleMoney(41900000, "List price · sample data"),
+    },
+    {
+      id: SEED_SEARCH_PROPERTY_IDS.athens,
+      address: {
+        line1: "44 Elm Grove Rd",
+        city: "Athens",
+        state: "AL",
+        postalCode: "35611",
+      },
+      coordinates: { lat: 35.0908, lng: -86.5861 },
+      specs: { beds: 4, baths: 2, sqft: 2060, lotAcres: 0.8, garageSpaces: 2 },
+      brief: "Athens four-bed with land and a two-car garage. Farther from town. Sample listing.",
+      source: "csv" as const,
+      listPrice: sampleMoney(43800000, "List price · sample data"),
+    },
+    {
+      id: SEED_SEARCH_PROPERTY_IDS.mlsHidden,
+      address: {
+        line1: "900 Licensed Feed Ln",
+        city: "Huntsville",
+        state: "AL",
+        postalCode: "35801",
+      },
+      coordinates: SEED_TOUR.origin.coordinates,
+      specs: { beds: 4, baths: 3, sqft: 2500, lotAcres: 1, garageSpaces: 3 },
+      brief: "Would come from the licensed feed. Hidden while FLAG_MLS is off.",
+      source: "mls" as const,
+      mlsId: "VALLEY-MLS-NOT-LIVE",
+      listPrice: sampleMoney(39900000, "List price · licensed feed"),
     },
   ],
 } as const;

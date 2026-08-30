@@ -66,6 +66,12 @@ export default async function HomePage() {
                 Command center
               </Link>
               <Link
+                href="/search"
+                className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
+              >
+                Search
+              </Link>
+              <Link
                 href="/tours"
                 className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
               >

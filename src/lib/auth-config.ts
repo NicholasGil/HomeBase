@@ -14,6 +14,7 @@ export const PROTECTED_PATH_PREFIXES = [
   "/offers",
   "/sign",
   "/identity",
+  "/search",
 ] as const;
 
 export type DashboardRenderMode = "live" | "fixture" | "login" | "unavailable";

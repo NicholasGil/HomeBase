@@ -54,6 +54,7 @@ test("buyer cannot load the command center", async ({ page }) => {
 test("vendor cannot load the command center", async ({ page }) => {
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Jordan Hale" }).click();
+  await expect(page).toHaveURL(/\/vault$/);
   await page.goto("/agent");
   await expect(page.getByTestId("command-center-denied")).toBeVisible();
   await expect(page.getByTestId("command-center")).toHaveCount(0);

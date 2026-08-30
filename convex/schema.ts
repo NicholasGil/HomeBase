@@ -111,6 +111,7 @@ export default defineSchema({
         blocksStage: v.boolean(),
       }),
     ),
+    requiredDocuments: v.array(v.string()),
   })
     .index("by_org", ["orgId"])
     .index("by_org_key", ["orgId", "key"]),
@@ -146,6 +147,7 @@ export default defineSchema({
     scope: documentGrantScopeValidator,
     expiresAt: v.number(),
     grantedBy: v.id("users"),
+    revokedAt: v.optional(v.number()),
   })
     .index("by_document", ["documentId"])
     .index("by_grantee", ["granteeId"]),

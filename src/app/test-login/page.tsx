@@ -40,6 +40,12 @@ export default function TestLoginPage() {
               </Button>
             </form>
           ))}
+          <form action={startTestSessionFromForm}>
+            <input type="hidden" name="clerkId" value={SEED_PLAN.lender.clerkId} />
+            <Button type="submit" variant="outline" className="w-full">
+              Sign in as {SEED_PLAN.lender.name}
+            </Button>
+          </form>
         </CardContent>
       </Card>
     </AppShell>

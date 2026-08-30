@@ -42,8 +42,21 @@ export const run = internalMutation({
           assigneeRole: task.assigneeRole,
           blocksStage: task.blocksStage,
         })),
+        requiredDocuments: [...stage.requiredDocuments],
       });
     }
+
+    const lenderId = await ctx.db.insert("users", {
+      clerkId: SEED_PLAN.lender.clerkId,
+      email: SEED_PLAN.lender.email,
+      name: SEED_PLAN.lender.name,
+      phone: SEED_PLAN.lender.phone,
+    });
+    await ctx.db.insert("memberships", {
+      userId: lenderId,
+      orgId,
+      role: "vendor",
+    });
 
     const transactionIds: string[] = [];
 
@@ -138,6 +151,22 @@ export const run = internalMutation({
           status: "blocked",
           blockedBy: [scheduleId],
           blocksStage: true,
+        });
+        await ctx.db.insert("documents", {
+          transactionId,
+          type: "preapproval",
+          extractedSummary:
+            "Lender issued a $450,000 preapproval ceiling on this buyer.",
+          status: "summarized",
+          uploadedBy: userId,
+        });
+        await ctx.db.insert("documents", {
+          transactionId,
+          type: "inspection_report",
+          extractedSummary:
+            "Roof and HVAC need service. No structural defects noted.",
+          status: "summarized",
+          uploadedBy: agentId,
         });
       } else {
         await ctx.db.insert("tasks", {

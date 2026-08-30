@@ -83,12 +83,14 @@ describe("org-configurable journey stages", () => {
             blocksStage: true,
           },
         ],
+        requiredDocuments: [],
       },
       {
         key: "underway",
         label: "Underway",
         order: 2,
         defaultTasks: [],
+        requiredDocuments: [],
       },
     ];
 

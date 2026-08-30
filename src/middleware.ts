@@ -31,6 +31,7 @@ export default async function middleware(
     "/vault(.*)",
     "/documents(.*)",
     "/tours(.*)",
+    "/offers(.*)",
   ]);
 
   return clerkMiddleware(async (auth, req) => {

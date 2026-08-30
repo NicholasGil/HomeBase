@@ -25,7 +25,7 @@ export function AppNavLinks({
               <Link
                 href={link.href}
                 className={cn(
-                  "inline-flex h-8 items-center rounded-full px-2.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+                  "inline-flex h-8 items-center rounded-full px-2.5 text-sm text-muted-foreground transition-colors hover:bg-sage hover:text-sage-foreground",
                 )}
               >
                 {link.label}

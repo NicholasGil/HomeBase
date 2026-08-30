@@ -60,7 +60,7 @@ export function LiveVendorDirectory({
                 <CardContent className="space-y-3 text-sm">
                   <p>{vendor.notes}</p>
                   <p className="text-muted-foreground">{vendor.credentials}</p>
-                  <Badge variant="outline">Compensation: none</Badge>
+                  <Badge variant="sage">Compensation: none</Badge>
                   <Button
                     variant="outline"
                     onClick={() => {
@@ -94,7 +94,7 @@ export function LiveVendorDirectory({
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
                 <p>{vendor.notes}</p>
-                <Badge variant="outline">Compensation: none</Badge>
+                <Badge variant="sage">Compensation: none</Badge>
                 <Button
                   variant="outline"
                   onClick={() => {

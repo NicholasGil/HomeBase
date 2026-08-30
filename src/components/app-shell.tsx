@@ -25,7 +25,7 @@ export async function AppShell({
 
   return (
     <div className="min-h-full bg-background">
-      <header className="sticky top-0 z-20 border-b border-black/5 bg-card/90 backdrop-blur">
+      <header className="sticky top-0 z-20 border-b border-sand/80 bg-card/90 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center gap-4 px-5 py-3">
           <Link
             href={wordmarkHrefFor(context.role)}

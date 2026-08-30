@@ -49,7 +49,7 @@ describe("owedTodayDisplay", () => {
       expect(entered.estimateLabel).toBe(ESTIMATE_LABEL);
       expect(ai.amountClassName).toBe(ESTIMATE_AMOUNT_CLASS_NAME);
       expect(entered.amountClassName).toBe(ESTIMATE_AMOUNT_CLASS_NAME);
-      expect(ai.amountClassName).toContain("text-muted-foreground");
+      expect(ai.amountClassName).toContain("text-sage-foreground");
       expect(ai.amountClassName).not.toBe(ISSUED_AMOUNT_CLASS_NAME);
     }
   });

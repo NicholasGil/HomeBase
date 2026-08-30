@@ -151,10 +151,10 @@ export function OfferCostSimulator({
           </label>
           <div className="md:col-span-2 space-y-2 text-xs text-muted-foreground">
             <div className="flex flex-wrap gap-2">
-              <Badge variant="outline">
+              <Badge variant="sky">
                 {simulation.assumptions.program}
               </Badge>
-              <Badge variant="outline">{rateBps} bps</Badge>
+              <Badge variant="sky">{rateBps} bps</Badge>
             </div>
             <p data-testid="simulator-assumptions">
               Price, down payment, concessions, rate, and program stay visible.

@@ -102,7 +102,7 @@ function LiveAssignment({
           <p data-testid="vendor-assignment-file">
             File {assignment.transaction.transactionId}
           </p>
-          <Badge variant="outline">Compensation: none</Badge>
+          <Badge variant="sage">Compensation: none</Badge>
         </CardContent>
       </Card>
       <Card>

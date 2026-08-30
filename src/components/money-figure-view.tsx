@@ -34,13 +34,17 @@ export function MoneyFigureView({
         {display.amountText}
       </p>
       <div className="flex flex-wrap gap-2">
-        <Badge variant={display.kind === "issued" ? "default" : "outline"}>
+        <Badge variant={display.kind === "issued" ? "default" : "sky"}>
           {figure.provenance}
         </Badge>
-        <Badge variant="secondary">
+        <Badge variant={display.kind === "issued" ? "default" : "sky"}>
           {display.kind === "issued" ? "issued" : "estimate"}
         </Badge>
-        {figure.label ? <Badge variant="secondary">{figure.label}</Badge> : null}
+        {figure.label ? (
+          <Badge variant={display.kind === "issued" ? "sand" : "sage"}>
+            {figure.label}
+          </Badge>
+        ) : null}
       </div>
     </div>
   );

@@ -1,29 +1,32 @@
+import type { ReactNode } from "react";
 import { Home } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { heroPhotoWashClassName, photoWashForSeed } from "@/lib/trip-ui";
 import { cn } from "@/lib/utils";
 
 export function PhotoTile({
   className,
   children,
+  wash,
+  seed,
 }: {
   className?: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
+  wash?: string;
+  seed?: string;
 }) {
+  const gradient = wash ?? (seed ? photoWashForSeed(seed) : heroPhotoWashClassName);
+
   return (
-    <div
-      className={cn(
-        "relative overflow-hidden bg-neutral-200",
-        className,
-      )}
-    >
+    <div className={cn("relative overflow-hidden bg-sand", className)}>
       <div
         aria-hidden
-        className="absolute inset-0 bg-gradient-to-br from-neutral-300 via-zinc-200 to-slate-300"
+        className={cn("absolute inset-0 bg-gradient-to-br", gradient)}
       />
       <Home
-        className="absolute bottom-3 left-3 size-4 text-neutral-500"
+        className="absolute bottom-3 left-3 size-4 text-sand-foreground/70"
         aria-hidden
       />
       {children}
@@ -45,7 +48,7 @@ export function ListingCardFrame({
 }: {
   addressLine: string;
   cityState: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
   testId: string;
   propertyId?: string;
   rank?: number;
@@ -62,7 +65,10 @@ export function ListingCardFrame({
       data-score={score}
       className={cn("py-0", className)}
     >
-      <PhotoTile className="aspect-[20/19] w-full">
+      <PhotoTile
+        className="aspect-[20/19] w-full"
+        seed={propertyId ?? addressLine}
+      >
         {rank !== undefined ? (
           <span className="absolute top-3 left-3 rounded-full bg-card/90 px-2 py-0.5 text-[11px] font-medium text-foreground">
             #{rank}
@@ -70,7 +76,7 @@ export function ListingCardFrame({
         ) : null}
         {sample ? (
           <Badge
-            variant="secondary"
+            variant="sage"
             data-testid={sampleTestId}
             className="absolute top-3 right-3"
           >

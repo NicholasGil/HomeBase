@@ -56,7 +56,7 @@ export function LiveTourBuilder() {
         <Badge variant="outline">sample listings</Badge>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2">
+      <div className="grid gap-5 sm:grid-cols-2">
         {candidates.map((listing) => (
           <ListingCardFrame
             key={listing._id}
@@ -84,6 +84,7 @@ export function LiveTourBuilder() {
       </div>
       <Button
         type="button"
+        variant="next"
         data-testid="build-my-tour"
         disabled={busy || selected.length === 0}
         onClick={() => {

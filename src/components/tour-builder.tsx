@@ -53,7 +53,7 @@ export function FixtureTourBuilder({
       </div>
 
       <form action={buildTourFromForm} className="space-y-4">
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid gap-5 sm:grid-cols-2">
           {listings.map((listing) => (
             <ListingCardFrame
               key={listing.id}
@@ -74,7 +74,7 @@ export function FixtureTourBuilder({
             </ListingCardFrame>
           ))}
         </div>
-        <Button type="submit" data-testid="build-my-tour">
+        <Button type="submit" variant="next" data-testid="build-my-tour">
           Build My Tour
         </Button>
       </form>

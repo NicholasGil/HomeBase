@@ -5,6 +5,7 @@ import {
 } from "@/app/actions/search";
 import { ListingCardFrame } from "@/components/listing-card";
 import { MoneyFigureView } from "@/components/money-figure-view";
+import { SearchQueryPill } from "@/components/search-pill";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { CANONICAL_SEARCH_QUERY } from "../../convex/lib/propertySearch";
@@ -49,7 +50,7 @@ export function PropertySearch({
   }
 
   return (
-    <section className="space-y-6" data-testid="property-search">
+    <section className="space-y-8" data-testid="property-search">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 className={tripHeadingClassName}>
@@ -70,35 +71,22 @@ export function PropertySearch({
       </div>
 
       <form className="space-y-3" action="/search" method="get">
-        <label className="block space-y-2">
-          <span className="text-sm font-medium">What are you looking for?</span>
-          <textarea
-            name="q"
-            data-testid="search-query"
-            defaultValue={view.query}
-            rows={3}
-            className="w-full rounded-lg border bg-background px-3 py-2 text-sm"
-          />
-        </label>
-        <div className="flex flex-wrap gap-2">
-          <Button type="submit" data-testid="search-submit">
-            Search
-          </Button>
+        <SearchQueryPill name="q" defaultValue={view.query} />
+        <div className="flex flex-wrap items-center justify-between gap-2 px-1">
           <Link
             href={`/search?q=${encodeURIComponent(CANONICAL_SEARCH_QUERY)}`}
-            className={cn(buttonVariants({ variant: "outline" }))}
+            className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
             data-testid="search-canonical"
           >
             Canonical query
           </Link>
+          <p className="text-sm text-muted-foreground" data-testid="search-criteria">
+            {criteriaLine(view)}
+          </p>
         </div>
       </form>
 
-      <p className="text-sm text-muted-foreground" data-testid="search-criteria">
-        {criteriaLine(view)}
-      </p>
-
-      <ol className="space-y-3">
+      <ol className="grid gap-6 sm:grid-cols-2">
         {view.results.map((row, index) => {
           const signal = view.signals[row.id];
           return (
@@ -114,7 +102,7 @@ export function PropertySearch({
                 sampleTestId="search-sample-label"
               >
                 <p
-                  className="text-sm"
+                  className="line-clamp-2 text-sm text-muted-foreground"
                   data-testid={`search-reason-${row.id}`}
                 >
                   {row.reason}
@@ -132,7 +120,7 @@ export function PropertySearch({
                     None
                   </p>
                 )}
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 pt-1">
                   <form action={recordSearchSignalFromForm}>
                     <input type="hidden" name="propertyId" value={row.id} />
                     <input type="hidden" name="kind" value="save" />

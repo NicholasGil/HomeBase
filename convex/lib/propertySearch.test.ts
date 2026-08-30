@@ -79,8 +79,8 @@ describe("conversational property search", () => {
     expect(ranked.results.map((row) => row.id)).toEqual([
       "near-match",
       "far-match",
-      "over-price",
       "three-bed",
+      "over-price",
     ]);
     expect(ranked.results.every((row) => row.reason.length > 0)).toBe(true);
     expect(ranked.results.every((row) => row.sampleData)).toBe(true);

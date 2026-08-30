@@ -397,12 +397,13 @@ export const SEED_PLAN = {
       email: "indira.shah@example.com",
       name: "Indira Shah",
       phone: "256-555-0108",
-      stage: "closing",
+      stage: "move_in",
+      status: "closed" as const,
       exception: null,
       inspectionDueOffsetDays: null,
       underContractOffsetDays: 40,
-      closingAtOffsetDays: 21,
-      documents: ["purchase_agreement"],
+      closingAtOffsetDays: -30,
+      documents: ["purchase_agreement", "closing_disclosure", "hvac_warranty"],
       seedDraftOffer: false,
       prequalStatus: "preapproved" as const,
       property: {
@@ -422,8 +423,15 @@ export const SEED_PLAN = {
           stage: "closing",
           title: "Confirm closing appointment",
           assigneeRole: "buyer",
-          status: "open",
+          status: "done",
           blocksStage: true,
+        },
+        {
+          stage: "move_in",
+          title: "Change HVAC filter",
+          assigneeRole: "buyer",
+          status: "open",
+          blocksStage: false,
         },
       ] satisfies SeedBuyerTask[],
     },
@@ -722,6 +730,74 @@ export const SEED_VENDOR_IDS = {
 
 export const SEED_ASSIGNMENT_IDS = {
   lenderAlex: "seed-assignment-lender-alex",
+  hvacIndira: "seed-assignment-hvac-indira",
+} as const;
+
+export function seedTransactionStatus(
+  buyer: (typeof SEED_PLAN.buyers)[number],
+): "active" | "closed" {
+  return "status" in buyer && buyer.status === "closed" ? "closed" : "active";
+}
+
+export const SEED_HOMEOWNERSHIP = {
+  closedClerkId: SEED_CLERK_IDS.buyerH,
+  asOf: SEED_OFFER_AS_OF,
+  maintenance: [
+    {
+      title: "Replace HVAC filter",
+      category: "hvac",
+      cadenceDays: 90,
+      nextDueOffsetDays: 12,
+      status: "upcoming" as const,
+      notes: "16x25x1. Seed upkeep item.",
+    },
+    {
+      title: "Service HVAC",
+      category: "hvac",
+      cadenceDays: 365,
+      nextDueOffsetDays: 40,
+      status: "upcoming" as const,
+      notes: "Annual tune-up after close.",
+    },
+    {
+      title: "Clean gutters",
+      category: "exterior",
+      cadenceDays: 180,
+      nextDueOffsetDays: -3,
+      status: "due" as const,
+      notes: "Twice a year.",
+    },
+  ],
+  warranties: [
+    {
+      title: "HVAC manufacturer warranty",
+      provider: "Bluff City Air",
+      coverage: "Compressor and coil. Seed record.",
+      expiresOffsetDays: 700,
+      documentType: "hvac_warranty",
+    },
+    {
+      title: "Closing package retention",
+      provider: "Lookout Realty",
+      coverage: "App-owned closing file. Not a client-side dump.",
+      expiresOffsetDays: 2555,
+      documentType: "closing_disclosure",
+    },
+  ],
+  values: {
+    issued: {
+      amountCents: 40500000,
+      currency: "USD" as const,
+      provenance: "title_issued" as const,
+      label: "Purchase price at close",
+    },
+    estimated: {
+      amountCents: 41200000,
+      currency: "USD" as const,
+      provenance: "ai_estimate" as const,
+      label: "Modeled market value",
+    },
+  },
 } as const;
 
 export const SEED_VENDORS = [

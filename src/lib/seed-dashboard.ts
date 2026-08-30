@@ -1,9 +1,15 @@
 import type { BuyerDashboardView } from "../../convex/lib/dashboardView";
 import { summarizeBuyerDashboard } from "../../convex/lib/dashboardView";
-import { SEED_CLERK_IDS, SEED_PLAN } from "../../convex/seedPlan";
+import {
+  SEED_CLERK_IDS,
+  SEED_PLAN,
+  seedTransactionStatus,
+} from "../../convex/seedPlan";
 
 export type TestBuyerClerkId =
-  (typeof SEED_CLERK_IDS)["buyerA"] | (typeof SEED_CLERK_IDS)["buyerB"];
+  | (typeof SEED_CLERK_IDS)["buyerA"]
+  | (typeof SEED_CLERK_IDS)["buyerB"]
+  | (typeof SEED_CLERK_IDS)["buyerH"];
 
 const BUYER_TASKS = {
   [SEED_CLERK_IDS.buyerA]: [
@@ -52,10 +58,32 @@ const BUYER_TASKS = {
       blocksStage: false,
     },
   ],
+  [SEED_CLERK_IDS.buyerH]: [
+    {
+      title: "Confirm closing appointment",
+      status: "done" as const,
+      assigneeRole: "buyer" as const,
+      stage: "closing",
+      blocksStage: true,
+    },
+    {
+      title: "Change HVAC filter",
+      status: "open" as const,
+      assigneeRole: "buyer" as const,
+      stage: "move_in",
+      blocksStage: false,
+    },
+  ],
 } as const;
 
 export function seedTransactionIdForBuyer(clerkId: TestBuyerClerkId) {
-  return clerkId === SEED_CLERK_IDS.buyerA ? "seed:buyer-a" : "seed:buyer-b";
+  if (clerkId === SEED_CLERK_IDS.buyerA) {
+    return "seed:buyer-a";
+  }
+  if (clerkId === SEED_CLERK_IDS.buyerB) {
+    return "seed:buyer-b";
+  }
+  return "seed:buyer-h";
 }
 
 export function seedDashboardForBuyer(
@@ -71,7 +99,7 @@ export function seedDashboardForBuyer(
     transactionId: seedTransactionIdForBuyer(clerkId),
     stage: buyer.stage,
     stageLabel: current?.label ?? buyer.stage,
-    status: "active",
+    status: seedTransactionStatus(buyer),
     owedToday: {
       amountCents: buyer.owedToday.amountCents,
       currency: buyer.owedToday.currency,

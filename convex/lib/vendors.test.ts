@@ -5,6 +5,7 @@ import {
   categoriesForStage,
   isAssignmentLive,
   isLenderCategory,
+  postCloseVendorCategories,
 } from "./vendors";
 
 const flagsOff = {
@@ -19,6 +20,8 @@ describe("vendor stage surfacing", () => {
     expect(categoriesForStage("inspection")).toContain("inspectors");
     expect(categoriesForStage("financing")).toEqual(["lenders"]);
     expect(categoriesForStage("showings")).toEqual([]);
+    expect(postCloseVendorCategories()).toContain("hvac");
+    expect(postCloseVendorCategories()).toContain("locksmiths");
   });
 
   it("treats lender and lenders as the same directory family", () => {

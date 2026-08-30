@@ -2,6 +2,7 @@ import { categoriesForStage } from "../../convex/lib/vendors";
 import {
   SEED_ASSIGNMENT_IDS,
   SEED_CLERK_IDS,
+  SEED_PLAN,
 } from "../../convex/seedPlan";
 import {
   seedLenderAssignment,
@@ -72,7 +73,8 @@ function buyerStage(session: TestSession) {
   if (session.role !== "buyer") {
     return null;
   }
-  return session.clerkId === SEED_CLERK_IDS.buyerA ? "inspection" : "showings";
+  const buyer = SEED_PLAN.buyers.find((row) => row.clerkId === session.clerkId);
+  return buyer?.stage ?? null;
 }
 
 export function loadSeedDirectoryForViewer(

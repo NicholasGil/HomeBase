@@ -11,6 +11,7 @@ export const TEST_SESSION_COOKIE = "hb_test_identity";
 export const SEED_TRANSACTION_IDS = {
   [SEED_CLERK_IDS.buyerA]: "seed:buyer-a",
   [SEED_CLERK_IDS.buyerB]: "seed:buyer-b",
+  [SEED_CLERK_IDS.buyerH]: "seed:buyer-h",
 } as const;
 
 export type { TestBuyerClerkId };
@@ -41,7 +42,9 @@ export type TestSession =
 
 export function isTestBuyerClerkId(value: string): value is TestBuyerClerkId {
   return (
-    value === SEED_CLERK_IDS.buyerA || value === SEED_CLERK_IDS.buyerB
+    value === SEED_CLERK_IDS.buyerA ||
+    value === SEED_CLERK_IDS.buyerB ||
+    value === SEED_CLERK_IDS.buyerH
   );
 }
 

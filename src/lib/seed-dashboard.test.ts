@@ -16,6 +16,14 @@ describe("seed dashboard", () => {
     expect(view.blockingTasks[0]?.title).toBe("Schedule inspection");
   });
 
+  it("marks Indira Shah closed on move-in", () => {
+    const view = seedDashboardForBuyer(SEED_CLERK_IDS.buyerH);
+    expect(view.transactionId).toBe("seed:buyer-h");
+    expect(view.where.key).toBe("move_in");
+    expect(view.where.status).toBe("closed");
+    expect(view.done).toContain("Confirm closing appointment");
+  });
+
   it("keeps Blair Chen on a distinct transaction", () => {
     const alex = seedDashboardForBuyer(SEED_CLERK_IDS.buyerA);
     const blair = seedDashboardForBuyer(SEED_CLERK_IDS.buyerB);

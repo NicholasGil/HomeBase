@@ -165,6 +165,29 @@ describe("transaction isolation", () => {
     expect(alex.results[0]?.id).not.toBe(first.id);
   });
 
+  it("buyer A cannot load the closed buyer's homeownership hub", async () => {
+    const t = convexTest(schema, modules);
+    await t.mutation(internal.seed.run, {});
+    const asBuyerA = t.withIdentity({ subject: "clerk_buyer_a" });
+    const asBuyerH = t.withIdentity({ subject: "clerk_buyer_h" });
+    const closed = await asBuyerH.query(api.transactions.listMine, {});
+    const closedId = closed[0]?._id;
+    if (closedId === undefined) {
+      throw new Error("closed transaction missing");
+    }
+    await expect(
+      asBuyerA.query(api.homeownership.getHub, { transactionId: closedId }),
+    ).rejects.toThrow("FORBIDDEN");
+    const own = await asBuyerA.query(api.transactions.listMine, {});
+    const ownId = own[0]?._id;
+    if (ownId === undefined) {
+      throw new Error("alex transaction missing");
+    }
+    await expect(
+      asBuyerA.query(api.homeownership.getHub, { transactionId: ownId }),
+    ).rejects.toThrow("FORBIDDEN");
+  });
+
   it("buyer cannot load the agent command center", async () => {
     const t = convexTest(schema, modules);
     await t.mutation(internal.seed.run, {});

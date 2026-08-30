@@ -37,6 +37,9 @@ export function AppShell({
             <Link href="/identity" className={cn(buttonVariants({ variant: "ghost" }))}>
               Identity
             </Link>
+            <Link href="/homeownership/seed:buyer-h" className={cn(buttonVariants({ variant: "ghost" }))}>
+              Hub
+            </Link>
             <Link href="/vendor" className={cn(buttonVariants({ variant: "ghost" }))}>
               Vendor portal
             </Link>

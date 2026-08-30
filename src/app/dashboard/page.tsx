@@ -20,7 +20,13 @@ import {
   mustFailClosed,
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
+import { HomeownershipHubView } from "@/components/homeownership-hub";
+import {
+  loadFixtureHub,
+  reengageFixtureVendorFromForm,
+} from "@/app/actions/homeownership";
 import { seedDashboardForBuyer } from "@/lib/seed-dashboard";
+import { fixtureBuyerIsClosed } from "@/lib/homeownership-access";
 
 export const dynamic = "force-dynamic";
 
@@ -54,9 +60,15 @@ export default async function DashboardPage() {
     if (session.role === "agent") {
       redirect("/agent");
     }
+    if (session.role !== "buyer") {
+      throw new Error("fixture mode requires a buyer session");
+    }
     const tours = await loadFixtureTours();
     const offers = await loadFixtureOffers();
     const explainer = await loadFixtureExplainer();
+    const hub = fixtureBuyerIsClosed(session)
+      ? await loadFixtureHub(session.transactionId)
+      : null;
     return (
       <AppShell>
         <div className="space-y-10">
@@ -65,6 +77,12 @@ export default async function DashboardPage() {
             buyerName={session.name}
             eyebrow="Fixture session · not Clerk"
           />
+          {hub?.ok ? (
+            <HomeownershipHubView
+              view={hub.view}
+              reengageAction={reengageFixtureVendorFromForm}
+            />
+          ) : null}
           <FixtureTourBuilder
             tours={tours.tours.ok ? tours.tours.tours : []}
           />

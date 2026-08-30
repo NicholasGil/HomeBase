@@ -3,7 +3,7 @@ import {
   FINANCING_DOCUMENT_TYPES,
   type CommandCenterView,
 } from "../../convex/lib/commandCenter";
-import { SEED_PLAN } from "../../convex/seedPlan";
+import { SEED_PLAN, seedTransactionStatus } from "../../convex/seedPlan";
 import { completeCommandCenterPriority } from "../../lib/llm";
 
 const DAY_MS = 86_400_000;
@@ -26,7 +26,7 @@ export function seedCommandCenter(now = Date.now()): CommandCenterView {
         stage: buyer.stage,
         stageLabel: stage?.label ?? buyer.stage,
         stageOrder: stage?.order ?? 0,
-        status: "active",
+        status: seedTransactionStatus(buyer),
         documentTypes: buyer.documents,
         financingRequired,
         inspectionDueAt:

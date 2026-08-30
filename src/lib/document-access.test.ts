@@ -127,6 +127,34 @@ describe("fixture document access", () => {
     ).toEqual({ ok: false, reason: "FORBIDDEN" });
   });
 
+  it("keeps the closed-file closing disclosure off another buyer and the vendor", () => {
+    const indira = {
+      clerkId: SEED_CLERK_IDS.buyerH,
+      role: "buyer" as const,
+      transactionId: "seed:buyer-h",
+    };
+    const opened = resolveFixtureDocument({
+      viewer: indira,
+      documentId: SEED_DOCUMENT_IDS.closingDisclosure,
+      grants: [],
+    });
+    expect(opened.ok).toBe(true);
+    expect(
+      resolveFixtureDocument({
+        viewer: alex,
+        documentId: SEED_DOCUMENT_IDS.closingDisclosure,
+        grants: [],
+      }),
+    ).toEqual({ ok: false, reason: "FORBIDDEN" });
+    expect(
+      resolveFixtureDocument({
+        viewer: jordan,
+        documentId: SEED_DOCUMENT_IDS.closingDisclosure,
+        grants: [],
+      }),
+    ).toEqual({ ok: false, reason: "FORBIDDEN" });
+  });
+
   it("denies an unauthenticated open", () => {
     expect(
       resolveFixtureDocument({

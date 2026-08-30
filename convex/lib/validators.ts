@@ -230,6 +230,24 @@ export const vendorWorkProductValidator = v.union(
   v.literal("invoice"),
 );
 
+export const MAINTENANCE_STATUSES = ["upcoming", "due", "done"] as const;
+
+export const maintenanceStatusValidator = v.union(
+  v.literal("upcoming"),
+  v.literal("due"),
+  v.literal("done"),
+);
+
+export const POST_CLOSE_VENDOR_CATEGORIES = [
+  "hvac",
+  "plumbing",
+  "electrical",
+  "roofing",
+  "pest",
+  "locksmiths",
+  "cleaners",
+] as const;
+
 export const defaultTaskValidator = v.object({
   title: v.string(),
   assigneeRole: roleValidator,

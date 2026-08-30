@@ -4,12 +4,15 @@ import { appendAuditLog } from "./lib/audit";
 import { DEFAULT_FEATURE_FLAGS } from "./lib/validators";
 import {
   SEED_CONCIERGE,
+  SEED_HOMEOWNERSHIP,
   SEED_OFFER_AS_OF,
   SEED_OFFER_MARKET,
   SEED_PLAN,
   SEED_SEARCH,
   SEED_TOUR,
+  SEED_VENDOR_IDS,
   SEED_VENDORS,
+  seedTransactionStatus,
 } from "./seedPlan";
 
 const DAY_MS = 86_400_000;
@@ -198,7 +201,7 @@ export const run = internalMutation({
         agentId,
         propertyId,
         stage: buyer.stage,
-        status: "active",
+        status: seedTransactionStatus(buyer),
         keyDates: keyDatesFor(buyer, now),
         owedToday: {
           amountCents: buyer.owedToday.amountCents,
@@ -376,6 +379,65 @@ export const run = internalMutation({
             status: "draft",
           });
         }
+      }
+
+      if (buyer.clerkId === SEED_HOMEOWNERSHIP.closedClerkId) {
+        const docs = await ctx.db
+          .query("documents")
+          .withIndex("by_transaction", (q) =>
+            q.eq("transactionId", transactionId),
+          )
+          .collect();
+        for (const item of SEED_HOMEOWNERSHIP.maintenance) {
+          await ctx.db.insert("maintenanceItems", {
+            transactionId,
+            propertyId,
+            title: item.title,
+            category: item.category,
+            cadenceDays: item.cadenceDays,
+            nextDueAt: now + item.nextDueOffsetDays * DAY_MS,
+            status: item.status,
+            notes: item.notes,
+          });
+        }
+        for (const warranty of SEED_HOMEOWNERSHIP.warranties) {
+          const document = docs.find((row) => row.type === warranty.documentType);
+          await ctx.db.insert("warranties", {
+            transactionId,
+            documentId: document?._id,
+            title: warranty.title,
+            provider: warranty.provider,
+            coverage: warranty.coverage,
+            expiresAt: now + warranty.expiresOffsetDays * DAY_MS,
+          });
+        }
+        await ctx.db.insert("propertyValueSnapshots", {
+          transactionId,
+          propertyId,
+          figure: {
+            ...SEED_HOMEOWNERSHIP.values.issued,
+            asOf: SEED_HOMEOWNERSHIP.asOf,
+          },
+        });
+        await ctx.db.insert("propertyValueSnapshots", {
+          transactionId,
+          propertyId,
+          figure: {
+            ...SEED_HOMEOWNERSHIP.values.estimated,
+            asOf: SEED_HOMEOWNERSHIP.asOf,
+          },
+        });
+        const hvacVendorId = vendorIdsBySeed[SEED_VENDOR_IDS.hvac];
+        if (hvacVendorId === undefined) {
+          throw new Error("seed hvac vendor missing");
+        }
+        await ctx.db.insert("vendorAssignments", {
+          vendorId: hvacVendorId,
+          transactionId,
+          scope: "hvac",
+          expiresAt: now + 365 * DAY_MS,
+          status: "complete",
+        });
       }
 
       await appendAuditLog(ctx, {

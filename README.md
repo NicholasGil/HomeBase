@@ -6,7 +6,9 @@ Buyer-side operating system for one brokerage and one market. A buyer should ope
 
 ## Stack
 
-Next.js 16 App Router, TypeScript strict, Tailwind, shadcn/ui. Convex and Clerk land in the next two P0 slices.
+Next.js 16 App Router, TypeScript strict, Tailwind, shadcn/ui, Convex. Clerk lands in the next P0 slice.
+
+Convex functions live in `convex/`. `npx convex codegen` writes `convex/_generated`. Seed and permission tests run in `convex-test` without a cloud project.
 
 ## Scripts
 

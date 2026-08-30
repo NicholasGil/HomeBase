@@ -45,6 +45,16 @@ describe("transaction isolation", () => {
     expect(ownDashboard?.transactionId).toBe(buyerATransaction._id);
     expect(ownDashboard?.transactionId).not.toBe(buyerBTransaction._id);
     expect(ownDashboard?.where.key).toBe("inspection");
+
+    await expect(
+      asBuyerA.query(api.vendors.listForStage, {
+        transactionId: buyerBTransaction._id,
+      }),
+    ).rejects.toThrow("FORBIDDEN");
+    const ownVendors = await asBuyerA.query(api.vendors.listForStage, {
+      transactionId: buyerATransaction._id,
+    });
+    expect(ownVendors.vendors.map((row) => row.name)).toContain("Riley Brooks");
   });
 
   it("buyer A cannot load buyer B's tour by id", async () => {

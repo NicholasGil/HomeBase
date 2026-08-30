@@ -55,6 +55,12 @@ describe("seed", () => {
       expect(table in schema.tables).toBe(true);
     }
 
+    const vendors = await t.run(async (ctx) => ctx.db.query("vendors").collect());
+    expect(vendors.length).toBeGreaterThanOrEqual(14);
+    expect(vendors.every((row) => row.compensationModel === "none")).toBe(true);
+    expect(vendors.some((row) => row.category === "inspectors")).toBe(true);
+    expect(vendors.some((row) => row.category === "lenders")).toBe(true);
+
     const asAlex = t.withIdentity({ subject: "clerk_buyer_a" });
     const asBlair = t.withIdentity({ subject: "clerk_buyer_b" });
     const alex = await asAlex.query(api.transactions.listMine, {});

@@ -11,6 +11,7 @@ import { FixtureVault } from "@/components/document-vault";
 import { ContractExplainer } from "@/components/contract-explainer";
 import { FixtureOfferCenter } from "@/components/offer-center";
 import { FixtureTourBuilder } from "@/components/tour-builder";
+import { FixtureVendorDirectory } from "@/components/fixture-vendor-directory";
 import { loadFixtureExplainer } from "@/app/actions/explainer";
 import { loadFixtureOffers } from "@/app/actions/offers";
 import { loadFixtureTours } from "@/app/actions/tours";
@@ -76,6 +77,7 @@ export default async function DashboardPage() {
             sections={explainer.sections.ok ? explainer.sections.sections : []}
             thread={explainer.thread}
           />
+          <FixtureVendorDirectory />
           <FixtureVault />
           <ConciergeChat />
         </div>

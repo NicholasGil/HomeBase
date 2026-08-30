@@ -1,5 +1,72 @@
-import { RoleHome } from "@/components/role-home";
+import { loadFixtureVendorCookies } from "@/app/actions/vendors";
+import { getTestSession } from "@/app/actions/test-session";
+import { AppShell } from "@/components/app-shell";
+import { FixtureLoginPrompt } from "@/components/fixture-login-prompt";
+import { LiveVendorPortal } from "@/components/live-vendor-portal";
+import { QueryErrorBoundary } from "@/components/query-error-boundary";
+import {
+  VendorPortalDenied,
+  VendorPortalView,
+} from "@/components/vendor-portal";
+import {
+  dashboardRenderMode,
+  mustFailClosed,
+  ProductionAuthMisconfiguredError,
+} from "@/lib/auth-config";
+import { loadSeedPortalForViewer } from "@/lib/vendor-access";
 
-export default function VendorPage() {
-  return <RoleHome role="vendor" phase="P5" />;
+export const dynamic = "force-dynamic";
+
+export default async function VendorPage() {
+  if (mustFailClosed()) {
+    throw new ProductionAuthMisconfiguredError();
+  }
+
+  const session = await getTestSession();
+  const mode = dashboardRenderMode(process.env, session);
+
+  if (mode === "unavailable") {
+    throw new ProductionAuthMisconfiguredError();
+  }
+
+  if (mode === "login") {
+    return (
+      <AppShell>
+        <FixtureLoginPrompt />
+      </AppShell>
+    );
+  }
+
+  if (mode === "fixture") {
+    const cookies = await loadFixtureVendorCookies();
+    const loaded = loadSeedPortalForViewer(session, {
+      expired: cookies.expired,
+      state: cookies.state,
+    });
+    if (!loaded.ok) {
+      return (
+        <AppShell>
+          <VendorPortalDenied />
+        </AppShell>
+      );
+    }
+    return (
+      <AppShell>
+        <VendorPortalView
+          vendorName={session?.role === "vendor" ? session.name : "Vendor"}
+          assignments={loaded.assignments}
+          state={loaded.state}
+          expired={loaded.expired}
+        />
+      </AppShell>
+    );
+  }
+
+  return (
+    <AppShell>
+      <QueryErrorBoundary fallback={<VendorPortalDenied />}>
+        <LiveVendorPortal />
+      </QueryErrorBoundary>
+    </AppShell>
+  );
 }

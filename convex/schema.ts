@@ -261,9 +261,17 @@ export default defineSchema({
       email: v.optional(v.string()),
       phone: v.optional(v.string()),
     }),
-    // Pinned to none while FLAG_VENDOR_COMP is off (DESIGN.md M10).
+    notes: v.optional(v.string()),
+    credentials: v.optional(v.string()),
+    // Portal identity. Directory-only vendors omit this.
+    userId: v.optional(v.id("users")),
+    // Stored value is pinned to none. Writes of any other model are
+    // rejected in vendors.ts while FLAG_VENDOR_COMP is off (DESIGN.md M10).
     compensationModel: v.literal("none"),
-  }).index("by_org", ["orgId"]),
+  })
+    .index("by_org", ["orgId"])
+    .index("by_user", ["userId"])
+    .index("by_org_category", ["orgId", "category"]),
 
   vendorAssignments: defineTable({
     vendorId: v.id("vendors"),
@@ -278,6 +286,32 @@ export default defineSchema({
     ),
   })
     .index("by_vendor", ["vendorId"])
+    .index("by_transaction", ["transactionId"]),
+
+  vendorMessages: defineTable({
+    assignmentId: v.id("vendorAssignments"),
+    transactionId: v.id("transactions"),
+    authorId: v.id("users"),
+    body: v.string(),
+    at: v.number(),
+  })
+    .index("by_assignment", ["assignmentId"])
+    .index("by_transaction", ["transactionId"]),
+
+  vendorDocumentRequests: defineTable({
+    assignmentId: v.id("vendorAssignments"),
+    transactionId: v.id("transactions"),
+    requestedBy: v.id("users"),
+    documentType: v.string(),
+    note: v.optional(v.string()),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("fulfilled"),
+      v.literal("canceled"),
+    ),
+    at: v.number(),
+  })
+    .index("by_assignment", ["assignmentId"])
     .index("by_transaction", ["transactionId"]),
 
   conciergeThreads: defineTable({

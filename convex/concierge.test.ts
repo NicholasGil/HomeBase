@@ -33,6 +33,34 @@ function expectNoFindingsText(value: unknown) {
   expect(serialized).not.toContain("structural defects");
 }
 
+function appendTurnArgs(
+  transactionId: Awaited<ReturnType<typeof alexAndBlairIds>>["alexId"],
+) {
+  return {
+    transactionId,
+    question: "what happens next",
+    answer: "Next is Schedule inspection.",
+    kind: "answer" as const,
+  };
+}
+
+type ConciergeCaller =
+  | ReturnType<typeof convexTest>
+  | ReturnType<ReturnType<typeof convexTest>["withIdentity"]>;
+
+async function expectDeniedOnThreadAndTurn(
+  caller: ConciergeCaller,
+  transactionId: Awaited<ReturnType<typeof alexAndBlairIds>>["alexId"],
+  reason: "FORBIDDEN" | "UNAUTHENTICATED",
+) {
+  await expect(
+    caller.query(api.concierge.listThread, { transactionId }),
+  ).rejects.toThrow(reason);
+  await expect(
+    caller.mutation(api.concierge.appendTurn, appendTurnArgs(transactionId)),
+  ).rejects.toThrow(reason);
+}
+
 async function expectNoFindingsViaConcierge(
   identity: ReturnType<ReturnType<typeof convexTest>["withIdentity"]>,
   transactionId: Awaited<ReturnType<typeof alexAndBlairIds>>["alexId"],
@@ -40,9 +68,7 @@ async function expectNoFindingsViaConcierge(
   await expect(
     identity.query(api.concierge.gatherContext, { transactionId }),
   ).rejects.toThrow("FORBIDDEN");
-  await expect(
-    identity.query(api.concierge.listThread, { transactionId }),
-  ).rejects.toThrow("FORBIDDEN");
+  await expectDeniedOnThreadAndTurn(identity, transactionId, "FORBIDDEN");
   await expect(
     identity.mutation(api.concierge.ask, {
       transactionId,
@@ -101,6 +127,13 @@ describe("concierge scope", () => {
         .withIdentity({ subject: "clerk_lender" })
         .query(api.concierge.gatherContext, { transactionId: alexId }),
     ).rejects.toThrow("FORBIDDEN");
+    await expectDeniedOnThreadAndTurn(asAlex, blairId, "FORBIDDEN");
+    await expectDeniedOnThreadAndTurn(t, alexId, "UNAUTHENTICATED");
+    await expectDeniedOnThreadAndTurn(
+      t.withIdentity({ subject: "clerk_lender" }),
+      alexId,
+      "FORBIDDEN",
+    );
   });
 
   it("does not return inspection findings text without document access", async () => {
@@ -181,27 +214,18 @@ describe("concierge scope", () => {
     ).toBeGreaterThan(0);
   });
 
-  it("denies vendor and stranger on appendTurn", async () => {
+  it("denies stranger and cross-client on listThread and appendTurn", async () => {
     const t = await seeded();
-    const { alexId } = await alexAndBlairIds(t);
-    const turn = {
-      transactionId: alexId,
-      question: "what happens next",
-      answer: "Next is Schedule inspection.",
-      kind: "answer" as const,
-    };
-    await expect(
-      t
-        .withIdentity({ subject: "clerk_lender" })
-        .mutation(api.concierge.appendTurn, turn),
-    ).rejects.toThrow("FORBIDDEN");
-    await expect(
-      t
-        .withIdentity({ subject: "clerk_stranger" })
-        .mutation(api.concierge.appendTurn, turn),
-    ).rejects.toThrow("FORBIDDEN");
-    await expect(t.mutation(api.concierge.appendTurn, turn)).rejects.toThrow(
-      "UNAUTHENTICATED",
-    );
+    const { asAlex, asBlair, alexId, blairId } = await alexAndBlairIds(t);
+    const asStranger = t.withIdentity({ subject: "clerk_stranger" });
+    const asVendor = t.withIdentity({ subject: "clerk_lender" });
+
+    await expectDeniedOnThreadAndTurn(asAlex, blairId, "FORBIDDEN");
+    await expectDeniedOnThreadAndTurn(asBlair, alexId, "FORBIDDEN");
+    await expectDeniedOnThreadAndTurn(asStranger, alexId, "FORBIDDEN");
+    await expectDeniedOnThreadAndTurn(asStranger, blairId, "FORBIDDEN");
+    await expectDeniedOnThreadAndTurn(asVendor, alexId, "FORBIDDEN");
+    await expectDeniedOnThreadAndTurn(t, alexId, "UNAUTHENTICATED");
+    await expectDeniedOnThreadAndTurn(t, blairId, "UNAUTHENTICATED");
   });
 });

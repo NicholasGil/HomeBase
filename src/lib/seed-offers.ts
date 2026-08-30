@@ -8,7 +8,7 @@ import {
 import { SEED_TRANSACTION_IDS } from "@/lib/test-session";
 
 export const SEED_OFFER_IDS = {
-  alexSubmitted: "seed-offer-alex",
+  alexDraft: "seed-offer-alex",
 } as const;
 
 export function marketForBuyer(clerkId: string) {
@@ -31,12 +31,12 @@ export function competingInventoryCount() {
 
 export function alexSeedOffer() {
   return {
-    _id: SEED_OFFER_IDS.alexSubmitted,
+    _id: SEED_OFFER_IDS.alexDraft,
     transactionId: SEED_TRANSACTION_IDS[SEED_CLERK_IDS.buyerA],
     ownerClerkId: SEED_CLERK_IDS.buyerA,
-    status: "submitted" as const,
+    status: "draft" as const,
     reviewedByLicenseeId: null,
-    submittedAt: SEED_OFFER_AS_OF,
+    submittedAt: null,
     terms: {
       price: {
         amountCents: SEED_CONCIERGE.counterOfferCents,

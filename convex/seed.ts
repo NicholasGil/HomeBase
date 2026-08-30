@@ -221,7 +221,7 @@ export const run = internalMutation({
               label: "Seller counter, up from $420,000",
             },
           },
-          status: "submitted",
+          status: "draft",
         });
         const vendorId = await ctx.db.insert("vendors", {
           orgId,

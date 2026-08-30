@@ -75,7 +75,8 @@ describe("fixture offer access", () => {
       throw new Error(alexLoaded.reason);
     }
     expect(alexLoaded.center.offer?.reviewedByLicenseeId).toBeNull();
-    expect(alexLoaded.center.offer?.status).toBe("submitted");
+    expect(alexLoaded.center.offer?.status).toBe("draft");
+    expect(alexLoaded.center.offer?.gate.reason).toBe(LICENSEE_REVIEW_REQUIRED);
     expect(
       submitFixtureOffer({ viewer: alex, state: { drafts: [] } }).ok,
     ).toBe(false);

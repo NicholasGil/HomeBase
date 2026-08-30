@@ -228,7 +228,7 @@ export function OfferCenterViewPanel({
             {gateReason === "LICENSEE_REVIEW_REQUIRED"
               ? "A licensee must review this offer before it can leave draft."
               : gateReason === "already_submitted"
-                ? "This offer is already submitted. The seed file still has no licensee review."
+                ? "This offer is already submitted."
                 : "Ready for licensee-approved submit."}
           </p>
           {submitControl ?? (

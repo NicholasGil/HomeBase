@@ -74,11 +74,15 @@ describe("offer center", () => {
       return first;
     });
     expect(seededOffer.reviewedByLicenseeId).toBeUndefined();
-    expect(seededOffer.status).toBe("submitted");
+    expect(seededOffer.status).toBe("draft");
 
     const alexCenter = await asAlex.query(api.offers.getMine, {});
     expect(alexCenter?.offer?.reviewedByLicenseeId).toBeNull();
-    expect(alexCenter?.offer?.gate.reason).toBe("already_submitted");
+    expect(alexCenter?.offer?.status).toBe("draft");
+    expect(alexCenter?.offer?.gate.reason).toBe("LICENSEE_REVIEW_REQUIRED");
+    await expect(
+      asAlex.mutation(api.offers.submit, { offerId: seededOffer._id }),
+    ).rejects.toThrow("LICENSEE_REVIEW_REQUIRED");
 
     const transactionId = await blairTransactionId(t);
     const asBlair = t.withIdentity({ subject: "clerk_buyer_b" });

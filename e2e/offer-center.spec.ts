@@ -38,6 +38,9 @@ test("another buyer cannot submit Blair's draft", async ({ page }) => {
   await page.goto("/offers");
   await expect(page.getByText("Signed in as Alex Rivera")).toBeVisible();
   await expect(page.getByTestId("offer-center")).toBeVisible();
-  await expect(page.getByTestId("offer-status")).toContainText("submitted");
-  await expect(page.getByTestId("licensee-gate")).toContainText("submitted");
+  await expect(page.getByTestId("offer-status")).toContainText("draft");
+  await expect(page.getByTestId("licensee-gate")).toHaveAttribute(
+    "data-gate",
+    "LICENSEE_REVIEW_REQUIRED",
+  );
 });

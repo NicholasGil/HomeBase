@@ -45,7 +45,7 @@ export function ListingCardFrame({
 }: {
   addressLine: string;
   cityState: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   testId: string;
   propertyId?: string;
   rank?: number;

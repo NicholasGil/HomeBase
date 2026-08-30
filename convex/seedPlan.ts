@@ -155,3 +155,11 @@ export const SEED_PLAN = {
 } as const;
 
 export type SeedBuyer = (typeof SEED_PLAN.buyers)[number];
+
+export const SEED_CONCIERGE = {
+  inspectionStartsAt: Date.UTC(2026, 8, 8, 15, 0, 0),
+  showingStartsAt: Date.UTC(2026, 8, 5, 19, 0, 0),
+  originalOfferCents: 42000000,
+  counterOfferCents: 43000000,
+  lenderName: "Jordan Hale",
+} as const;

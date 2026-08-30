@@ -1,7 +1,7 @@
 import { internalMutation } from "./_generated/server";
 import { appendAuditLog } from "./lib/audit";
 import { DEFAULT_FEATURE_FLAGS } from "./lib/validators";
-import { SEED_PLAN } from "./seedPlan";
+import { SEED_CONCIERGE, SEED_PLAN } from "./seedPlan";
 
 export const run = internalMutation({
   args: {},
@@ -167,6 +167,47 @@ export const run = internalMutation({
             "Roof and HVAC need service. No structural defects noted.",
           status: "summarized",
           uploadedBy: agentId,
+        });
+        await ctx.db.insert("appointments", {
+          transactionId,
+          type: "inspection",
+          startsAt: SEED_CONCIERGE.inspectionStartsAt,
+          endsAt: SEED_CONCIERGE.inspectionStartsAt + 2 * 60 * 60 * 1000,
+          participants: [userId, agentId],
+        });
+        await ctx.db.insert("appointments", {
+          transactionId,
+          type: "showing",
+          startsAt: SEED_CONCIERGE.showingStartsAt,
+          endsAt: SEED_CONCIERGE.showingStartsAt + 45 * 60 * 1000,
+          participants: [userId, agentId],
+        });
+        await ctx.db.insert("offers", {
+          transactionId,
+          terms: {
+            price: {
+              amountCents: SEED_CONCIERGE.counterOfferCents,
+              currency: "USD",
+              provenance: "user_entered",
+              asOf: now,
+              label: "Seller counter, up from $420,000",
+            },
+          },
+          status: "submitted",
+        });
+        const vendorId = await ctx.db.insert("vendors", {
+          orgId,
+          category: "lender",
+          name: SEED_CONCIERGE.lenderName,
+          contact: { email: SEED_PLAN.lender.email },
+          compensationModel: "none",
+        });
+        await ctx.db.insert("vendorAssignments", {
+          vendorId,
+          transactionId,
+          scope: "preapproval",
+          expiresAt: now + 30 * 24 * 60 * 60 * 1000,
+          status: "active",
         });
       } else {
         await ctx.db.insert("tasks", {

@@ -21,6 +21,8 @@ const READ_FUNCTIONS = [
   "documents.listForTransaction",
   "documents.missingForStage",
   "documents.listGrants",
+  "concierge.gatherContext",
+  "concierge.listThread",
 ] as const;
 
 async function seeded() {
@@ -57,7 +59,7 @@ async function buyerATransactionId(t: ReturnType<typeof convexTest>) {
 
 describe("permission tests for data-reading functions", () => {
   it("lists every public read function so coverage cannot drift silently", () => {
-    expect(READ_FUNCTIONS).toHaveLength(15);
+    expect(READ_FUNCTIONS).toHaveLength(17);
   });
 
   it.each([
@@ -108,6 +110,14 @@ describe("permission tests for data-reading functions", () => {
         throw new Error("seed documents missing");
       }
       return t.query(api.documents.listGrants, { documentId: first._id });
+    }],
+    ["concierge.gatherContext", async (t: ReturnType<typeof convexTest>) => {
+      const id = await buyerATransactionId(t);
+      return t.query(api.concierge.gatherContext, { transactionId: id });
+    }],
+    ["concierge.listThread", async (t: ReturnType<typeof convexTest>) => {
+      const id = await buyerATransactionId(t);
+      return t.query(api.concierge.listThread, { transactionId: id });
     }],
   ] as const)("%s denies an unauthenticated caller", async (_name, call) => {
     const t = await seeded();
@@ -165,6 +175,12 @@ describe("permission tests for data-reading functions", () => {
     await expect(
       asVendor.query(api.documents.missingForStage, { transactionId: id }),
     ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      asVendor.query(api.concierge.gatherContext, { transactionId: id }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      asVendor.query(api.concierge.listThread, { transactionId: id }),
+    ).rejects.toThrow("FORBIDDEN");
   });
 
   it("denies a signed-in user with no membership", async () => {
@@ -206,6 +222,10 @@ describe("permission tests for data-reading functions", () => {
     }
     await expect(
       asStranger.query(api.documents.listGrants, { documentId: first._id }),
+    ).rejects.toThrow("FORBIDDEN");
+    const id = await buyerATransactionId(t);
+    await expect(
+      asStranger.query(api.concierge.gatherContext, { transactionId: id }),
     ).rejects.toThrow("FORBIDDEN");
   });
 

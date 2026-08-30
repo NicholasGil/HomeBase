@@ -10,7 +10,7 @@ export const PROTECTED_PATH_PREFIXES = [
   "/vendor",
 ] as const;
 
-export type DashboardRenderMode = "live" | "seed" | "unavailable";
+export type DashboardRenderMode = "live" | "fixture" | "login" | "unavailable";
 
 export function isProductionDeploy(env: AuthEnv = process.env) {
   return env.VERCEL_ENV === "production";
@@ -73,6 +73,7 @@ export function unauthenticatedAuthAction(
 
 export function dashboardRenderMode(
   env: AuthEnv = process.env,
+  session: { clerkId: string } | null = null,
 ): DashboardRenderMode {
   if (isAuthConfigured(env)) {
     return "live";
@@ -80,7 +81,10 @@ export function dashboardRenderMode(
   if (isProductionDeploy(env)) {
     return "unavailable";
   }
-  return "seed";
+  if (session !== null) {
+    return "fixture";
+  }
+  return "login";
 }
 
 export class ProductionAuthMisconfiguredError extends Error {

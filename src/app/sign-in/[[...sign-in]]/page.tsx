@@ -10,9 +10,9 @@ export default function SignInPage() {
         <div className="space-y-3">
           <h1 className="text-2xl font-semibold tracking-tight">Sign in</h1>
           <p className="max-w-xl text-sm leading-6 text-muted-foreground">
-            Clerk keys are not set. Use the local seed preview on{" "}
-            <a className="underline" href="/dashboard">
-              /dashboard
+            Clerk keys are not set. Use the fixture login at{" "}
+            <a className="underline" href="/test-login">
+              /test-login
             </a>{" "}
             until a human creates the Clerk application.
           </p>

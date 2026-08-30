@@ -1,7 +1,11 @@
+import { loadSeedTransaction } from "@/app/actions/seed-transaction";
 import { AppShell } from "@/components/app-shell";
+import { BuyerDashboardViewPanel } from "@/components/buyer-dashboard-view";
 import { LiveTransactionPage } from "@/components/live-transaction-page";
 import { QueryErrorBoundary } from "@/components/query-error-boundary";
 import { assertCanRenderWithoutAuth, isAuthConfigured } from "@/lib/auth-config";
+
+export const dynamic = "force-dynamic";
 
 export default async function TransactionPage({
   params,
@@ -10,20 +14,22 @@ export default async function TransactionPage({
 
   if (!isAuthConfigured()) {
     assertCanRenderWithoutAuth();
+    const loaded = await loadSeedTransaction({ transactionId });
+    if (!loaded.ok) {
+      return (
+        <AppShell>
+          <p className="text-sm text-muted-foreground">
+            You cannot open this transaction.
+          </p>
+        </AppShell>
+      );
+    }
     return (
       <AppShell>
-        <div className="space-y-3">
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Transaction {transactionId}
-          </h1>
-          <p className="max-w-xl text-sm leading-6 text-muted-foreground">
-            Loading another buyer&apos;s transaction by URL is denied in
-            Convex. Buyer A calling <code>dashboard.getById</code> or{" "}
-            <code>transactions.get</code> with buyer B&apos;s id throws
-            FORBIDDEN. Sign in with Clerk to exercise this route against a live
-            backend.
-          </p>
-        </div>
+        <BuyerDashboardViewPanel
+          view={loaded.view}
+          eyebrow="Opened by id"
+        />
       </AppShell>
     );
   }

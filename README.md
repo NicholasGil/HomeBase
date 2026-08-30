@@ -8,7 +8,7 @@ Buyer-side operating system for one brokerage and one market. A buyer should ope
 
 Next.js 16 App Router, TypeScript strict, Tailwind, shadcn/ui, Convex, Clerk.
 
-Convex functions live in `convex/`. `npx convex codegen` writes `convex/_generated`. Seed, permission, and isolation tests run in `convex-test` without a cloud project. Clerk and a hosted Convex project are needs-human. Until those exist, `/dashboard` renders the seeded buyer preview and queries still enforce isolation in tests.
+Convex functions live in `convex/`. `npx convex codegen` writes `convex/_generated`. Seed, permission, and isolation tests run in `convex-test` without a cloud project. Clerk and a hosted Convex project are needs-human. Until those exist, `/test-login` starts a fixture buyer session. Production ignores that cookie.
 
 ## Scripts
 
@@ -18,9 +18,10 @@ npm run dev
 npm run lint
 npm run typecheck
 npm test
+npm run test:e2e
 ```
 
-CI runs lint, typecheck, and unit tests on every pull request.
+CI runs lint, typecheck, unit tests, and the P0 Playwright job on every pull request.
 
 ## Feature flags
 
@@ -31,3 +32,4 @@ CI runs lint, typecheck, and unit tests on every pull request.
 1. Scaffold, flags, home page.
 2. Convex schema, seed, and permission tests.
 3. Clerk wiring, role routing, buyer dashboard, transaction isolation.
+4. Playwright buyer login → dashboard, fixture auth, isolation by URL.

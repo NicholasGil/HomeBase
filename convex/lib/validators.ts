@@ -85,6 +85,30 @@ export const showingVerdictValidator = v.union(
   v.literal("no"),
 );
 
+export const coordinatesValidator = v.object({
+  lat: v.number(),
+  lng: v.number(),
+});
+
+export const availabilityWindowValidator = v.object({
+  startsAt: v.number(),
+  endsAt: v.number(),
+});
+
+export const driveTimeSourceValidator = v.union(
+  v.literal("fixture"),
+  v.literal("routes_api"),
+);
+
+export const showingRatingsValidator = v.object({
+  kitchen: v.number(),
+  location: v.number(),
+  yard: v.number(),
+  condition: v.number(),
+  layout: v.number(),
+  value: v.number(),
+});
+
 export const documentGrantScopeValidator = v.union(
   v.literal("view"),
   v.literal("download"),

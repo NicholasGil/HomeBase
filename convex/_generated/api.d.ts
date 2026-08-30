@@ -24,7 +24,10 @@ import type * as orgs from "../orgs.js";
 import type * as seed from "../seed.js";
 import type * as seedPlan from "../seedPlan.js";
 import type * as tasks from "../tasks.js";
+import type * as tours from "../tours.js";
 import type * as transactions from "../transactions.js";
+import type * as lib_driveTimes from "../lib/driveTimes.js";
+import type * as lib_tourOptimizer from "../lib/tourOptimizer.js";
 
 import type {
   ApiFromModules,
@@ -49,7 +52,10 @@ declare const fullApi: ApiFromModules<{
   seed: typeof seed;
   seedPlan: typeof seedPlan;
   tasks: typeof tasks;
+  tours: typeof tours;
   transactions: typeof transactions;
+  "lib/driveTimes": typeof lib_driveTimes;
+  "lib/tourOptimizer": typeof lib_tourOptimizer;
 }>;
 
 /**

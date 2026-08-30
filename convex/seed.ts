@@ -1,7 +1,7 @@
 import { internalMutation } from "./_generated/server";
 import { appendAuditLog } from "./lib/audit";
 import { DEFAULT_FEATURE_FLAGS } from "./lib/validators";
-import { SEED_CONCIERGE, SEED_PLAN } from "./seedPlan";
+import { SEED_CONCIERGE, SEED_PLAN, SEED_TOUR } from "./seedPlan";
 
 export const run = internalMutation({
   args: {},
@@ -24,6 +24,7 @@ export const run = internalMutation({
       email: SEED_PLAN.agent.email,
       name: SEED_PLAN.agent.name,
       phone: SEED_PLAN.agent.phone,
+      availabilityWindows: [...SEED_TOUR.agentWindows],
     });
     await ctx.db.insert("memberships", {
       userId: agentId,
@@ -85,6 +86,7 @@ export const run = internalMutation({
           asOf: now,
           label: "Preapproval ceiling",
         },
+        availabilityWindows: [...SEED_TOUR.buyerWindows],
       });
 
       const propertyId = await ctx.db.insert("properties", {
@@ -236,6 +238,19 @@ export const run = internalMutation({
         targetType: "transaction",
         targetId: transactionId,
         meta: { stage: buyer.stage, buyer: buyer.clerkId },
+      });
+    }
+
+    for (const listing of SEED_TOUR.properties) {
+      await ctx.db.insert("properties", {
+        address: listing.address,
+        specs: listing.specs,
+        media: [],
+        source: "manual",
+        coordinates: listing.coordinates,
+        brief: listing.brief,
+        showingDurationMinutes: SEED_TOUR.appointmentLengthMinutes,
+        availabilityWindows: [...SEED_TOUR.propertyWindows],
       });
     }
 

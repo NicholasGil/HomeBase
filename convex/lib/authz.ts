@@ -81,3 +81,28 @@ export async function requireTransactionAccess(
   }
   return { ...session, transaction };
 }
+
+export async function requireTourAccess(ctx: DbCtx, tourId: Id<"tours">) {
+  const session = await requireTransactionReadRole(ctx);
+  const tour = await ctx.db.get(tourId);
+  if (tour === null) {
+    throw new Error("FORBIDDEN");
+  }
+  const client = await ctx.db.get(tour.clientId);
+  if (client === null || client.orgId !== session.membership.orgId) {
+    throw new Error("FORBIDDEN");
+  }
+  if (session.membership.role === "broker" || session.membership.role === "admin") {
+    return { ...session, tour, client };
+  }
+  if (session.membership.role === "agent") {
+    if (tour.agentId !== session.user._id) {
+      throw new Error("FORBIDDEN");
+    }
+    return { ...session, tour, client };
+  }
+  if (client.userId !== session.user._id) {
+    throw new Error("FORBIDDEN");
+  }
+  return { ...session, tour, client };
+}

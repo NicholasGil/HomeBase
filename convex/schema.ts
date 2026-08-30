@@ -2,7 +2,10 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 import {
+  availabilityWindowValidator,
+  coordinatesValidator,
   documentGrantScopeValidator,
+  driveTimeSourceValidator,
   featureFlagsValidator,
   moneyFigureValidator,
   offerStatusValidator,
@@ -45,6 +48,8 @@ export default defineSchema({
     email: v.string(),
     name: v.string(),
     phone: v.optional(v.string()),
+    // Proposed DESIGN.md addition: agent/buyer availability for M4.
+    availabilityWindows: v.optional(v.array(availabilityWindowValidator)),
   })
     .index("by_clerkId", ["clerkId"])
     .index("by_email", ["email"]),
@@ -67,6 +72,8 @@ export default defineSchema({
     }),
     prequalStatus: prequalStatusValidator,
     budget: moneyFigureValidator,
+    // Proposed DESIGN.md addition: buyer availability for M4.
+    availabilityWindows: v.optional(v.array(availabilityWindowValidator)),
   })
     .index("by_user", ["userId"])
     .index("by_org", ["orgId"])
@@ -78,6 +85,11 @@ export default defineSchema({
     media: v.array(v.string()),
     source: propertySourceValidator,
     mlsId: v.optional(v.string()),
+    // Proposed DESIGN.md addition: geography, brief, and showing windows for M4.
+    coordinates: v.optional(coordinatesValidator),
+    brief: v.optional(v.string()),
+    showingDurationMinutes: v.optional(v.number()),
+    availabilityWindows: v.optional(v.array(availabilityWindowValidator)),
   }),
 
   transactions: defineTable({
@@ -171,7 +183,15 @@ export default defineSchema({
       v.literal("completed"),
       v.literal("canceled"),
     ),
-  }).index("by_client", ["clientId"]),
+    originLabel: v.optional(v.string()),
+    originCoordinates: v.optional(coordinatesValidator),
+    bufferMinutes: v.optional(v.number()),
+    appointmentLengthMinutes: v.optional(v.number()),
+    departureNotifiedAt: v.optional(v.number()),
+    driveTimeSource: v.optional(driveTimeSourceValidator),
+  })
+    .index("by_client", ["clientId"])
+    .index("by_agent", ["agentId"]),
 
   tourStops: defineTable({
     tourId: v.id("tours"),
@@ -180,6 +200,9 @@ export default defineSchema({
     arriveAt: v.number(),
     departAt: v.number(),
     driveMinutes: v.number(),
+    directionsSummary: v.optional(v.string()),
+    windowStartsAt: v.optional(v.number()),
+    windowEndsAt: v.optional(v.number()),
   }).index("by_tour", ["tourId"]),
 
   showingFeedback: defineTable({

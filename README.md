@@ -41,3 +41,9 @@ M1 journey roadmap: org-configurable stages, blocking tasks hold stage advance, 
 M2 document vault: upload/classify, grants with scope and expiry, immediate revoke. Every open goes through documentGrants or a transaction principal check inside Convex. A lender granted the preapproval cannot load the inspection report by id.
 
 M3 concierge: `lib/llm/` is the only model path. Prompts live in `lib/llm/prompts/`. Answers are scoped to one transaction, PII is redacted first, and dollar figures must already exist on the file with provenance.
+
+## P2
+
+M4 showing scheduler: buyer picks sample listings and hits Build My Tour. The optimizer accounts for listing windows, appointment length, fixture drive times, buyer/agent windows, and buffers. Removing a stop re-optimizes the remainder. Post-showing verdicts write to `showingFeedback`.
+
+There is no production Routes API key in this repo. Local and CI use the named fixture distance path. Vercel production without `GOOGLE_MAPS_ROUTES_API_KEY` fail-closes. That credential stays on needs-human #1.

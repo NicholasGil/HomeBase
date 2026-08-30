@@ -163,3 +163,92 @@ export const SEED_CONCIERGE = {
   counterOfferCents: 43000000,
   lenderName: "Jordan Hale",
 } as const;
+
+/** Saturday 12 Sep 2026. CDT is UTC-5, so 10:00 CDT = 15:00 UTC. */
+function cdtOnTourSaturday(hour: number, minute = 0) {
+  return Date.UTC(2026, 8, 12, hour + 5, minute, 0);
+}
+
+export const SEED_TOUR_PROPERTY_IDS = {
+  oakwood: "seed-listing-oakwood",
+  madison: "seed-listing-madison",
+  harvest: "seed-listing-harvest",
+  decatur: "seed-listing-decatur",
+} as const;
+
+export const SEED_TOUR = {
+  date: Date.UTC(2026, 8, 12),
+  timezone: "America/Chicago",
+  bufferMinutes: 10,
+  appointmentLengthMinutes: 45,
+  departureNoticeMinutes: 30,
+  origin: {
+    label: "Lookout Realty office",
+    address: {
+      line1: "200 Church St NW",
+      city: "Huntsville",
+      state: "AL",
+      postalCode: "35801",
+    },
+    coordinates: { lat: 34.7308, lng: -86.5861 },
+  },
+  buyerWindows: [
+    { startsAt: cdtOnTourSaturday(9), endsAt: cdtOnTourSaturday(18) },
+  ],
+  agentWindows: [
+    { startsAt: cdtOnTourSaturday(9), endsAt: cdtOnTourSaturday(18) },
+  ],
+  propertyWindows: [
+    { startsAt: cdtOnTourSaturday(10), endsAt: cdtOnTourSaturday(17) },
+  ],
+  properties: [
+    {
+      id: SEED_TOUR_PROPERTY_IDS.oakwood,
+      address: {
+        line1: "4101 Oakwood Ave",
+        city: "Huntsville",
+        state: "AL",
+        postalCode: "35801",
+      },
+      coordinates: { lat: 34.73037, lng: -86.5861 },
+      specs: { beds: 3, baths: 2, sqft: 1680 },
+      brief: "Downtown bungalow two blocks from the square. Sample listing.",
+    },
+    {
+      id: SEED_TOUR_PROPERTY_IDS.madison,
+      address: {
+        line1: "88 Legacy Dr",
+        city: "Madison",
+        state: "AL",
+        postalCode: "35758",
+      },
+      coordinates: { lat: 34.69926, lng: -86.74833 },
+      specs: { beds: 4, baths: 3, sqft: 2420 },
+      brief: "Madison subdivision with a two-car garage. Sample listing.",
+    },
+    {
+      id: SEED_TOUR_PROPERTY_IDS.harvest,
+      address: {
+        line1: "212 Nick Fitcheard Rd",
+        city: "Harvest",
+        state: "AL",
+        postalCode: "35749",
+      },
+      coordinates: { lat: 34.85564, lng: -86.75083 },
+      specs: { beds: 4, baths: 2, sqft: 2100 },
+      brief: "Harvest ranch on a half acre. Sample listing.",
+    },
+    {
+      id: SEED_TOUR_PROPERTY_IDS.decatur,
+      address: {
+        line1: "701 6th Ave SE",
+        city: "Decatur",
+        state: "AL",
+        postalCode: "35601",
+      },
+      coordinates: { lat: 34.60593, lng: -86.98334 },
+      specs: { beds: 3, baths: 2, sqft: 1900 },
+      brief: "Decatur craftsman near the river. Longest hop on this loop. Sample listing.",
+    },
+  ],
+} as const;

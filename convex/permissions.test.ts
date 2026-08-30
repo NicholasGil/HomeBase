@@ -23,6 +23,9 @@ const READ_FUNCTIONS = [
   "documents.listGrants",
   "concierge.gatherContext",
   "concierge.listThread",
+  "tours.listCandidates",
+  "tours.listMine",
+  "tours.get",
 ] as const;
 
 async function seeded() {
@@ -59,7 +62,7 @@ async function buyerATransactionId(t: ReturnType<typeof convexTest>) {
 
 describe("permission tests for data-reading functions", () => {
   it("lists every public read function so coverage cannot drift silently", () => {
-    expect(READ_FUNCTIONS).toHaveLength(17);
+    expect(READ_FUNCTIONS).toHaveLength(20);
   });
 
   it.each([
@@ -118,6 +121,18 @@ describe("permission tests for data-reading functions", () => {
     ["concierge.listThread", async (t: ReturnType<typeof convexTest>) => {
       const id = await buyerATransactionId(t);
       return t.query(api.concierge.listThread, { transactionId: id });
+    }],
+    ["tours.listCandidates", async (t: ReturnType<typeof convexTest>) =>
+      t.query(api.tours.listCandidates, {})],
+    ["tours.listMine", async (t: ReturnType<typeof convexTest>) =>
+      t.query(api.tours.listMine, {})],
+    ["tours.get", async (t: ReturnType<typeof convexTest>) => {
+      const asBlair = t.withIdentity({ subject: "clerk_buyer_b" });
+      const candidates = await asBlair.query(api.tours.listCandidates, {});
+      const built = await asBlair.mutation(api.tours.build, {
+        propertyIds: candidates.map((row) => row._id),
+      });
+      return t.query(api.tours.get, { tourId: built.tourId });
     }],
   ] as const)("%s denies an unauthenticated caller", async (_name, call) => {
     const t = await seeded();
@@ -200,6 +215,20 @@ describe("permission tests for data-reading functions", () => {
         transactionId: id,
       }),
     ).rejects.toThrow("FORBIDDEN");
+    await expect(asVendor.query(api.tours.listCandidates, {})).rejects.toThrow(
+      "FORBIDDEN",
+    );
+    await expect(asVendor.query(api.tours.listMine, {})).rejects.toThrow(
+      "FORBIDDEN",
+    );
+    const asBlair = t.withIdentity({ subject: "clerk_buyer_b" });
+    const candidates = await asBlair.query(api.tours.listCandidates, {});
+    const built = await asBlair.mutation(api.tours.build, {
+      propertyIds: candidates.map((row) => row._id),
+    });
+    await expect(
+      asVendor.query(api.tours.get, { tourId: built.tourId }),
+    ).rejects.toThrow("FORBIDDEN");
   });
 
   it("denies a signed-in user with no membership", async () => {
@@ -267,6 +296,20 @@ describe("permission tests for data-reading functions", () => {
       asStranger.mutation(api.concierge.loadInspectionFindings, {
         transactionId: id,
       }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(asStranger.query(api.tours.listCandidates, {})).rejects.toThrow(
+      "FORBIDDEN",
+    );
+    await expect(asStranger.query(api.tours.listMine, {})).rejects.toThrow(
+      "FORBIDDEN",
+    );
+    const asBlair = t.withIdentity({ subject: "clerk_buyer_b" });
+    const candidates = await asBlair.query(api.tours.listCandidates, {});
+    const built = await asBlair.mutation(api.tours.build, {
+      propertyIds: candidates.map((row) => row._id),
+    });
+    await expect(
+      asStranger.query(api.tours.get, { tourId: built.tourId }),
     ).rejects.toThrow("FORBIDDEN");
   });
 

@@ -23,6 +23,7 @@ test("FLAG_IDV off and disallowed state reject high-risk actions", async ({
 }) => {
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Alex Rivera" }).click();
+  await expect(page).toHaveURL(/\/dashboard$/);
   await page.goto("/identity");
   await expect(page.getByTestId("identity-security")).toBeVisible();
   await expect(page.getByTestId("idv-flag")).toContainText("off");

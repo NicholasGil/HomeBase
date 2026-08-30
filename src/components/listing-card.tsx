@@ -36,7 +36,7 @@ export function ListingCardFrame({
       className={cn("py-0", className)}
     >
       <div className="grid sm:grid-cols-[9.5rem_minmax(0,1fr)]">
-        <div className="relative flex aspect-[4/3] items-end bg-secondary px-3 py-3 sm:aspect-auto sm:min-h-[8.5rem]">
+        <div className="relative flex aspect-[4/3] items-end bg-foreground/8 px-3 py-3 sm:aspect-auto sm:min-h-[8.5rem]">
           <Home className="size-4 text-muted-foreground" aria-hidden />
           {rank !== undefined ? (
             <span className="absolute top-3 right-3 text-[11px] text-muted-foreground">

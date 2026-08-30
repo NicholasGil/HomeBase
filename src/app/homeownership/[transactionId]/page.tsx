@@ -22,7 +22,8 @@ export const dynamic = "force-dynamic";
 export default async function HomeownershipHubPage({
   params,
 }: PageProps<"/homeownership/[transactionId]">) {
-  const { transactionId } = await params;
+  const { transactionId: rawTransactionId } = await params;
+  const transactionId = decodeURIComponent(rawTransactionId);
 
   if (mustFailClosed()) {
     throw new ProductionAuthMisconfiguredError();

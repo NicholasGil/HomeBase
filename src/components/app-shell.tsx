@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { Search } from "lucide-react";
 
 import { getTestSession } from "@/app/actions/test-session";
 import { AppNavLinks } from "@/components/app-nav";
+import { HeaderSearchHomes } from "@/components/header-search";
 import { LiveAppNav } from "@/components/live-app-nav";
 import {
   navContextFromFixtureSession,
@@ -33,15 +33,7 @@ export async function AppShell({
           >
             HomeBase
           </Link>
-          {context.role === "buyer" ? (
-            <Link
-              href="/search"
-              className="hidden min-w-0 max-w-xs flex-1 items-center gap-2 rounded-full bg-card px-4 py-2 text-sm text-muted-foreground shadow-sm ring-1 ring-black/8 sm:flex"
-            >
-              <Search className="size-3.5 shrink-0" aria-hidden />
-              <span className="truncate">Search homes</span>
-            </Link>
-          ) : null}
+          {context.role === "buyer" ? <HeaderSearchHomes /> : null}
           <div className="ml-auto flex min-w-0 items-center gap-2">
             {nav}
             {live && session === null ? (

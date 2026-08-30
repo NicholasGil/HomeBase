@@ -25,6 +25,8 @@ describe("BuyerDashboardViewPanel ten-second answers", () => {
     expect(html).toContain("Inspection");
     expect(html).toContain("Sign purchase agreement");
     expect(html).toContain("Schedule inspection");
+    expect(html).toContain('href="/tours"');
+    expect(html).toContain('href="/vault"');
     expect(html).toContain("data-state=\"current\"");
     expect(html).toContain("Cannot leave Inspection");
     expect(html).toContain('data-testid="journey-stage-inspection"');

@@ -28,6 +28,7 @@ describe("M9 search server functions", () => {
       minLotAcres: 0.35,
       minGarageSpaces: 2,
       driveMinutesFromTown: 20,
+      location: null,
     });
     expect(result.inventory.kind).toBe("sample");
     expect(result.mlsEnabled).toBe(false);
@@ -138,5 +139,15 @@ describe("M9 search server functions", () => {
     const t = await seeded();
     const asVendor = t.withIdentity({ subject: "clerk_lender" });
     await expect(asVendor.query(api.search.run, {})).rejects.toThrow("FORBIDDEN");
+    await expect(asVendor.query(api.search.assertCanSearch, {})).rejects.toThrow(
+      "FORBIDDEN",
+    );
+  });
+
+  it("denies an unauthenticated caller on listing access", async () => {
+    const t = await seeded();
+    await expect(t.query(api.search.assertCanSearch, {})).rejects.toThrow(
+      "UNAUTHENTICATED",
+    );
   });
 });

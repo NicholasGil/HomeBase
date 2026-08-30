@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -55,30 +57,35 @@ export function AgentCommandCenterView({
                   data-stage={client.stage}
                   className="rounded-lg border px-3 py-3"
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="font-medium">{client.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {client.priorityReason}
-                      </p>
+                  <Link
+                    href={`/transactions/${client.transactionId}`}
+                    className="block"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-medium">{client.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {client.priorityReason}
+                        </p>
+                      </div>
+                      <Badge
+                        variant={
+                          client.exceptions.length > 0 ? "destructive" : "outline"
+                        }
+                      >
+                        {client.stageLabel}
+                      </Badge>
                     </div>
-                    <Badge
-                      variant={
-                        client.exceptions.length > 0 ? "destructive" : "outline"
-                      }
-                    >
-                      {client.stageLabel}
-                    </Badge>
-                  </div>
-                  {client.exceptions.length > 0 ? (
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {client.exceptions.map((exception) => (
-                        <Badge key={exception.kind} variant="secondary">
-                          {exception.label}
-                        </Badge>
-                      ))}
-                    </div>
-                  ) : null}
+                    {client.exceptions.length > 0 ? (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {client.exceptions.map((exception) => (
+                          <Badge key={exception.kind} variant="secondary">
+                            {exception.label}
+                          </Badge>
+                        ))}
+                      </div>
+                    ) : null}
+                  </Link>
                 </li>
               ))}
             </ol>
@@ -98,18 +105,23 @@ export function AgentCommandCenterView({
                   data-testid={`client-${clientKey(client.name)}`}
                   data-client-name={client.name}
                   data-stage={client.stage}
-                  className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2"
+                  className="rounded-lg border px-3 py-2"
                 >
-                  <div>
-                    <p className="text-sm font-medium">{client.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {client.propertyCity
-                        ? `${client.propertyCity}, ${client.propertyState}`
-                        : "No property yet"}
-                      {client.nextTask ? ` · ${client.nextTask.title}` : ""}
-                    </p>
-                  </div>
-                  <Badge variant="sage">{client.stageLabel}</Badge>
+                  <Link
+                    href={`/transactions/${client.transactionId}`}
+                    className="flex items-center justify-between gap-3"
+                  >
+                    <div>
+                      <p className="text-sm font-medium">{client.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {client.propertyCity
+                          ? `${client.propertyCity}, ${client.propertyState}`
+                          : "No property yet"}
+                        {client.nextTask ? ` · ${client.nextTask.title}` : ""}
+                      </p>
+                    </div>
+                    <Badge variant="sage">{client.stageLabel}</Badge>
+                  </Link>
                 </li>
               ))}
             </ul>

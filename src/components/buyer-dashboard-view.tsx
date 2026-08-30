@@ -1,7 +1,10 @@
+import Link from "next/link";
+
 import { PhotoTile } from "@/components/listing-card";
 import { Badge } from "@/components/ui/badge";
 import { JourneyTracker } from "@/components/journey-tracker";
 import type { BuyerDashboardView } from "../../convex/lib/dashboardView";
+import { nextActionHref, owedTodayHref } from "@/lib/dashboard-links";
 import {
   ESTIMATE_AMOUNT_CLASS_NAME,
   ISSUED_AMOUNT_CLASS_NAME,
@@ -126,12 +129,18 @@ export function BuyerDashboardViewPanel({
                   No open task right now.
                 </p>
               ) : (
-                <div className="mt-3 space-y-3">
+                <Link
+                  href={nextActionHref({
+                    title: view.next.title,
+                    transactionId: view.transactionId,
+                  })}
+                  className="mt-3 block space-y-3"
+                >
                   <p className="text-3xl font-semibold tracking-tight text-balance">
                     {view.next.title}
                   </p>
                   <Badge variant="sage">{view.next.assigneeRole}</Badge>
-                </div>
+                </Link>
               )}
             </section>
 
@@ -139,15 +148,17 @@ export function BuyerDashboardViewPanel({
               data-testid="ten-second-owe"
               className="rounded-[14px] bg-sky px-5 py-6"
             >
-              <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                Due today
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {owed?.label ?? "No sourced figure on this file"}
-              </p>
-              <div className="mt-4">
-                <OwedTodayFigure owed={owed} featured />
-              </div>
+              <Link href={owedTodayHref()} className="block">
+                <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                  Due today
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {owed?.label ?? "No sourced figure on this file"}
+                </p>
+                <div className="mt-4">
+                  <OwedTodayFigure owed={owed} featured />
+                </div>
+              </Link>
             </section>
           </div>
 

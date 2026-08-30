@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { SEED_CLERK_IDS } from "../../convex/seedPlan";
-import { seedDashboardForBuyer } from "@/lib/seed-dashboard";
+import {
+  seedDashboardForBuyer,
+  seedDashboardForClerkId,
+} from "@/lib/seed-dashboard";
 
 describe("seed dashboard", () => {
   it("answers the ten-second test for Alex Rivera", () => {
@@ -22,6 +25,13 @@ describe("seed dashboard", () => {
     expect(view.where.key).toBe("move_in");
     expect(view.where.status).toBe("closed");
     expect(view.done).toContain("Confirm closing appointment");
+  });
+
+  it("builds a command-center client file for Dana Ortiz", () => {
+    const view = seedDashboardForClerkId(SEED_CLERK_IDS.buyerC);
+    expect(view.transactionId).toBe("seed:buyer-c");
+    expect(view.where.key).toBe("financing");
+    expect(view.next?.title).toBe("Send lender documents");
   });
 
   it("keeps Blair Chen on a distinct transaction", () => {

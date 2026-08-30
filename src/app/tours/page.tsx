@@ -15,7 +15,11 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export default async function ToursPage() {
+export default async function ToursPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ notice?: string }>;
+}) {
   if (mustFailClosed()) {
     throw new ProductionAuthMisconfiguredError();
   }
@@ -40,6 +44,7 @@ export default async function ToursPage() {
       redirect("/test-login");
     }
     const loaded = await loadFixtureTours();
+    const params = await searchParams;
     const denied =
       !loaded.candidates.ok && loaded.candidates.reason === "FORBIDDEN";
     return (
@@ -51,6 +56,7 @@ export default async function ToursPage() {
         <FixtureTourBuilder
           denied={denied}
           tours={loaded.tours.ok ? loaded.tours.tours : []}
+          notice={params.notice}
         />
       </AppShell>
     );

@@ -34,6 +34,7 @@ export type SearchCriteria = {
   minLotAcres: number | null;
   minGarageSpaces: number | null;
   driveMinutesFromTown: number | null;
+  location: string | null;
 };
 
 export type SearchListing = {
@@ -162,6 +163,100 @@ function parseDriveMinutes(text: string): number | null {
   return Number.parseInt(match[1], 10);
 }
 
+const LOCATION_STOP_WORDS = new Set([
+  "a",
+  "an",
+  "the",
+  "in",
+  "near",
+  "around",
+  "for",
+  "of",
+  "and",
+  "or",
+  "with",
+  "to",
+  "from",
+  "at",
+  "on",
+  "homes",
+  "home",
+  "house",
+  "houses",
+  "listings",
+  "listing",
+  "property",
+  "properties",
+  "sale",
+  "buy",
+  "looking",
+  "want",
+  "need",
+  "some",
+  "good",
+  "under",
+  "below",
+  "less",
+  "than",
+  "bedroom",
+  "bedrooms",
+  "bed",
+  "beds",
+  "br",
+  "garage",
+  "car",
+  "minutes",
+  "minute",
+  "mins",
+  "min",
+  "town",
+  "about",
+  "approx",
+]);
+
+export function locationTextFromQuery(query: string): string | null {
+  let text = normalizeQuery(query);
+  if (text === normalizeQuery(CANONICAL_SEARCH_QUERY)) {
+    return null;
+  }
+  text = text
+    .replace(/\d+\s*-?\s*(?:bed(?:room)?s?|br)\b/g, " ")
+    .replace(/(?:under|below|less than|<)\s*\$?\s*[\d,]+(?:\.\d+)?\s*(k|m)?\b/g, " ")
+    .replace(/\$\s*[\d,]+(?:\.\d+)?\s*(k|m)?\b/g, " ")
+    .replace(/\bsome land\b/g, " ")
+    .replace(/\blot\b/g, " ")
+    .replace(/\bacres?\b/g, " ")
+    .replace(/\bgood garage\b/g, " ")
+    .replace(/\b(?:two|2)[-\s]?car\b/g, " ")
+    .replace(/\d+\s*(?:car|garage)/g, " ")
+    .replace(/~?\s*\d+\s*(?:minutes?|mins?)\s+from\s+town/g, " ")
+    .replace(/[^a-z0-9\s]/g, " ");
+  const tokens = text
+    .split(/\s+/)
+    .filter((token) => token.length >= 2 && !LOCATION_STOP_WORDS.has(token));
+  if (tokens.length === 0) {
+    return null;
+  }
+  return tokens.join(" ");
+}
+
+export function listingMatchesLocation(
+  listing: SearchListing,
+  location: string,
+): boolean {
+  const haystack = [
+    listing.address.line1,
+    listing.address.city,
+    listing.address.state,
+    listing.address.postalCode,
+    listing.brief ?? "",
+  ]
+    .join(" ")
+    .toLowerCase();
+  const tokens = location.split(/\s+/).filter((token) => token.length >= 2);
+  return tokens.every((token) => haystack.includes(token));
+}
+
 export function parseSearchQuery(query: string): SearchCriteria {
   const text = normalizeQuery(query);
   if (text === normalizeQuery(CANONICAL_SEARCH_QUERY)) {
@@ -171,6 +266,7 @@ export function parseSearchQuery(query: string): SearchCriteria {
       minLotAcres: SOME_LAND_ACRES,
       minGarageSpaces: GOOD_GARAGE_SPACES,
       driveMinutesFromTown: 20,
+      location: null,
     };
   }
   return {
@@ -179,6 +275,7 @@ export function parseSearchQuery(query: string): SearchCriteria {
     minLotAcres: parseLandAcres(text),
     minGarageSpaces: parseGarageSpaces(text),
     driveMinutesFromTown: parseDriveMinutes(text),
+    location: locationTextFromQuery(query),
   };
 }
 
@@ -382,8 +479,15 @@ export function rankSearchListings(input: {
   results: RankedSearchResult[];
 } {
   const filtered = filterSearchableListings(input.listings, input.mlsEnabled);
+  const location = input.criteria.location;
+  const located =
+    location === null
+      ? filtered.listings
+      : filtered.listings.filter((listing) =>
+          listingMatchesLocation(listing, location),
+        );
   const events = input.feedback ?? [];
-  const results = filtered.listings
+  const results = located
     .map((listing) => {
       const driveMinutes = driveMinutesForListing(listing, input.town);
       const score =

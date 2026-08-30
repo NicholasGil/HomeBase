@@ -5,6 +5,7 @@ import { getFeatureFlags } from "@/lib/flags";
 import { SEED_SEARCH_PROPERTY_IDS } from "@/lib/seed-search";
 import { SEED_TOUR_PROPERTY_IDS } from "@/lib/seed-tours";
 import {
+  loadFixtureListing,
   loadFixtureSearch,
   recordFixtureSignal,
 } from "@/lib/search-access";
@@ -161,6 +162,59 @@ describe("fixture property search", () => {
     expect(jones.score).toBeGreaterThan(harvestRow.score);
   });
 
+  it("filters Madison and stays empty for a city with no sample homes", () => {
+    const madison = loadFixtureSearch({
+      session: blair,
+      query: "Madison",
+      searchState: { signals: {} },
+    });
+    expect(madison.ok).toBe(true);
+    if (!madison.ok) {
+      throw new Error("expected madison");
+    }
+    expect(madison.view.results).toHaveLength(1);
+    expect(madison.view.results[0]?.id).toBe(SEED_TOUR_PROPERTY_IDS.madison);
+    expect(madison.view.results[0]?.listing.address.city).toBe("Madison");
+
+    const empty = loadFixtureSearch({
+      session: blair,
+      query: "Birmingham",
+      searchState: { signals: {} },
+    });
+    expect(empty.ok).toBe(true);
+    if (!empty.ok) {
+      throw new Error("expected empty");
+    }
+    expect(empty.view.results).toEqual([]);
+    expect(empty.view.criteria.location).toBe("birmingham");
+  });
+
+  it("clears a dislike so the listing can be restored", () => {
+    const disliked = recordFixtureSignal({
+      session: blair,
+      searchState: { signals: {} },
+      propertyId: SEED_SEARCH_PROPERTY_IDS.jonesValley,
+      kind: "dislike",
+    });
+    expect(disliked.ok).toBe(true);
+    if (!disliked.ok) {
+      throw new Error("expected dislike");
+    }
+    const cleared = recordFixtureSignal({
+      session: blair,
+      searchState: disliked.state,
+      propertyId: SEED_SEARCH_PROPERTY_IDS.jonesValley,
+      kind: "clear",
+    });
+    expect(cleared.ok).toBe(true);
+    if (!cleared.ok) {
+      throw new Error("expected clear");
+    }
+    expect(
+      cleared.state.signals[blair.clerkId]?.[SEED_SEARCH_PROPERTY_IDS.jonesValley],
+    ).toBeUndefined();
+  });
+
   it("denies a vendor", () => {
     expect(
       loadFixtureSearch({
@@ -172,5 +226,44 @@ describe("fixture property search", () => {
         searchState: { signals: {} },
       }),
     ).toEqual({ ok: false, reason: "FORBIDDEN" });
+  });
+});
+
+const jordan = {
+  clerkId: "clerk_lender" as const,
+  name: "Jordan Hale",
+  role: "vendor" as const,
+};
+
+describe("fixture listing access", () => {
+  it("denies an unauthenticated caller", () => {
+    expect(
+      loadFixtureListing({
+        session: null,
+        listingId: SEED_TOUR_PROPERTY_IDS.madison,
+      }),
+    ).toEqual({ ok: false, reason: "UNAUTHENTICATED" });
+  });
+
+  it("denies a vendor", () => {
+    expect(
+      loadFixtureListing({
+        session: jordan,
+        listingId: SEED_TOUR_PROPERTY_IDS.madison,
+      }),
+    ).toEqual({ ok: false, reason: "FORBIDDEN" });
+  });
+
+  it("lets a buyer open a sample listing", () => {
+    const loaded = loadFixtureListing({
+      session: blair,
+      listingId: SEED_TOUR_PROPERTY_IDS.madison,
+    });
+    expect(loaded.ok).toBe(true);
+    if (!loaded.ok) {
+      throw new Error("expected listing");
+    }
+    expect(loaded.listing.id).toBe(SEED_TOUR_PROPERTY_IDS.madison);
+    expect(loaded.listing.address.line1).toBe("88 Legacy Dr");
   });
 });

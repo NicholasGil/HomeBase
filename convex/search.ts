@@ -92,6 +92,14 @@ async function feedbackForClient(
   return events;
 }
 
+export const assertCanSearch = query({
+  args: {},
+  handler: async (ctx) => {
+    await requireTransactionReadRole(ctx);
+    return { ok: true as const };
+  },
+});
+
 export const run = query({
   args: {
     query: v.optional(v.string()),

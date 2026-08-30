@@ -64,7 +64,36 @@ describe("conversational property search", () => {
       minLotAcres: 0.35,
       minGarageSpaces: 2,
       driveMinutesFromTown: 20,
+      location: null,
     });
+  });
+
+  it("filters sample listings by city text and stays empty when none match", () => {
+    const madison = listing("madison-home", {
+      address: {
+        line1: "88 Legacy Dr",
+        city: "Madison",
+        state: "AL",
+        postalCode: "35758",
+      },
+    });
+    const huntsville = listing("downtown");
+    const ranked = rankSearchListings({
+      listings: [madison, huntsville],
+      criteria: parseSearchQuery("Madison"),
+      town,
+      mlsEnabled: false,
+    });
+    expect(parseSearchQuery("Madison").location).toBe("madison");
+    expect(ranked.results.map((row) => row.id)).toEqual(["madison-home"]);
+
+    const empty = rankSearchListings({
+      listings: [madison, huntsville],
+      criteria: parseSearchQuery("Birmingham"),
+      town,
+      mlsEnabled: false,
+    });
+    expect(empty.results).toEqual([]);
   });
 
   it("ranks sample listings with a stated reason on every row", () => {

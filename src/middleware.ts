@@ -35,6 +35,7 @@ export default async function middleware(
     "/sign(.*)",
     "/identity(.*)",
     "/search(.*)",
+    "/listings(.*)",
     "/homeownership(.*)",
     "/profile(.*)",
   ]);

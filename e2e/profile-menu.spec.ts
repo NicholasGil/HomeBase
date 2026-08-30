@@ -69,6 +69,8 @@ test("buyer avatar opens profile settings and signs out to fixture login", async
   await expect(page).toHaveURL(/\/profile$/);
   await expect(page.getByTestId("profile-settings")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Profile" })).toBeVisible();
+  await expect(page.getByTestId("profile-back")).toBeVisible();
+  await expect(page.getByText("Display only")).toBeVisible();
   await expect(page.getByText("Alex Rivera")).toBeVisible();
   await expect(page.getByText("alex.rivera@example.com")).toBeVisible();
   await expect(page.getByText("256-555-0101")).toBeVisible();

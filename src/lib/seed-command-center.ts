@@ -5,6 +5,7 @@ import {
 } from "../../convex/lib/commandCenter";
 import { SEED_PLAN, seedTransactionStatus } from "../../convex/seedPlan";
 import { completeCommandCenterPriority } from "../../lib/llm";
+import { seedTransactionIdForClerk } from "@/lib/seed-dashboard";
 
 const DAY_MS = 86_400_000;
 
@@ -21,7 +22,7 @@ export function seedCommandCenter(now = Date.now()): CommandCenterView {
       const nextTask = buyer.tasks.find((task) => task.status === "open") ?? null;
       return {
         clientId: `seed-client:${buyer.clerkId}`,
-        transactionId: `seed:${buyer.clerkId}`,
+        transactionId: seedTransactionIdForClerk(buyer.clerkId) ?? `seed:${buyer.clerkId}`,
         name: buyer.name,
         stage: buyer.stage,
         stageLabel: stage?.label ?? buyer.stage,

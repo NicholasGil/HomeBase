@@ -116,5 +116,5 @@ export async function submitFeedbackFromForm(formData: FormData) {
     throw new Error(result.reason);
   }
   await writeState(result.state);
-  redirect("/tours");
+  redirect("/tours?notice=feedback");
 }

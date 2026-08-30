@@ -27,6 +27,7 @@ export function LiveTourBuilder() {
   const submitFeedback = useMutation(api.tours.submitFeedback);
   const [selected, setSelected] = useState<Id<"properties">[]>([]);
   const [busy, setBusy] = useState(false);
+  const [feedbackNotice, setFeedbackNotice] = useState(false);
 
   if (candidates === undefined || tours === undefined) {
     return <p className="text-sm text-muted-foreground">Loading tours…</p>;
@@ -56,31 +57,41 @@ export function LiveTourBuilder() {
         <Badge variant="sage">sample listings</Badge>
       </div>
 
+      {feedbackNotice ? (
+        <p
+          data-testid="tour-feedback-notice"
+          className="rounded-lg border bg-sage/40 px-4 py-3 text-sm"
+        >
+          Feedback saved.
+        </p>
+      ) : null}
+
       <div className="grid gap-5 sm:grid-cols-2">
         {candidates.map((listing) => (
-          <ListingCardFrame
-            key={listing._id}
-            testId={`tour-candidate-${listing._id}`}
-            addressLine={listing.address.line1}
-            cityState={`${listing.address.city}, ${listing.address.state}`}
-            sample
-          >
-            <p className="text-sm">{listing.brief}</p>
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={selected.includes(listing._id)}
-                onChange={(event) => {
-                  if (event.target.checked) {
-                    setSelected([...selected, listing._id]);
-                  } else {
-                    setSelected(selected.filter((id) => id !== listing._id));
-                  }
-                }}
-              />
-              Add to tour
-            </label>
-          </ListingCardFrame>
+          <label key={listing._id} className="block cursor-pointer">
+            <ListingCardFrame
+              testId={`tour-candidate-${listing._id}`}
+              addressLine={listing.address.line1}
+              cityState={`${listing.address.city}, ${listing.address.state}`}
+              sample
+            >
+              <p className="text-sm">{listing.brief}</p>
+              <span className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={selected.includes(listing._id)}
+                  onChange={(event) => {
+                    if (event.target.checked) {
+                      setSelected([...selected, listing._id]);
+                    } else {
+                      setSelected(selected.filter((id) => id !== listing._id));
+                    }
+                  }}
+                />
+                Add to tour
+              </span>
+            </ListingCardFrame>
+          </label>
         ))}
       </div>
       <Button
@@ -172,6 +183,8 @@ export function LiveTourBuilder() {
                             layout: 3,
                             value: 3,
                           },
+                        }).then(() => {
+                          setFeedbackNotice(true);
                         });
                       }}
                     >

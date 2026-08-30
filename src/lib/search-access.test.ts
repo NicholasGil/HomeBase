@@ -5,6 +5,7 @@ import { getFeatureFlags } from "@/lib/flags";
 import { SEED_SEARCH_PROPERTY_IDS } from "@/lib/seed-search";
 import { SEED_TOUR_PROPERTY_IDS } from "@/lib/seed-tours";
 import {
+  loadFixtureListing,
   loadFixtureSearch,
   recordFixtureSignal,
 } from "@/lib/search-access";
@@ -225,5 +226,44 @@ describe("fixture property search", () => {
         searchState: { signals: {} },
       }),
     ).toEqual({ ok: false, reason: "FORBIDDEN" });
+  });
+});
+
+const jordan = {
+  clerkId: "clerk_lender" as const,
+  name: "Jordan Hale",
+  role: "vendor" as const,
+};
+
+describe("fixture listing access", () => {
+  it("denies an unauthenticated caller", () => {
+    expect(
+      loadFixtureListing({
+        session: null,
+        listingId: SEED_TOUR_PROPERTY_IDS.madison,
+      }),
+    ).toEqual({ ok: false, reason: "UNAUTHENTICATED" });
+  });
+
+  it("denies a vendor", () => {
+    expect(
+      loadFixtureListing({
+        session: jordan,
+        listingId: SEED_TOUR_PROPERTY_IDS.madison,
+      }),
+    ).toEqual({ ok: false, reason: "FORBIDDEN" });
+  });
+
+  it("lets a buyer open a sample listing", () => {
+    const loaded = loadFixtureListing({
+      session: blair,
+      listingId: SEED_TOUR_PROPERTY_IDS.madison,
+    });
+    expect(loaded.ok).toBe(true);
+    if (!loaded.ok) {
+      throw new Error("expected listing");
+    }
+    expect(loaded.listing.id).toBe(SEED_TOUR_PROPERTY_IDS.madison);
+    expect(loaded.listing.address.line1).toBe("88 Legacy Dr");
   });
 });

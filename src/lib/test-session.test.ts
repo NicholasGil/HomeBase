@@ -79,6 +79,32 @@ describe("seed transaction isolation", () => {
     ).toEqual({ ok: false, reason: "FORBIDDEN" });
   });
 
+  it("denies a vendor opening a seed file", () => {
+    const started = startTestSessionDecision(SEED_CLERK_IDS.lender);
+    if (!started.ok) {
+      throw new Error("expected vendor session");
+    }
+    expect(
+      loadSeedTransactionForViewer(started.session, "seed:buyer-a"),
+    ).toEqual({ ok: false, reason: "FORBIDDEN" });
+  });
+
+  it("denies the agent an unknown or non-seed id", () => {
+    const started = startTestSessionDecision(SEED_CLERK_IDS.agent);
+    if (!started.ok) {
+      throw new Error("expected agent session");
+    }
+    expect(
+      loadSeedTransactionForViewer(started.session, "seed:buyer-z"),
+    ).toEqual({ ok: false, reason: "FORBIDDEN" });
+    expect(
+      loadSeedTransactionForViewer(started.session, "not-a-seed"),
+    ).toEqual({ ok: false, reason: "FORBIDDEN" });
+    expect(
+      loadSeedTransactionForViewer(started.session, "seed:clerk_buyer_a"),
+    ).toEqual({ ok: false, reason: "FORBIDDEN" });
+  });
+
   it("lets the seeded agent open a client file by id", () => {
     const started = startTestSessionDecision(SEED_CLERK_IDS.agent);
     if (!started.ok) {

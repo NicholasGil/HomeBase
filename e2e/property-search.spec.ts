@@ -1,7 +1,10 @@
 import { expect, test } from "@playwright/test";
 
 import { CANONICAL_SEARCH_QUERY } from "../convex/lib/propertySearch";
-import { SEED_SEARCH_PROPERTY_IDS } from "../convex/seedPlan";
+import {
+  SEED_SEARCH_PROPERTY_IDS,
+  SEED_TOUR_PROPERTY_IDS,
+} from "../convex/seedPlan";
 
 test("canonical search ranks sample listings and feedback changes order", async ({
   page,
@@ -62,6 +65,19 @@ test("vendor cannot open search", async ({ page }) => {
   await expect(page).toHaveURL(/\/vault$/);
   await page.goto("/search");
   await expect(page.getByTestId("search-denied")).toBeVisible();
+});
+
+test("vendor cannot open a listing by url", async ({ page }) => {
+  await page.goto("/test-login");
+  await page.getByRole("button", { name: "Sign in as Jordan Hale" }).click();
+  await expect(page).toHaveURL(/\/vault$/);
+  await page.goto(`/listings/${SEED_TOUR_PROPERTY_IDS.madison}`);
+  await expect(page.getByTestId("listing-denied")).toBeVisible();
+  await expect(page.getByTestId("listing-denied")).toHaveText(
+    "You cannot open this listing.",
+  );
+  await expect(page.getByTestId("listing-detail")).toHaveCount(0);
+  await expect(page.getByText("88 Legacy Dr")).toHaveCount(0);
 });
 
 test("feature flags stay off including MLS", async ({ page }) => {

@@ -14,10 +14,12 @@ import {
   type SearchInventory,
 } from "../../convex/lib/propertySearch";
 import {
+  getSampleListing,
   isSeedSearchPropertyId,
   seedSearchListings,
   SEED_SEARCH,
 } from "@/lib/seed-search";
+import type { SearchListing } from "../../convex/lib/propertySearch";
 
 export const FIXTURE_SEARCH_COOKIE = "hb_fixture_search";
 
@@ -46,7 +48,7 @@ export function parseFixtureSearch(value: string | undefined): FixtureSearchStat
   }
 }
 
-function canSearch(session: TestSession | null) {
+export function canSearch(session: TestSession | null) {
   if (session === null) {
     return { ok: false as const, reason: "UNAUTHENTICATED" as const };
   }
@@ -54,6 +56,23 @@ function canSearch(session: TestSession | null) {
     return { ok: false as const, reason: "FORBIDDEN" as const };
   }
   return { ok: true as const, session };
+}
+
+export function loadFixtureListing(input: {
+  session: TestSession | null;
+  listingId: string;
+}):
+  | { ok: true; listing: SearchListing }
+  | { ok: false; reason: "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" } {
+  const access = canSearch(input.session);
+  if (!access.ok) {
+    return access;
+  }
+  const listing = getSampleListing(input.listingId);
+  if (listing === null) {
+    return { ok: false, reason: "NOT_FOUND" };
+  }
+  return { ok: true, listing };
 }
 
 function feedbackFrom(

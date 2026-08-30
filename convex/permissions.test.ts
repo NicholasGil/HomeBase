@@ -47,6 +47,7 @@ const READ_FUNCTIONS = [
   "idv.listMine",
   "idv.getGating",
   "search.run",
+  "search.assertCanSearch",
   "homeownership.getHub",
 ] as const;
 
@@ -84,7 +85,7 @@ async function buyerATransactionId(t: ReturnType<typeof convexTest>) {
 
 describe("permission tests for data-reading functions", () => {
   it("lists every public read function so coverage cannot drift silently", () => {
-    expect(READ_FUNCTIONS).toHaveLength(42);
+    expect(READ_FUNCTIONS).toHaveLength(43);
   });
 
   it.each([
@@ -279,6 +280,8 @@ describe("permission tests for data-reading functions", () => {
       t.query(api.idv.getGating, {})],
     ["search.run", async (t: ReturnType<typeof convexTest>) =>
       t.query(api.search.run, {})],
+    ["search.assertCanSearch", async (t: ReturnType<typeof convexTest>) =>
+      t.query(api.search.assertCanSearch, {})],
     ["homeownership.getHub", async (t: ReturnType<typeof convexTest>) => {
       const id = await buyerATransactionId(t);
       return t.query(api.homeownership.getHub, { transactionId: id });
@@ -505,6 +508,9 @@ describe("permission tests for data-reading functions", () => {
     await expect(asVendor.query(api.search.run, {})).rejects.toThrow(
       "FORBIDDEN",
     );
+    await expect(asVendor.query(api.search.assertCanSearch, {})).rejects.toThrow(
+      "FORBIDDEN",
+    );
     await expect(
       asVendor.query(api.homeownership.getHub, { transactionId: id }),
     ).rejects.toThrow("FORBIDDEN");
@@ -714,6 +720,9 @@ describe("permission tests for data-reading functions", () => {
       "FORBIDDEN",
     );
     await expect(asStranger.query(api.search.run, {})).rejects.toThrow(
+      "FORBIDDEN",
+    );
+    await expect(asStranger.query(api.search.assertCanSearch, {})).rejects.toThrow(
       "FORBIDDEN",
     );
     await expect(

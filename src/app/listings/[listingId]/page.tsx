@@ -5,15 +5,25 @@ import { getTestSession } from "@/app/actions/test-session";
 import { AppShell } from "@/components/app-shell";
 import { FixtureLoginPrompt } from "@/components/fixture-login-prompt";
 import { ListingDetail } from "@/components/listing-detail";
+import { LiveListingDetail } from "@/components/live-listing-detail";
+import { QueryErrorBoundary } from "@/components/query-error-boundary";
 import {
   dashboardRenderMode,
   mustFailClosed,
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
-import { getSampleListing } from "@/lib/seed-search";
+import { loadFixtureListing } from "@/lib/search-access";
 import { CANONICAL_SEARCH_QUERY } from "../../../../convex/lib/propertySearch";
 
 export const dynamic = "force-dynamic";
+
+function ListingDenied({ children }: { children: string }) {
+  return (
+    <p className="text-sm text-muted-foreground" data-testid="listing-denied">
+      {children}
+    </p>
+  );
+}
 
 export default async function ListingPage({
   params,
@@ -47,33 +57,50 @@ export default async function ListingPage({
     );
   }
 
-  if (mode === "fixture" && session === null) {
-    redirect("/test-login");
-  }
-
-  const listing = getSampleListing(listingId);
-  if (listing === null) {
+  if (mode === "fixture") {
+    if (session === null) {
+      redirect("/test-login");
+    }
+    const loaded = loadFixtureListing({ session, listingId });
+    if (!loaded.ok) {
+      return (
+        <AppShell>
+          <ListingDenied>
+            {loaded.reason === "NOT_FOUND"
+              ? "This sample listing is not available."
+              : "You cannot open this listing."}
+          </ListingDenied>
+        </AppShell>
+      );
+    }
+    const search = await loadFixturePropertySearch(query);
     return (
       <AppShell>
-        <p className="text-sm text-muted-foreground" data-testid="listing-denied">
-          This sample listing is not available.
-        </p>
+        <ListingDetail
+          listing={loaded.listing}
+          query={query}
+          signal={search.ok ? search.view.signals[loaded.listing.id] : undefined}
+          notice={notice}
+        />
       </AppShell>
     );
   }
 
-  const loaded =
-    mode === "fixture" ? await loadFixturePropertySearch(query) : null;
-  const signal = loaded?.ok ? loaded.view.signals[listing.id] : undefined;
-
   return (
     <AppShell>
-      <ListingDetail
-        listing={listing}
-        query={query}
-        signal={signal}
-        notice={notice}
-      />
+      <QueryErrorBoundary
+        fallback={
+          <p className="text-sm text-muted-foreground" data-testid="listing-denied">
+            You cannot open this listing.
+          </p>
+        }
+      >
+        <LiveListingDetail
+          listingId={listingId}
+          query={query}
+          notice={notice}
+        />
+      </QueryErrorBoundary>
     </AppShell>
   );
 }

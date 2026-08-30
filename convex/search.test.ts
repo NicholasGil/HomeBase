@@ -139,5 +139,15 @@ describe("M9 search server functions", () => {
     const t = await seeded();
     const asVendor = t.withIdentity({ subject: "clerk_lender" });
     await expect(asVendor.query(api.search.run, {})).rejects.toThrow("FORBIDDEN");
+    await expect(asVendor.query(api.search.assertCanSearch, {})).rejects.toThrow(
+      "FORBIDDEN",
+    );
+  });
+
+  it("denies an unauthenticated caller on listing access", async () => {
+    const t = await seeded();
+    await expect(t.query(api.search.assertCanSearch, {})).rejects.toThrow(
+      "UNAUTHENTICATED",
+    );
   });
 });

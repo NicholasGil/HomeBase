@@ -1,6 +1,9 @@
 import { redirect } from "next/navigation";
 
-import { loadFixturePropertySearch } from "@/app/actions/search";
+import {
+  loadFixtureListingForViewer,
+  loadFixturePropertySearch,
+} from "@/app/actions/search";
 import { getTestSession } from "@/app/actions/test-session";
 import { AppShell } from "@/components/app-shell";
 import { FixtureLoginPrompt } from "@/components/fixture-login-prompt";
@@ -12,7 +15,6 @@ import {
   mustFailClosed,
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
-import { loadFixtureListing } from "@/lib/search-access";
 import { CANONICAL_SEARCH_QUERY } from "../../../../convex/lib/propertySearch";
 
 export const dynamic = "force-dynamic";
@@ -61,7 +63,7 @@ export default async function ListingPage({
     if (session === null) {
       redirect("/test-login");
     }
-    const loaded = loadFixtureListing({ session, listingId });
+    const loaded = await loadFixtureListingForViewer(listingId);
     if (!loaded.ok) {
       return (
         <AppShell>

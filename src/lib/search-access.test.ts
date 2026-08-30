@@ -5,6 +5,7 @@ import { getFeatureFlags } from "@/lib/flags";
 import { SEED_SEARCH_PROPERTY_IDS } from "@/lib/seed-search";
 import { SEED_TOUR_PROPERTY_IDS } from "@/lib/seed-tours";
 import {
+  canSearch,
   loadFixtureListing,
   loadFixtureSearch,
   recordFixtureSignal,
@@ -237,6 +238,10 @@ const jordan = {
 
 describe("fixture listing access", () => {
   it("denies an unauthenticated caller", () => {
+    expect(canSearch(null)).toEqual({
+      ok: false,
+      reason: "UNAUTHENTICATED",
+    });
     expect(
       loadFixtureListing({
         session: null,
@@ -246,6 +251,7 @@ describe("fixture listing access", () => {
   });
 
   it("denies a vendor", () => {
+    expect(canSearch(jordan)).toEqual({ ok: false, reason: "FORBIDDEN" });
     expect(
       loadFixtureListing({
         session: jordan,
@@ -265,5 +271,20 @@ describe("fixture listing access", () => {
     }
     expect(loaded.listing.id).toBe(SEED_TOUR_PROPERTY_IDS.madison);
     expect(loaded.listing.address.line1).toBe("88 Legacy Dr");
+  });
+
+  it("does not treat a missing sample id as a role allow", () => {
+    expect(
+      loadFixtureListing({
+        session: blair,
+        listingId: "not-a-listing",
+      }),
+    ).toEqual({ ok: false, reason: "NOT_FOUND" });
+    expect(
+      loadFixtureListing({
+        session: jordan,
+        listingId: "not-a-listing",
+      }),
+    ).toEqual({ ok: false, reason: "FORBIDDEN" });
   });
 });

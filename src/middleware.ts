@@ -36,6 +36,7 @@ export default async function middleware(
     "/identity(.*)",
     "/search(.*)",
     "/homeownership(.*)",
+    "/profile(.*)",
   ]);
 
   return clerkMiddleware(async (auth, req) => {

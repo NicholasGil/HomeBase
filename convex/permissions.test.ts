@@ -31,6 +31,7 @@ const READ_FUNCTIONS = [
   "offers.simulate",
   "explainer.listMine",
   "explainer.listSections",
+  "commandCenter.getMine",
 ] as const;
 
 async function seeded() {
@@ -67,7 +68,7 @@ async function buyerATransactionId(t: ReturnType<typeof convexTest>) {
 
 describe("permission tests for data-reading functions", () => {
   it("lists every public read function so coverage cannot drift silently", () => {
-    expect(READ_FUNCTIONS).toHaveLength(25);
+    expect(READ_FUNCTIONS).toHaveLength(26);
   });
 
   it.each([
@@ -162,6 +163,8 @@ describe("permission tests for data-reading functions", () => {
       const id = await buyerATransactionId(t);
       return t.query(api.explainer.listSections, { transactionId: id });
     }],
+    ["commandCenter.getMine", async (t: ReturnType<typeof convexTest>) =>
+      t.query(api.commandCenter.getMine, {})],
   ] as const)("%s denies an unauthenticated caller", async (_name, call) => {
     const t = await seeded();
     await expect(call(t)).rejects.toThrow("UNAUTHENTICATED");
@@ -301,6 +304,9 @@ describe("permission tests for data-reading functions", () => {
         sectionId: "earnest-money",
       }),
     ).rejects.toThrow("FORBIDDEN");
+    await expect(asVendor.query(api.commandCenter.getMine, {})).rejects.toThrow(
+      "FORBIDDEN",
+    );
   });
 
   it("denies a signed-in user with no membership", async () => {
@@ -426,6 +432,9 @@ describe("permission tests for data-reading functions", () => {
         transactionId: id,
         sectionId: "earnest-money",
       }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      asStranger.query(api.commandCenter.getMine, {}),
     ).rejects.toThrow("FORBIDDEN");
   });
 

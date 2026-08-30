@@ -12,9 +12,27 @@ export const REQUIRED_P0_TABLES = [
 export const SEED_CLERK_IDS = {
   buyerA: "clerk_buyer_a",
   buyerB: "clerk_buyer_b",
+  buyerC: "clerk_buyer_c",
+  buyerD: "clerk_buyer_d",
+  buyerE: "clerk_buyer_e",
+  buyerF: "clerk_buyer_f",
+  buyerG: "clerk_buyer_g",
+  buyerH: "clerk_buyer_h",
   agent: "clerk_agent",
   lender: "clerk_lender",
 } as const;
+
+export type SeedCommandCenterException =
+  | "missing_financing_document"
+  | "inspection_due_tomorrow";
+
+type SeedBuyerTask = {
+  stage: string;
+  title: string;
+  assigneeRole: "buyer" | "agent" | "broker" | "admin" | "vendor";
+  status: "open" | "blocked" | "done" | "canceled";
+  blocksStage: boolean;
+};
 
 type SeedDefaultTask = {
   title: string;
@@ -100,6 +118,13 @@ export const SEED_PLAN = {
       name: "Alex Rivera",
       phone: "256-555-0101",
       stage: "inspection",
+      exception: null,
+      inspectionDueOffsetDays: null,
+      underContractOffsetDays: null,
+      closingAtOffsetDays: null,
+      documents: ["preapproval", "inspection_report"],
+      seedDraftOffer: true,
+      prequalStatus: "preapproved" as const,
       property: {
         line1: "814 Maple Ave",
         city: "Huntsville",
@@ -112,6 +137,36 @@ export const SEED_PLAN = {
         provenance: "title_issued" as const,
         label: "Inspection invoice due today",
       },
+      tasks: [
+        {
+          stage: "under_contract",
+          title: "Sign purchase agreement",
+          assigneeRole: "agent",
+          status: "done",
+          blocksStage: true,
+        },
+        {
+          stage: "under_contract",
+          title: "Submit earnest money",
+          assigneeRole: "buyer",
+          status: "done",
+          blocksStage: true,
+        },
+        {
+          stage: "inspection",
+          title: "Schedule inspection",
+          assigneeRole: "agent",
+          status: "open",
+          blocksStage: true,
+        },
+        {
+          stage: "inspection",
+          title: "Review inspection report",
+          assigneeRole: "buyer",
+          status: "blocked",
+          blocksStage: true,
+        },
+      ] satisfies SeedBuyerTask[],
     },
     {
       clerkId: SEED_CLERK_IDS.buyerB,
@@ -119,6 +174,13 @@ export const SEED_PLAN = {
       name: "Blair Chen",
       phone: "256-555-0102",
       stage: "showings",
+      exception: null,
+      inspectionDueOffsetDays: null,
+      underContractOffsetDays: null,
+      closingAtOffsetDays: null,
+      documents: [],
+      seedDraftOffer: false,
+      prequalStatus: "preapproved" as const,
       property: {
         line1: "22 Cedar Trail",
         city: "Madison",
@@ -131,6 +193,239 @@ export const SEED_PLAN = {
         provenance: "user_entered" as const,
         label: "Nothing due today",
       },
+      tasks: [
+        {
+          stage: "financing",
+          title: "Send lender documents",
+          assigneeRole: "buyer",
+          status: "done",
+          blocksStage: true,
+        },
+        {
+          stage: "showings",
+          title: "Tour Saturday listings",
+          assigneeRole: "buyer",
+          status: "open",
+          blocksStage: false,
+        },
+      ] satisfies SeedBuyerTask[],
+    },
+    {
+      clerkId: SEED_CLERK_IDS.buyerC,
+      email: "dana.ortiz@example.com",
+      name: "Dana Ortiz",
+      phone: "256-555-0103",
+      stage: "financing",
+      exception: "missing_financing_document" as const,
+      inspectionDueOffsetDays: null,
+      underContractOffsetDays: null,
+      closingAtOffsetDays: null,
+      documents: [],
+      seedDraftOffer: false,
+      prequalStatus: "in_progress" as const,
+      property: {
+        line1: "90 Pulaski Pike",
+        city: "Huntsville",
+        state: "AL",
+        postalCode: "35810",
+      },
+      owedToday: {
+        amountCents: 0,
+        currency: "USD" as const,
+        provenance: "user_entered" as const,
+        label: "Nothing due today",
+      },
+      tasks: [
+        {
+          stage: "financing",
+          title: "Send lender documents",
+          assigneeRole: "buyer",
+          status: "open",
+          blocksStage: true,
+        },
+      ] satisfies SeedBuyerTask[],
+    },
+    {
+      clerkId: SEED_CLERK_IDS.buyerD,
+      email: "ellis.park@example.com",
+      name: "Ellis Park",
+      phone: "256-555-0104",
+      stage: "inspection",
+      exception: "inspection_due_tomorrow" as const,
+      inspectionDueOffsetDays: 1,
+      underContractOffsetDays: 5,
+      closingAtOffsetDays: null,
+      documents: ["inspection_report"],
+      seedDraftOffer: false,
+      prequalStatus: "preapproved" as const,
+      property: {
+        line1: "415 Esslinger Dr",
+        city: "Huntsville",
+        state: "AL",
+        postalCode: "35802",
+      },
+      owedToday: {
+        amountCents: 0,
+        currency: "USD" as const,
+        provenance: "user_entered" as const,
+        label: "Nothing due today",
+      },
+      tasks: [
+        {
+          stage: "inspection",
+          title: "Schedule inspection",
+          assigneeRole: "agent",
+          status: "done",
+          blocksStage: true,
+        },
+        {
+          stage: "inspection",
+          title: "Review inspection report",
+          assigneeRole: "buyer",
+          status: "open",
+          blocksStage: true,
+        },
+      ] satisfies SeedBuyerTask[],
+    },
+    {
+      clerkId: SEED_CLERK_IDS.buyerE,
+      email: "fran.okonkwo@example.com",
+      name: "Fran Okonkwo",
+      phone: "256-555-0105",
+      stage: "offer",
+      exception: null,
+      inspectionDueOffsetDays: null,
+      underContractOffsetDays: null,
+      closingAtOffsetDays: null,
+      documents: ["preapproval"],
+      seedDraftOffer: true,
+      prequalStatus: "preapproved" as const,
+      property: {
+        line1: "12 Clinton Ave",
+        city: "Huntsville",
+        state: "AL",
+        postalCode: "35801",
+      },
+      owedToday: {
+        amountCents: 0,
+        currency: "USD" as const,
+        provenance: "user_entered" as const,
+        label: "Nothing due today",
+      },
+      tasks: [
+        {
+          stage: "offer",
+          title: "Write offer terms",
+          assigneeRole: "buyer",
+          status: "open",
+          blocksStage: false,
+        },
+      ] satisfies SeedBuyerTask[],
+    },
+    {
+      clerkId: SEED_CLERK_IDS.buyerF,
+      email: "gray.patel@example.com",
+      name: "Gray Patel",
+      phone: "256-555-0106",
+      stage: "under_contract",
+      exception: null,
+      inspectionDueOffsetDays: null,
+      underContractOffsetDays: 2,
+      closingAtOffsetDays: null,
+      documents: ["purchase_agreement"],
+      seedDraftOffer: false,
+      prequalStatus: "preapproved" as const,
+      property: {
+        line1: "308 Drake Ave",
+        city: "Huntsville",
+        state: "AL",
+        postalCode: "35801",
+      },
+      owedToday: {
+        amountCents: 0,
+        currency: "USD" as const,
+        provenance: "user_entered" as const,
+        label: "Nothing due today",
+      },
+      tasks: [
+        {
+          stage: "under_contract",
+          title: "Sign purchase agreement",
+          assigneeRole: "agent",
+          status: "open",
+          blocksStage: true,
+        },
+      ] satisfies SeedBuyerTask[],
+    },
+    {
+      clerkId: SEED_CLERK_IDS.buyerG,
+      email: "harper.quinn@example.com",
+      name: "Harper Quinn",
+      phone: "256-555-0107",
+      stage: "discovery",
+      exception: null,
+      inspectionDueOffsetDays: null,
+      underContractOffsetDays: null,
+      closingAtOffsetDays: null,
+      documents: [],
+      seedDraftOffer: false,
+      prequalStatus: "none" as const,
+      property: {
+        line1: "55 Gobbs Lane",
+        city: "Gurley",
+        state: "AL",
+        postalCode: "35748",
+      },
+      owedToday: {
+        amountCents: 0,
+        currency: "USD" as const,
+        provenance: "user_entered" as const,
+        label: "Nothing due today",
+      },
+      tasks: [
+        {
+          stage: "discovery",
+          title: "Share must-haves",
+          assigneeRole: "buyer",
+          status: "open",
+          blocksStage: false,
+        },
+      ] satisfies SeedBuyerTask[],
+    },
+    {
+      clerkId: SEED_CLERK_IDS.buyerH,
+      email: "indira.shah@example.com",
+      name: "Indira Shah",
+      phone: "256-555-0108",
+      stage: "closing",
+      exception: null,
+      inspectionDueOffsetDays: null,
+      underContractOffsetDays: 40,
+      closingAtOffsetDays: 21,
+      documents: ["purchase_agreement"],
+      seedDraftOffer: false,
+      prequalStatus: "preapproved" as const,
+      property: {
+        line1: "8806 Carlton Dr",
+        city: "Madison",
+        state: "AL",
+        postalCode: "35758",
+      },
+      owedToday: {
+        amountCents: 0,
+        currency: "USD" as const,
+        provenance: "user_entered" as const,
+        label: "Nothing due today",
+      },
+      tasks: [
+        {
+          stage: "closing",
+          title: "Confirm closing appointment",
+          assigneeRole: "buyer",
+          status: "open",
+          blocksStage: true,
+        },
+      ] satisfies SeedBuyerTask[],
     },
   ],
   stages: [
@@ -155,6 +450,13 @@ export const SEED_PLAN = {
 } as const;
 
 export type SeedBuyer = (typeof SEED_PLAN.buyers)[number];
+
+export const COMMAND_CENTER_CLIENT_COUNT = SEED_PLAN.buyers.length;
+
+export const COMMAND_CENTER_EXCEPTION_NAMES = [
+  "Dana Ortiz",
+  "Ellis Park",
+] as const;
 
 export const SEED_CONCIERGE = {
   inspectionStartsAt: Date.UTC(2026, 8, 8, 15, 0, 0),

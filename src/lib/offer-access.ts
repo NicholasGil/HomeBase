@@ -117,6 +117,9 @@ export function sessionAsOfferViewer(
   if (session.role === "vendor") {
     return { clerkId: session.clerkId, role: "vendor" };
   }
+  if (session.role === "agent") {
+    return { clerkId: session.clerkId, role: "agent" };
+  }
   return {
     clerkId: session.clerkId,
     role: session.role,

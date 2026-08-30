@@ -60,6 +60,12 @@ export default async function HomePage() {
                 Buyer dashboard
               </Link>
               <Link
+                href="/agent"
+                className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
+              >
+                Command center
+              </Link>
+              <Link
                 href="/tours"
                 className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
               >

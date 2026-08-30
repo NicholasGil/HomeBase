@@ -33,9 +33,9 @@ export default async function FoundationPage() {
             Foundation data
           </h1>
           <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-            Seeded Lookout Realty has two buyers with distinct transactions and
-            one agent. Convex queries deny unauthenticated callers and deny the
-            vendor role on every transaction-scoped read.
+            Seeded Lookout Realty has eight buyers with distinct transactions
+            and one agent. Convex queries deny unauthenticated callers and deny
+            the vendor role on every transaction-scoped read.
           </p>
         </section>
 

@@ -47,3 +47,11 @@ M3 concierge: `lib/llm/` is the only model path. Prompts live in `lib/llm/prompt
 M4 showing scheduler: buyer picks sample listings and hits Build My Tour. The optimizer accounts for listing windows, appointment length, fixture drive times, buyer/agent windows, and buffers. Removing a stop re-optimizes the remainder. Post-showing verdicts write to `showingFeedback`.
 
 There is no production Routes API key in this repo. Local and CI use the named fixture distance path. Vercel production without `GOOGLE_MAPS_ROUTES_API_KEY` fail-closes. That credential stays on needs-human #1.
+
+## P3
+
+M5–M7 offer center, cost simulator, and contract explainer. Seeded offers stay draft until a licensee reviews them. Every figure carries provenance. Explainer describes only.
+
+## P4
+
+M8 agent command center: Casey Holt's eight assigned clients, stage at a glance, and a daily list that puts exception files first. Buyers and vendors cannot load `/agent`. Flags stay off.

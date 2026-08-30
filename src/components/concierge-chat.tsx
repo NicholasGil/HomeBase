@@ -84,7 +84,11 @@ export function ConciergeChat() {
             onChange={(event) => setQuestion(event.target.value)}
             placeholder="Ask about this transaction"
           />
-          <Button type="submit" disabled={busy || question.trim().length === 0}>
+          <Button
+            type="submit"
+            data-testid="concierge-ask"
+            disabled={busy || question.trim().length === 0}
+          >
             Ask
           </Button>
         </form>

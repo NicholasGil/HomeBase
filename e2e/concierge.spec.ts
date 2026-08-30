@@ -15,7 +15,7 @@ test("concierge answers a seed question and refuses another client", async ({
   await page.getByTestId("concierge-question").fill(
     "What happens next on Blair Chen's file?",
   );
-  await page.getByRole("button", { name: "Ask" }).click();
+  await page.getByTestId("concierge-ask").click();
   await expect(page.getByTestId("concierge-answer")).toHaveAttribute(
     "data-kind",
     "refuse",

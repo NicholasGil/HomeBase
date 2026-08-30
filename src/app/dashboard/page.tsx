@@ -8,8 +8,10 @@ import { LiveBuyerDashboard } from "@/components/live-buyer-dashboard";
 import { QueryErrorBoundary } from "@/components/query-error-boundary";
 import { ConciergeChat } from "@/components/concierge-chat";
 import { FixtureVault } from "@/components/document-vault";
+import { ContractExplainer } from "@/components/contract-explainer";
 import { FixtureOfferCenter } from "@/components/offer-center";
 import { FixtureTourBuilder } from "@/components/tour-builder";
+import { loadFixtureExplainer } from "@/app/actions/explainer";
 import { loadFixtureOffers } from "@/app/actions/offers";
 import { loadFixtureTours } from "@/app/actions/tours";
 import {
@@ -50,6 +52,7 @@ export default async function DashboardPage() {
     }
     const tours = await loadFixtureTours();
     const offers = await loadFixtureOffers();
+    const explainer = await loadFixtureExplainer();
     return (
       <AppShell>
         <div className="space-y-10">
@@ -64,6 +67,11 @@ export default async function DashboardPage() {
           <FixtureOfferCenter
             denied={!offers.ok}
             center={offers.ok ? offers.center : null}
+          />
+          <ContractExplainer
+            denied={!explainer.sections.ok}
+            sections={explainer.sections.ok ? explainer.sections.sections : []}
+            thread={explainer.thread}
           />
           <FixtureVault />
           <ConciergeChat />

@@ -109,6 +109,45 @@ export const ask = mutation({
   },
 });
 
+export async function writeConciergeTurn(
+  ctx: MutationCtx,
+  input: {
+    transactionId: Id<"transactions">;
+    actorId: Id<"users">;
+    question: string;
+    answer: string;
+    kind: "answer" | "refuse" | "ask_agent";
+  },
+) {
+  const now = Date.now();
+  const existing = await ctx.db
+    .query("conciergeThreads")
+    .withIndex("by_transaction", (q) =>
+      q.eq("transactionId", input.transactionId),
+    )
+    .unique();
+  const messages = [
+    ...(existing?.messages ?? []),
+    { role: "user" as const, content: input.question, at: now },
+    { role: "assistant" as const, content: input.answer, at: now },
+  ];
+  if (existing === null) {
+    await ctx.db.insert("conciergeThreads", {
+      transactionId: input.transactionId,
+      messages,
+    });
+  } else {
+    await ctx.db.patch(existing._id, { messages });
+  }
+  await appendAuditLog(ctx, {
+    actorId: input.actorId,
+    action: "concierge.asked",
+    targetType: "transaction",
+    targetId: input.transactionId,
+    meta: { kind: input.kind },
+  });
+}
+
 export const appendTurn = mutation({
   args: {
     transactionId: v.id("transactions"),
@@ -122,32 +161,12 @@ export const appendTurn = mutation({
   },
   handler: async (ctx, args) => {
     const { user } = await requireTransactionAccess(ctx, args.transactionId);
-    const now = Date.now();
-    const existing = await ctx.db
-      .query("conciergeThreads")
-      .withIndex("by_transaction", (q) =>
-        q.eq("transactionId", args.transactionId),
-      )
-      .unique();
-    const messages = [
-      ...(existing?.messages ?? []),
-      { role: "user" as const, content: args.question, at: now },
-      { role: "assistant" as const, content: args.answer, at: now },
-    ];
-    if (existing === null) {
-      await ctx.db.insert("conciergeThreads", {
-        transactionId: args.transactionId,
-        messages,
-      });
-    } else {
-      await ctx.db.patch(existing._id, { messages });
-    }
-    await appendAuditLog(ctx, {
+    await writeConciergeTurn(ctx, {
+      transactionId: args.transactionId,
       actorId: user._id,
-      action: "concierge.asked",
-      targetType: "transaction",
-      targetId: args.transactionId,
-      meta: { kind: args.kind },
+      question: args.question,
+      answer: args.answer,
+      kind: args.kind,
     });
     return { ok: true };
   },

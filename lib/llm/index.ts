@@ -2,17 +2,24 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 
 import { answerConcierge } from "./answerConcierge";
+import { explainAllSections } from "../../convex/lib/explainContract";
 import { asksAboutAnotherClient } from "./guardrails";
 import { redactPii } from "./redact";
 import type { ConciergeAnswer, ConciergeFact } from "./types";
 
 export { answerConcierge } from "./answerConcierge";
+export {
+  agentQuestionForSection,
+  explainAllSections,
+  explainSection,
+} from "./explainContract";
 export { redactPii } from "./redact";
 export type { ConciergeAnswer, ConciergeFact } from "./types";
 export { CANONICAL_QUESTIONS } from "./types";
 
 const PROMPT_FILES = {
   "concierge.v1": "prompts/concierge.v1.txt",
+  "explainer.v1": "prompts/explainer.v1.txt",
 } as const;
 
 export type PromptId = keyof typeof PROMPT_FILES;
@@ -50,4 +57,9 @@ export function completeConcierge(input: {
 
   void loadPrompt("concierge.v1");
   return answerConcierge(question, facts);
+}
+
+export function completeExplainer() {
+  void loadPrompt("explainer.v1");
+  return explainAllSections();
 }

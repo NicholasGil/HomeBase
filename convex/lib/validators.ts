@@ -133,6 +133,11 @@ export const showingVerdictValidator = v.union(
   v.literal("no"),
 );
 
+export const propertySignalKindValidator = v.union(
+  v.literal("save"),
+  v.literal("dislike"),
+);
+
 export const coordinatesValidator = v.object({
   lat: v.number(),
   lng: v.number(),

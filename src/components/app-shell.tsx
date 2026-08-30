@@ -22,6 +22,9 @@ export function AppShell({
             <Link href="/agent" className={cn(buttonVariants({ variant: "ghost" }))}>
               Command center
             </Link>
+            <Link href="/search" className={cn(buttonVariants({ variant: "ghost" }))}>
+              Search
+            </Link>
             <Link href="/tours" className={cn(buttonVariants({ variant: "ghost" }))}>
               Tours
             </Link>

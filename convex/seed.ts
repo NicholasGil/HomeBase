@@ -7,6 +7,7 @@ import {
   SEED_OFFER_AS_OF,
   SEED_OFFER_MARKET,
   SEED_PLAN,
+  SEED_SEARCH,
   SEED_TOUR,
   SEED_VENDORS,
 } from "./seedPlan";
@@ -397,6 +398,21 @@ export const run = internalMutation({
         showingDurationMinutes: SEED_TOUR.appointmentLengthMinutes,
         availabilityWindows: [...SEED_TOUR.propertyWindows],
         listPrice: { ...SEED_OFFER_MARKET.tourListPrices[listing.id] },
+        listedAt: SEED_OFFER_MARKET.cedar.listedAt,
+        priceReductions: [],
+      });
+    }
+
+    for (const listing of SEED_SEARCH.properties) {
+      await ctx.db.insert("properties", {
+        address: listing.address,
+        specs: listing.specs,
+        media: [],
+        source: listing.source,
+        mlsId: "mlsId" in listing ? listing.mlsId : undefined,
+        coordinates: listing.coordinates,
+        brief: listing.brief,
+        listPrice: { ...listing.listPrice },
         listedAt: SEED_OFFER_MARKET.cedar.listedAt,
         priceReductions: [],
       });

@@ -37,6 +37,7 @@ const propertySpecsValidator = v.object({
   baths: v.optional(v.number()),
   sqft: v.optional(v.number()),
   lotAcres: v.optional(v.number()),
+  garageSpaces: v.optional(v.number()),
   yearBuilt: v.optional(v.number()),
 });
 
@@ -229,6 +230,17 @@ export default defineSchema({
     }),
     notes: v.optional(v.string()),
   }).index("by_tourStop", ["tourStopId"]),
+
+  // M9. Saves and dislikes for ranking. Tours and showingFeedback
+  // already exist; this is the missing pair from DESIGN.md M9.
+  propertySignals: defineTable({
+    clientId: v.id("clients"),
+    propertyId: v.id("properties"),
+    kind: v.union(v.literal("save"), v.literal("dislike")),
+    at: v.number(),
+  })
+    .index("by_client", ["clientId"])
+    .index("by_client_property", ["clientId", "propertyId"]),
 
   comps: defineTable({
     propertyId: v.id("properties"),

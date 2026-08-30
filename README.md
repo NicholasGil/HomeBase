@@ -65,3 +65,9 @@ M10 vendor directory and portal. Inspection-stage buyers see inspectors with com
 M11 e-signature and M12 identity. The app owns the Prepare → Explain (M7) → Agent Review → Buyer Review → Verify → Sign → Audit Trail → Storage → advance-stage workflow, plus the audit log and retention timestamp. The sandbox adapter never calls Dropbox Sign or DocuSign and never reads an API key. `FLAG_ESIGN` stays off; provider send/sign fail closed.
 
 M12 tier 1 is device unlock. No face or biometric template is stored or sent. Tier 2 is vendor IDV for financial documents, designated execution, and recovery changes. `FLAG_IDV` stays off. The per-state table is empty until review. High-risk actions fail closed. Production keys stay on needs-human #1.
+
+## P7
+
+M9 conversational property search. A deterministic parser turns the canonical query (`4-bedroom under $450k, some land, good garage, ~20 minutes from town`) into structured criteria. Results are ranked sample listings, each with a stated reason. Saves, dislikes, tours, and M4 showing feedback change later rank order.
+
+`FLAG_MLS` stays off. Search runs against manual/CSV seed inventory labeled sample data. The licensed-feed branch is closed and empty. This repo does not scrape listing sites and does not install an MLS/IDX client.

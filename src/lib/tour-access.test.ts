@@ -24,6 +24,16 @@ const fourIds = [
 ];
 
 describe("fixture tour access", () => {
+  it("returns EMPTY when no listings are selected", () => {
+    expect(
+      buildFixtureTour({
+        viewer: blair,
+        propertyIds: [],
+        state: { tours: [] },
+      }),
+    ).toEqual({ ok: false, reason: "EMPTY" });
+  });
+
   it("denies unauthenticated and vendor readers", () => {
     expect(listFixtureCandidates(null)).toEqual({
       ok: false,

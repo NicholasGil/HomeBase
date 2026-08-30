@@ -31,7 +31,11 @@ import { tripStackClassName } from "@/lib/trip-ui";
 
 export const dynamic = "force-dynamic";
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ notice?: string; gate?: string }>;
+}) {
   if (mustFailClosed()) {
     throw new ProductionAuthMisconfiguredError();
   }
@@ -56,7 +60,7 @@ export default async function DashboardPage() {
       throw new Error("fixture mode requires a test session");
     }
     if (session.role === "vendor") {
-      redirect("/vault");
+      redirect("/vendor");
     }
     if (session.role === "agent") {
       redirect("/agent");
@@ -64,6 +68,7 @@ export default async function DashboardPage() {
     if (session.role !== "buyer") {
       throw new Error("fixture mode requires a buyer session");
     }
+    const params = await searchParams;
     const tours = await loadFixtureTours();
     const offers = await loadFixtureOffers();
     const explainer = await loadFixtureExplainer();
@@ -86,10 +91,13 @@ export default async function DashboardPage() {
           ) : null}
           <FixtureTourBuilder
             tours={tours.tours.ok ? tours.tours.tours : []}
+            notice={params.notice}
+            returnTo="/dashboard"
           />
           <FixtureOfferCenter
             denied={!offers.ok}
             center={offers.ok ? offers.center : null}
+            gateFromSubmit={params.gate}
           />
           <ContractExplainer
             denied={!explainer.sections.ok}

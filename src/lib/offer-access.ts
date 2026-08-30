@@ -10,7 +10,9 @@ import {
   type MoneyFigure,
   type OfferTerms,
 } from "../../convex/lib/offerModel";
+import { ESIGN_NOT_ENABLED } from "../../convex/lib/esign";
 import { SEED_CLERK_IDS, SEED_OFFER_AS_OF } from "../../convex/seedPlan";
+import { getFeatureFlags } from "@/lib/flags";
 import {
   alexSeedOffer,
   competingInventoryCount,
@@ -283,8 +285,15 @@ export function submitFixtureOffer(input: {
   | { ok: true; center: OfferCenterView; state: FixtureOfferState }
   | {
       ok: false;
-      reason: "UNAUTHENTICATED" | "FORBIDDEN" | typeof LICENSEE_REVIEW_REQUIRED;
+      reason:
+        | "UNAUTHENTICATED"
+        | "FORBIDDEN"
+        | typeof LICENSEE_REVIEW_REQUIRED
+        | typeof ESIGN_NOT_ENABLED;
     } {
+  if (!getFeatureFlags().FLAG_ESIGN) {
+    return { ok: false, reason: ESIGN_NOT_ENABLED };
+  }
   const ensured = ensureFixtureDraft(input);
   if (!ensured.ok) {
     return ensured;

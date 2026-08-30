@@ -62,7 +62,7 @@ test("other buyer, vendor, and unauthenticated callers are denied", async ({
 
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Jordan Hale" }).click();
-  await expect(page).toHaveURL(/\/vault$/);
+  await expect(page).toHaveURL(/\/vendor$/);
   await page.goto("/homeownership/seed:buyer-h");
   await expect(page.getByTestId("homeownership-hub-denied")).toBeVisible();
   await expect(page.getByTestId("homeownership-hub")).toHaveCount(0);
@@ -103,7 +103,7 @@ test("retained hub documents stay grant-gated on open", async ({ page }) => {
 
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Jordan Hale" }).click();
-  await expect(page).toHaveURL(/\/vault$/);
+  await expect(page).toHaveURL(/\/vendor$/);
   await page.goto("/documents/seed-doc-closing-disclosure");
   await expect(page.getByTestId("document-denied")).toBeVisible();
 });

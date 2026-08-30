@@ -5,6 +5,8 @@ import {
   listFixtureDocuments,
   resolveFixtureDocument,
   revokeFixtureGrant,
+  vaultAuditForViewer,
+  vaultGrantsForViewer,
 } from "@/lib/document-access";
 import { SEED_DOCUMENT_IDS } from "@/lib/seed-documents";
 import { SEED_CLERK_IDS } from "../../convex/seedPlan";
@@ -153,6 +155,53 @@ describe("fixture document access", () => {
         grants: [],
       }),
     ).toEqual({ ok: false, reason: "FORBIDDEN" });
+  });
+
+  it("scopes vault grants and audit to the vendor assignment", () => {
+    const granted = grantFixtureDocument({
+      viewer: alex,
+      documentId: SEED_DOCUMENT_IDS.preapproval,
+      granteeClerkId: SEED_CLERK_IDS.lender,
+      grants: [],
+    });
+    expect(granted.ok).toBe(true);
+    if (!granted.ok) {
+      throw new Error("grant failed");
+    }
+    const otherBuyerAudit = [
+      {
+        actorClerkId: SEED_CLERK_IDS.buyerH,
+        action: "document.granted",
+        documentId: SEED_DOCUMENT_IDS.closingDisclosure,
+        at: Date.now(),
+      },
+      {
+        actorClerkId: SEED_CLERK_IDS.buyerA,
+        action: "document.granted",
+        documentId: SEED_DOCUMENT_IDS.preapproval,
+        at: Date.now(),
+      },
+    ];
+    expect(
+      vaultAuditForViewer({
+        viewer: jordan,
+        grants: granted.grants,
+        audit: otherBuyerAudit,
+      }).map((entry) => entry.documentId),
+    ).toEqual([SEED_DOCUMENT_IDS.preapproval]);
+    expect(
+      vaultGrantsForViewer({
+        viewer: jordan,
+        grants: granted.grants,
+      }).map((grant) => grant.documentId),
+    ).toEqual([SEED_DOCUMENT_IDS.preapproval]);
+    expect(
+      vaultAuditForViewer({
+        viewer: jordan,
+        grants: [],
+        audit: otherBuyerAudit,
+      }),
+    ).toEqual([]);
   });
 
   it("denies an unauthenticated open", () => {

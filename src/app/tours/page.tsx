@@ -57,6 +57,7 @@ export default async function ToursPage({
           denied={denied}
           tours={loaded.tours.ok ? loaded.tours.tours : []}
           notice={params.notice}
+          returnTo="/tours"
         />
       </AppShell>
     );

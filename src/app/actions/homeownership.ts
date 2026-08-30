@@ -46,7 +46,7 @@ export async function reengageFixtureVendorFromForm(formData: FormData) {
   const vendorId = formData.get("vendorId");
   const compensationModel = formData.get("compensationModel");
   if (typeof transactionId !== "string" || typeof vendorId !== "string") {
-    throw new Error("FORBIDDEN");
+    redirect(`/homeownership/${typeof transactionId === "string" ? transactionId : ""}`);
   }
   const session = await getTestSession();
   const reengaged = await readReengagedVendorIds();
@@ -61,7 +61,7 @@ export async function reengageFixtureVendorFromForm(formData: FormData) {
     reengaged,
   );
   if (!result.ok) {
-    throw new Error(result.reason);
+    redirect(`/homeownership/${transactionId}`);
   }
   await writeReengagedVendorIds(
     result.view.vendors

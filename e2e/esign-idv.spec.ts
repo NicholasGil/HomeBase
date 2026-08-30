@@ -54,7 +54,7 @@ test("feature flags stay off including e-sign and idv", async ({ page }) => {
 test("vendor cannot open the signature or identity pages", async ({ page }) => {
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Jordan Hale" }).click();
-  await expect(page).toHaveURL(/\/vault$/);
+  await expect(page).toHaveURL(/\/vendor$/);
   await page.goto("/sign");
   await expect(page.getByTestId("esign-denied")).toBeVisible();
   await page.goto("/identity");

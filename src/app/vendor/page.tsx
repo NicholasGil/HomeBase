@@ -17,7 +17,11 @@ import { loadSeedPortalForViewer } from "@/lib/vendor-access";
 
 export const dynamic = "force-dynamic";
 
-export default async function VendorPage() {
+export default async function VendorPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ notice?: string }>;
+}) {
   if (mustFailClosed()) {
     throw new ProductionAuthMisconfiguredError();
   }
@@ -50,6 +54,7 @@ export default async function VendorPage() {
         </AppShell>
       );
     }
+    const params = await searchParams;
     return (
       <AppShell>
         <VendorPortalView
@@ -57,6 +62,7 @@ export default async function VendorPage() {
           assignments={loaded.assignments}
           state={loaded.state}
           expired={loaded.expired}
+          notice={params.notice}
         />
       </AppShell>
     );

@@ -36,7 +36,7 @@ export async function loadFixtureExplainer() {
 export async function askAboutSectionFromForm(formData: FormData) {
   const sectionId = formData.get("sectionId");
   if (typeof sectionId !== "string") {
-    throw new Error("UNKNOWN_SECTION");
+    redirect("/offers?notice=denied");
   }
   const session = await getTestSession();
   const result = askFixtureSection({
@@ -45,7 +45,7 @@ export async function askAboutSectionFromForm(formData: FormData) {
     thread: await readThread(),
   });
   if (!result.ok) {
-    throw new Error(result.reason);
+    redirect("/offers?notice=denied");
   }
   await writeThread(result.thread);
   redirect("/offers");

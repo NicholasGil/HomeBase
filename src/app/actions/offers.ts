@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { getTestSession } from "@/app/actions/test-session";
+import { ESIGN_NOT_ENABLED } from "../../../convex/lib/esign";
 import {
   FIXTURE_OFFER_COOKIE,
   ensureFixtureDraft,
@@ -50,8 +51,11 @@ export async function submitOfferFromForm() {
   if (!result.ok && result.reason === "LICENSEE_REVIEW_REQUIRED") {
     redirect("/offers?gate=LICENSEE_REVIEW_REQUIRED");
   }
+  if (!result.ok && result.reason === ESIGN_NOT_ENABLED) {
+    redirect(`/offers?gate=${ESIGN_NOT_ENABLED}`);
+  }
   if (!result.ok) {
-    throw new Error(result.reason);
+    redirect("/offers?gate=denied");
   }
   redirect("/offers");
 }

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { SEED_CLERK_IDS } from "../../convex/seedPlan";
 import {
+  fixtureHomePath,
   loadSeedTransactionForViewer,
   parseTestSessionCookie,
   startTestSessionDecision,
@@ -37,6 +38,12 @@ describe("test session permission", () => {
       ok: false,
       reason: "FORBIDDEN",
     });
+    if (lender.ok) {
+      expect(fixtureHomePath(lender.session)).toBe("/vendor");
+    }
+    if (agent.ok) {
+      expect(fixtureHomePath(agent.session)).toBe("/agent");
+    }
   });
 
   it("starts a buyer session outside production", () => {

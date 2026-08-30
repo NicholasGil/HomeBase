@@ -187,6 +187,59 @@ export function grantFixtureDocument(input: {
   return { ok: true, grants: [...input.grants, next] };
 }
 
+export function vaultAuditForViewer(input: {
+  viewer: FixtureViewer | null;
+  grants: FixtureGrant[];
+  audit: FixtureAuditEntry[];
+  now?: number;
+}): FixtureAuditEntry[] {
+  if (input.viewer === null) {
+    return [];
+  }
+  const visibleIds = new Set<string>(
+    listFixtureDocuments({
+      viewer: input.viewer,
+      grants: input.grants,
+      now: input.now,
+    }).map((document) => document.id),
+  );
+  const grantDocIds = new Set(
+    input.grants
+      .filter((grant) => grant.granteeClerkId === input.viewer?.clerkId)
+      .map((grant) => grant.documentId),
+  );
+  return input.audit.filter((entry) => {
+    if (entry.actorClerkId === input.viewer?.clerkId) {
+      return true;
+    }
+    if (visibleIds.has(entry.documentId) || grantDocIds.has(entry.documentId)) {
+      return true;
+    }
+    return false;
+  });
+}
+
+export function vaultGrantsForViewer(input: {
+  viewer: FixtureViewer | null;
+  grants: FixtureGrant[];
+}): FixtureGrant[] {
+  if (input.viewer === null) {
+    return [];
+  }
+  if (input.viewer.role === "buyer" || input.viewer.role === "agent") {
+    return input.grants.filter((grant) => {
+      if (!isSeedDocumentId(grant.documentId)) {
+        return false;
+      }
+      const document = SEED_DOCUMENTS[grant.documentId];
+      return isDocumentPrincipal(input.viewer as FixtureViewer, document);
+    });
+  }
+  return input.grants.filter(
+    (grant) => grant.granteeClerkId === input.viewer?.clerkId,
+  );
+}
+
 export function revokeFixtureGrant(input: {
   viewer: FixtureViewer | null;
   grantId: string;

@@ -16,6 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { SeedAssignment } from "@/lib/seed-vendors";
+import { ActionNotice } from "@/components/action-notice";
 import type { FixtureVendorPortalState } from "@/lib/vendor-access";
 
 export function VendorPortalDenied() {
@@ -31,11 +32,13 @@ export function VendorPortalView({
   assignments,
   state,
   expired,
+  notice,
 }: {
   vendorName: string;
   assignments: SeedAssignment[];
   state: FixtureVendorPortalState;
   expired: boolean;
+  notice?: string;
 }) {
   return (
     <div className="space-y-8" data-testid="vendor-portal">
@@ -46,6 +49,8 @@ export function VendorPortalView({
           Signed in as {vendorName}. One assigned file. Compensation is none.
         </p>
       </section>
+
+      <ActionNotice notice={notice} />
 
       {expired || assignments.length === 0 ? (
         <Card data-testid="vendor-access-expired">
@@ -110,7 +115,11 @@ function AssignmentPanel({
               {message.authorName}: {message.body}
             </p>
           ))}
-          <form action={sendFixtureVendorMessageFromForm} className="space-y-2">
+          <form
+            action={sendFixtureVendorMessageFromForm}
+            className="space-y-2"
+            data-testid="vendor-message-form"
+          >
             <input
               type="hidden"
               name="assignmentId"
@@ -121,8 +130,11 @@ function AssignmentPanel({
               rows={3}
               className="w-full rounded-md border bg-background px-3 py-2 text-sm"
               placeholder="Message the file"
+              data-testid="vendor-message-body"
             />
-            <Button type="submit">Send message</Button>
+            <Button type="submit" data-testid="vendor-send-message">
+              Send message
+            </Button>
           </form>
         </CardContent>
       </Card>

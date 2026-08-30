@@ -10,7 +10,9 @@ import {
   moneyFigureValidator,
   offerStatusValidator,
   offerStrategyValidator,
+  offerTermsValidator,
   prequalStatusValidator,
+  priceReductionValidator,
   propertySourceValidator,
   roleValidator,
   showingVerdictValidator,
@@ -90,6 +92,10 @@ export default defineSchema({
     brief: v.optional(v.string()),
     showingDurationMinutes: v.optional(v.number()),
     availabilityWindows: v.optional(v.array(availabilityWindowValidator)),
+    // Proposed DESIGN.md addition: listing history for M5 market context.
+    listPrice: v.optional(moneyFigureValidator),
+    listedAt: v.optional(v.number()),
+    priceReductions: v.optional(v.array(priceReductionValidator)),
   }),
 
   transactions: defineTable({
@@ -230,11 +236,7 @@ export default defineSchema({
 
   offers: defineTable({
     transactionId: v.id("transactions"),
-    terms: v.object({
-      price: moneyFigureValidator,
-      earnestMoney: v.optional(moneyFigureValidator),
-      closingDate: v.optional(v.number()),
-    }),
+    terms: offerTermsValidator,
     status: offerStatusValidator,
     reviewedByLicenseeId: v.optional(v.id("users")),
     submittedAt: v.optional(v.number()),
@@ -243,9 +245,7 @@ export default defineSchema({
   offerScenarios: defineTable({
     offerId: v.id("offers"),
     strategy: offerStrategyValidator,
-    terms: v.object({
-      price: moneyFigureValidator,
-    }),
+    terms: offerTermsValidator,
     modeledOutcome: v.object({
       cashToClose: moneyFigureValidator,
       monthlyPayment: moneyFigureValidator,

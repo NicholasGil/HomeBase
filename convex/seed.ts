@@ -1,7 +1,12 @@
 import { internalMutation } from "./_generated/server";
 import { appendAuditLog } from "./lib/audit";
 import { DEFAULT_FEATURE_FLAGS } from "./lib/validators";
-import { SEED_CONCIERGE, SEED_PLAN, SEED_TOUR } from "./seedPlan";
+import {
+  SEED_CONCIERGE,
+  SEED_OFFER_MARKET,
+  SEED_PLAN,
+  SEED_TOUR,
+} from "./seedPlan";
 
 export const run = internalMutation({
   args: {},
@@ -89,12 +94,33 @@ export const run = internalMutation({
         availabilityWindows: [...SEED_TOUR.buyerWindows],
       });
 
+      const market =
+        buyer.clerkId === "clerk_buyer_a"
+          ? SEED_OFFER_MARKET.maple
+          : SEED_OFFER_MARKET.cedar;
       const propertyId = await ctx.db.insert("properties", {
         address: buyer.property,
         specs: { beds: 3, baths: 2, sqft: 1800 },
         media: [],
         source: "manual",
+        listPrice: { ...market.listPrice },
+        listedAt: market.listedAt,
+        priceReductions: market.priceReductions.map((row) => ({
+          reducedAt: row.reducedAt,
+          previousPrice: { ...row.previousPrice },
+          newPrice: { ...row.newPrice },
+        })),
       });
+      for (const comp of market.comps) {
+        await ctx.db.insert("comps", {
+          propertyId,
+          address: { ...comp.address },
+          soldPrice: { ...comp.soldPrice },
+          soldDate: comp.soldDate,
+          specs: { ...comp.specs },
+          source: comp.source,
+        });
+      }
 
       const transactionId = await ctx.db.insert("transactions", {
         orgId,
@@ -195,7 +221,7 @@ export const run = internalMutation({
               label: "Seller counter, up from $420,000",
             },
           },
-          status: "submitted",
+          status: "draft",
         });
         const vendorId = await ctx.db.insert("vendors", {
           orgId,
@@ -251,6 +277,9 @@ export const run = internalMutation({
         brief: listing.brief,
         showingDurationMinutes: SEED_TOUR.appointmentLengthMinutes,
         availabilityWindows: [...SEED_TOUR.propertyWindows],
+        listPrice: { ...SEED_OFFER_MARKET.tourListPrices[listing.id] },
+        listedAt: SEED_OFFER_MARKET.cedar.listedAt,
+        priceReductions: [],
       });
     }
 

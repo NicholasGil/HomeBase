@@ -164,6 +164,98 @@ export const SEED_CONCIERGE = {
   lenderName: "Jordan Hale",
 } as const;
 
+export const SEED_OFFER_AS_OF = Date.UTC(2026, 7, 30, 12, 0, 0);
+
+const DAY_MS = 86_400_000;
+
+function sampleMoney(amountCents: number, label: string) {
+  return {
+    amountCents,
+    currency: "USD" as const,
+    provenance: "user_entered" as const,
+    asOf: SEED_OFFER_AS_OF,
+    label,
+  };
+}
+
+export const SEED_OFFER_MARKET = {
+  sampleLabel: "sample data",
+  maple: {
+    listPrice: sampleMoney(42500000, "List price · sample data"),
+    listedAt: SEED_OFFER_AS_OF - 18 * DAY_MS,
+    priceReductions: [
+      {
+        reducedAt: SEED_OFFER_AS_OF - 6 * DAY_MS,
+        previousPrice: sampleMoney(43500000, "Prior list · sample data"),
+        newPrice: sampleMoney(42500000, "Reduced list · sample data"),
+      },
+    ],
+    comps: [
+      {
+        address: {
+          line1: "802 Maple Ave",
+          city: "Huntsville",
+          state: "AL",
+          postalCode: "35801",
+        },
+        soldPrice: sampleMoney(41800000, "Sold comp · sample data"),
+        soldDate: SEED_OFFER_AS_OF - 40 * DAY_MS,
+        specs: { beds: 3, baths: 2, sqft: 1720 },
+        source: "sample data",
+      },
+      {
+        address: {
+          line1: "19 Clinton Dr",
+          city: "Huntsville",
+          state: "AL",
+          postalCode: "35801",
+        },
+        soldPrice: sampleMoney(42900000, "Sold comp · sample data"),
+        soldDate: SEED_OFFER_AS_OF - 22 * DAY_MS,
+        specs: { beds: 3, baths: 2, sqft: 1880 },
+        source: "sample data",
+      },
+    ],
+  },
+  cedar: {
+    listPrice: sampleMoney(41000000, "List price · sample data"),
+    listedAt: SEED_OFFER_AS_OF - 12 * DAY_MS,
+    priceReductions: [] as const,
+    comps: [
+      {
+        address: {
+          line1: "14 Cedar Trail",
+          city: "Madison",
+          state: "AL",
+          postalCode: "35758",
+        },
+        soldPrice: sampleMoney(39900000, "Sold comp · sample data"),
+        soldDate: SEED_OFFER_AS_OF - 28 * DAY_MS,
+        specs: { beds: 3, baths: 2, sqft: 1760 },
+        source: "sample data",
+      },
+      {
+        address: {
+          line1: "101 Hughes Rd",
+          city: "Madison",
+          state: "AL",
+          postalCode: "35758",
+        },
+        soldPrice: sampleMoney(41500000, "Sold comp · sample data"),
+        soldDate: SEED_OFFER_AS_OF - 15 * DAY_MS,
+        specs: { beds: 4, baths: 2, sqft: 2010 },
+        source: "sample data",
+      },
+    ],
+  },
+  tourListPrices: {
+    "seed-listing-oakwood": sampleMoney(38900000, "List price · sample data"),
+    "seed-listing-madison": sampleMoney(46500000, "List price · sample data"),
+    "seed-listing-harvest": sampleMoney(42900000, "List price · sample data"),
+    "seed-listing-decatur": sampleMoney(35500000, "List price · sample data"),
+  },
+} as const;
+
 /** Saturday 12 Sep 2026. CDT is UTC-5, so 10:00 CDT = 15:00 UTC. */
 function cdtOnTourSaturday(hour: number, minute = 0) {
   return Date.UTC(2026, 8, 12, hour + 5, minute, 0);

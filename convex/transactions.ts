@@ -2,8 +2,15 @@ import { v } from "convex/values";
 
 import type { Doc, Id } from "./_generated/dataModel";
 import type { QueryCtx } from "./_generated/server";
-import { query } from "./_generated/server";
-import { requireTransactionAccess, requireTransactionReadRole } from "./lib/authz";
+import { mutation, query } from "./_generated/server";
+import { appendAuditLog } from "./lib/audit";
+import {
+  assertRole,
+  requireTransactionAccess,
+  requireTransactionReadRole,
+} from "./lib/authz";
+import { nextStageAfter, openBlockingTasks } from "./lib/journeyLogic";
+import { STAGE_ADVANCE_ROLES } from "./lib/validators";
 
 export const listMine = query({
   args: {},
@@ -22,6 +29,68 @@ export const get = query({
       args.transactionId,
     );
     return await toSummary(ctx, transaction);
+  },
+});
+
+export const advanceStage = mutation({
+  args: { transactionId: v.id("transactions") },
+  handler: async (ctx, args) => {
+    const { user, membership, transaction } = await requireTransactionAccess(
+      ctx,
+      args.transactionId,
+    );
+    assertRole(membership, STAGE_ADVANCE_ROLES);
+
+    const [stages, tasks] = await Promise.all([
+      ctx.db
+        .query("journeyStages")
+        .withIndex("by_org", (q) => q.eq("orgId", transaction.orgId))
+        .collect(),
+      ctx.db
+        .query("tasks")
+        .withIndex("by_transaction", (q) =>
+          q.eq("transactionId", args.transactionId),
+        )
+        .collect(),
+    ]);
+
+    const blockers = openBlockingTasks(tasks, transaction.stage);
+    if (blockers.length > 0) {
+      throw new Error("STAGE_BLOCKED");
+    }
+
+    const next = nextStageAfter(stages, transaction.stage);
+    if (next === null) {
+      throw new Error("NO_NEXT_STAGE");
+    }
+
+    await ctx.db.patch(args.transactionId, { stage: next.key });
+
+    const nextConfig = stages.find((stage) => stage.key === next.key);
+    const existingOnNext = tasks.filter((task) => task.stage === next.key);
+    if (nextConfig !== undefined && existingOnNext.length === 0) {
+      for (const template of nextConfig.defaultTasks) {
+        await ctx.db.insert("tasks", {
+          transactionId: args.transactionId,
+          stage: next.key,
+          title: template.title,
+          assigneeRole: template.assigneeRole,
+          blockedBy: [],
+          status: "open",
+          blocksStage: template.blocksStage,
+        });
+      }
+    }
+
+    await appendAuditLog(ctx, {
+      actorId: user._id,
+      action: "transaction.stage_advanced",
+      targetType: "transaction",
+      targetId: args.transactionId,
+      meta: { from: transaction.stage, to: next.key },
+    });
+
+    return { from: transaction.stage, to: next.key };
   },
 });
 

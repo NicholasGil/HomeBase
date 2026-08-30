@@ -17,5 +17,11 @@ export async function loadFoundation() {
       stage: buyer.stage,
       owedToday: buyer.owedToday,
     })),
+    stages: SEED_PLAN.stages.map((stage) => ({
+      key: stage.key,
+      label: stage.label,
+      order: stage.order,
+      defaultTasks: stage.defaultTasks,
+    })),
   };
 }

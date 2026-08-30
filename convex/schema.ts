@@ -108,6 +108,7 @@ export default defineSchema({
       v.object({
         title: v.string(),
         assigneeRole: roleValidator,
+        blocksStage: v.boolean(),
       }),
     ),
   })
@@ -122,6 +123,7 @@ export default defineSchema({
     dueDate: v.optional(v.number()),
     blockedBy: v.array(v.id("tasks")),
     status: taskStatusValidator,
+    blocksStage: v.boolean(),
   }).index("by_transaction", ["transactionId"]),
 
   documents: defineTable({

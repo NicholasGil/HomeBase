@@ -83,6 +83,42 @@ export default async function FoundationPage() {
         <section>
           <Card>
             <CardHeader>
+              <CardTitle>Org-configurable stages</CardTitle>
+              <CardDescription>
+                Lookout Realty&apos;s journey. Broker and admin can replace this
+                list. Stage advance is blocked while a blocking task is open.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {foundation.stages.map((stage) => (
+                <div
+                  key={stage.key}
+                  className="flex items-start justify-between gap-3 rounded-lg border px-3 py-2"
+                >
+                  <div>
+                    <p className="text-sm font-medium">{stage.label}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {stage.defaultTasks.length === 0
+                        ? "No default tasks"
+                        : stage.defaultTasks
+                            .map((task) =>
+                              task.blocksStage
+                                ? `${task.title} (blocks)`
+                                : task.title,
+                            )
+                            .join(" · ")}
+                    </p>
+                  </div>
+                  <Badge variant="outline">{String(stage.order).padStart(2, "0")}</Badge>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </section>
+
+        <section>
+          <Card>
+            <CardHeader>
               <CardTitle>Flags on the seeded org</CardTitle>
               <CardDescription>
                 Stored on orgs.flags and default off. Same keys as the home page.

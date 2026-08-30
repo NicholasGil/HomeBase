@@ -3,6 +3,7 @@
 import { useQuery } from "convex/react";
 
 import { BuyerDashboardViewPanel } from "@/components/buyer-dashboard-view";
+import { StageAdvancePanel } from "@/components/stage-advance-panel";
 import type { Id } from "../../convex/_generated/dataModel";
 import { api } from "../../convex/_generated/api";
 
@@ -20,9 +21,12 @@ export function LiveTransactionPage({
   }
 
   return (
-    <BuyerDashboardViewPanel
-      view={view}
-      eyebrow="Opened by id"
-    />
+    <div className="space-y-6">
+      <BuyerDashboardViewPanel
+        view={view}
+        eyebrow="Opened by id"
+      />
+      <StageAdvancePanel view={view} />
+    </div>
   );
 }

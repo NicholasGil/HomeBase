@@ -11,6 +11,7 @@ import {
 import {
   summarizeBuyerDashboard,
   type BuyerDashboardView,
+  type DashboardDeadline,
 } from "./lib/dashboardView";
 
 export const getBuyerDashboard = query({
@@ -56,13 +57,11 @@ async function loadDashboard(
   ctx: QueryCtx,
   transaction: Doc<"transactions">,
 ): Promise<BuyerDashboardView> {
-  const [stages, tasks, property] = await Promise.all([
+  const [stages, tasks, property, agent] = await Promise.all([
     ctx.db
       .query("journeyStages")
-      .withIndex("by_org_key", (q) =>
-        q.eq("orgId", transaction.orgId).eq("key", transaction.stage),
-      )
-      .unique(),
+      .withIndex("by_org", (q) => q.eq("orgId", transaction.orgId))
+      .collect(),
     ctx.db
       .query("tasks")
       .withIndex("by_transaction", (q) => q.eq("transactionId", transaction._id))
@@ -70,15 +69,40 @@ async function loadDashboard(
     transaction.propertyId
       ? ctx.db.get(transaction.propertyId)
       : Promise.resolve(null),
+    ctx.db.get(transaction.agentId),
   ]);
+
+  const currentStage = stages.find((stage) => stage.key === transaction.stage);
+  const deadlines: DashboardDeadline[] = [];
+  if (transaction.keyDates.inspectionDueAt !== undefined) {
+    deadlines.push({
+      label: "Inspection due",
+      at: transaction.keyDates.inspectionDueAt,
+    });
+  }
+  if (transaction.keyDates.closingAt !== undefined) {
+    deadlines.push({
+      label: "Closing",
+      at: transaction.keyDates.closingAt,
+    });
+  }
 
   return summarizeBuyerDashboard({
     transactionId: transaction._id as Id<"transactions">,
     stage: transaction.stage,
-    stageLabel: stages?.label ?? transaction.stage,
+    stageLabel: currentStage?.label ?? transaction.stage,
     status: transaction.status,
     owedToday: transaction.owedToday ?? null,
     propertyAddress: property?.address ?? null,
-    tasks,
+    tasks: tasks.map((task) => ({
+      title: task.title,
+      status: task.status,
+      assigneeRole: task.assigneeRole,
+      stage: task.stage,
+      blocksStage: task.blocksStage,
+    })),
+    stages,
+    deadlines,
+    contacts: agent === null ? [] : [{ name: agent.name, role: "agent" }],
   });
 }

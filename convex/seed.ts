@@ -37,7 +37,11 @@ export const run = internalMutation({
         key: stage.key,
         label: stage.label,
         order: stage.order,
-        defaultTasks: [],
+        defaultTasks: stage.defaultTasks.map((task) => ({
+          title: task.title,
+          assigneeRole: task.assigneeRole,
+          blocksStage: task.blocksStage,
+        })),
       });
     }
 
@@ -106,6 +110,7 @@ export const run = internalMutation({
           assigneeRole: "agent",
           status: "done",
           blockedBy: [],
+          blocksStage: true,
         });
         await ctx.db.insert("tasks", {
           transactionId,
@@ -114,6 +119,7 @@ export const run = internalMutation({
           assigneeRole: "buyer",
           status: "done",
           blockedBy: [],
+          blocksStage: true,
         });
         const scheduleId = await ctx.db.insert("tasks", {
           transactionId,
@@ -122,6 +128,7 @@ export const run = internalMutation({
           assigneeRole: "agent",
           status: "open",
           blockedBy: [],
+          blocksStage: true,
         });
         await ctx.db.insert("tasks", {
           transactionId,
@@ -130,6 +137,7 @@ export const run = internalMutation({
           assigneeRole: "buyer",
           status: "blocked",
           blockedBy: [scheduleId],
+          blocksStage: true,
         });
       } else {
         await ctx.db.insert("tasks", {
@@ -139,6 +147,7 @@ export const run = internalMutation({
           assigneeRole: "buyer",
           status: "done",
           blockedBy: [],
+          blocksStage: true,
         });
         await ctx.db.insert("tasks", {
           transactionId,
@@ -147,6 +156,7 @@ export const run = internalMutation({
           assigneeRole: "buyer",
           status: "open",
           blockedBy: [],
+          blocksStage: false,
         });
       }
 

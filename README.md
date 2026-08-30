@@ -33,3 +33,7 @@ CI runs lint, typecheck, unit tests, and the P0 Playwright job on every pull req
 2. Convex schema, seed, and permission tests.
 3. Clerk wiring, role routing, buyer dashboard, transaction isolation.
 4. Playwright buyer login → dashboard, fixture auth, isolation by URL.
+
+## P1
+
+M1 journey roadmap: org-configurable stages, blocking tasks hold stage advance, transitions append to auditLog. Seeded mid-flight buyer (Alex Rivera, inspection) passes the ten-second test.

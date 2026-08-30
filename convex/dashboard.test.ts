@@ -26,6 +26,18 @@ describe("buyer dashboard", () => {
     expect(view?.waitingOn).toBe("agent");
     expect(view?.owedToday?.amountCents).toBe(45000);
     expect(view?.owedToday?.provenance).toBe("title_issued");
+    expect(view?.stages.find((stage) => stage.key === "inspection")?.state).toBe(
+      "current",
+    );
+    expect(view?.stages.find((stage) => stage.key === "under_contract")?.state).toBe(
+      "complete",
+    );
+    expect(view?.stages.find((stage) => stage.key === "appraisal")?.state).toBe(
+      "upcoming",
+    );
+    expect(view?.canAdvance).toBe(false);
+    expect(view?.blockingTasks[0]?.title).toBe("Schedule inspection");
+    expect(view?.contacts[0]?.name).toBe("Casey Holt");
   });
 
   it("denies agent, vendor, and unauthenticated callers", async () => {

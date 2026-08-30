@@ -6,6 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { JourneyTracker } from "@/components/journey-tracker";
 import type { BuyerDashboardView } from "../../convex/lib/dashboardView";
 import { owedTodayDisplay } from "@/lib/owed-today-display";
 
@@ -74,7 +75,10 @@ export function BuyerDashboardViewPanel({
             ? ` · ${view.propertyAddress.city}, ${view.propertyAddress.state}`
             : null}
         </p>
-        <h1 className="text-3xl font-semibold tracking-tight">
+        <h1
+          data-testid="ten-second-where"
+          className="text-3xl font-semibold tracking-tight"
+        >
           {view.where.label}
         </h1>
         <p className="text-sm text-muted-foreground">
@@ -82,8 +86,15 @@ export function BuyerDashboardViewPanel({
         </p>
       </section>
 
+      <section className="space-y-3">
+        <h2 className="text-sm font-medium text-muted-foreground">
+          Journey
+        </h2>
+        <JourneyTracker stages={view.stages} />
+      </section>
+
       <section className="grid gap-4 md:grid-cols-2">
-        <Card>
+        <Card data-testid="ten-second-done">
           <CardHeader>
             <CardTitle>What is done</CardTitle>
             <CardDescription>Completed work on this file.</CardDescription>
@@ -101,7 +112,7 @@ export function BuyerDashboardViewPanel({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-testid="ten-second-next">
           <CardHeader>
             <CardTitle>What is next</CardTitle>
             <CardDescription>First open task that is not blocked.</CardDescription>
@@ -118,7 +129,7 @@ export function BuyerDashboardViewPanel({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-testid="ten-second-waiting">
           <CardHeader>
             <CardTitle>Who you are waiting on</CardTitle>
             <CardDescription>Role that owns the next move.</CardDescription>
@@ -128,7 +139,7 @@ export function BuyerDashboardViewPanel({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-testid="ten-second-owe">
           <CardHeader>
             <CardTitle>What you owe today</CardTitle>
             <CardDescription>
@@ -137,6 +148,73 @@ export function BuyerDashboardViewPanel({
           </CardHeader>
           <CardContent>
             <OwedTodayFigure owed={owed} />
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader>
+            <CardTitle>This stage</CardTitle>
+            <CardDescription>Tasks that live on {view.where.label}.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {view.currentStageTasks.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No tasks on this stage.</p>
+            ) : (
+              <ul className="space-y-2 text-sm">
+                {view.currentStageTasks.map((task) => (
+                  <li key={task.title} className="flex items-center justify-between gap-2">
+                    <span>{task.title}</span>
+                    <Badge variant="outline">{task.status}</Badge>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Waiting and deadlines</CardTitle>
+            <CardDescription>
+              Stage advance stays blocked while a blocking task is open.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            {view.canAdvance ? (
+              <p>Ready for {view.nextStage?.label ?? "the next stage"}.</p>
+            ) : (
+              <p data-testid="stage-blocked">
+                Cannot leave {view.where.label}
+                {view.blockingTasks[0]
+                  ? ` while ${view.blockingTasks[0].title} is open.`
+                  : "."}
+              </p>
+            )}
+            {view.deadlines.map((deadline) => (
+              <p key={deadline.label} className="text-muted-foreground">
+                {deadline.label}
+              </p>
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Contacts</CardTitle>
+            <CardDescription>People on this file.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            {view.contacts.length === 0 ? (
+              <p className="text-muted-foreground">No contacts yet.</p>
+            ) : (
+              view.contacts.map((contact) => (
+                <p key={`${contact.role}-${contact.name}`}>
+                  {contact.name} · {contact.role}
+                </p>
+              ))
+            )}
           </CardContent>
         </Card>
       </section>

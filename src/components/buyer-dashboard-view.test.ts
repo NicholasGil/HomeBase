@@ -13,6 +13,23 @@ import {
 } from "@/lib/owed-today-display";
 import { seedDashboardForBuyerA } from "@/lib/seed-dashboard";
 
+describe("BuyerDashboardViewPanel ten-second answers", () => {
+  it("renders the seeded mid-flight answers and current stage", () => {
+    const html = renderToStaticMarkup(
+      createElement(BuyerDashboardViewPanel, {
+        view: seedDashboardForBuyerA(),
+        buyerName: "Alex Rivera",
+      }),
+    );
+    expect(html).toContain('data-testid="ten-second-where"');
+    expect(html).toContain("Inspection");
+    expect(html).toContain("Sign purchase agreement");
+    expect(html).toContain("Schedule inspection");
+    expect(html).toContain("data-state=\"current\"");
+    expect(html).toContain("Cannot leave Inspection");
+  });
+});
+
 describe("BuyerDashboardViewPanel owedToday", () => {
   it("does not render a dollar amount when owedToday is null", () => {
     const view = { ...seedDashboardForBuyerA(), owedToday: null };

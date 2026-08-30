@@ -11,6 +11,9 @@ describe("seed dashboard", () => {
     expect(view.next?.title).toBe("Schedule inspection");
     expect(view.waitingOn).toBe("agent");
     expect(view.owedToday?.provenance).toBe("title_issued");
+    expect(view.stages).toHaveLength(13);
+    expect(view.canAdvance).toBe(false);
+    expect(view.blockingTasks[0]?.title).toBe("Schedule inspection");
   });
 
   it("keeps Blair Chen on a distinct transaction", () => {

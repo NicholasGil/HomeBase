@@ -96,3 +96,15 @@ export const TRANSACTION_READ_ROLES = [
   "broker",
   "admin",
 ] as const;
+
+export const JOURNEY_WRITE_ROLES = ["broker", "admin"] as const;
+
+export const STAGE_ADVANCE_ROLES = ["agent", "broker", "admin"] as const;
+
+export const TASK_WRITE_ROLES = ["agent", "broker", "admin"] as const;
+
+export const defaultTaskValidator = v.object({
+  title: v.string(),
+  assigneeRole: roleValidator,
+  blocksStage: v.boolean(),
+});

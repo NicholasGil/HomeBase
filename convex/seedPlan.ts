@@ -15,6 +15,60 @@ export const SEED_CLERK_IDS = {
   agent: "clerk_agent",
 } as const;
 
+type SeedDefaultTask = {
+  title: string;
+  assigneeRole: "buyer" | "agent" | "broker" | "admin" | "vendor";
+  blocksStage: boolean;
+};
+
+const STAGE_DEFAULT_TASKS: Record<string, SeedDefaultTask[]> = {
+  financing: [
+    {
+      title: "Send lender documents",
+      assigneeRole: "buyer",
+      blocksStage: true,
+    },
+  ],
+  showings: [
+    {
+      title: "Tour Saturday listings",
+      assigneeRole: "buyer",
+      blocksStage: false,
+    },
+  ],
+  under_contract: [
+    {
+      title: "Sign purchase agreement",
+      assigneeRole: "agent",
+      blocksStage: true,
+    },
+    {
+      title: "Submit earnest money",
+      assigneeRole: "buyer",
+      blocksStage: true,
+    },
+  ],
+  inspection: [
+    {
+      title: "Schedule inspection",
+      assigneeRole: "agent",
+      blocksStage: true,
+    },
+    {
+      title: "Review inspection report",
+      assigneeRole: "buyer",
+      blocksStage: true,
+    },
+  ],
+  appraisal: [
+    {
+      title: "Order appraisal",
+      assigneeRole: "agent",
+      blocksStage: true,
+    },
+  ],
+};
+
 export const SEED_PLAN = {
   org: {
     name: "Lookout Realty",
@@ -80,7 +134,10 @@ export const SEED_PLAN = {
     { key: "final_walkthrough", label: "Final Walkthrough", order: 11 },
     { key: "closing", label: "Closing", order: 12 },
     { key: "move_in", label: "Move-In", order: 13 },
-  ],
+  ].map((stage) => ({
+    ...stage,
+    defaultTasks: STAGE_DEFAULT_TASKS[stage.key] ?? [],
+  })),
 } as const;
 
 export type SeedBuyer = (typeof SEED_PLAN.buyers)[number];

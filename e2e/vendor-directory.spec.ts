@@ -60,7 +60,7 @@ test("vendor portal is one assigned file and expires", async ({ page }) => {
 test("feature flags stay off", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByText("FLAG_VENDOR_COMP")).toBeVisible();
-  await expect(page.getByText("Vendor compensation")).toBeVisible();
+  await expect(page.getByText("Vendor compensation", { exact: true })).toBeVisible();
   await expect(page.getByText("off").first()).toBeVisible();
 });
 

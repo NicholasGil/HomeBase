@@ -34,4 +34,19 @@ describe("ListingCardFrame", () => {
     expect(html).not.toContain("to-slate-300");
     expect(html).toMatch(/from-(sand|sage|sky|peach)/);
   });
+
+  it("makes the photo and address a link when href is set", () => {
+    const html = renderToStaticMarkup(
+      createElement(ListingCardFrame, {
+        testId: "search-result-demo",
+        propertyId: "seed:listing",
+        addressLine: "88 Legacy Dr",
+        cityState: "Madison, AL",
+        href: "/listings/seed:listing",
+      }),
+    );
+
+    expect(html).toContain('href="/listings/seed:listing"');
+    expect(html).toContain("88 Legacy Dr, Madison, AL");
+  });
 });

@@ -22,12 +22,15 @@ import { tripHeadingClassName } from "@/lib/trip-ui";
 export function FixtureTourBuilder({
   denied,
   tours,
+  notice,
 }: {
   denied?: boolean;
   tours: FixtureTour[];
+  notice?: string;
 }) {
   const listings = seedTourListings();
   const tour = tours[0];
+  const selectedIds = new Set(tour?.stops.map((stop) => stop.propertyId) ?? []);
 
   if (denied) {
     return (
@@ -52,27 +55,38 @@ export function FixtureTourBuilder({
         <Badge variant="sage">sample listings</Badge>
       </div>
 
+      {notice === "feedback" ? (
+        <p
+          data-testid="tour-feedback-notice"
+          className="rounded-lg border bg-sage/40 px-4 py-3 text-sm"
+        >
+          Feedback saved.
+        </p>
+      ) : null}
+
       <form action={buildTourFromForm} className="space-y-4">
         <div className="grid gap-5 sm:grid-cols-2">
           {listings.map((listing) => (
-            <ListingCardFrame
-              key={listing.id}
-              testId={`tour-candidate-${listing.id}`}
-              addressLine={listing.address.line1}
-              cityState={`${listing.address.city}, ${listing.address.state} · sample data`}
-              sample
-            >
-              <p className="text-sm">{listing.brief}</p>
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  name="propertyIds"
-                  value={listing.id}
-                  data-testid={`select-${listing.id}`}
-                />
-                Add to tour
-              </label>
-            </ListingCardFrame>
+            <label key={listing.id} className="block cursor-pointer">
+              <ListingCardFrame
+                testId={`tour-candidate-${listing.id}`}
+                addressLine={listing.address.line1}
+                cityState={`${listing.address.city}, ${listing.address.state} · sample data`}
+                sample
+              >
+                <p className="text-sm">{listing.brief}</p>
+                <span className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    name="propertyIds"
+                    value={listing.id}
+                    defaultChecked={selectedIds.has(listing.id)}
+                    data-testid={`select-${listing.id}`}
+                  />
+                  Add to tour
+                </span>
+              </ListingCardFrame>
+            </label>
           ))}
         </div>
         <Button type="submit" variant="next" data-testid="build-my-tour">

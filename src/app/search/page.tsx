@@ -18,7 +18,12 @@ export const dynamic = "force-dynamic";
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    saved?: string;
+    notice?: string;
+    propertyId?: string;
+  }>;
 }) {
   if (mustFailClosed()) {
     throw new ProductionAuthMisconfiguredError();
@@ -54,6 +59,9 @@ export default async function SearchPage({
         <PropertySearch
           denied={!loaded.ok}
           view={loaded.ok ? loaded.view : null}
+          savedOnly={params.saved === "1"}
+          notice={params.notice}
+          noticePropertyId={params.propertyId}
         />
       </AppShell>
     );

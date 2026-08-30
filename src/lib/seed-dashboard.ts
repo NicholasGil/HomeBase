@@ -11,92 +11,48 @@ export type TestBuyerClerkId =
   | (typeof SEED_CLERK_IDS)["buyerB"]
   | (typeof SEED_CLERK_IDS)["buyerH"];
 
-const BUYER_TASKS = {
-  [SEED_CLERK_IDS.buyerA]: [
-    {
-      title: "Sign purchase agreement",
-      status: "done" as const,
-      assigneeRole: "agent" as const,
-      stage: "under_contract",
-      blocksStage: true,
-    },
-    {
-      title: "Submit earnest money",
-      status: "done" as const,
-      assigneeRole: "buyer" as const,
-      stage: "under_contract",
-      blocksStage: true,
-    },
-    {
-      title: "Schedule inspection",
-      status: "open" as const,
-      assigneeRole: "agent" as const,
-      stage: "inspection",
-      blocksStage: true,
-    },
-    {
-      title: "Review inspection report",
-      status: "blocked" as const,
-      assigneeRole: "buyer" as const,
-      stage: "inspection",
-      blocksStage: true,
-    },
-  ],
-  [SEED_CLERK_IDS.buyerB]: [
-    {
-      title: "Send lender documents",
-      status: "done" as const,
-      assigneeRole: "buyer" as const,
-      stage: "financing",
-      blocksStage: true,
-    },
-    {
-      title: "Tour Saturday listings",
-      status: "open" as const,
-      assigneeRole: "buyer" as const,
-      stage: "showings",
-      blocksStage: false,
-    },
-  ],
-  [SEED_CLERK_IDS.buyerH]: [
-    {
-      title: "Confirm closing appointment",
-      status: "done" as const,
-      assigneeRole: "buyer" as const,
-      stage: "closing",
-      blocksStage: true,
-    },
-    {
-      title: "Change HVAC filter",
-      status: "open" as const,
-      assigneeRole: "buyer" as const,
-      stage: "move_in",
-      blocksStage: false,
-    },
-  ],
-} as const;
-
-export function seedTransactionIdForBuyer(clerkId: TestBuyerClerkId) {
-  if (clerkId === SEED_CLERK_IDS.buyerA) {
-    return "seed:buyer-a";
+export function seedTransactionIdForClerk(clerkId: string): string | null {
+  const match = /^clerk_buyer_([a-h])$/.exec(clerkId);
+  if (match === null) {
+    return null;
   }
-  if (clerkId === SEED_CLERK_IDS.buyerB) {
-    return "seed:buyer-b";
-  }
-  return "seed:buyer-h";
+  return `seed:buyer-${match[1]}`;
 }
 
-export function seedDashboardForBuyer(
-  clerkId: TestBuyerClerkId,
-): BuyerDashboardView {
+export function clerkIdForSeedTransaction(transactionId: string): string | null {
+  const match = /^seed:buyer-([a-h])$/.exec(transactionId);
+  if (match === null) {
+    return null;
+  }
+  return `clerk_buyer_${match[1]}`;
+}
+
+export function seedBuyerNameForTransaction(transactionId: string): string | null {
+  const clerkId = clerkIdForSeedTransaction(transactionId);
+  if (clerkId === null) {
+    return null;
+  }
+  return SEED_PLAN.buyers.find((row) => row.clerkId === clerkId)?.name ?? null;
+}
+
+export function seedTransactionIdForBuyer(clerkId: TestBuyerClerkId) {
+  const transactionId = seedTransactionIdForClerk(clerkId);
+  if (transactionId === null) {
+    throw new Error(`seed plan missing transaction for ${clerkId}`);
+  }
+  return transactionId;
+}
+
+export function seedDashboardForClerkId(clerkId: string): BuyerDashboardView {
   const buyer = SEED_PLAN.buyers.find((row) => row.clerkId === clerkId);
-  if (buyer === undefined) {
+  const transactionId = seedTransactionIdForClerk(clerkId);
+  if (buyer === undefined || transactionId === null) {
     throw new Error(`seed plan missing ${clerkId}`);
   }
   const current = SEED_PLAN.stages.find((stage) => stage.key === buyer.stage);
 
   return summarizeBuyerDashboard({
-    transactionId: seedTransactionIdForBuyer(clerkId),
+    transactionId,
     stage: buyer.stage,
     stageLabel: current?.label ?? buyer.stage,
     status: seedTransactionStatus(buyer),
@@ -108,7 +64,7 @@ export function seedDashboardForBuyer(
       label: buyer.owedToday.label,
     },
     propertyAddress: buyer.property,
-    tasks: [...BUYER_TASKS[clerkId]],
+    tasks: buyer.tasks.map((task) => ({ ...task })),
     stages: SEED_PLAN.stages,
     deadlines:
       buyer.stage === "inspection"
@@ -116,6 +72,12 @@ export function seedDashboardForBuyer(
         : [],
     contacts: [{ name: SEED_PLAN.agent.name, role: "agent" }],
   });
+}
+
+export function seedDashboardForBuyer(
+  clerkId: TestBuyerClerkId,
+): BuyerDashboardView {
+  return seedDashboardForClerkId(clerkId);
 }
 
 export function seedDashboardForBuyerA() {

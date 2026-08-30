@@ -53,12 +53,22 @@ export async function FixtureVault() {
               (grant) => grant.documentId === document.id,
             );
             return (
-              <Card key={document.id} data-testid={`vault-doc-${document.type}`}>
-                <CardHeader>
+              <Card
+                key={document.id}
+                data-testid={`vault-doc-${document.type}`}
+                className="relative"
+              >
+                <Link
+                  href={`/documents/${document.id}`}
+                  className="absolute inset-0 z-0"
+                  aria-label={`Open ${seedDocumentTitle(document.type)}`}
+                  data-testid={`vault-doc-open-${document.type}`}
+                />
+                <CardHeader className="pointer-events-none">
                   <CardTitle>{seedDocumentTitle(document.type)}</CardTitle>
                   <CardDescription>{document.type}</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="relative z-10 space-y-3">
                   <Link
                     href={`/documents/${document.id}`}
                     className="text-sm underline"

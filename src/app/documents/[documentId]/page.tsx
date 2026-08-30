@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { AppShell } from "@/components/app-shell";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -49,6 +51,9 @@ export default async function DocumentPage({
       <AppShell>
         <Card data-testid={`document-open-${loaded.document.type}`}>
           <CardHeader>
+            <Link href="/vault" className="text-sm underline" data-testid="document-back">
+              Back to vault
+            </Link>
             <Badge variant="outline">{loaded.via}</Badge>
             <CardTitle>{seedDocumentTitle(loaded.document.type)}</CardTitle>
             <CardDescription>{loaded.document.type}</CardDescription>

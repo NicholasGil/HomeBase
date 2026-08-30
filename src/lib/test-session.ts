@@ -2,7 +2,9 @@ import { SEED_CLERK_IDS, SEED_PLAN } from "../../convex/seedPlan";
 import type { BuyerDashboardView } from "../../convex/lib/dashboardView";
 import { isProductionDeploy, type AuthEnv } from "@/lib/auth-config";
 import {
+  clerkIdForSeedTransaction,
   seedDashboardForBuyer,
+  seedDashboardForClerkId,
   type TestBuyerClerkId,
 } from "@/lib/seed-dashboard";
 
@@ -124,6 +126,13 @@ export function loadSeedTransactionForViewer(
   | { ok: false; reason: "UNAUTHENTICATED" | "FORBIDDEN" } {
   if (session === null) {
     return { ok: false, reason: "UNAUTHENTICATED" };
+  }
+  if (session.role === "agent") {
+    const clerkId = clerkIdForSeedTransaction(transactionId);
+    if (clerkId === null) {
+      return { ok: false, reason: "FORBIDDEN" };
+    }
+    return { ok: true, view: seedDashboardForClerkId(clerkId) };
   }
   if (session.role !== "buyer" || session.transactionId !== transactionId) {
     return { ok: false, reason: "FORBIDDEN" };

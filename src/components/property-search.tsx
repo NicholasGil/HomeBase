@@ -1,21 +1,23 @@
 import Link from "next/link";
 
-import {
-  recordSearchSignalFromForm,
-} from "@/app/actions/search";
 import { ListingCardFrame } from "@/components/listing-card";
+import { ListingSignalForms } from "@/components/listing-signals";
 import { MoneyFigureView } from "@/components/money-figure-view";
 import { SearchQueryPill } from "@/components/search-pill";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { CANONICAL_SEARCH_QUERY } from "../../convex/lib/propertySearch";
 import type { FixtureSearchView } from "@/lib/search-access";
+import { listingPath } from "@/lib/seed-search";
 import { tripHeadingClassName } from "@/lib/trip-ui";
 import { cn } from "@/lib/utils";
 
 function criteriaLine(view: FixtureSearchView) {
   const { criteria } = view;
   const parts: string[] = [];
+  if (criteria.location !== null) {
+    parts.push(`in ${criteria.location}`);
+  }
   if (criteria.beds !== null) {
     parts.push(`${criteria.beds} beds`);
   }
@@ -34,12 +36,64 @@ function criteriaLine(view: FixtureSearchView) {
   return parts.join(" · ");
 }
 
+function SearchNotice({
+  notice,
+  propertyId,
+  query,
+}: {
+  notice?: string;
+  propertyId?: string;
+  query: string;
+}) {
+  if (notice === "saved") {
+    return (
+      <p
+        data-testid="search-notice"
+        className="rounded-lg border bg-sage/40 px-4 py-3 text-sm"
+      >
+        Saved.{" "}
+        <Link href={`/search?q=${encodeURIComponent(query)}&saved=1`} className="underline">
+          See saved homes
+        </Link>
+      </p>
+    );
+  }
+  if (notice === "disliked" && propertyId) {
+    return (
+      <p
+        data-testid="search-notice"
+        className="rounded-lg border bg-sand px-4 py-3 text-sm"
+      >
+        Removed from the top of this ranking. Use Restore on the card if that
+        was a mistake.
+      </p>
+    );
+  }
+  if (notice === "restored") {
+    return (
+      <p
+        data-testid="search-notice"
+        className="rounded-lg border bg-sky/50 px-4 py-3 text-sm"
+      >
+        Restored. That home is back in the usual ranking.
+      </p>
+    );
+  }
+  return null;
+}
+
 export function PropertySearch({
   denied,
   view,
+  savedOnly,
+  notice,
+  noticePropertyId,
 }: {
   denied?: boolean;
   view: FixtureSearchView | null;
+  savedOnly?: boolean;
+  notice?: string;
+  noticePropertyId?: string;
 }) {
   if (denied || view === null) {
     return (
@@ -48,6 +102,11 @@ export function PropertySearch({
       </p>
     );
   }
+
+  const shown = savedOnly
+    ? view.results.filter((row) => view.signals[row.id] === "save")
+    : view.results;
+  const queryHref = `/search?q=${encodeURIComponent(view.query)}`;
 
   return (
     <section className="space-y-8" data-testid="property-search">
@@ -86,73 +145,89 @@ export function PropertySearch({
         </div>
       </form>
 
-      <ol className="grid gap-6 sm:grid-cols-2">
-        {view.results.map((row, index) => {
-          const signal = view.signals[row.id];
-          return (
-            <li key={row.id}>
-              <ListingCardFrame
-                testId={`search-result-${row.id}`}
-                propertyId={row.id}
-                rank={index + 1}
-                score={row.score}
-                addressLine={row.listing.address.line1}
-                cityState={`${row.listing.address.city}, ${row.listing.address.state}`}
-                sample={row.sampleData}
-                sampleTestId="search-sample-label"
-              >
-                <p
-                  className="line-clamp-2 text-sm text-muted-foreground"
-                  data-testid={`search-reason-${row.id}`}
+      <div className="flex flex-wrap gap-2">
+        <Link
+          href={queryHref}
+          className={cn(
+            buttonVariants({ variant: savedOnly ? "outline" : "default", size: "sm" }),
+          )}
+          data-testid="search-all-filter"
+        >
+          All
+        </Link>
+        <Link
+          href={`${queryHref}&saved=1`}
+          className={cn(
+            buttonVariants({ variant: savedOnly ? "default" : "outline", size: "sm" }),
+          )}
+          data-testid="search-saved-filter"
+        >
+          Saved
+        </Link>
+      </div>
+
+      <SearchNotice
+        notice={notice}
+        propertyId={noticePropertyId}
+        query={view.query}
+      />
+
+      {shown.length === 0 ? (
+        <p
+          data-testid="search-empty"
+          className="rounded-lg border bg-card px-4 py-6 text-sm text-muted-foreground"
+        >
+          {savedOnly
+            ? "No saved sample homes yet."
+            : `No sample homes match "${view.query}". Try another city or a beds and price search.`}
+        </p>
+      ) : (
+        <ol className="grid gap-6 sm:grid-cols-2">
+          {shown.map((row, index) => {
+            const signal = view.signals[row.id];
+            return (
+              <li key={row.id}>
+                <ListingCardFrame
+                  testId={`search-result-${row.id}`}
+                  propertyId={row.id}
+                  rank={index + 1}
+                  score={row.score}
+                  href={listingPath(row.id)}
+                  addressLine={row.listing.address.line1}
+                  cityState={`${row.listing.address.city}, ${row.listing.address.state}`}
+                  sample={row.sampleData}
+                  sampleTestId="search-sample-label"
                 >
-                  {row.reason}
-                </p>
-                {row.listing.listPrice ? (
-                  <MoneyFigureView
-                    figure={row.listing.listPrice}
-                    testId={`search-price-${row.id}`}
-                  />
-                ) : (
                   <p
-                    className="text-sm text-muted-foreground"
-                    data-testid={`search-price-missing-${row.id}`}
+                    className="line-clamp-2 text-sm text-muted-foreground"
+                    data-testid={`search-reason-${row.id}`}
                   >
-                    None
+                    {row.reason}
                   </p>
-                )}
-                <div className="flex flex-wrap gap-2 pt-1">
-                  <form action={recordSearchSignalFromForm}>
-                    <input type="hidden" name="propertyId" value={row.id} />
-                    <input type="hidden" name="kind" value="save" />
-                    <input type="hidden" name="query" value={view.query} />
-                    <Button
-                      type="submit"
-                      variant={signal === "save" ? "default" : "outline"}
-                      size="sm"
-                      data-testid={`search-save-${row.id}`}
+                  {row.listing.listPrice ? (
+                    <MoneyFigureView
+                      figure={row.listing.listPrice}
+                      testId={`search-price-${row.id}`}
+                    />
+                  ) : (
+                    <p
+                      className="text-sm text-muted-foreground"
+                      data-testid={`search-price-missing-${row.id}`}
                     >
-                      Save
-                    </Button>
-                  </form>
-                  <form action={recordSearchSignalFromForm}>
-                    <input type="hidden" name="propertyId" value={row.id} />
-                    <input type="hidden" name="kind" value="dislike" />
-                    <input type="hidden" name="query" value={view.query} />
-                    <Button
-                      type="submit"
-                      variant={signal === "dislike" ? "destructive" : "outline"}
-                      size="sm"
-                      data-testid={`search-dislike-${row.id}`}
-                    >
-                      Dislike
-                    </Button>
-                  </form>
-                </div>
-              </ListingCardFrame>
-            </li>
-          );
-        })}
-      </ol>
+                      None
+                    </p>
+                  )}
+                  <ListingSignalForms
+                    propertyId={row.id}
+                    query={view.query}
+                    signal={signal}
+                  />
+                </ListingCardFrame>
+              </li>
+            );
+          })}
+        </ol>
+      )}
     </section>
   );
 }

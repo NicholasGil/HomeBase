@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { endTestSessionFromForm } from "@/app/actions/test-session";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,6 +11,8 @@ export function ProfileSettings({
   phone,
   eyebrow,
   fixtureSignOut,
+  backHref,
+  backLabel,
 }: {
   name: string;
   role: string;
@@ -16,14 +20,22 @@ export function ProfileSettings({
   phone?: string;
   eyebrow?: string;
   fixtureSignOut?: boolean;
+  backHref?: string;
+  backLabel?: string;
 }) {
   return (
     <section className="space-y-6" data-testid="profile-settings">
+      {backHref ? (
+        <Link href={backHref} className="text-sm underline" data-testid="profile-back">
+          {backLabel ?? "Back"}
+        </Link>
+      ) : null}
       {eyebrow ? <Badge variant="sage">{eyebrow}</Badge> : null}
       <div className="space-y-2">
         <h1 className="text-3xl font-semibold tracking-tight">Profile</h1>
         <p className="text-sm text-muted-foreground">
-          Name and contact for this session.
+          Display only. These fields come from the fixture session. This page
+          does not change a Clerk account.
         </p>
       </div>
       <div className="overflow-hidden rounded-[16px] bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04)] ring-1 ring-black/6">

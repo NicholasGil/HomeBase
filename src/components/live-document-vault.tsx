@@ -67,12 +67,18 @@ function LiveDocumentCard({
   const lender = users?.find((user) => user.role === "vendor");
 
   return (
-    <Card data-testid={`vault-doc-${type}`}>
-      <CardHeader>
+    <Card data-testid={`vault-doc-${type}`} className="relative">
+      <Link
+        href={`/documents/${documentId}`}
+        className="absolute inset-0 z-0"
+        aria-label={`Open ${seedDocumentTitle(type)}`}
+        data-testid={`vault-doc-open-${type}`}
+      />
+      <CardHeader className="pointer-events-none">
         <CardTitle>{seedDocumentTitle(type)}</CardTitle>
         <CardDescription>{type}</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="relative z-10 space-y-3">
         <Link href={`/documents/${documentId}`} className="text-sm underline">
           Open document
         </Link>

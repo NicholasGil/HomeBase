@@ -39,13 +39,40 @@ export async function loadFixturePropertySearch(query?: string) {
   });
 }
 
+function noticeForSignal(kind: "save" | "dislike" | "clear") {
+  if (kind === "save") {
+    return "saved";
+  }
+  if (kind === "dislike") {
+    return "disliked";
+  }
+  return "restored";
+}
+
+function safeReturnTo(value: unknown): string | null {
+  if (typeof value !== "string" || !value.startsWith("/")) {
+    return null;
+  }
+  if (value.startsWith("//") || value.includes("://")) {
+    return null;
+  }
+  if (
+    !value.startsWith("/search") &&
+    !value.startsWith("/listings/") &&
+    value !== "/listings"
+  ) {
+    return null;
+  }
+  return value;
+}
+
 export async function recordSearchSignalFromForm(formData: FormData) {
   const propertyId = formData.get("propertyId");
   const kind = formData.get("kind");
   const query = formData.get("query");
   if (
     typeof propertyId !== "string" ||
-    (kind !== "save" && kind !== "dislike")
+    (kind !== "save" && kind !== "dislike" && kind !== "clear")
   ) {
     throw new Error("FORBIDDEN");
   }
@@ -64,5 +91,15 @@ export async function recordSearchSignalFromForm(formData: FormData) {
     typeof query === "string" && query.length > 0
       ? query
       : CANONICAL_SEARCH_QUERY;
-  redirect(`/search?q=${encodeURIComponent(nextQuery)}`);
+  const params = new URLSearchParams({
+    q: nextQuery,
+    notice: noticeForSignal(kind),
+    propertyId,
+  });
+  const returnTo = safeReturnTo(formData.get("returnTo"));
+  if (returnTo !== null) {
+    const separator = returnTo.includes("?") ? "&" : "?";
+    redirect(`${returnTo}${separator}${params.toString()}`);
+  }
+  redirect(`/search?${params.toString()}`);
 }

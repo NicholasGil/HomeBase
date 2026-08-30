@@ -2,6 +2,7 @@
 
 import { useMutation } from "convex/react";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -60,6 +61,9 @@ export function LiveDocumentPage({ documentId }: { documentId: string }) {
   return (
     <Card data-testid={`document-open-${opened.type}`}>
       <CardHeader>
+        <Link href="/vault" className="text-sm underline" data-testid="document-back">
+          Back to vault
+        </Link>
         <Badge variant="outline">{opened.via}</Badge>
         <CardTitle>{seedDocumentTitle(opened.type)}</CardTitle>
         <CardDescription>{opened.type}</CardDescription>

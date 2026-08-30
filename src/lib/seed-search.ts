@@ -42,3 +42,15 @@ export function isSeedSearchPropertyId(value: string) {
     value === SEED_SEARCH_PROPERTY_IDS.mlsHidden
   );
 }
+
+export function listingPath(listingId: string) {
+  return `/listings/${encodeURIComponent(listingId)}`;
+}
+
+export function getSampleListing(listingId: string) {
+  const listing = seedSearchListings().find((row) => row.id === listingId);
+  if (listing === undefined || listing.source === "mls") {
+    return null;
+  }
+  return listing;
+}

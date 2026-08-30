@@ -28,6 +28,7 @@ describe("M9 search server functions", () => {
       minLotAcres: 0.35,
       minGarageSpaces: 2,
       driveMinutesFromTown: 20,
+      location: null,
     });
     expect(result.inventory.kind).toBe("sample");
     expect(result.mlsEnabled).toBe(false);

@@ -140,7 +140,7 @@ export function recordFixtureSignal(input: {
   session: TestSession | null;
   searchState: FixtureSearchState;
   propertyId: string;
-  kind: "save" | "dislike";
+  kind: "save" | "dislike" | "clear";
 }):
   | { ok: true; state: FixtureSearchState }
   | { ok: false; reason: "UNAUTHENTICATED" | "FORBIDDEN" } {
@@ -160,15 +160,21 @@ export function recordFixtureSignal(input: {
   }
   const clerkId = access.session.clerkId;
   const current = input.searchState.signals[clerkId] ?? {};
+  const nextSignals =
+    input.kind === "clear"
+      ? Object.fromEntries(
+          Object.entries(current).filter(([id]) => id !== input.propertyId),
+        )
+      : {
+          ...current,
+          [input.propertyId]: input.kind,
+        };
   return {
     ok: true,
     state: {
       signals: {
         ...input.searchState.signals,
-        [clerkId]: {
-          ...current,
-          [input.propertyId]: input.kind,
-        },
+        [clerkId]: nextSignals,
       },
     },
   };

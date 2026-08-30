@@ -79,6 +79,25 @@ describe("seed transaction isolation", () => {
     ).toEqual({ ok: false, reason: "FORBIDDEN" });
   });
 
+  it("lets the seeded agent open a client file by id", () => {
+    const started = startTestSessionDecision(SEED_CLERK_IDS.agent);
+    if (!started.ok) {
+      throw new Error("expected agent session");
+    }
+    const alex = loadSeedTransactionForViewer(started.session, "seed:buyer-a");
+    expect(alex.ok).toBe(true);
+    if (alex.ok) {
+      expect(alex.view.transactionId).toBe("seed:buyer-a");
+      expect(alex.view.where.key).toBe("inspection");
+    }
+    const dana = loadSeedTransactionForViewer(started.session, "seed:buyer-c");
+    expect(dana.ok).toBe(true);
+    if (dana.ok) {
+      expect(dana.view.transactionId).toBe("seed:buyer-c");
+      expect(dana.view.where.key).toBe("financing");
+    }
+  });
+
   it("returns buyer A their own transaction only", () => {
     const started = startTestSessionDecision(SEED_CLERK_IDS.buyerA);
     if (!started.ok) {

@@ -20,6 +20,17 @@ export function TourMap({
     order: number;
   }>;
 }) {
+  if (stops.length === 0) {
+    return (
+      <div
+        data-testid="tour-map"
+        className="rounded-xl border bg-sand px-4 py-6 text-sm text-muted-foreground"
+      >
+        Map unavailable. Stop coordinates are missing on this fixture tour.
+      </div>
+    );
+  }
+
   const points: MappedPoint[] = [
     { ...origin, kind: "origin" },
     ...stops.map((stop) => ({
@@ -48,9 +59,13 @@ export function TourMap({
   }
 
   return (
-    <div data-testid="tour-map" className="rounded-xl border bg-card p-3">
+    <div data-testid="tour-map" className="rounded-xl border bg-sand p-3">
+      <p className="px-1 pb-2 text-xs text-muted-foreground">
+        Schematic pins. Not a live street map.
+      </p>
       <svg viewBox="0 0 100 72" className="h-56 w-full" role="img">
         <title>Tour map</title>
+        <rect width="100" height="72" fill="#efe4d0" />
         {points.slice(1).map((point, index) => {
           const from = xy(points[index] ?? origin);
           const to = xy(point);
@@ -61,8 +76,8 @@ export function TourMap({
               y1={from.y}
               x2={to.x}
               y2={to.y}
-              className="stroke-foreground/40"
-              strokeWidth="0.6"
+              stroke="#57534e"
+              strokeWidth="0.8"
             />
           );
         })}
@@ -73,15 +88,14 @@ export function TourMap({
               <circle
                 cx={x}
                 cy={y}
-                r={point.kind === "origin" ? 2.4 : 2}
-                className={
-                  point.kind === "origin" ? "fill-foreground" : "fill-primary"
-                }
+                r={point.kind === "origin" ? 3.2 : 2.8}
+                fill={point.kind === "origin" ? "#1c1917" : "#c2410c"}
               />
               <text
-                x={x + 2.4}
-                y={y - 1.6}
-                className="fill-foreground text-[3px]"
+                x={x + 3.2}
+                y={y - 2}
+                fill="#1c1917"
+                fontSize="3.4"
               >
                 {point.kind === "origin" ? "Start" : point.order}
               </text>

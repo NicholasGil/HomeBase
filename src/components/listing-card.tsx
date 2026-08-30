@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { Home } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -45,6 +46,7 @@ export function ListingCardFrame({
   sample,
   sampleTestId,
   className,
+  href,
 }: {
   addressLine: string;
   cityState: string;
@@ -56,6 +58,7 @@ export function ListingCardFrame({
   sample?: boolean;
   sampleTestId?: string;
   className?: string;
+  href?: string;
 }) {
   return (
     <Card
@@ -63,10 +66,20 @@ export function ListingCardFrame({
       data-property-id={propertyId}
       data-rank={rank}
       data-score={score}
-      className={cn("py-0", className)}
+      className={cn("relative py-0", className)}
     >
+      {href ? (
+        <Link
+          href={href}
+          className="absolute inset-0 z-0"
+          aria-label={`${addressLine}, ${cityState}`}
+        />
+      ) : null}
       <PhotoTile
-        className="aspect-[20/19] w-full"
+        className={cn(
+          "aspect-[20/19] w-full",
+          href ? "pointer-events-none" : undefined,
+        )}
         seed={propertyId ?? addressLine}
       >
         {rank !== undefined ? (
@@ -85,13 +98,13 @@ export function ListingCardFrame({
         ) : null}
       </PhotoTile>
       <div className="space-y-2 px-4 pt-3 pb-4">
-        <div>
+        <div className={href ? "pointer-events-none" : undefined}>
           <p className="font-heading text-base leading-snug font-medium">
             {addressLine}
           </p>
           <p className="text-sm text-muted-foreground">{cityState}</p>
         </div>
-        {children}
+        <div className={href ? "relative z-10" : undefined}>{children}</div>
       </div>
     </Card>
   );

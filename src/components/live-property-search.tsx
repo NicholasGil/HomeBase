@@ -6,6 +6,7 @@ import { useState } from "react";
 import { ListingCardFrame } from "@/components/listing-card";
 import { MoneyFigureView } from "@/components/money-figure-view";
 import { SearchQueryPill } from "@/components/search-pill";
+import { listingPath } from "@/lib/seed-search";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { api } from "../../convex/_generated/api";
@@ -68,6 +69,14 @@ export function LivePropertySearch() {
         </div>
       </form>
 
+      {result.results.length === 0 ? (
+        <p
+          data-testid="search-empty"
+          className="rounded-lg border bg-card px-4 py-6 text-sm text-muted-foreground"
+        >
+          {`No sample homes match "${submitted}". Try another city or a beds and price search.`}
+        </p>
+      ) : (
       <ol className="grid gap-6 sm:grid-cols-2">
         {result.results.map((row, index) => (
           <li key={row.id}>
@@ -76,6 +85,7 @@ export function LivePropertySearch() {
               propertyId={row.id}
               rank={index + 1}
               score={row.score}
+              href={listingPath(row.id)}
               addressLine={row.listing.address.line1}
               cityState={`${row.listing.address.city}, ${row.listing.address.state}`}
               sample={row.sampleData}
@@ -124,6 +134,7 @@ export function LivePropertySearch() {
           </li>
         ))}
       </ol>
+      )}
     </section>
   );
 }

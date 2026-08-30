@@ -15,6 +15,7 @@ export const PROTECTED_PATH_PREFIXES = [
   "/sign",
   "/identity",
   "/search",
+  "/listings",
   "/homeownership",
   "/profile",
 ] as const;

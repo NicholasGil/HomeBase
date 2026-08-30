@@ -40,7 +40,7 @@ export function VendorPortalView({
   return (
     <div className="space-y-8" data-testid="vendor-portal">
       <section className="space-y-2">
-        <Badge variant="outline">Fixture session · not Clerk</Badge>
+        <Badge variant="sage">Fixture session · not Clerk</Badge>
         <h1 className="text-3xl font-semibold tracking-tight">Vendor portal</h1>
         <p className="text-sm text-muted-foreground">
           Signed in as {vendorName}. One assigned file. Compensation is none.
@@ -93,7 +93,7 @@ function AssignmentPanel({
           <p data-testid="vendor-assignment-file">
             File {assignment.transaction.transactionId}
           </p>
-          <Badge variant="outline">Compensation: none</Badge>
+          <Badge variant="sage">Compensation: none</Badge>
           <p className="text-muted-foreground">
             Expires {new Date(assignment.expiresAt).toISOString().slice(0, 10)}
           </p>

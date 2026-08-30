@@ -38,8 +38,8 @@ export function OwedTodayFigure({
             {display.amountText}
           </p>
           <div className="flex flex-wrap gap-2">
-            <Badge variant="outline">{display.provenance}</Badge>
-            <Badge variant="secondary">estimate</Badge>
+            <Badge variant="sky">{display.provenance}</Badge>
+            <Badge variant="sky">estimate</Badge>
           </div>
         </div>
       );
@@ -49,7 +49,7 @@ export function OwedTodayFigure({
           <p className={amountClassName}>{display.amountText}</p>
           <div className="flex flex-wrap gap-2">
             <Badge variant="default">{display.provenance}</Badge>
-            <Badge variant="secondary">issued</Badge>
+            <Badge variant="sand">issued</Badge>
           </div>
         </div>
       );
@@ -77,7 +77,11 @@ export function BuyerDashboardViewPanel({
   return (
     <div className="space-y-10">
       <section className="overflow-hidden rounded-[16px] bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04)] ring-1 ring-black/6">
-        <PhotoTile className="h-40 w-full sm:h-48">
+        <PhotoTile
+          className="h-40 w-full sm:h-48"
+          wash="from-peach via-sand to-next/35"
+          seed={view.propertyAddress?.line1}
+        >
           {view.propertyAddress ? (
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/45 to-transparent px-6 py-4 text-white">
               <p className="text-sm font-medium">
@@ -91,7 +95,7 @@ export function BuyerDashboardViewPanel({
         <div className="space-y-6 px-6 py-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="space-y-2">
-              {eyebrow ? <Badge variant="outline">{eyebrow}</Badge> : null}
+              {eyebrow ? <Badge variant="sage">{eyebrow}</Badge> : null}
               <p className="text-sm text-muted-foreground">
                 {buyerName ?? "Your transaction"}
                 {place ? ` · ${place}` : null}
@@ -112,7 +116,7 @@ export function BuyerDashboardViewPanel({
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
             <section
               data-testid="ten-second-next"
-              className="rounded-[14px] bg-next/10 px-5 py-6"
+              className="rounded-[14px] bg-sand px-5 py-6"
             >
               <p className="text-xs font-medium uppercase tracking-[0.2em] text-next">
                 Next
@@ -126,14 +130,14 @@ export function BuyerDashboardViewPanel({
                   <p className="text-3xl font-semibold tracking-tight text-balance">
                     {view.next.title}
                   </p>
-                  <Badge variant="secondary">{view.next.assigneeRole}</Badge>
+                  <Badge variant="sage">{view.next.assigneeRole}</Badge>
                 </div>
               )}
             </section>
 
             <section
               data-testid="ten-second-owe"
-              className="rounded-[14px] bg-muted/70 px-5 py-6"
+              className="rounded-[14px] bg-sky px-5 py-6"
             >
               <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
                 Due today
@@ -195,7 +199,9 @@ export function BuyerDashboardViewPanel({
                   className="flex items-center justify-between gap-2"
                 >
                   <span>{task.title}</span>
-                  <Badge variant="outline">{task.status}</Badge>
+                  <Badge variant={task.status === "blocked" ? "sand" : "sage"}>
+                    {task.status}
+                  </Badge>
                 </li>
               ))}
             </ul>

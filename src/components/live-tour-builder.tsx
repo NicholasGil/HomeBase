@@ -53,7 +53,7 @@ export function LiveTourBuilder() {
             Select properties, then Build My Tour.
           </p>
         </div>
-        <Badge variant="outline">sample listings</Badge>
+        <Badge variant="sage">sample listings</Badge>
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
@@ -63,6 +63,7 @@ export function LiveTourBuilder() {
             testId={`tour-candidate-${listing._id}`}
             addressLine={listing.address.line1}
             cityState={`${listing.address.city}, ${listing.address.state}`}
+            sample
           >
             <p className="text-sm">{listing.brief}</p>
             <label className="flex items-center gap-2 text-sm">

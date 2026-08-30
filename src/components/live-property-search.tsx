@@ -35,10 +35,10 @@ export function LivePropertySearch() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Badge variant="outline" data-testid="search-sample-banner">
+          <Badge variant="sage" data-testid="search-sample-banner">
             sample data
           </Badge>
-          <Badge variant="outline" data-testid="search-mls-flag">
+          <Badge variant="sky" data-testid="search-mls-flag">
             FLAG_MLS {result.mlsEnabled ? "on" : "off"}
           </Badge>
         </div>

@@ -11,3 +11,26 @@ export const searchPillClassName =
 
 export const searchPillInputClassName =
   "min-h-11 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground";
+
+export const heroPhotoWashClassName =
+  "from-peach via-sand to-sage/70";
+
+export const PHOTO_WASHES = [
+  "from-sand via-peach to-sage/60",
+  "from-sage via-sky/80 to-sand",
+  "from-sky via-sage/70 to-peach/80",
+  "from-peach via-sand to-sky/50",
+  "from-sage/90 via-sand to-peach",
+  "from-sky/80 via-peach/70 to-sage/80",
+] as const;
+
+export function photoWashForSeed(seed: string): (typeof PHOTO_WASHES)[number] {
+  let hash = 0;
+  for (const char of seed) {
+    hash = (hash * 31 + char.charCodeAt(0)) | 0;
+  }
+  return (
+    PHOTO_WASHES[Math.abs(hash) % PHOTO_WASHES.length] ??
+    "from-sand via-peach to-sage/60"
+  );
+}

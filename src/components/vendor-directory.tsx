@@ -119,7 +119,7 @@ function VendorCard({
           {vendor.contact.phone ?? "No phone"}
           {vendor.contact.email ? ` · ${vendor.contact.email}` : null}
         </p>
-        <Badge variant="outline">Compensation: none</Badge>
+        <Badge variant="sage">Compensation: none</Badge>
         <form action={requestFixtureAppointmentFromForm}>
           <input type="hidden" name="transactionId" value={transactionId} />
           <input type="hidden" name="vendorId" value={vendor.id} />

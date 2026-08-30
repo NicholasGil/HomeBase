@@ -24,7 +24,7 @@ export function AgentCommandCenterView({
   return (
     <div className="space-y-8" data-testid="command-center">
       <section className="space-y-2">
-        {eyebrow ? <Badge variant="outline">{eyebrow}</Badge> : null}
+        {eyebrow ? <Badge variant="sage">{eyebrow}</Badge> : null}
         <p className="text-sm text-muted-foreground">
           {agentName ?? "Assigned clients"}
         </p>
@@ -109,7 +109,7 @@ export function AgentCommandCenterView({
                       {client.nextTask ? ` · ${client.nextTask.title}` : ""}
                     </p>
                   </div>
-                  <Badge variant="outline">{client.stageLabel}</Badge>
+                  <Badge variant="sage">{client.stageLabel}</Badge>
                 </li>
               ))}
             </ul>

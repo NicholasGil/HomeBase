@@ -49,7 +49,7 @@ export function FixtureTourBuilder({
             distance path until a Routes API key exists.
           </p>
         </div>
-        <Badge variant="outline">sample listings</Badge>
+        <Badge variant="sage">sample listings</Badge>
       </div>
 
       <form action={buildTourFromForm} className="space-y-4">
@@ -60,6 +60,7 @@ export function FixtureTourBuilder({
               testId={`tour-candidate-${listing.id}`}
               addressLine={listing.address.line1}
               cityState={`${listing.address.city}, ${listing.address.state} · sample data`}
+              sample
             >
               <p className="text-sm">{listing.brief}</p>
               <label className="flex items-center gap-2 text-sm">

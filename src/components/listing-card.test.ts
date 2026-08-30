@@ -28,5 +28,10 @@ describe("ListingCardFrame", () => {
     expect(addressAt).toBeGreaterThan(photoAt);
     expect(html).toContain('data-testid="search-result-demo"');
     expect(html).toContain("sample data");
+    expect(html).not.toContain("bg-neutral-200");
+    expect(html).not.toContain("from-neutral-300");
+    expect(html).not.toContain("via-zinc-200");
+    expect(html).not.toContain("to-slate-300");
+    expect(html).toMatch(/from-(sand|sage|sky|peach)/);
   });
 });

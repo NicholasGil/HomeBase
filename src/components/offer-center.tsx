@@ -45,7 +45,7 @@ export function OfferCenterViewPanel({
             only.
           </p>
         </div>
-        <Badge variant="outline">{center.market.sampleData}</Badge>
+        <Badge variant="sage">{center.market.sampleData}</Badge>
       </div>
 
       <Card data-testid="offer-market">

@@ -26,10 +26,10 @@ export function JourneyTracker({
             data-state={stage.state}
             title={`${stage.label} · ${stage.state}`}
             className={cn(
-              "h-1.5 min-w-0 flex-1 rounded-full",
+              "h-2 min-w-0 flex-1 rounded-full",
               stage.state === "current" && "bg-next",
-              stage.state === "complete" && "bg-foreground/55",
-              stage.state === "upcoming" && "bg-foreground/12",
+              stage.state === "complete" && "bg-sand-foreground/55",
+              stage.state === "upcoming" && "bg-sage",
             )}
           >
             <span className="sr-only">

@@ -58,8 +58,9 @@ export function ConciergeChat() {
             <Button
               key={starter}
               type="button"
-              variant="outline"
+              variant="secondary"
               size="sm"
+              className="rounded-full bg-sage text-sage-foreground hover:bg-sage/80"
               disabled={busy}
               onClick={() => {
                 setQuestion(starter);

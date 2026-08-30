@@ -20,6 +20,7 @@ import type * as lib_documentAccess from "../lib/documentAccess.js";
 import type * as lib_journeyLogic from "../lib/journeyLogic.js";
 import type * as lib_validators from "../lib/validators.js";
 import type * as me from "../me.js";
+import type * as offers from "../offers.js";
 import type * as orgs from "../orgs.js";
 import type * as seed from "../seed.js";
 import type * as seedPlan from "../seedPlan.js";
@@ -27,6 +28,7 @@ import type * as tasks from "../tasks.js";
 import type * as tours from "../tours.js";
 import type * as transactions from "../transactions.js";
 import type * as lib_driveTimes from "../lib/driveTimes.js";
+import type * as lib_offerModel from "../lib/offerModel.js";
 import type * as lib_tourOptimizer from "../lib/tourOptimizer.js";
 
 import type {
@@ -48,6 +50,7 @@ declare const fullApi: ApiFromModules<{
   "lib/journeyLogic": typeof lib_journeyLogic;
   "lib/validators": typeof lib_validators;
   me: typeof me;
+  offers: typeof offers;
   orgs: typeof orgs;
   seed: typeof seed;
   seedPlan: typeof seedPlan;
@@ -55,6 +58,7 @@ declare const fullApi: ApiFromModules<{
   tours: typeof tours;
   transactions: typeof transactions;
   "lib/driveTimes": typeof lib_driveTimes;
+  "lib/offerModel": typeof lib_offerModel;
   "lib/tourOptimizer": typeof lib_tourOptimizer;
 }>;
 

@@ -79,6 +79,54 @@ export const offerStrategyValidator = v.union(
   v.literal("value"),
 );
 
+export const financingProgramValidator = v.union(
+  v.literal("conventional"),
+  v.literal("fha"),
+  v.literal("va"),
+  v.literal("cash"),
+);
+
+export const inspectionRepairsValidator = v.union(
+  v.literal("as_is"),
+  v.literal("request_repairs"),
+  v.literal("credit"),
+);
+
+export const offerFinancingValidator = v.object({
+  program: financingProgramValidator,
+  downPayment: v.optional(moneyFigureValidator),
+  rateBps: v.optional(v.number()),
+});
+
+export const offerContingenciesValidator = v.object({
+  inspection: v.boolean(),
+  financing: v.boolean(),
+  appraisal: v.boolean(),
+});
+
+export const offerInspectionTermsValidator = v.object({
+  periodDays: v.number(),
+  repairs: inspectionRepairsValidator,
+});
+
+export const offerTermsValidator = v.object({
+  price: moneyFigureValidator,
+  earnestMoney: v.optional(moneyFigureValidator),
+  sellerConcessions: v.optional(moneyFigureValidator),
+  closingDate: v.optional(v.number()),
+  financing: v.optional(offerFinancingValidator),
+  contingencies: v.optional(offerContingenciesValidator),
+  inspectionTerms: v.optional(offerInspectionTermsValidator),
+});
+
+export const priceReductionValidator = v.object({
+  reducedAt: v.number(),
+  previousPrice: moneyFigureValidator,
+  newPrice: moneyFigureValidator,
+});
+
+export const OFFER_REVIEW_ROLES = ["agent", "broker", "admin"] as const;
+
 export const showingVerdictValidator = v.union(
   v.literal("love"),
   v.literal("maybe"),

@@ -26,6 +26,8 @@ const READ_FUNCTIONS = [
   "tours.listCandidates",
   "tours.listMine",
   "tours.get",
+  "offers.getMine",
+  "offers.getCenter",
 ] as const;
 
 async function seeded() {
@@ -62,7 +64,7 @@ async function buyerATransactionId(t: ReturnType<typeof convexTest>) {
 
 describe("permission tests for data-reading functions", () => {
   it("lists every public read function so coverage cannot drift silently", () => {
-    expect(READ_FUNCTIONS).toHaveLength(20);
+    expect(READ_FUNCTIONS).toHaveLength(22);
   });
 
   it.each([
@@ -133,6 +135,12 @@ describe("permission tests for data-reading functions", () => {
         propertyIds: candidates.map((row) => row._id),
       });
       return t.query(api.tours.get, { tourId: built.tourId });
+    }],
+    ["offers.getMine", async (t: ReturnType<typeof convexTest>) =>
+      t.query(api.offers.getMine, {})],
+    ["offers.getCenter", async (t: ReturnType<typeof convexTest>) => {
+      const id = await buyerATransactionId(t);
+      return t.query(api.offers.getCenter, { transactionId: id });
     }],
   ] as const)("%s denies an unauthenticated caller", async (_name, call) => {
     const t = await seeded();
@@ -229,6 +237,28 @@ describe("permission tests for data-reading functions", () => {
     await expect(
       asVendor.query(api.tours.get, { tourId: built.tourId }),
     ).rejects.toThrow("FORBIDDEN");
+    await expect(asVendor.query(api.offers.getMine, {})).rejects.toThrow(
+      "FORBIDDEN",
+    );
+    await expect(
+      asVendor.query(api.offers.getCenter, { transactionId: id }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      asVendor.mutation(api.offers.ensureDraft, { transactionId: id }),
+    ).rejects.toThrow("FORBIDDEN");
+    const alexOffer = await t
+      .withIdentity({ subject: "clerk_buyer_a" })
+      .query(api.offers.getMine, {});
+    const offerId = alexOffer?.offer?._id;
+    if (offerId === undefined) {
+      throw new Error("seed offer missing");
+    }
+    await expect(
+      asVendor.mutation(api.offers.submit, { offerId }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      asVendor.mutation(api.offers.review, { offerId }),
+    ).rejects.toThrow("FORBIDDEN");
   });
 
   it("denies a signed-in user with no membership", async () => {
@@ -310,6 +340,28 @@ describe("permission tests for data-reading functions", () => {
     });
     await expect(
       asStranger.query(api.tours.get, { tourId: built.tourId }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(asStranger.query(api.offers.getMine, {})).rejects.toThrow(
+      "FORBIDDEN",
+    );
+    await expect(
+      asStranger.query(api.offers.getCenter, { transactionId: id }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      asStranger.mutation(api.offers.ensureDraft, { transactionId: id }),
+    ).rejects.toThrow("FORBIDDEN");
+    const alexOffer = await t
+      .withIdentity({ subject: "clerk_buyer_a" })
+      .query(api.offers.getMine, {});
+    const offerId = alexOffer?.offer?._id;
+    if (offerId === undefined) {
+      throw new Error("seed offer missing");
+    }
+    await expect(
+      asStranger.mutation(api.offers.submit, { offerId }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      asStranger.mutation(api.offers.review, { offerId }),
     ).rejects.toThrow("FORBIDDEN");
   });
 

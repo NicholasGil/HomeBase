@@ -60,4 +60,34 @@ describe("transaction isolation", () => {
       asBuyerA.query(api.tours.get, { tourId: tour.tourId }),
     ).rejects.toThrow("FORBIDDEN");
   });
+
+  it("buyer A cannot load buyer B's offer center", async () => {
+    const t = convexTest(schema, modules);
+    await t.mutation(internal.seed.run, {});
+    const asBuyerA = t.withIdentity({ subject: "clerk_buyer_a" });
+    const asBuyerB = t.withIdentity({ subject: "clerk_buyer_b" });
+    const buyerBTransactions = await asBuyerB.query(
+      api.transactions.listMine,
+      {},
+    );
+    const buyerBTransaction = buyerBTransactions[0];
+    if (buyerBTransaction === undefined) {
+      throw new Error("buyer B missing transaction");
+    }
+    await expect(
+      asBuyerA.query(api.offers.getCenter, {
+        transactionId: buyerBTransaction._id,
+      }),
+    ).rejects.toThrow("FORBIDDEN");
+    const drafted = await asBuyerB.mutation(api.offers.ensureDraft, {
+      transactionId: buyerBTransaction._id,
+    });
+    const offerId = drafted.offer?._id;
+    if (offerId === undefined) {
+      throw new Error("buyer B draft missing");
+    }
+    await expect(
+      asBuyerA.mutation(api.offers.submit, { offerId }),
+    ).rejects.toThrow("FORBIDDEN");
+  });
 });

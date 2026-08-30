@@ -11,6 +11,7 @@
 import type * as concierge from "../concierge.js";
 import type * as dashboard from "../dashboard.js";
 import type * as documents from "../documents.js";
+import type * as explainer from "../explainer.js";
 import type * as journey from "../journey.js";
 import type * as lib_audit from "../lib/audit.js";
 import type * as lib_authz from "../lib/authz.js";
@@ -41,6 +42,7 @@ declare const fullApi: ApiFromModules<{
   concierge: typeof concierge;
   dashboard: typeof dashboard;
   documents: typeof documents;
+  explainer: typeof explainer;
   journey: typeof journey;
   "lib/audit": typeof lib_audit;
   "lib/authz": typeof lib_authz;

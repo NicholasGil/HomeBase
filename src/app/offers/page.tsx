@@ -1,10 +1,13 @@
 import { redirect } from "next/navigation";
 
+import { loadFixtureExplainer } from "@/app/actions/explainer";
 import { loadFixtureOffers } from "@/app/actions/offers";
 import { getTestSession } from "@/app/actions/test-session";
 import { AppShell } from "@/components/app-shell";
 import { FixtureLoginPrompt } from "@/components/fixture-login-prompt";
 import { LiveOfferCenter } from "@/components/live-offer-center";
+import { ContractExplainer } from "@/components/contract-explainer";
+import { LiveContractExplainer } from "@/components/live-contract-explainer";
 import { FixtureOfferCenter } from "@/components/offer-center";
 import { QueryErrorBoundary } from "@/components/query-error-boundary";
 import {
@@ -45,17 +48,25 @@ export default async function OffersPage({
       redirect("/test-login");
     }
     const loaded = await loadFixtureOffers();
+    const explainer = await loadFixtureExplainer();
     return (
       <AppShell>
         <h1 className="mb-6 text-3xl font-semibold tracking-tight">Offers</h1>
         <p className="mb-8 text-sm text-muted-foreground">
           Signed in as {session.name} · {session.role}
         </p>
-        <FixtureOfferCenter
-          denied={!loaded.ok}
-          center={loaded.ok ? loaded.center : null}
-          gateFromSubmit={params.gate}
-        />
+        <div className="space-y-10">
+          <FixtureOfferCenter
+            denied={!loaded.ok}
+            center={loaded.ok ? loaded.center : null}
+            gateFromSubmit={params.gate}
+          />
+          <ContractExplainer
+            denied={!explainer.sections.ok}
+            sections={explainer.sections.ok ? explainer.sections.sections : []}
+            thread={explainer.thread}
+          />
+        </div>
       </AppShell>
     );
   }
@@ -69,7 +80,10 @@ export default async function OffersPage({
           </p>
         }
       >
-        <LiveOfferCenter />
+        <div className="space-y-10">
+          <LiveOfferCenter />
+          <LiveContractExplainer />
+        </div>
       </QueryErrorBoundary>
     </AppShell>
   );

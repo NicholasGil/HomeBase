@@ -29,6 +29,8 @@ const READ_FUNCTIONS = [
   "offers.getMine",
   "offers.getCenter",
   "offers.simulate",
+  "explainer.listMine",
+  "explainer.listSections",
 ] as const;
 
 async function seeded() {
@@ -65,7 +67,7 @@ async function buyerATransactionId(t: ReturnType<typeof convexTest>) {
 
 describe("permission tests for data-reading functions", () => {
   it("lists every public read function so coverage cannot drift silently", () => {
-    expect(READ_FUNCTIONS).toHaveLength(23);
+    expect(READ_FUNCTIONS).toHaveLength(25);
   });
 
   it.each([
@@ -153,6 +155,12 @@ describe("permission tests for data-reading functions", () => {
         rateBps: 675,
         program: "conventional",
       });
+    }],
+    ["explainer.listMine", async (t: ReturnType<typeof convexTest>) =>
+      t.query(api.explainer.listMine, {})],
+    ["explainer.listSections", async (t: ReturnType<typeof convexTest>) => {
+      const id = await buyerATransactionId(t);
+      return t.query(api.explainer.listSections, { transactionId: id });
     }],
   ] as const)("%s denies an unauthenticated caller", async (_name, call) => {
     const t = await seeded();
@@ -281,6 +289,18 @@ describe("permission tests for data-reading functions", () => {
     await expect(
       asVendor.mutation(api.offers.review, { offerId }),
     ).rejects.toThrow("FORBIDDEN");
+    await expect(asVendor.query(api.explainer.listMine, {})).rejects.toThrow(
+      "FORBIDDEN",
+    );
+    await expect(
+      asVendor.query(api.explainer.listSections, { transactionId: id }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      asVendor.mutation(api.explainer.askAboutSection, {
+        transactionId: id,
+        sectionId: "earnest-money",
+      }),
+    ).rejects.toThrow("FORBIDDEN");
   });
 
   it("denies a signed-in user with no membership", async () => {
@@ -394,6 +414,18 @@ describe("permission tests for data-reading functions", () => {
     ).rejects.toThrow("FORBIDDEN");
     await expect(
       asStranger.mutation(api.offers.review, { offerId }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(asStranger.query(api.explainer.listMine, {})).rejects.toThrow(
+      "FORBIDDEN",
+    );
+    await expect(
+      asStranger.query(api.explainer.listSections, { transactionId: id }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      asStranger.mutation(api.explainer.askAboutSection, {
+        transactionId: id,
+        sectionId: "earnest-money",
+      }),
     ).rejects.toThrow("FORBIDDEN");
   });
 

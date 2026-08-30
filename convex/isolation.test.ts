@@ -99,5 +99,10 @@ describe("transaction isolation", () => {
         program: "conventional",
       }),
     ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      asBuyerA.query(api.explainer.listSections, {
+        transactionId: buyerBTransaction._id,
+      }),
+    ).rejects.toThrow("FORBIDDEN");
   });
 });

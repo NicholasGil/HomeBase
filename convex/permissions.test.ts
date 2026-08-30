@@ -41,6 +41,11 @@ const READ_FUNCTIONS = [
   "vendors.listMessages",
   "vendors.listDocumentRequests",
   "vendors.listGrantedDocuments",
+  "esign.listMine",
+  "esign.listForTransaction",
+  "esign.getPacket",
+  "idv.listMine",
+  "idv.getGating",
 ] as const;
 
 async function seeded() {
@@ -77,7 +82,7 @@ async function buyerATransactionId(t: ReturnType<typeof convexTest>) {
 
 describe("permission tests for data-reading functions", () => {
   it("lists every public read function so coverage cannot drift silently", () => {
-    expect(READ_FUNCTIONS).toHaveLength(35);
+    expect(READ_FUNCTIONS).toHaveLength(40);
   });
 
   it.each([
@@ -250,6 +255,26 @@ describe("permission tests for data-reading functions", () => {
         assignmentId: first.assignmentId,
       });
     }],
+    ["esign.listMine", async (t: ReturnType<typeof convexTest>) =>
+      t.query(api.esign.listMine, {})],
+    ["esign.listForTransaction", async (t: ReturnType<typeof convexTest>) => {
+      const id = await buyerATransactionId(t);
+      return t.query(api.esign.listForTransaction, { transactionId: id });
+    }],
+    ["esign.getPacket", async (t: ReturnType<typeof convexTest>) => {
+      const packets = await t
+        .withIdentity({ subject: "clerk_buyer_a" })
+        .query(api.esign.listMine, {});
+      const first = packets[0];
+      if (first === undefined) {
+        throw new Error("seed packet missing");
+      }
+      return t.query(api.esign.getPacket, { packetId: first._id });
+    }],
+    ["idv.listMine", async (t: ReturnType<typeof convexTest>) =>
+      t.query(api.idv.listMine, {})],
+    ["idv.getGating", async (t: ReturnType<typeof convexTest>) =>
+      t.query(api.idv.getGating, {})],
   ] as const)("%s denies an unauthenticated caller", async (_name, call) => {
     const t = await seeded();
     await expect(call(t)).rejects.toThrow("UNAUTHENTICATED");
@@ -447,6 +472,28 @@ describe("permission tests for data-reading functions", () => {
         assignmentId: jordanAssignment.assignmentId,
       }),
     ).rejects.toThrow("FORBIDDEN");
+    await expect(asVendor.query(api.esign.listMine, {})).rejects.toThrow(
+      "FORBIDDEN",
+    );
+    await expect(
+      asVendor.query(api.esign.listForTransaction, { transactionId: id }),
+    ).rejects.toThrow("FORBIDDEN");
+    const vendorPackets = await t
+      .withIdentity({ subject: "clerk_buyer_a" })
+      .query(api.esign.listMine, {});
+    const vendorPacket = vendorPackets[0];
+    if (vendorPacket === undefined) {
+      throw new Error("seed packet missing");
+    }
+    await expect(
+      asVendor.query(api.esign.getPacket, { packetId: vendorPacket._id }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(asVendor.query(api.idv.listMine, {})).rejects.toThrow(
+      "FORBIDDEN",
+    );
+    await expect(asVendor.query(api.idv.getGating, {})).rejects.toThrow(
+      "FORBIDDEN",
+    );
   });
 
   it("denies a signed-in user with no membership", async () => {
@@ -630,6 +677,28 @@ describe("permission tests for data-reading functions", () => {
         assignmentId: strangerAssignment.assignmentId,
       }),
     ).rejects.toThrow("FORBIDDEN");
+    await expect(asStranger.query(api.esign.listMine, {})).rejects.toThrow(
+      "FORBIDDEN",
+    );
+    await expect(
+      asStranger.query(api.esign.listForTransaction, { transactionId: id }),
+    ).rejects.toThrow("FORBIDDEN");
+    const strangerPackets = await t
+      .withIdentity({ subject: "clerk_buyer_a" })
+      .query(api.esign.listMine, {});
+    const strangerPacket = strangerPackets[0];
+    if (strangerPacket === undefined) {
+      throw new Error("seed packet missing");
+    }
+    await expect(
+      asStranger.query(api.esign.getPacket, { packetId: strangerPacket._id }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(asStranger.query(api.idv.listMine, {})).rejects.toThrow(
+      "FORBIDDEN",
+    );
+    await expect(asStranger.query(api.idv.getGating, {})).rejects.toThrow(
+      "FORBIDDEN",
+    );
   });
 
   it("refuses listGrants for a vendor who holds an active grant", async () => {

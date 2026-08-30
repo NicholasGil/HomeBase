@@ -16,6 +16,11 @@ import {
   propertySourceValidator,
   roleValidator,
   showingVerdictValidator,
+  signaturePacketStatusValidator,
+  esignProviderValidator,
+  idvPurposeValidator,
+  idvSessionStatusValidator,
+  idvProviderValidator,
   taskStatusValidator,
   transactionStatusValidator,
 } from "./lib/validators";
@@ -336,4 +341,38 @@ export default defineSchema({
   })
     .index("by_target", ["targetType", "targetId"])
     .index("by_actor", ["actorId"]),
+
+  // M11. App owns workflow, audit, and retention. Provider owns crypto.
+  // status + providerRef only. No signature image or private key.
+  signaturePackets: defineTable({
+    transactionId: v.id("transactions"),
+    documentId: v.id("documents"),
+    status: signaturePacketStatusValidator,
+    provider: esignProviderValidator,
+    providerRef: v.optional(v.string()),
+    designated: v.boolean(),
+    retentionUntil: v.optional(v.number()),
+    explainedSectionIds: v.array(v.string()),
+    agentReviewedById: v.optional(v.id("users")),
+    buyerReviewedById: v.optional(v.id("users")),
+    verifiedAt: v.optional(v.number()),
+    signedAt: v.optional(v.number()),
+    storedDocumentId: v.optional(v.id("documents")),
+    createdBy: v.id("users"),
+  })
+    .index("by_transaction", ["transactionId"])
+    .index("by_document", ["documentId"]),
+
+  // M12 tier 2. Status + provider ref only. No selfie, ID bytes, or template.
+  idvSessions: defineTable({
+    orgId: v.id("orgs"),
+    userId: v.id("users"),
+    purpose: idvPurposeValidator,
+    status: idvSessionStatusValidator,
+    provider: idvProviderValidator,
+    providerRef: v.optional(v.string()),
+    completedAt: v.optional(v.number()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_org_user", ["orgId", "userId"]),
 });

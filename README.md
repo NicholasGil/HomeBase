@@ -59,3 +59,9 @@ M8 agent command center: Casey Holt's eight assigned clients, stage at a glance,
 ## P5
 
 M10 vendor directory and portal. Inspection-stage buyers see inspectors with compare and request-appointment. Jordan Hale's portal is one assigned file, granted documents only, and access that ends on expiry. `compensationModel` writes other than `none` are rejected while `FLAG_VENDOR_COMP` is off. No payment flow. Flags stay off.
+
+## P6
+
+M11 e-signature and M12 identity. The app owns the Prepare → Explain (M7) → Agent Review → Buyer Review → Verify → Sign → Audit Trail → Storage → advance-stage workflow, plus the audit log and retention timestamp. The sandbox adapter never calls Dropbox Sign or DocuSign and never reads an API key. `FLAG_ESIGN` stays off; provider send/sign fail closed.
+
+M12 tier 1 is device unlock. No face or biometric template is stored or sent. Tier 2 is vendor IDV for financial documents, designated execution, and recovery changes. `FLAG_IDV` stays off. The per-state table is empty until review. High-risk actions fail closed. Production keys stay on needs-human #1.

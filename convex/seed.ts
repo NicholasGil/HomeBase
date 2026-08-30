@@ -262,6 +262,30 @@ export const run = internalMutation({
           status: "summarized",
           uploadedBy: agentId,
         });
+        const purchaseAgreementId = await ctx.db.insert("documents", {
+          transactionId,
+          type: "purchase_agreement",
+          extractedSummary:
+            "Sample purchase agreement for the Maple Avenue file.",
+          status: "summarized",
+          uploadedBy: agentId,
+        });
+        const packetId = await ctx.db.insert("signaturePackets", {
+          transactionId,
+          documentId: purchaseAgreementId,
+          status: "prepare",
+          provider: "sandbox",
+          designated: true,
+          explainedSectionIds: [],
+          createdBy: userId,
+        });
+        await appendAuditLog(ctx, {
+          actorId: "system",
+          action: "esign.seeded",
+          targetType: "signaturePacket",
+          targetId: packetId,
+          meta: { documentId: purchaseAgreementId },
+        });
         await ctx.db.insert("appointments", {
           transactionId,
           type: "inspection",

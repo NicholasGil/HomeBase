@@ -116,6 +116,34 @@ describe("transaction isolation", () => {
     ).rejects.toThrow("FORBIDDEN");
   });
 
+  it("buyer A cannot load buyer B's signature packet", async () => {
+    const t = convexTest(schema, modules);
+    await t.mutation(internal.seed.run, {});
+    const asBuyerA = t.withIdentity({ subject: "clerk_buyer_a" });
+    const asBuyerB = t.withIdentity({ subject: "clerk_buyer_b" });
+    const buyerATransactions = await asBuyerA.query(
+      api.transactions.listMine,
+      {},
+    );
+    const buyerATransaction = buyerATransactions[0];
+    if (buyerATransaction === undefined) {
+      throw new Error("buyer A missing transaction");
+    }
+    await expect(
+      asBuyerB.query(api.esign.listForTransaction, {
+        transactionId: buyerATransaction._id,
+      }),
+    ).rejects.toThrow("FORBIDDEN");
+    const packets = await asBuyerA.query(api.esign.listMine, {});
+    const first = packets[0];
+    if (first === undefined) {
+      throw new Error("seed packet missing");
+    }
+    await expect(
+      asBuyerB.query(api.esign.getPacket, { packetId: first._id }),
+    ).rejects.toThrow("FORBIDDEN");
+  });
+
   it("buyer cannot load the agent command center", async () => {
     const t = convexTest(schema, modules);
     await t.mutation(internal.seed.run, {});

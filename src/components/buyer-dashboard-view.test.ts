@@ -29,6 +29,8 @@ describe("BuyerDashboardViewPanel ten-second answers", () => {
     expect(html).toContain("Cannot leave Inspection");
     expect(html).toContain('data-testid="journey-stage-inspection"');
     expect(html).toContain('data-testid="journey-tracker"');
+    expect(html).toContain("4101 Oakwood Ave");
+    expect(html.indexOf("h-40")).toBeLessThan(html.indexOf("Inspection"));
   });
 });
 

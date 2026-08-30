@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { ListingCardFrame } from "@/components/listing-card";
 import { MoneyFigureView } from "@/components/money-figure-view";
+import { SearchQueryPill } from "@/components/search-pill";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { api } from "../../convex/_generated/api";
@@ -23,7 +24,7 @@ export function LivePropertySearch() {
   }
 
   return (
-    <section className="space-y-6" data-testid="property-search">
+    <section className="space-y-8" data-testid="property-search">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 className={tripHeadingClassName}>
@@ -50,23 +51,12 @@ export function LivePropertySearch() {
           setSubmitted(query);
         }}
       >
-        <label className="block space-y-2">
-          <span className="text-sm font-medium">What are you looking for?</span>
-          <textarea
-            data-testid="search-query"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            rows={3}
-            className="w-full rounded-lg border bg-background px-3 py-2 text-sm"
-          />
-        </label>
-        <div className="flex flex-wrap gap-2">
-          <Button type="submit" data-testid="search-submit">
-            Search
-          </Button>
+        <SearchQueryPill value={query} onChange={setQuery} />
+        <div className="px-1">
           <Button
             type="button"
-            variant="outline"
+            variant="ghost"
+            size="sm"
             data-testid="search-canonical"
             onClick={() => {
               setQuery(CANONICAL_SEARCH_QUERY);
@@ -78,7 +68,7 @@ export function LivePropertySearch() {
         </div>
       </form>
 
-      <ol className="space-y-3">
+      <ol className="grid gap-6 sm:grid-cols-2">
         {result.results.map((row, index) => (
           <li key={row.id}>
             <ListingCardFrame
@@ -91,7 +81,10 @@ export function LivePropertySearch() {
               sample={row.sampleData}
               sampleTestId="search-sample-label"
             >
-              <p className="text-sm" data-testid={`search-reason-${row.id}`}>
+              <p
+                className="line-clamp-2 text-sm text-muted-foreground"
+                data-testid={`search-reason-${row.id}`}
+              >
                 {row.reason}
               </p>
               {row.listing.listPrice ? (
@@ -99,7 +92,7 @@ export function LivePropertySearch() {
               ) : (
                 <p className="text-sm text-muted-foreground">None</p>
               )}
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 pt-1">
                 <Button
                   type="button"
                   variant="outline"

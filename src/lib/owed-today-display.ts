@@ -3,9 +3,9 @@ import type { DashboardMoney } from "../../convex/lib/dashboardView";
 export const MISSING_OWED_TODAY_TEXT = "None";
 export const ESTIMATE_LABEL = "ESTIMATE";
 export const ISSUED_AMOUNT_CLASS_NAME =
-  "font-mono text-3xl font-semibold tracking-tight tabular-nums";
+  "font-mono text-4xl font-semibold tracking-tight tabular-nums";
 export const ESTIMATE_AMOUNT_CLASS_NAME =
-  "text-2xl font-normal text-muted-foreground italic tabular-nums";
+  "text-3xl font-normal text-muted-foreground italic tabular-nums";
 
 export type OwedTodayDisplay =
   | {

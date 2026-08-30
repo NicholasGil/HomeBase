@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import { buttonVariants } from "@/components/ui/button";
 import type { AppNavLink, AppNavRole } from "@/lib/app-nav";
 import { cn } from "@/lib/utils";
 
@@ -26,8 +25,7 @@ export function AppNavLinks({
               <Link
                 href={link.href}
                 className={cn(
-                  buttonVariants({ variant: "ghost", size: "sm" }),
-                  "text-muted-foreground",
+                  "inline-flex h-8 items-center rounded-full px-2.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
                 )}
               >
                 {link.label}

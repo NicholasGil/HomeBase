@@ -19,6 +19,9 @@ export function AppShell({
           </Link>
           <div className="flex items-center gap-2">
             {nav}
+            <Link href="/agent" className={cn(buttonVariants({ variant: "ghost" }))}>
+              Command center
+            </Link>
             <Link href="/tours" className={cn(buttonVariants({ variant: "ghost" }))}>
               Tours
             </Link>

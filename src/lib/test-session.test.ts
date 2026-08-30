@@ -16,11 +16,13 @@ describe("test session permission", () => {
     ).toEqual({ ok: false, reason: "FORBIDDEN" });
   });
 
-  it("denies unauthorized roles and unknown ids", () => {
-    expect(startTestSessionDecision(SEED_CLERK_IDS.agent)).toEqual({
-      ok: false,
-      reason: "FORBIDDEN",
-    });
+  it("starts known fixture roles and denies unknown ids", () => {
+    const agent = startTestSessionDecision(SEED_CLERK_IDS.agent);
+    expect(agent.ok).toBe(true);
+    if (agent.ok) {
+      expect(agent.session.role).toBe("agent");
+      expect(agent.session.name).toBe("Casey Holt");
+    }
     expect(startTestSessionDecision("clerk_vendor")).toEqual({
       ok: false,
       reason: "FORBIDDEN",

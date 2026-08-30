@@ -7,7 +7,7 @@ import { REQUIRED_P0_TABLES, SEED_PLAN } from "./seedPlan";
 import { modules } from "./test.setup";
 
 describe("seed", () => {
-  it("creates one org, two buyers with distinct transactions, and one agent", async () => {
+  it("creates one org, eight buyers with distinct transactions, and one agent", async () => {
     const t = convexTest(schema, modules);
     await t.mutation(internal.seed.run, {});
 
@@ -41,11 +41,11 @@ describe("seed", () => {
       FLAG_IDV: false,
     });
 
-    expect(counts.users).toHaveLength(4);
-    expect(counts.memberships.filter((row) => row.role === "buyer")).toHaveLength(2);
+    expect(counts.users).toHaveLength(10);
+    expect(counts.memberships.filter((row) => row.role === "buyer")).toHaveLength(8);
     expect(counts.memberships.filter((row) => row.role === "agent")).toHaveLength(1);
-    expect(counts.clients).toHaveLength(2);
-    expect(counts.transactions).toHaveLength(2);
+    expect(counts.clients).toHaveLength(8);
+    expect(counts.transactions).toHaveLength(8);
     expect(counts.transactions[0]?._id).not.toBe(counts.transactions[1]?._id);
     expect(counts.stages).toHaveLength(13);
     expect(counts.tasks.length).toBeGreaterThan(0);
@@ -65,5 +65,12 @@ describe("seed", () => {
     expect(alex[0]?.stage).toBe("inspection");
     expect(blair[0]?.stage).toBe("showings");
     expect(alex[0]?.owedToday?.provenance).toBe("title_issued");
+
+    const offers = await t.run(async (ctx) => ctx.db.query("offers").collect());
+    expect(offers.length).toBeGreaterThan(0);
+    for (const offer of offers) {
+      expect(offer.status).toBe("draft");
+      expect(offer.reviewedByLicenseeId).toBeUndefined();
+    }
   });
 });

@@ -105,4 +105,13 @@ describe("transaction isolation", () => {
       }),
     ).rejects.toThrow("FORBIDDEN");
   });
+
+  it("buyer cannot load the agent command center", async () => {
+    const t = convexTest(schema, modules);
+    await t.mutation(internal.seed.run, {});
+    const asBuyerA = t.withIdentity({ subject: "clerk_buyer_a" });
+    await expect(asBuyerA.query(api.commandCenter.getMine, {})).rejects.toThrow(
+      "FORBIDDEN",
+    );
+  });
 });

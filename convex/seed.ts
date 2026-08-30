@@ -3,10 +3,49 @@ import { appendAuditLog } from "./lib/audit";
 import { DEFAULT_FEATURE_FLAGS } from "./lib/validators";
 import {
   SEED_CONCIERGE,
+  SEED_OFFER_AS_OF,
   SEED_OFFER_MARKET,
   SEED_PLAN,
   SEED_TOUR,
 } from "./seedPlan";
+
+const DAY_MS = 86_400_000;
+
+function keyDatesFor(
+  buyer: (typeof SEED_PLAN.buyers)[number],
+  now: number,
+) {
+  const inspectionDueOffsetDays =
+    buyer.inspectionDueOffsetDays ??
+    (buyer.stage === "inspection" ? 2 : null);
+  const underContractOffsetDays =
+    buyer.underContractOffsetDays ??
+    (buyer.stage === "inspection" ? 5 : null);
+  return {
+    underContractAt:
+      underContractOffsetDays === null
+        ? undefined
+        : now - underContractOffsetDays * DAY_MS,
+    inspectionDueAt:
+      inspectionDueOffsetDays === null
+        ? undefined
+        : now + inspectionDueOffsetDays * DAY_MS,
+    closingAt:
+      buyer.closingAtOffsetDays === null
+        ? undefined
+        : now + buyer.closingAtOffsetDays * DAY_MS,
+  };
+}
+
+function sampleListPrice() {
+  return {
+    amountCents: 40000000,
+    currency: "USD" as const,
+    provenance: "user_entered" as const,
+    asOf: SEED_OFFER_AS_OF,
+    label: "List price · sample data",
+  };
+}
 
 export const run = internalMutation({
   args: {},
@@ -83,13 +122,19 @@ export const run = internalMutation({
         userId,
         orgId,
         preferences: { beds: 3 },
-        prequalStatus: "preapproved",
+        prequalStatus: buyer.prequalStatus,
         budget: {
           amountCents: 45000000,
           currency: "USD",
-          provenance: "lender_issued",
+          provenance:
+            buyer.prequalStatus === "preapproved"
+              ? "lender_issued"
+              : "user_entered",
           asOf: now,
-          label: "Preapproval ceiling",
+          label:
+            buyer.prequalStatus === "preapproved"
+              ? "Preapproval ceiling"
+              : "Buyer budget target",
         },
         availabilityWindows: [...SEED_TOUR.buyerWindows],
       });
@@ -97,29 +142,36 @@ export const run = internalMutation({
       const market =
         buyer.clerkId === "clerk_buyer_a"
           ? SEED_OFFER_MARKET.maple
-          : SEED_OFFER_MARKET.cedar;
+          : buyer.clerkId === "clerk_buyer_b"
+            ? SEED_OFFER_MARKET.cedar
+            : null;
       const propertyId = await ctx.db.insert("properties", {
         address: buyer.property,
         specs: { beds: 3, baths: 2, sqft: 1800 },
         media: [],
         source: "manual",
-        listPrice: { ...market.listPrice },
-        listedAt: market.listedAt,
-        priceReductions: market.priceReductions.map((row) => ({
-          reducedAt: row.reducedAt,
-          previousPrice: { ...row.previousPrice },
-          newPrice: { ...row.newPrice },
-        })),
+        listPrice: market === null ? sampleListPrice() : { ...market.listPrice },
+        listedAt: market === null ? SEED_OFFER_AS_OF - 10 * DAY_MS : market.listedAt,
+        priceReductions:
+          market === null
+            ? []
+            : market.priceReductions.map((row) => ({
+                reducedAt: row.reducedAt,
+                previousPrice: { ...row.previousPrice },
+                newPrice: { ...row.newPrice },
+              })),
       });
-      for (const comp of market.comps) {
-        await ctx.db.insert("comps", {
-          propertyId,
-          address: { ...comp.address },
-          soldPrice: { ...comp.soldPrice },
-          soldDate: comp.soldDate,
-          specs: { ...comp.specs },
-          source: comp.source,
-        });
+      if (market !== null) {
+        for (const comp of market.comps) {
+          await ctx.db.insert("comps", {
+            propertyId,
+            address: { ...comp.address },
+            soldPrice: { ...comp.soldPrice },
+            soldDate: comp.soldDate,
+            specs: { ...comp.specs },
+            source: comp.source,
+          });
+        }
       }
 
       const transactionId = await ctx.db.insert("transactions", {
@@ -129,10 +181,7 @@ export const run = internalMutation({
         propertyId,
         stage: buyer.stage,
         status: "active",
-        keyDates: {
-          underContractAt: buyer.stage === "inspection" ? now - 86400000 * 5 : undefined,
-          inspectionDueAt: buyer.stage === "inspection" ? now + 86400000 * 2 : undefined,
-        },
+        keyDates: keyDatesFor(buyer, now),
         owedToday: {
           amountCents: buyer.owedToday.amountCents,
           currency: buyer.owedToday.currency,
@@ -237,7 +286,7 @@ export const run = internalMutation({
           expiresAt: now + 30 * 24 * 60 * 60 * 1000,
           status: "active",
         });
-      } else {
+      } else if (buyer.clerkId === "clerk_buyer_b") {
         await ctx.db.insert("tasks", {
           transactionId,
           stage: "financing",
@@ -256,6 +305,38 @@ export const run = internalMutation({
           blockedBy: [],
           blocksStage: false,
         });
+      } else {
+        for (const task of buyer.tasks) {
+          await ctx.db.insert("tasks", {
+            transactionId,
+            stage: task.stage,
+            title: task.title,
+            assigneeRole: task.assigneeRole,
+            status: task.status,
+            blockedBy: [],
+            blocksStage: task.blocksStage,
+          });
+        }
+        for (const type of buyer.documents) {
+          await ctx.db.insert("documents", {
+            transactionId,
+            type,
+            status: "classified",
+            uploadedBy: userId,
+          });
+        }
+        if (buyer.seedDraftOffer) {
+          await ctx.db.insert("offers", {
+            transactionId,
+            terms: {
+              price: {
+                ...sampleListPrice(),
+                label: "Draft at list",
+              },
+            },
+            status: "draft",
+          });
+        }
       }
 
       await appendAuditLog(ctx, {

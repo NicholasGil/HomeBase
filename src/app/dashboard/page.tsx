@@ -47,8 +47,11 @@ export default async function DashboardPage() {
     if (session === null) {
       throw new Error("fixture mode requires a test session");
     }
-    if (session.role !== "buyer") {
+    if (session.role === "vendor") {
       redirect("/vault");
+    }
+    if (session.role === "agent") {
+      redirect("/agent");
     }
     const tours = await loadFixtureTours();
     const offers = await loadFixtureOffers();

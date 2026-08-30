@@ -28,7 +28,16 @@ export type TestVendorSession = {
   role: "vendor";
 };
 
-export type TestSession = TestBuyerSession | TestVendorSession;
+export type TestAgentSession = {
+  clerkId: typeof SEED_CLERK_IDS.agent;
+  name: string;
+  role: "agent";
+};
+
+export type TestSession =
+  | TestBuyerSession
+  | TestVendorSession
+  | TestAgentSession;
 
 export function isTestBuyerClerkId(value: string): value is TestBuyerClerkId {
   return (
@@ -40,6 +49,12 @@ export function isTestLenderClerkId(
   value: string,
 ): value is typeof SEED_CLERK_IDS.lender {
   return value === SEED_CLERK_IDS.lender;
+}
+
+export function isTestAgentClerkId(
+  value: string,
+): value is typeof SEED_CLERK_IDS.agent {
+  return value === SEED_CLERK_IDS.agent;
 }
 
 export function startTestSessionDecision(
@@ -56,6 +71,16 @@ export function startTestSessionDecision(
         clerkId,
         name: SEED_PLAN.lender.name,
         role: "vendor",
+      },
+    };
+  }
+  if (isTestAgentClerkId(clerkId)) {
+    return {
+      ok: true,
+      session: {
+        clerkId,
+        name: SEED_PLAN.agent.name,
+        role: "agent",
       },
     };
   }
@@ -104,5 +129,11 @@ export function loadSeedTransactionForViewer(
 }
 
 export function fixtureHomePath(session: TestSession) {
-  return session.role === "vendor" ? "/vault" : "/dashboard";
+  if (session.role === "vendor") {
+    return "/vault";
+  }
+  if (session.role === "agent") {
+    return "/agent";
+  }
+  return "/dashboard";
 }

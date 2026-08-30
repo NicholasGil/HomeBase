@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as commandCenter from "../commandCenter.js";
 import type * as concierge from "../concierge.js";
 import type * as dashboard from "../dashboard.js";
 import type * as documents from "../documents.js";
@@ -16,6 +17,7 @@ import type * as journey from "../journey.js";
 import type * as lib_audit from "../lib/audit.js";
 import type * as lib_authz from "../lib/authz.js";
 import type * as lib_classifyDocument from "../lib/classifyDocument.js";
+import type * as lib_commandCenter from "../lib/commandCenter.js";
 import type * as lib_dashboardView from "../lib/dashboardView.js";
 import type * as lib_documentAccess from "../lib/documentAccess.js";
 import type * as lib_journeyLogic from "../lib/journeyLogic.js";
@@ -39,6 +41,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  commandCenter: typeof commandCenter;
   concierge: typeof concierge;
   dashboard: typeof dashboard;
   documents: typeof documents;
@@ -47,6 +50,7 @@ declare const fullApi: ApiFromModules<{
   "lib/audit": typeof lib_audit;
   "lib/authz": typeof lib_authz;
   "lib/classifyDocument": typeof lib_classifyDocument;
+  "lib/commandCenter": typeof lib_commandCenter;
   "lib/dashboardView": typeof lib_dashboardView;
   "lib/documentAccess": typeof lib_documentAccess;
   "lib/journeyLogic": typeof lib_journeyLogic;

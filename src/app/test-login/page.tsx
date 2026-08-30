@@ -12,7 +12,7 @@ import {
   isProductionDeploy,
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
-import { SEED_PLAN } from "../../../convex/seedPlan";
+import { SEED_CLERK_IDS, SEED_PLAN } from "../../../convex/seedPlan";
 
 export const dynamic = "force-dynamic";
 
@@ -32,14 +32,26 @@ export default function TestLoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
-          {SEED_PLAN.buyers.map((buyer) => (
-            <form action={startTestSessionFromForm} key={buyer.clerkId}>
-              <input type="hidden" name="clerkId" value={buyer.clerkId} />
-              <Button type="submit" className="w-full">
-                Sign in as {buyer.name}
-              </Button>
-            </form>
-          ))}
+          {SEED_PLAN.buyers
+            .filter(
+              (buyer) =>
+                buyer.clerkId === SEED_CLERK_IDS.buyerA ||
+                buyer.clerkId === SEED_CLERK_IDS.buyerB,
+            )
+            .map((buyer) => (
+              <form action={startTestSessionFromForm} key={buyer.clerkId}>
+                <input type="hidden" name="clerkId" value={buyer.clerkId} />
+                <Button type="submit" className="w-full">
+                  Sign in as {buyer.name}
+                </Button>
+              </form>
+            ))}
+          <form action={startTestSessionFromForm}>
+            <input type="hidden" name="clerkId" value={SEED_PLAN.agent.clerkId} />
+            <Button type="submit" className="w-full">
+              Sign in as {SEED_PLAN.agent.name}
+            </Button>
+          </form>
           <form action={startTestSessionFromForm}>
             <input type="hidden" name="clerkId" value={SEED_PLAN.lender.clerkId} />
             <Button type="submit" variant="outline" className="w-full">

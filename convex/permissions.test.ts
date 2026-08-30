@@ -181,6 +181,25 @@ describe("permission tests for data-reading functions", () => {
     await expect(
       asVendor.query(api.concierge.listThread, { transactionId: id }),
     ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      asVendor.mutation(api.concierge.appendTurn, {
+        transactionId: id,
+        question: "what happens next",
+        answer: "Next is Schedule inspection.",
+        kind: "answer",
+      }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      asVendor.mutation(api.concierge.ask, {
+        transactionId: id,
+        question: "what did the inspection find",
+      }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      asVendor.mutation(api.concierge.loadInspectionFindings, {
+        transactionId: id,
+      }),
+    ).rejects.toThrow("FORBIDDEN");
   });
 
   it("denies a signed-in user with no membership", async () => {
@@ -226,6 +245,28 @@ describe("permission tests for data-reading functions", () => {
     const id = await buyerATransactionId(t);
     await expect(
       asStranger.query(api.concierge.gatherContext, { transactionId: id }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      asStranger.query(api.concierge.listThread, { transactionId: id }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      asStranger.mutation(api.concierge.appendTurn, {
+        transactionId: id,
+        question: "what happens next",
+        answer: "Next is Schedule inspection.",
+        kind: "answer",
+      }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      asStranger.mutation(api.concierge.ask, {
+        transactionId: id,
+        question: "what did the inspection find",
+      }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      asStranger.mutation(api.concierge.loadInspectionFindings, {
+        transactionId: id,
+      }),
     ).rejects.toThrow("FORBIDDEN");
   });
 

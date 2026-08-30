@@ -1,5 +1,7 @@
 import type { Doc } from "../_generated/dataModel";
-import type { QueryCtx } from "../_generated/server";
+import type { MutationCtx, QueryCtx } from "../_generated/server";
+
+type DbCtx = QueryCtx | MutationCtx;
 
 export type ConciergeFact = {
   key: string;
@@ -9,8 +11,16 @@ export type ConciergeFact = {
   provenance?: "ai_estimate" | "lender_issued" | "title_issued" | "user_entered";
 };
 
+export function wantsInspectionFindings(question: string) {
+  const normalized = question.trim().toLowerCase();
+  return (
+    normalized.includes("inspection") &&
+    (normalized.includes("find") || normalized.includes("found"))
+  );
+}
+
 export async function gatherConciergeFacts(
-  ctx: QueryCtx,
+  ctx: DbCtx,
   transaction: Doc<"transactions">,
 ): Promise<ConciergeFact[]> {
   const [tasks, documents, appointments, offers, assignments, stages] =
@@ -101,13 +111,10 @@ export async function gatherConciergeFacts(
     });
   }
 
-  const inspectionDoc = documents.find(
-    (document) => document.type === "inspection_report",
-  );
-  if (inspectionDoc?.extractedSummary !== undefined) {
+  if (present.has("inspection_report")) {
     facts.push({
       key: "inspection_findings",
-      text: inspectionDoc.extractedSummary,
+      text: "inspection_report",
       source: "documents.inspection_report",
     });
   }

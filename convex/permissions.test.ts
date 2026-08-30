@@ -47,6 +47,7 @@ const READ_FUNCTIONS = [
   "idv.listMine",
   "idv.getGating",
   "search.run",
+  "homeownership.getHub",
 ] as const;
 
 async function seeded() {
@@ -83,7 +84,7 @@ async function buyerATransactionId(t: ReturnType<typeof convexTest>) {
 
 describe("permission tests for data-reading functions", () => {
   it("lists every public read function so coverage cannot drift silently", () => {
-    expect(READ_FUNCTIONS).toHaveLength(41);
+    expect(READ_FUNCTIONS).toHaveLength(42);
   });
 
   it.each([
@@ -278,6 +279,10 @@ describe("permission tests for data-reading functions", () => {
       t.query(api.idv.getGating, {})],
     ["search.run", async (t: ReturnType<typeof convexTest>) =>
       t.query(api.search.run, {})],
+    ["homeownership.getHub", async (t: ReturnType<typeof convexTest>) => {
+      const id = await buyerATransactionId(t);
+      return t.query(api.homeownership.getHub, { transactionId: id });
+    }],
   ] as const)("%s denies an unauthenticated caller", async (_name, call) => {
     const t = await seeded();
     await expect(call(t)).rejects.toThrow("UNAUTHENTICATED");
@@ -500,6 +505,9 @@ describe("permission tests for data-reading functions", () => {
     await expect(asVendor.query(api.search.run, {})).rejects.toThrow(
       "FORBIDDEN",
     );
+    await expect(
+      asVendor.query(api.homeownership.getHub, { transactionId: id }),
+    ).rejects.toThrow("FORBIDDEN");
   });
 
   it("denies a signed-in user with no membership", async () => {
@@ -708,6 +716,35 @@ describe("permission tests for data-reading functions", () => {
     await expect(asStranger.query(api.search.run, {})).rejects.toThrow(
       "FORBIDDEN",
     );
+    await expect(
+      asStranger.query(api.homeownership.getHub, { transactionId: id }),
+    ).rejects.toThrow("FORBIDDEN");
+  });
+
+  it("denies homeownership.getHub to another buyer, a vendor, and a non-closed transaction", async () => {
+    const t = await seeded();
+    const asClosed = t.withIdentity({ subject: "clerk_buyer_h" });
+    const closed = await asClosed.query(api.transactions.listMine, {});
+    const closedId = closed[0]?._id;
+    if (closedId === undefined) {
+      throw new Error("closed transaction missing");
+    }
+    const activeId = await buyerATransactionId(t);
+    await expect(
+      t
+        .withIdentity({ subject: "clerk_buyer_a" })
+        .query(api.homeownership.getHub, { transactionId: closedId }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      t
+        .withIdentity({ subject: "clerk_vendor" })
+        .query(api.homeownership.getHub, { transactionId: closedId }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      t
+        .withIdentity({ subject: "clerk_buyer_a" })
+        .query(api.homeownership.getHub, { transactionId: activeId }),
+    ).rejects.toThrow("FORBIDDEN");
   });
 
   it("refuses listGrants for a vendor who holds an active grant", async () => {

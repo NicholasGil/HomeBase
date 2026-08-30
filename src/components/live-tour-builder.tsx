@@ -3,6 +3,7 @@
 import { useMutation, useQuery } from "convex/react";
 import { useState } from "react";
 
+import { ListingCardFrame } from "@/components/listing-card";
 import { TourMap } from "@/components/tour-map";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { formatTourInstant, propertyLine } from "@/lib/tour-format";
+import { tripHeadingClassName } from "@/lib/trip-ui";
 import type { Id } from "../../convex/_generated/dataModel";
 import { api } from "../../convex/_generated/api";
 
@@ -44,7 +46,7 @@ export function LiveTourBuilder() {
     <section className="space-y-6" data-testid="tour-builder">
       <div className="flex items-end justify-between gap-3">
         <div>
-          <h2 className="text-xl font-semibold tracking-tight">
+          <h2 className={tripHeadingClassName}>
             Showing scheduler
           </h2>
           <p className="text-sm text-muted-foreground">
@@ -54,35 +56,30 @@ export function LiveTourBuilder() {
         <Badge variant="outline">sample listings</Badge>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-3 md:grid-cols-2">
         {candidates.map((listing) => (
-          <Card key={listing._id} data-testid={`tour-candidate-${listing._id}`}>
-            <CardHeader>
-              <CardTitle>{listing.address.line1}</CardTitle>
-              <CardDescription>
-                {listing.address.city}, {listing.address.state}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <p className="text-sm">{listing.brief}</p>
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={selected.includes(listing._id)}
-                  onChange={(event) => {
-                    if (event.target.checked) {
-                      setSelected([...selected, listing._id]);
-                    } else {
-                      setSelected(
-                        selected.filter((id) => id !== listing._id),
-                      );
-                    }
-                  }}
-                />
-                Add to tour
-              </label>
-            </CardContent>
-          </Card>
+          <ListingCardFrame
+            key={listing._id}
+            testId={`tour-candidate-${listing._id}`}
+            addressLine={listing.address.line1}
+            cityState={`${listing.address.city}, ${listing.address.state}`}
+          >
+            <p className="text-sm">{listing.brief}</p>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={selected.includes(listing._id)}
+                onChange={(event) => {
+                  if (event.target.checked) {
+                    setSelected([...selected, listing._id]);
+                  } else {
+                    setSelected(selected.filter((id) => id !== listing._id));
+                  }
+                }}
+              />
+              Add to tour
+            </label>
+          </ListingCardFrame>
         ))}
       </div>
       <Button

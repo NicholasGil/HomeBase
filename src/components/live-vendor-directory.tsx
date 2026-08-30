@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { Id } from "../../convex/_generated/dataModel";
+import { tripHeadingClassName } from "@/lib/trip-ui";
 import { api } from "../../convex/_generated/api";
 
 export function LiveVendorDirectory({
@@ -38,7 +39,7 @@ export function LiveVendorDirectory({
   return (
     <section className="space-y-4" data-testid="vendor-directory">
       <div>
-        <h2 className="text-xl font-semibold tracking-tight">Vendors for this stage</h2>
+        <h2 className={tripHeadingClassName}>Vendors for this stage</h2>
         <p className="text-sm text-muted-foreground">
           Compensation stays none. HomeBase does not take payment.
         </p>

@@ -3,6 +3,7 @@ import {
   removeStopFromForm,
   submitFeedbackFromForm,
 } from "@/app/actions/tours";
+import { ListingCardFrame } from "@/components/listing-card";
 import { TourMap } from "@/components/tour-map";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ import {
 import { formatTourInstant, propertyLine } from "@/lib/tour-format";
 import type { FixtureTour } from "@/lib/tour-access";
 import { seedTourListings } from "@/lib/seed-tours";
+import { tripHeadingClassName } from "@/lib/trip-ui";
 
 export function FixtureTourBuilder({
   denied,
@@ -39,7 +41,7 @@ export function FixtureTourBuilder({
     <section className="space-y-6" data-testid="tour-builder">
       <div className="flex items-end justify-between gap-3">
         <div>
-          <h2 className="text-xl font-semibold tracking-tight">
+          <h2 className={tripHeadingClassName}>
             Showing scheduler
           </h2>
           <p className="text-sm text-muted-foreground">
@@ -51,31 +53,25 @@ export function FixtureTourBuilder({
       </div>
 
       <form action={buildTourFromForm} className="space-y-4">
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-3 md:grid-cols-2">
           {listings.map((listing) => (
-            <Card
+            <ListingCardFrame
               key={listing.id}
-              data-testid={`tour-candidate-${listing.id}`}
+              testId={`tour-candidate-${listing.id}`}
+              addressLine={listing.address.line1}
+              cityState={`${listing.address.city}, ${listing.address.state} · sample data`}
             >
-              <CardHeader>
-                <CardTitle>{listing.address.line1}</CardTitle>
-                <CardDescription>
-                  {listing.address.city}, {listing.address.state} · sample data
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p className="text-sm">{listing.brief}</p>
-                <label className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    name="propertyIds"
-                    value={listing.id}
-                    data-testid={`select-${listing.id}`}
-                  />
-                  Add to tour
-                </label>
-              </CardContent>
-            </Card>
+              <p className="text-sm">{listing.brief}</p>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  name="propertyIds"
+                  value={listing.id}
+                  data-testid={`select-${listing.id}`}
+                />
+                Add to tour
+              </label>
+            </ListingCardFrame>
           ))}
         </div>
         <Button type="submit" data-testid="build-my-tour">

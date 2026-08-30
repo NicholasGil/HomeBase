@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { tripHeadingClassName } from "@/lib/trip-ui";
 import { api } from "../../convex/_generated/api";
 
 export function LiveContractExplainer() {
@@ -36,7 +37,7 @@ export function LiveContractExplainer() {
 
   return (
     <section className="space-y-4" data-testid="contract-explainer">
-      <h2 className="text-xl font-semibold tracking-tight">
+      <h2 className={tripHeadingClassName}>
         Contract explainer
       </h2>
       <div className="grid gap-4 md:grid-cols-2">

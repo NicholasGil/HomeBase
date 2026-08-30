@@ -27,6 +27,37 @@ test("buyer login shows own transaction and denies another by URL", async ({
   );
   await expect(page.getByText("Alex Rivera")).toBeVisible();
   await expect(page.getByText("Blair Chen")).toHaveCount(0);
+  await expect(page.getByTestId("app-nav")).toHaveAttribute(
+    "data-nav-role",
+    "buyer",
+  );
+  await expect(
+    page.getByTestId("app-nav").getByRole("link", { name: "Home", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByTestId("app-nav").getByRole("link", { name: "Search" }),
+  ).toBeVisible();
+  await expect(
+    page.getByTestId("app-nav").getByRole("link", { name: "Tours" }),
+  ).toBeVisible();
+  await expect(
+    page.getByTestId("app-nav").getByRole("link", { name: "Vault" }),
+  ).toBeVisible();
+  await expect(
+    page.getByTestId("app-nav").getByRole("link", { name: "Command center" }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByTestId("app-nav").getByRole("link", { name: "Vendor portal" }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByTestId("app-nav").getByRole("link", { name: "Sign", exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByTestId("app-nav").getByRole("link", { name: "Identity" }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByTestId("app-nav").getByRole("link", { name: "Hub" }),
+  ).toHaveCount(0);
 
   await page.goto("/transactions/seed:buyer-b");
   await expect(

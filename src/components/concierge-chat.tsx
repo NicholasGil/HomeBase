@@ -44,7 +44,7 @@ export function ConciergeChat() {
   }
 
   return (
-    <Card data-testid="concierge">
+    <Card data-testid="concierge" className="ring-0">
       <CardHeader>
         <CardTitle>Transaction concierge</CardTitle>
         <CardDescription>

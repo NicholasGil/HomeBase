@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { ListedSeedVendor } from "@/lib/seed-vendors";
+import { tripHeadingClassName } from "@/lib/trip-ui";
 
 export function VendorDirectoryDenied() {
   return (
@@ -37,7 +38,7 @@ export function VendorDirectoryView({
   return (
     <section className="space-y-4" data-testid="vendor-directory">
       <div>
-        <h2 className="text-xl font-semibold tracking-tight">Vendors for this stage</h2>
+        <h2 className={tripHeadingClassName}>Vendors for this stage</h2>
         <p className="text-sm text-muted-foreground">
           {stage === "inspection"
             ? "Inspectors for this file. Compare, then request an appointment."

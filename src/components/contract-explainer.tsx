@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import type { FixtureAgentThread } from "@/lib/explainer-access";
 import type { ContractSection } from "../../convex/lib/explainContract";
+import { tripHeadingClassName } from "@/lib/trip-ui";
 
 export function ContractExplainer({
   sections,
@@ -31,7 +32,7 @@ export function ContractExplainer({
   return (
     <section className="space-y-4" data-testid="contract-explainer">
       <div>
-        <h2 className="text-xl font-semibold tracking-tight">
+        <h2 className={tripHeadingClassName}>
           Contract explainer
         </h2>
         <p className="text-sm text-muted-foreground">

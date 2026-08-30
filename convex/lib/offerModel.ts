@@ -164,6 +164,31 @@ export const OFFER_STRATEGIES = [
 const DAY_MS = 86_400_000;
 const DEFAULT_TERM_MONTHS = 360;
 const CLOSING_COST_BPS = 300;
+const ANNUAL_TAX_INSURANCE_BPS = 155;
+
+export const SIMULATOR_DERIVED_KEYS = [
+  "estimatedLoan",
+  "closingCosts",
+  "cashToClose",
+  "monthlyPayment",
+  "monthlyTaxesInsurance",
+  "totalMonthly",
+] as const;
+
+export type SimulatorDerivedKey = (typeof SIMULATOR_DERIVED_KEYS)[number];
+
+export type OfferSimulationAssumptions = {
+  purchasePrice: MoneyFigure;
+  downPayment: MoneyFigure;
+  sellerConcessions: MoneyFigure;
+  rateBps: number;
+  program: FinancingProgram;
+};
+
+export type OfferSimulation = {
+  assumptions: OfferSimulationAssumptions;
+  derived: Record<SimulatorDerivedKey, MoneyFigure>;
+};
 
 export function moneyFigure(input: {
   amountCents: number;
@@ -236,6 +261,102 @@ export function estimateCashToCloseCents(input: {
     0,
     input.downPaymentCents + input.closingCostsCents - input.sellerConcessionsCents,
   );
+}
+
+export function estimateMonthlyTaxesInsuranceCents(priceCents: number) {
+  return Math.round(applyBps(priceCents, ANNUAL_TAX_INSURANCE_BPS) / 12);
+}
+
+export function simulateOfferCost(input: {
+  purchasePriceCents: number;
+  downPaymentCents: number;
+  sellerConcessionsCents: number;
+  rateBps: number;
+  program: FinancingProgram;
+  asOf: number;
+}): OfferSimulation {
+  const purchasePrice = moneyFigure({
+    amountCents: input.purchasePriceCents,
+    provenance: "user_entered",
+    asOf: input.asOf,
+    label: "Purchase price assumption",
+  });
+  const downPayment = moneyFigure({
+    amountCents: input.downPaymentCents,
+    provenance: "user_entered",
+    asOf: input.asOf,
+    label: "Down payment assumption",
+  });
+  const sellerConcessions = moneyFigure({
+    amountCents: input.sellerConcessionsCents,
+    provenance: "user_entered",
+    asOf: input.asOf,
+    label: "Seller concessions assumption",
+  });
+  const loanCents =
+    input.program === "cash"
+      ? 0
+      : estimateLoanCents(input.purchasePriceCents, input.downPaymentCents);
+  const closingCostsCents = estimateClosingCostsCents(input.purchasePriceCents);
+  const cashToCloseCents = estimateCashToCloseCents({
+    downPaymentCents: input.downPaymentCents,
+    closingCostsCents,
+    sellerConcessionsCents: input.sellerConcessionsCents,
+  });
+  const monthlyPaymentCents = estimateMonthlyPaymentCents({
+    loanCents,
+    rateBps: input.rateBps,
+  });
+  const monthlyTaxesInsuranceCents = estimateMonthlyTaxesInsuranceCents(
+    input.purchasePriceCents,
+  );
+  return {
+    assumptions: {
+      purchasePrice,
+      downPayment,
+      sellerConcessions,
+      rateBps: input.rateBps,
+      program: input.program,
+    },
+    derived: {
+      estimatedLoan: moneyFigure({
+        amountCents: loanCents,
+        provenance: "ai_estimate",
+        asOf: input.asOf,
+        label: "Estimated loan",
+      }),
+      closingCosts: moneyFigure({
+        amountCents: closingCostsCents,
+        provenance: "ai_estimate",
+        asOf: input.asOf,
+        label: "Estimated closing costs",
+      }),
+      cashToClose: moneyFigure({
+        amountCents: cashToCloseCents,
+        provenance: "ai_estimate",
+        asOf: input.asOf,
+        label: "Estimated cash to close",
+      }),
+      monthlyPayment: moneyFigure({
+        amountCents: monthlyPaymentCents,
+        provenance: "ai_estimate",
+        asOf: input.asOf,
+        label: "Estimated monthly principal and interest",
+      }),
+      monthlyTaxesInsurance: moneyFigure({
+        amountCents: monthlyTaxesInsuranceCents,
+        provenance: "ai_estimate",
+        asOf: input.asOf,
+        label: "Estimated monthly taxes and insurance",
+      }),
+      totalMonthly: moneyFigure({
+        amountCents: monthlyPaymentCents + monthlyTaxesInsuranceCents,
+        provenance: "ai_estimate",
+        asOf: input.asOf,
+        label: "Estimated total monthly payment",
+      }),
+    },
+  };
 }
 
 export function estimateMonthlyPaymentCents(input: {

@@ -28,6 +28,7 @@ const READ_FUNCTIONS = [
   "tours.get",
   "offers.getMine",
   "offers.getCenter",
+  "offers.simulate",
 ] as const;
 
 async function seeded() {
@@ -64,7 +65,7 @@ async function buyerATransactionId(t: ReturnType<typeof convexTest>) {
 
 describe("permission tests for data-reading functions", () => {
   it("lists every public read function so coverage cannot drift silently", () => {
-    expect(READ_FUNCTIONS).toHaveLength(22);
+    expect(READ_FUNCTIONS).toHaveLength(23);
   });
 
   it.each([
@@ -141,6 +142,17 @@ describe("permission tests for data-reading functions", () => {
     ["offers.getCenter", async (t: ReturnType<typeof convexTest>) => {
       const id = await buyerATransactionId(t);
       return t.query(api.offers.getCenter, { transactionId: id });
+    }],
+    ["offers.simulate", async (t: ReturnType<typeof convexTest>) => {
+      const id = await buyerATransactionId(t);
+      return t.query(api.offers.simulate, {
+        transactionId: id,
+        purchasePriceCents: 41000000,
+        downPaymentCents: 8200000,
+        sellerConcessionsCents: 0,
+        rateBps: 675,
+        program: "conventional",
+      });
     }],
   ] as const)("%s denies an unauthenticated caller", async (_name, call) => {
     const t = await seeded();
@@ -242,6 +254,16 @@ describe("permission tests for data-reading functions", () => {
     );
     await expect(
       asVendor.query(api.offers.getCenter, { transactionId: id }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      asVendor.query(api.offers.simulate, {
+        transactionId: id,
+        purchasePriceCents: 41000000,
+        downPaymentCents: 8200000,
+        sellerConcessionsCents: 0,
+        rateBps: 675,
+        program: "conventional",
+      }),
     ).rejects.toThrow("FORBIDDEN");
     await expect(
       asVendor.mutation(api.offers.ensureDraft, { transactionId: id }),
@@ -346,6 +368,16 @@ describe("permission tests for data-reading functions", () => {
     );
     await expect(
       asStranger.query(api.offers.getCenter, { transactionId: id }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      asStranger.query(api.offers.simulate, {
+        transactionId: id,
+        purchasePriceCents: 41000000,
+        downPaymentCents: 8200000,
+        sellerConcessionsCents: 0,
+        rateBps: 675,
+        program: "conventional",
+      }),
     ).rejects.toThrow("FORBIDDEN");
     await expect(
       asStranger.mutation(api.offers.ensureDraft, { transactionId: id }),

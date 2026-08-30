@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   LICENSEE_REVIEW_REQUIRED,
+  SIMULATOR_DERIVED_KEYS,
   STRATEGY_TABLE,
   UNSOURCED_MONEY,
   assertCanSubmit,
@@ -16,6 +17,7 @@ import {
   modelAllStrategies,
   moneyFigure,
   offerGate,
+  simulateOfferCost,
 } from "./offerModel";
 
 const AS_OF = Date.UTC(2026, 7, 30);
@@ -111,5 +113,42 @@ describe("offer model", () => {
         rateBps: 675,
       }),
     ).toBeGreaterThan(0);
+  });
+
+  it("updates all six derived figures when price moves $10k", () => {
+    const base = simulateOfferCost({
+      purchasePriceCents: 41000000,
+      downPaymentCents: 8200000,
+      sellerConcessionsCents: 500000,
+      rateBps: 675,
+      program: "conventional",
+      asOf: AS_OF,
+    });
+    const moved = simulateOfferCost({
+      purchasePriceCents: 42000000,
+      downPaymentCents: 8200000,
+      sellerConcessionsCents: 500000,
+      rateBps: 675,
+      program: "conventional",
+      asOf: AS_OF,
+    });
+    expect(SIMULATOR_DERIVED_KEYS).toHaveLength(6);
+    for (const key of SIMULATOR_DERIVED_KEYS) {
+      expect(base.derived[key].provenance).toBe("ai_estimate");
+      expect(moved.derived[key].provenance).toBe("ai_estimate");
+      expect(moved.derived[key].amountCents).not.toBe(
+        base.derived[key].amountCents,
+      );
+    }
+    expect(moved.derived.estimatedLoan.amountCents).toBe(
+      base.derived.estimatedLoan.amountCents + 1_000_000,
+    );
+    expect(moved.derived.closingCosts.amountCents).toBe(
+      base.derived.closingCosts.amountCents + 30_000,
+    );
+    expect(moved.derived.cashToClose.amountCents).toBe(
+      base.derived.cashToClose.amountCents + 30_000,
+    );
+    expect(everyFigureHasProvenance(Object.values(moved.derived))).toBe(true);
   });
 });

@@ -132,4 +132,47 @@ describe("offer center", () => {
     });
     expect(own.transactionId).toBe(alexId);
   });
+
+  it("recalculates all six simulator figures after a $10k price change", async () => {
+    const t = await seeded();
+    const asBlair = t.withIdentity({ subject: "clerk_buyer_b" });
+    const transactionId = await blairTransactionId(t);
+    const args = {
+      transactionId,
+      downPaymentCents: 8200000,
+      sellerConcessionsCents: 500000,
+      rateBps: 675,
+      program: "conventional" as const,
+    };
+    const base = await asBlair.query(api.offers.simulate, {
+      ...args,
+      purchasePriceCents: 41000000,
+    });
+    const moved = await asBlair.query(api.offers.simulate, {
+      ...args,
+      purchasePriceCents: 42000000,
+    });
+    expect(moved.derived.estimatedLoan.amountCents).toBe(
+      base.derived.estimatedLoan.amountCents + 1_000_000,
+    );
+    expect(moved.derived.closingCosts.amountCents).toBe(
+      base.derived.closingCosts.amountCents + 30_000,
+    );
+    expect(moved.derived.cashToClose.amountCents).toBe(
+      base.derived.cashToClose.amountCents + 30_000,
+    );
+    expect(moved.derived.monthlyPayment.amountCents).toBeGreaterThan(
+      base.derived.monthlyPayment.amountCents,
+    );
+    expect(moved.derived.monthlyTaxesInsurance.amountCents).toBeGreaterThan(
+      base.derived.monthlyTaxesInsurance.amountCents,
+    );
+    expect(moved.derived.totalMonthly.amountCents).toBeGreaterThan(
+      base.derived.totalMonthly.amountCents,
+    );
+    for (const figure of Object.values(moved.derived)) {
+      expect(figure.provenance).toBe("ai_estimate");
+      expect(figure.label).toMatch(/Estimated/);
+    }
+  });
 });

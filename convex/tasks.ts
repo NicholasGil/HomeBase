@@ -98,7 +98,11 @@ export const complete = mutation({
     if (task === null) {
       throw new Error("FORBIDDEN");
     }
-    const { user } = await requireTransactionAccess(ctx, task.transactionId);
+    const { user, membership } = await requireTransactionAccess(
+      ctx,
+      task.transactionId,
+    );
+    assertRole(membership, TASK_WRITE_ROLES);
     if (task.status === "done" || task.status === "canceled") {
       return task._id;
     }

@@ -52,6 +52,35 @@ describe("org-configurable journey stages", () => {
     expect(inspection?.defaultTasks.some((task) => task.blocksStage)).toBe(true);
   });
 
+  it("denies vendor and unauthenticated callers on listStages", async () => {
+    const t = await seedWithBroker();
+    await t.run(async (ctx) => {
+      const org = await ctx.db.query("orgs").first();
+      if (org === null) {
+        throw new Error("missing org");
+      }
+      const vendorId = await ctx.db.insert("users", {
+        clerkId: "clerk_vendor",
+        email: "devon.nguyen@example.com",
+        name: "Devon Nguyen",
+      });
+      await ctx.db.insert("memberships", {
+        userId: vendorId,
+        orgId: org._id,
+        role: "vendor",
+      });
+    });
+
+    await expect(
+      t
+        .withIdentity({ subject: "clerk_vendor" })
+        .query(api.journey.listStages, {}),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(t.query(api.journey.listStages, {})).rejects.toThrow(
+      "UNAUTHENTICATED",
+    );
+  });
+
   it("lets a broker replace stages and denies buyer and vendor", async () => {
     const t = await seedWithBroker();
     await t.run(async (ctx) => {

@@ -54,10 +54,16 @@ export default async function HomePage() {
             </p>
             <div className="flex flex-wrap gap-2">
               <Link
-                href="#ten-second-test"
+                href="/dashboard"
                 className={cn(buttonVariants({ size: "lg" }))}
               >
-                See the ten-second test
+                Buyer dashboard
+              </Link>
+              <Link
+                href="/sign-in"
+                className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
+              >
+                Sign in
               </Link>
               <Link
                 href="/foundation"

@@ -58,7 +58,6 @@ export function FixtureTourBuilder({
             <ListingCardFrame
               key={listing.id}
               testId={`tour-candidate-${listing.id}`}
-              propertyId={listing.id}
               addressLine={listing.address.line1}
               cityState={`${listing.address.city}, ${listing.address.state} · sample data`}
               sample

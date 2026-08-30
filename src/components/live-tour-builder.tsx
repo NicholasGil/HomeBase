@@ -61,7 +61,6 @@ export function LiveTourBuilder() {
           <ListingCardFrame
             key={listing._id}
             testId={`tour-candidate-${listing._id}`}
-            propertyId={listing._id}
             addressLine={listing.address.line1}
             cityState={`${listing.address.city}, ${listing.address.state}`}
             sample

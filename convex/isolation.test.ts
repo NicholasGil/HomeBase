@@ -89,5 +89,15 @@ describe("transaction isolation", () => {
     await expect(
       asBuyerA.mutation(api.offers.submit, { offerId }),
     ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      asBuyerA.query(api.offers.simulate, {
+        transactionId: buyerBTransaction._id,
+        purchasePriceCents: 41000000,
+        downPaymentCents: 8200000,
+        sellerConcessionsCents: 0,
+        rateBps: 675,
+        program: "conventional",
+      }),
+    ).rejects.toThrow("FORBIDDEN");
   });
 });

@@ -16,9 +16,13 @@ import {
   estimatedPosition,
   modelAllStrategies,
   offerGate,
+  simulateOfferCost,
   type MoneyFigure,
 } from "./lib/offerModel";
-import { OFFER_REVIEW_ROLES } from "./lib/validators";
+import {
+  financingProgramValidator,
+  OFFER_REVIEW_ROLES,
+} from "./lib/validators";
 import { listAccessibleTransactions } from "./transactions";
 
 type ReadCtx = QueryCtx | MutationCtx;
@@ -238,6 +242,28 @@ export const getMine = query({
       return null;
     }
     return await loadCenter(ctx, first, asOfNow());
+  },
+});
+
+export const simulate = query({
+  args: {
+    transactionId: v.id("transactions"),
+    purchasePriceCents: v.number(),
+    downPaymentCents: v.number(),
+    sellerConcessionsCents: v.number(),
+    rateBps: v.number(),
+    program: financingProgramValidator,
+  },
+  handler: async (ctx, args) => {
+    await requireTransactionAccess(ctx, args.transactionId);
+    return simulateOfferCost({
+      purchasePriceCents: args.purchasePriceCents,
+      downPaymentCents: args.downPaymentCents,
+      sellerConcessionsCents: args.sellerConcessionsCents,
+      rateBps: args.rateBps,
+      program: args.program,
+      asOf: asOfNow(),
+    });
   },
 });
 

@@ -6,7 +6,10 @@ import { appendAuditLog } from "./lib/audit";
 import { requireMembership, requireTransactionAccess } from "./lib/authz";
 import { classifyDocumentType } from "./lib/classifyDocument";
 import { isGrantActive, requireDocumentAccess } from "./lib/documentAccess";
-import { documentGrantScopeValidator } from "./lib/validators";
+import {
+  documentGrantScopeValidator,
+  GRANTABLE_DIRECTORY_ROLES,
+} from "./lib/validators";
 import { listAccessibleTransactions } from "./transactions";
 
 function toListed(document: Doc<"documents">) {
@@ -14,7 +17,6 @@ function toListed(document: Doc<"documents">) {
     _id: document._id,
     type: document.type,
     status: document.status,
-    extractedSummary: document.extractedSummary ?? null,
     uploadedBy: document.uploadedBy,
     transactionId: document.transactionId,
   };
@@ -36,9 +38,17 @@ export const listMine = query({
           continue;
         }
         const document = await ctx.db.get(grant.documentId);
-        if (document !== null) {
-          documents.push(toListed(document));
+        if (document === null) {
+          continue;
         }
+        const transaction = await ctx.db.get(document.transactionId);
+        if (
+          transaction === null ||
+          transaction.orgId !== membership.orgId
+        ) {
+          continue;
+        }
+        documents.push(toListed(document));
       }
       return documents;
     }
@@ -194,6 +204,20 @@ export const grant = mutation({
     }
     const grantee = await ctx.db.get(args.granteeId);
     if (grantee === null) {
+      throw new Error("FORBIDDEN");
+    }
+    const granteeMembership = await ctx.db
+      .query("memberships")
+      .withIndex("by_user_org", (q) =>
+        q.eq("userId", args.granteeId).eq("orgId", access.transaction.orgId),
+      )
+      .unique();
+    if (
+      granteeMembership === null ||
+      !(GRANTABLE_DIRECTORY_ROLES as readonly string[]).includes(
+        granteeMembership.role,
+      )
+    ) {
       throw new Error("FORBIDDEN");
     }
     const grantId = await ctx.db.insert("documentGrants", {

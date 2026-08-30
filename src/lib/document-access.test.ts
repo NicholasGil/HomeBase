@@ -73,6 +73,60 @@ describe("fixture document access", () => {
     ).toEqual({ ok: false, reason: "FORBIDDEN" });
   });
 
+  it("does not treat an agent as principal for another book", () => {
+    const casey = {
+      clerkId: SEED_CLERK_IDS.agent,
+      role: "agent" as const,
+    };
+    expect(
+      resolveFixtureDocument({
+        viewer: casey,
+        documentId: SEED_DOCUMENT_IDS.preapproval,
+        grants: [],
+      }),
+    ).toEqual({ ok: false, reason: "FORBIDDEN" });
+  });
+
+  it("omits extractedSummary from list payloads", () => {
+    const listed = listFixtureDocuments({ viewer: alex, grants: [] });
+    expect(listed.length).toBeGreaterThan(0);
+    for (const row of listed) {
+      expect(row).not.toHaveProperty("extractedSummary");
+    }
+  });
+
+  it("denies an expired grant on open and list", () => {
+    const grants = [
+      {
+        id: "grant-expired",
+        documentId: SEED_DOCUMENT_IDS.preapproval,
+        granteeClerkId: SEED_CLERK_IDS.lender,
+        scope: "view" as const,
+        expiresAt: Date.now() - 1_000,
+        grantedBy: SEED_CLERK_IDS.buyerA,
+      },
+    ];
+    expect(
+      resolveFixtureDocument({
+        viewer: jordan,
+        documentId: SEED_DOCUMENT_IDS.preapproval,
+        grants,
+      }),
+    ).toEqual({ ok: false, reason: "FORBIDDEN" });
+    expect(listFixtureDocuments({ viewer: jordan, grants })).toEqual([]);
+  });
+
+  it("refuses a grant to someone who is not the org vendor", () => {
+    expect(
+      grantFixtureDocument({
+        viewer: alex,
+        documentId: SEED_DOCUMENT_IDS.preapproval,
+        granteeClerkId: SEED_CLERK_IDS.buyerB,
+        grants: [],
+      }),
+    ).toEqual({ ok: false, reason: "FORBIDDEN" });
+  });
+
   it("denies an unauthenticated open", () => {
     expect(
       resolveFixtureDocument({

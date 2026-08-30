@@ -6,6 +6,8 @@ test("grant, third-party view, then revoke is denied", async ({ page }) => {
   await expect(page.getByTestId("document-vault")).toBeVisible();
   await expect(page.getByTestId("vault-doc-preapproval")).toBeVisible();
   await expect(page.getByTestId("vault-doc-inspection_report")).toBeVisible();
+  await expect(page.getByText("Lender issued a $450,000")).toHaveCount(0);
+  await expect(page.getByText("Roof and HVAC need service")).toHaveCount(0);
 
   await page
     .getByTestId("vault-doc-preapproval")
@@ -19,6 +21,7 @@ test("grant, third-party view, then revoke is denied", async ({ page }) => {
   await expect(page).toHaveURL(/\/vault$/);
   await expect(page.getByTestId("vault-doc-preapproval")).toBeVisible();
   await expect(page.getByTestId("vault-doc-inspection_report")).toHaveCount(0);
+  await expect(page.getByText("Lender issued a $450,000")).toHaveCount(0);
 
   await page
     .getByTestId("vault-doc-preapproval")
@@ -26,6 +29,7 @@ test("grant, third-party view, then revoke is denied", async ({ page }) => {
     .click();
   await expect(page.getByTestId("document-open-preapproval")).toBeVisible();
   await expect(page.getByText("You cannot open this document.")).toHaveCount(0);
+  await expect(page.getByText("Lender issued a $450,000")).toBeVisible();
 
   await page.goto("/documents/seed-doc-inspection");
   await expect(page.getByTestId("document-denied")).toBeVisible();

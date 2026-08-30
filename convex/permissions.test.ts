@@ -197,5 +197,47 @@ describe("permission tests for data-reading functions", () => {
     await expect(asStranger.query(api.me.listOrgDirectory, {})).rejects.toThrow(
       "FORBIDDEN",
     );
+    const docs = await t
+      .withIdentity({ subject: "clerk_buyer_a" })
+      .query(api.documents.listMine, {});
+    const first = docs[0];
+    if (first === undefined) {
+      throw new Error("seed documents missing");
+    }
+    await expect(
+      asStranger.query(api.documents.listGrants, { documentId: first._id }),
+    ).rejects.toThrow("FORBIDDEN");
+  });
+
+  it("refuses listGrants for a vendor who holds an active grant", async () => {
+    const t = await seeded();
+    const asBuyer = t.withIdentity({ subject: "clerk_buyer_a" });
+    const docs = await asBuyer.query(api.documents.listMine, {});
+    const preapproval = docs.find((row) => row.type === "preapproval");
+    if (preapproval === undefined) {
+      throw new Error("seed documents missing");
+    }
+    const lenderId = await t.run(async (ctx) => {
+      const user = await ctx.db
+        .query("users")
+        .withIndex("by_clerkId", (q) => q.eq("clerkId", "clerk_lender"))
+        .unique();
+      if (user === null) {
+        throw new Error("lender missing");
+      }
+      return user._id;
+    });
+    await asBuyer.mutation(api.documents.grant, {
+      documentId: preapproval._id,
+      granteeId: lenderId,
+      scope: "view",
+      expiresAt: Date.now() + 60_000,
+    });
+    const asLender = t.withIdentity({ subject: "clerk_lender" });
+    await expect(
+      asLender.query(api.documents.listGrants, {
+        documentId: preapproval._id,
+      }),
+    ).rejects.toThrow("FORBIDDEN");
   });
 });

@@ -58,7 +58,6 @@ export async function FixtureVault() {
                   <CardDescription>{document.type}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <p className="text-sm">{document.extractedSummary}</p>
                   <Link
                     href={`/documents/${document.id}`}
                     className="text-sm underline"

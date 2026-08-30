@@ -38,7 +38,6 @@ export function LiveDocumentVault() {
               key={document._id}
               documentId={document._id}
               type={document.type}
-              summary={document.extractedSummary}
               canManage={session.role !== "vendor"}
             />
           ))
@@ -51,12 +50,10 @@ export function LiveDocumentVault() {
 function LiveDocumentCard({
   documentId,
   type,
-  summary,
   canManage,
 }: {
   documentId: string;
   type: string;
-  summary: string | null;
   canManage: boolean;
 }) {
   const grants = useQuery(
@@ -76,7 +73,6 @@ function LiveDocumentCard({
         <CardDescription>{type}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
-        {summary ? <p className="text-sm">{summary}</p> : null}
         <Link href={`/documents/${documentId}`} className="text-sm underline">
           Open document
         </Link>

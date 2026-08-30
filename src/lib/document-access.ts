@@ -2,6 +2,7 @@ import { isGrantActive } from "../../convex/lib/documentAccess";
 import {
   isSeedDocumentId,
   SEED_DOCUMENTS,
+  SEED_LENDER,
   type SeedDocument,
 } from "@/lib/seed-documents";
 
@@ -86,7 +87,7 @@ export function isDocumentPrincipal(
     return true;
   }
   if (viewer.role === "agent") {
-    return true;
+    return viewer.transactionId === document.transactionId;
   }
   return (
     viewer.role === "buyer" && viewer.transactionId === document.transactionId
@@ -124,26 +125,30 @@ export function resolveFixtureDocument(input: {
   return { ok: true, document, via: "grant" };
 }
 
+export type ListedSeedDocument = Omit<SeedDocument, "extractedSummary">;
+
 export function listFixtureDocuments(input: {
   viewer: FixtureViewer | null;
   grants: FixtureGrant[];
   now?: number;
-}): SeedDocument[] {
+}): ListedSeedDocument[] {
   if (input.viewer === null) {
     return [];
   }
   const now = input.now ?? Date.now();
-  return Object.values(SEED_DOCUMENTS).filter((document) => {
-    if (isDocumentPrincipal(input.viewer as FixtureViewer, document)) {
-      return true;
-    }
-    return input.grants.some(
-      (grant) =>
-        grant.documentId === document.id &&
-        grant.granteeClerkId === input.viewer?.clerkId &&
-        isGrantActive(grant, now),
-    );
-  });
+  return Object.values(SEED_DOCUMENTS)
+    .filter((document) => {
+      if (isDocumentPrincipal(input.viewer as FixtureViewer, document)) {
+        return true;
+      }
+      return input.grants.some(
+        (grant) =>
+          grant.documentId === document.id &&
+          grant.granteeClerkId === input.viewer?.clerkId &&
+          isGrantActive(grant, now),
+      );
+    })
+    .map(({ extractedSummary: _extractedSummary, ...listed }) => listed);
 }
 
 export function grantFixtureDocument(input: {
@@ -165,6 +170,9 @@ export function grantFixtureDocument(input: {
     return resolved;
   }
   if (resolved.via !== "principal" || input.viewer === null) {
+    return { ok: false, reason: "FORBIDDEN" };
+  }
+  if (input.granteeClerkId !== SEED_LENDER.clerkId) {
     return { ok: false, reason: "FORBIDDEN" };
   }
   const now = input.now ?? Date.now();

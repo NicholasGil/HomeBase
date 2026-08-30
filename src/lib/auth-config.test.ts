@@ -79,6 +79,8 @@ describe("production fail-closed", () => {
     expect(isProtectedPath("/tours/abc")).toBe(true);
     expect(isProtectedPath("/offers")).toBe(true);
     expect(isProtectedPath("/offers/abc")).toBe(true);
+    expect(isProtectedPath("/sign")).toBe(true);
+    expect(isProtectedPath("/identity")).toBe(true);
     expect(isProtectedPath("/documents/abc")).toBe(true);
     expect(isProtectedPath("/transactions/abc")).toBe(true);
     expect(isProtectedPath("/")).toBe(false);

@@ -230,3 +230,63 @@ export const defaultTaskValidator = v.object({
   assigneeRole: roleValidator,
   blocksStage: v.boolean(),
 });
+
+export const SIGNATURE_PACKET_STATUSES = [
+  "prepare",
+  "explain",
+  "agent_review",
+  "buyer_review",
+  "verify",
+  "sign",
+  "audit_trail",
+  "storage",
+  "complete",
+] as const;
+
+export const signaturePacketStatusValidator = v.union(
+  v.literal("prepare"),
+  v.literal("explain"),
+  v.literal("agent_review"),
+  v.literal("buyer_review"),
+  v.literal("verify"),
+  v.literal("sign"),
+  v.literal("audit_trail"),
+  v.literal("storage"),
+  v.literal("complete"),
+);
+
+export const ESIGN_PROVIDER = "sandbox" as const;
+
+export const esignProviderValidator = v.literal(ESIGN_PROVIDER);
+
+export const IDV_PURPOSES = [
+  "financial_document",
+  "designated_document",
+  "account_recovery",
+] as const;
+
+export const idvPurposeValidator = v.union(
+  v.literal("financial_document"),
+  v.literal("designated_document"),
+  v.literal("account_recovery"),
+);
+
+export const IDV_SESSION_STATUSES = [
+  "pending",
+  "verified",
+  "failed",
+  "denied",
+] as const;
+
+export const idvSessionStatusValidator = v.union(
+  v.literal("pending"),
+  v.literal("verified"),
+  v.literal("failed"),
+  v.literal("denied"),
+);
+
+export const IDV_PROVIDER = "sandbox" as const;
+
+export const idvProviderValidator = v.literal(IDV_PROVIDER);
+
+export const ESIGN_AGENT_REVIEW_ROLES = ["agent", "broker", "admin"] as const;

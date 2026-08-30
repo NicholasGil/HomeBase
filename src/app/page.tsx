@@ -72,6 +72,18 @@ export default async function HomePage() {
                 Tours
               </Link>
               <Link
+                href="/sign"
+                className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
+              >
+                Sign
+              </Link>
+              <Link
+                href="/identity"
+                className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
+              >
+                Identity
+              </Link>
+              <Link
                 href="/sign-in"
                 className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
               >

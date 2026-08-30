@@ -2,8 +2,8 @@ import { SEED_CLERK_IDS, SEED_PLAN } from "../../convex/seedPlan";
 import { SEED_TRANSACTION_IDS } from "@/lib/test-session";
 
 export const SEED_DOCUMENT_IDS = {
-  preapproval: "seed:doc-preapproval",
-  inspection: "seed:doc-inspection",
+  preapproval: "seed-doc-preapproval",
+  inspection: "seed-doc-inspection",
 } as const;
 
 export type SeedDocumentId =

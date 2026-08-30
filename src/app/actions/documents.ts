@@ -27,13 +27,17 @@ async function readAudit() {
   return parseFixtureAudit(store.get(DOCUMENT_AUDIT_COOKIE)?.value);
 }
 
-async function writeState(grants: FixtureGrant[], audit: FixtureAuditEntry[]) {
+async function writeGrants(grants: FixtureGrant[]) {
   const store = await cookies();
   store.set(DOCUMENT_GRANTS_COOKIE, JSON.stringify(grants), {
     httpOnly: true,
     sameSite: "lax",
     path: "/",
   });
+}
+
+async function writeAudit(audit: FixtureAuditEntry[]) {
+  const store = await cookies();
   store.set(DOCUMENT_AUDIT_COOKIE, JSON.stringify(audit), {
     httpOnly: true,
     sameSite: "lax",
@@ -66,13 +70,17 @@ export async function openSeedDocument(input: { documentId: string }) {
   if (!resolved.ok) {
     return resolved;
   }
-  const audit = appendAudit(await readAudit(), {
-    actorClerkId: session?.clerkId ?? "unknown",
-    action: "document.viewed",
-    documentId: input.documentId,
-  });
-  await writeState(grants, audit);
-  return { ...resolved, audit };
+  try {
+    const audit = appendAudit(await readAudit(), {
+      actorClerkId: session?.clerkId ?? "unknown",
+      action: "document.viewed",
+      documentId: input.documentId,
+    });
+    await writeAudit(audit);
+    return { ...resolved, audit };
+  } catch {
+    return resolved;
+  }
 }
 
 export async function grantSeedDocumentFromForm(formData: FormData) {
@@ -96,7 +104,8 @@ export async function grantSeedDocumentFromForm(formData: FormData) {
     action: "document.granted",
     documentId,
   });
-  await writeState(result.grants, audit);
+  await writeGrants(result.grants);
+  await writeAudit(audit);
   redirect("/vault");
 }
 
@@ -121,6 +130,7 @@ export async function revokeSeedGrantFromForm(formData: FormData) {
     action: "document.revoked",
     documentId: grant?.documentId ?? "",
   });
-  await writeState(result.grants, audit);
+  await writeGrants(result.grants);
+  await writeAudit(audit);
   redirect("/vault");
 }

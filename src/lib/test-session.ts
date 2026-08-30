@@ -15,17 +15,31 @@ export const SEED_TRANSACTION_IDS = {
 
 export type { TestBuyerClerkId };
 
-export type TestSession = {
+export type TestBuyerSession = {
   clerkId: TestBuyerClerkId;
   name: string;
   role: "buyer";
   transactionId: (typeof SEED_TRANSACTION_IDS)[TestBuyerClerkId];
 };
 
+export type TestVendorSession = {
+  clerkId: typeof SEED_CLERK_IDS.lender;
+  name: string;
+  role: "vendor";
+};
+
+export type TestSession = TestBuyerSession | TestVendorSession;
+
 export function isTestBuyerClerkId(value: string): value is TestBuyerClerkId {
   return (
     value === SEED_CLERK_IDS.buyerA || value === SEED_CLERK_IDS.buyerB
   );
+}
+
+export function isTestLenderClerkId(
+  value: string,
+): value is typeof SEED_CLERK_IDS.lender {
+  return value === SEED_CLERK_IDS.lender;
 }
 
 export function startTestSessionDecision(
@@ -34,6 +48,16 @@ export function startTestSessionDecision(
 ): { ok: true; session: TestSession } | { ok: false; reason: "FORBIDDEN" } {
   if (isProductionDeploy(env)) {
     return { ok: false, reason: "FORBIDDEN" };
+  }
+  if (isTestLenderClerkId(clerkId)) {
+    return {
+      ok: true,
+      session: {
+        clerkId,
+        name: SEED_PLAN.lender.name,
+        role: "vendor",
+      },
+    };
   }
   if (!isTestBuyerClerkId(clerkId)) {
     return { ok: false, reason: "FORBIDDEN" };
@@ -73,8 +97,12 @@ export function loadSeedTransactionForViewer(
   if (session === null) {
     return { ok: false, reason: "UNAUTHENTICATED" };
   }
-  if (session.transactionId !== transactionId) {
+  if (session.role !== "buyer" || session.transactionId !== transactionId) {
     return { ok: false, reason: "FORBIDDEN" };
   }
   return { ok: true, view: seedDashboardForBuyer(session.clerkId) };
+}
+
+export function fixtureHomePath(session: TestSession) {
+  return session.role === "vendor" ? "/vault" : "/dashboard";
 }

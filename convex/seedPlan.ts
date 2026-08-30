@@ -13,12 +13,19 @@ export const SEED_CLERK_IDS = {
   buyerA: "clerk_buyer_a",
   buyerB: "clerk_buyer_b",
   agent: "clerk_agent",
+  lender: "clerk_lender",
 } as const;
 
 type SeedDefaultTask = {
   title: string;
   assigneeRole: "buyer" | "agent" | "broker" | "admin" | "vendor";
   blocksStage: boolean;
+};
+
+const STAGE_REQUIRED_DOCUMENTS: Record<string, string[]> = {
+  financing: ["preapproval"],
+  under_contract: ["purchase_agreement", "earnest_money"],
+  inspection: ["inspection_report", "repair_request"],
 };
 
 const STAGE_DEFAULT_TASKS: Record<string, SeedDefaultTask[]> = {
@@ -80,6 +87,12 @@ export const SEED_PLAN = {
     name: "Casey Holt",
     phone: "256-555-0100",
   },
+  lender: {
+    clerkId: SEED_CLERK_IDS.lender,
+    email: "jordan.hale@example.com",
+    name: "Jordan Hale",
+    phone: "256-555-0199",
+  },
   buyers: [
     {
       clerkId: SEED_CLERK_IDS.buyerA,
@@ -137,6 +150,7 @@ export const SEED_PLAN = {
   ].map((stage) => ({
     ...stage,
     defaultTasks: STAGE_DEFAULT_TASKS[stage.key] ?? [],
+    requiredDocuments: STAGE_REQUIRED_DOCUMENTS[stage.key] ?? [],
   })),
 } as const;
 

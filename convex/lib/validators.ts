@@ -97,6 +97,8 @@ export const TRANSACTION_READ_ROLES = [
   "admin",
 ] as const;
 
+export const GRANTABLE_DIRECTORY_ROLES = ["vendor"] as const;
+
 export const JOURNEY_WRITE_ROLES = ["broker", "admin"] as const;
 
 export const STAGE_ADVANCE_ROLES = ["agent", "broker", "admin"] as const;

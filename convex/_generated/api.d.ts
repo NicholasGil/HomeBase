@@ -9,10 +9,14 @@
  */
 
 import type * as dashboard from "../dashboard.js";
+import type * as documents from "../documents.js";
 import type * as journey from "../journey.js";
 import type * as lib_audit from "../lib/audit.js";
 import type * as lib_authz from "../lib/authz.js";
+import type * as lib_classifyDocument from "../lib/classifyDocument.js";
 import type * as lib_dashboardView from "../lib/dashboardView.js";
+import type * as lib_documentAccess from "../lib/documentAccess.js";
+import type * as lib_journeyLogic from "../lib/journeyLogic.js";
 import type * as lib_validators from "../lib/validators.js";
 import type * as me from "../me.js";
 import type * as orgs from "../orgs.js";
@@ -29,10 +33,14 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   dashboard: typeof dashboard;
+  documents: typeof documents;
   journey: typeof journey;
   "lib/audit": typeof lib_audit;
   "lib/authz": typeof lib_authz;
+  "lib/classifyDocument": typeof lib_classifyDocument;
   "lib/dashboardView": typeof lib_dashboardView;
+  "lib/documentAccess": typeof lib_documentAccess;
+  "lib/journeyLogic": typeof lib_journeyLogic;
   "lib/validators": typeof lib_validators;
   me: typeof me;
   orgs: typeof orgs;

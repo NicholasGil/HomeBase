@@ -41,7 +41,7 @@ describe("seed", () => {
       FLAG_IDV: false,
     });
 
-    expect(counts.users).toHaveLength(3);
+    expect(counts.users).toHaveLength(4);
     expect(counts.memberships.filter((row) => row.role === "buyer")).toHaveLength(2);
     expect(counts.memberships.filter((row) => row.role === "agent")).toHaveLength(1);
     expect(counts.clients).toHaveLength(2);

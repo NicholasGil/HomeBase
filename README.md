@@ -37,3 +37,5 @@ CI runs lint, typecheck, unit tests, and the P0 Playwright job on every pull req
 ## P1
 
 M1 journey roadmap: org-configurable stages, blocking tasks hold stage advance, transitions append to auditLog. Seeded mid-flight buyer (Alex Rivera, inspection) passes the ten-second test.
+
+M2 document vault: upload/classify, grants with scope and expiry, immediate revoke. Every open goes through documentGrants or a transaction principal check inside Convex. A lender granted the preapproval cannot load the inspection report by id.

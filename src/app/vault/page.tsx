@@ -2,21 +2,19 @@ import { redirect } from "next/navigation";
 
 import { getTestSession } from "@/app/actions/test-session";
 import { AppShell } from "@/components/app-shell";
-import { BuyerDashboardViewPanel } from "@/components/buyer-dashboard-view";
-import { FixtureLoginPrompt } from "@/components/fixture-login-prompt";
-import { LiveBuyerDashboard } from "@/components/live-buyer-dashboard";
-import { QueryErrorBoundary } from "@/components/query-error-boundary";
 import { FixtureVault } from "@/components/document-vault";
+import { FixtureLoginPrompt } from "@/components/fixture-login-prompt";
+import { LiveDocumentVault } from "@/components/live-document-vault";
+import { QueryErrorBoundary } from "@/components/query-error-boundary";
 import {
   dashboardRenderMode,
   mustFailClosed,
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
-import { seedDashboardForBuyer } from "@/lib/seed-dashboard";
 
 export const dynamic = "force-dynamic";
 
-export default async function DashboardPage() {
+export default async function VaultPage() {
   if (mustFailClosed()) {
     throw new ProductionAuthMisconfiguredError();
   }
@@ -38,21 +36,17 @@ export default async function DashboardPage() {
 
   if (mode === "fixture") {
     if (session === null) {
-      throw new Error("fixture mode requires a test session");
-    }
-    if (session.role !== "buyer") {
-      redirect("/vault");
+      redirect("/test-login");
     }
     return (
       <AppShell>
-        <div className="space-y-10">
-          <BuyerDashboardViewPanel
-            view={seedDashboardForBuyer(session.clerkId)}
-            buyerName={session.name}
-            eyebrow="Fixture session · not Clerk"
-          />
-          <FixtureVault />
-        </div>
+        <h1 className="mb-6 text-3xl font-semibold tracking-tight">
+          Document vault
+        </h1>
+        <p className="mb-8 text-sm text-muted-foreground">
+          Signed in as {session.name} · {session.role}
+        </p>
+        <FixtureVault />
       </AppShell>
     );
   }
@@ -62,11 +56,11 @@ export default async function DashboardPage() {
       <QueryErrorBoundary
         fallback={
           <p className="text-sm text-muted-foreground">
-            You cannot open this dashboard.
+            You cannot open this vault.
           </p>
         }
       >
-        <LiveBuyerDashboard />
+        <LiveDocumentVault />
       </QueryErrorBoundary>
     </AppShell>
   );

@@ -51,6 +51,7 @@ export async function AppShell({
                 links={links}
                 role={context.role}
                 viewerName={context.name}
+                fixtureSignOut={session !== null}
               />
             )}
           </div>

@@ -38,3 +38,9 @@ export async function startTestSessionFromForm(formData: FormData) {
   const session = await startTestSession({ clerkId });
   redirect(fixtureHomePath(session));
 }
+
+export async function endTestSessionFromForm() {
+  const store = await cookies();
+  store.delete(TEST_SESSION_COOKIE);
+  redirect("/test-login");
+}

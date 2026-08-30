@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { ProfileMenu } from "@/components/profile-menu";
 import type { AppNavLink, AppNavRole } from "@/lib/app-nav";
 import { cn } from "@/lib/utils";
 
@@ -7,10 +8,12 @@ export function AppNavLinks({
   links,
   role,
   viewerName,
+  fixtureSignOut,
 }: {
   links: AppNavLink[];
   role: AppNavRole;
   viewerName?: string;
+  fixtureSignOut?: boolean;
 }) {
   return (
     <div
@@ -34,13 +37,12 @@ export function AppNavLinks({
           ))}
         </ul>
       </nav>
-      {viewerName ? (
-        <span
-          aria-hidden
-          className="hidden size-8 shrink-0 items-center justify-center rounded-full bg-foreground text-[11px] font-medium text-background sm:flex"
-        >
-          {viewerName.slice(0, 1)}
-        </span>
+      {viewerName && role !== "guest" ? (
+        <ProfileMenu
+          name={viewerName}
+          role={role}
+          fixtureSignOut={fixtureSignOut}
+        />
       ) : null}
     </div>
   );

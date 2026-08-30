@@ -96,6 +96,11 @@ describe("seed transaction isolation", () => {
       expect(dana.view.transactionId).toBe("seed:buyer-c");
       expect(dana.view.where.key).toBe("financing");
     }
+    const encoded = loadSeedTransactionForViewer(
+      started.session,
+      encodeURIComponent("seed:buyer-a"),
+    );
+    expect(encoded.ok).toBe(true);
   });
 
   it("returns buyer A their own transaction only", () => {

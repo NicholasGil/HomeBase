@@ -14,7 +14,8 @@ export const dynamic = "force-dynamic";
 export default async function TransactionPage({
   params,
 }: PageProps<"/transactions/[transactionId]">) {
-  const { transactionId } = await params;
+  const { transactionId: rawTransactionId } = await params;
+  const transactionId = decodeURIComponent(rawTransactionId);
 
   if (!isAuthConfigured()) {
     assertCanRenderWithoutAuth();

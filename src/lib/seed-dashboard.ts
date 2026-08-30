@@ -20,7 +20,7 @@ export function seedTransactionIdForClerk(clerkId: string): string | null {
 }
 
 export function clerkIdForSeedTransaction(transactionId: string): string | null {
-  const match = /^seed:buyer-([a-h])$/.exec(transactionId);
+  const match = /^seed:buyer-([a-h])$/.exec(decodeURIComponent(transactionId));
   if (match === null) {
     return null;
   }

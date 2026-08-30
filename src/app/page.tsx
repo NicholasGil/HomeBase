@@ -90,6 +90,12 @@ export default async function HomePage() {
                 Identity
               </Link>
               <Link
+                href="/homeownership/seed:buyer-h"
+                className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
+              >
+                Homeownership hub
+              </Link>
+              <Link
                 href="/sign-in"
                 className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
               >

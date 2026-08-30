@@ -21,6 +21,7 @@ import {
   idvPurposeValidator,
   idvSessionStatusValidator,
   idvProviderValidator,
+  maintenanceStatusValidator,
   taskStatusValidator,
   transactionStatusValidator,
 } from "./lib/validators";
@@ -374,6 +375,32 @@ export default defineSchema({
   })
     .index("by_transaction", ["transactionId"])
     .index("by_document", ["documentId"]),
+
+  maintenanceItems: defineTable({
+    transactionId: v.id("transactions"),
+    propertyId: v.optional(v.id("properties")),
+    title: v.string(),
+    category: v.string(),
+    cadenceDays: v.optional(v.number()),
+    nextDueAt: v.number(),
+    status: maintenanceStatusValidator,
+    notes: v.optional(v.string()),
+  }).index("by_transaction", ["transactionId"]),
+
+  warranties: defineTable({
+    transactionId: v.id("transactions"),
+    documentId: v.optional(v.id("documents")),
+    title: v.string(),
+    provider: v.string(),
+    coverage: v.optional(v.string()),
+    expiresAt: v.optional(v.number()),
+  }).index("by_transaction", ["transactionId"]),
+
+  propertyValueSnapshots: defineTable({
+    transactionId: v.id("transactions"),
+    propertyId: v.optional(v.id("properties")),
+    figure: moneyFigureValidator,
+  }).index("by_transaction", ["transactionId"]),
 
   // M12 tier 2. Status + provider ref only. No selfie, ID bytes, or template.
   idvSessions: defineTable({

@@ -72,6 +72,12 @@ describe("seed", () => {
     expect(blair[0]?.stage).toBe("showings");
     expect(alex[0]?.owedToday?.provenance).toBe("title_issued");
 
+    const asIndira = t.withIdentity({ subject: "clerk_buyer_h" });
+    const indira = await asIndira.query(api.transactions.listMine, {});
+    expect(indira).toHaveLength(1);
+    expect(indira[0]?.status).toBe("closed");
+    expect(indira[0]?.stage).toBe("move_in");
+
     const offers = await t.run(async (ctx) => ctx.db.query("offers").collect());
     expect(offers.length).toBeGreaterThan(0);
     for (const offer of offers) {

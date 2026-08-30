@@ -6,12 +6,12 @@ export function MoneyFigureView({
   figure,
   testId,
 }: {
-  figure: MoneyFigure;
+  figure: MoneyFigure | null | undefined;
   testId?: string;
 }) {
   const display = owedTodayDisplay(figure);
 
-  if (display.kind === "missing") {
+  if (display.kind === "missing" || figure === null || figure === undefined) {
     return (
       <div className="space-y-1" data-testid={testId}>
         <p className={display.amountClassName}>{display.amountText}</p>

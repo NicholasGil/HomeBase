@@ -46,6 +46,12 @@ describe("test session permission", () => {
       expect(started.session.name).toBe("Alex Rivera");
       expect(started.session.transactionId).toBe("seed:buyer-a");
     }
+    const closed = startTestSessionDecision(SEED_CLERK_IDS.buyerH);
+    expect(closed.ok).toBe(true);
+    if (closed.ok && closed.session.role === "buyer") {
+      expect(closed.session.name).toBe("Indira Shah");
+      expect(closed.session.transactionId).toBe("seed:buyer-h");
+    }
   });
 
   it("ignores the fixture cookie on a production deploy", () => {

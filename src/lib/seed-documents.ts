@@ -4,6 +4,9 @@ import { SEED_TRANSACTION_IDS } from "@/lib/test-session";
 export const SEED_DOCUMENT_IDS = {
   preapproval: "seed-doc-preapproval",
   inspection: "seed-doc-inspection",
+  purchaseAgreementClosed: "seed-doc-closing-purchase",
+  closingDisclosure: "seed-doc-closing-disclosure",
+  hvacWarranty: "seed-doc-hvac-warranty",
 } as const;
 
 export type SeedDocumentId =
@@ -37,6 +40,30 @@ export const SEED_DOCUMENTS: Record<SeedDocumentId, SeedDocument> = {
       "Roof and HVAC need service. No structural defects noted.",
     ownerClerkId: SEED_CLERK_IDS.agent,
   },
+  [SEED_DOCUMENT_IDS.purchaseAgreementClosed]: {
+    id: SEED_DOCUMENT_IDS.purchaseAgreementClosed,
+    transactionId: SEED_TRANSACTION_IDS[SEED_CLERK_IDS.buyerH],
+    type: "purchase_agreement",
+    title: "Recorded purchase agreement",
+    extractedSummary: "Recorded contract for the Carlton Drive close.",
+    ownerClerkId: SEED_CLERK_IDS.buyerH,
+  },
+  [SEED_DOCUMENT_IDS.closingDisclosure]: {
+    id: SEED_DOCUMENT_IDS.closingDisclosure,
+    transactionId: SEED_TRANSACTION_IDS[SEED_CLERK_IDS.buyerH],
+    type: "closing_disclosure",
+    title: "Closing disclosure",
+    extractedSummary: "Title issued a $405,000 purchase price at close.",
+    ownerClerkId: SEED_CLERK_IDS.buyerH,
+  },
+  [SEED_DOCUMENT_IDS.hvacWarranty]: {
+    id: SEED_DOCUMENT_IDS.hvacWarranty,
+    transactionId: SEED_TRANSACTION_IDS[SEED_CLERK_IDS.buyerH],
+    type: "hvac_warranty",
+    title: "HVAC warranty",
+    extractedSummary: "Five-year compressor coverage from Bluff City Air.",
+    ownerClerkId: SEED_CLERK_IDS.buyerH,
+  },
 };
 
 export const SEED_LENDER = {
@@ -48,7 +75,10 @@ export const SEED_LENDER = {
 export function isSeedDocumentId(value: string): value is SeedDocumentId {
   return (
     value === SEED_DOCUMENT_IDS.preapproval ||
-    value === SEED_DOCUMENT_IDS.inspection
+    value === SEED_DOCUMENT_IDS.inspection ||
+    value === SEED_DOCUMENT_IDS.purchaseAgreementClosed ||
+    value === SEED_DOCUMENT_IDS.closingDisclosure ||
+    value === SEED_DOCUMENT_IDS.hvacWarranty
   );
 }
 
@@ -58,6 +88,15 @@ export function seedDocumentTitle(type: string) {
   }
   if (type === "inspection_report") {
     return "Inspection report";
+  }
+  if (type === "closing_disclosure") {
+    return "Closing disclosure";
+  }
+  if (type === "hvac_warranty") {
+    return "HVAC warranty";
+  }
+  if (type === "purchase_agreement") {
+    return "Purchase agreement";
   }
   return type;
 }

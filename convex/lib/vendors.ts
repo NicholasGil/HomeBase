@@ -1,6 +1,9 @@
 import type { Doc } from "../_generated/dataModel";
 
-import { VENDOR_CATEGORIES } from "./validators";
+import {
+  POST_CLOSE_VENDOR_CATEGORIES,
+  VENDOR_CATEGORIES,
+} from "./validators";
 
 export type VendorCategory = (typeof VENDOR_CATEGORIES)[number];
 
@@ -28,6 +31,10 @@ export function isLenderCategory(category: string) {
 
 export function categoriesForStage(stage: string): readonly VendorCategory[] {
   return STAGE_VENDOR_CATEGORIES[stage] ?? [];
+}
+
+export function postCloseVendorCategories(): readonly VendorCategory[] {
+  return POST_CLOSE_VENDOR_CATEGORIES;
 }
 
 export function isAssignmentLive(

@@ -36,7 +36,8 @@ export default function TestLoginPage() {
             .filter(
               (buyer) =>
                 buyer.clerkId === SEED_CLERK_IDS.buyerA ||
-                buyer.clerkId === SEED_CLERK_IDS.buyerB,
+                buyer.clerkId === SEED_CLERK_IDS.buyerB ||
+                buyer.clerkId === SEED_CLERK_IDS.buyerH,
             )
             .map((buyer) => (
               <form action={startTestSessionFromForm} key={buyer.clerkId}>

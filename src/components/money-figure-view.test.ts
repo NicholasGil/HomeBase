@@ -31,6 +31,18 @@ describe("MoneyFigureView", () => {
     expect(html).toContain("Estimated loan");
   });
 
+  it("renders a missing figure as None, never $0.00", () => {
+    const html = renderToStaticMarkup(
+      createElement(MoneyFigureView, {
+        figure: null,
+        testId: "hub-figure-taxAssessed",
+      }),
+    );
+    expect(html).toContain("None");
+    expect(html).not.toContain("$0.00");
+    expect(html).not.toContain("$0");
+  });
+
   it("keeps issued figures unlabeled and full-weight", () => {
     const html = renderToStaticMarkup(
       createElement(MoneyFigureView, {

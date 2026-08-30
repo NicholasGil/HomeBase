@@ -46,4 +46,18 @@ describe("transaction isolation", () => {
     expect(ownDashboard?.transactionId).not.toBe(buyerBTransaction._id);
     expect(ownDashboard?.where.key).toBe("inspection");
   });
+
+  it("buyer A cannot load buyer B's tour by id", async () => {
+    const t = convexTest(schema, modules);
+    await t.mutation(internal.seed.run, {});
+    const asBuyerA = t.withIdentity({ subject: "clerk_buyer_a" });
+    const asBuyerB = t.withIdentity({ subject: "clerk_buyer_b" });
+    const candidates = await asBuyerB.query(api.tours.listCandidates, {});
+    const tour = await asBuyerB.mutation(api.tours.build, {
+      propertyIds: candidates.map((row) => row._id),
+    });
+    await expect(
+      asBuyerA.query(api.tours.get, { tourId: tour.tourId }),
+    ).rejects.toThrow("FORBIDDEN");
+  });
 });

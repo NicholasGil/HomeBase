@@ -1,25 +1,21 @@
 import { redirect } from "next/navigation";
 
+import { loadFixtureTours } from "@/app/actions/tours";
 import { getTestSession } from "@/app/actions/test-session";
 import { AppShell } from "@/components/app-shell";
-import { BuyerDashboardViewPanel } from "@/components/buyer-dashboard-view";
 import { FixtureLoginPrompt } from "@/components/fixture-login-prompt";
-import { LiveBuyerDashboard } from "@/components/live-buyer-dashboard";
+import { LiveTourBuilder } from "@/components/live-tour-builder";
 import { QueryErrorBoundary } from "@/components/query-error-boundary";
-import { ConciergeChat } from "@/components/concierge-chat";
-import { FixtureVault } from "@/components/document-vault";
 import { FixtureTourBuilder } from "@/components/tour-builder";
-import { loadFixtureTours } from "@/app/actions/tours";
 import {
   dashboardRenderMode,
   mustFailClosed,
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
-import { seedDashboardForBuyer } from "@/lib/seed-dashboard";
 
 export const dynamic = "force-dynamic";
 
-export default async function DashboardPage() {
+export default async function ToursPage() {
   if (mustFailClosed()) {
     throw new ProductionAuthMisconfiguredError();
   }
@@ -41,26 +37,21 @@ export default async function DashboardPage() {
 
   if (mode === "fixture") {
     if (session === null) {
-      throw new Error("fixture mode requires a test session");
+      redirect("/test-login");
     }
-    if (session.role !== "buyer") {
-      redirect("/vault");
-    }
-    const tours = await loadFixtureTours();
+    const loaded = await loadFixtureTours();
+    const denied =
+      !loaded.candidates.ok && loaded.candidates.reason === "FORBIDDEN";
     return (
       <AppShell>
-        <div className="space-y-10">
-          <BuyerDashboardViewPanel
-            view={seedDashboardForBuyer(session.clerkId)}
-            buyerName={session.name}
-            eyebrow="Fixture session · not Clerk"
-          />
-          <FixtureTourBuilder
-            tours={tours.tours.ok ? tours.tours.tours : []}
-          />
-          <FixtureVault />
-          <ConciergeChat />
-        </div>
+        <h1 className="mb-6 text-3xl font-semibold tracking-tight">Tours</h1>
+        <p className="mb-8 text-sm text-muted-foreground">
+          Signed in as {session.name} · {session.role}
+        </p>
+        <FixtureTourBuilder
+          denied={denied}
+          tours={loaded.tours.ok ? loaded.tours.tours : []}
+        />
       </AppShell>
     );
   }
@@ -70,11 +61,11 @@ export default async function DashboardPage() {
       <QueryErrorBoundary
         fallback={
           <p className="text-sm text-muted-foreground">
-            You cannot open this dashboard.
+            You cannot open tours.
           </p>
         }
       >
-        <LiveBuyerDashboard />
+        <LiveTourBuilder />
       </QueryErrorBoundary>
     </AppShell>
   );

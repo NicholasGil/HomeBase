@@ -3,6 +3,7 @@
 import { useQuery } from "convex/react";
 
 import { BuyerDashboardViewPanel } from "@/components/buyer-dashboard-view";
+import { LiveTourBuilder } from "@/components/live-tour-builder";
 import { api } from "../../convex/_generated/api";
 
 export function LiveBuyerDashboard({ buyerName }: { buyerName?: string }) {
@@ -20,5 +21,10 @@ export function LiveBuyerDashboard({ buyerName }: { buyerName?: string }) {
     );
   }
 
-  return <BuyerDashboardViewPanel view={view} buyerName={buyerName} />;
+  return (
+    <div className="space-y-10">
+      <BuyerDashboardViewPanel view={view} buyerName={buyerName} />
+      <LiveTourBuilder />
+    </div>
+  );
 }

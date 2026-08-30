@@ -1,9 +1,11 @@
 import { expect, type Page, test } from "@playwright/test";
 
 async function expectNoRuntimeOverlay(page: Page) {
-  await expect(page.getByText("Runtime Error")).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Runtime Error" })).toHaveCount(
+    0,
+  );
   await expect(page.getByText("Application error")).toHaveCount(0);
-  await expect(page.locator("nextjs-portal")).toHaveCount(0);
+  await expect(page.locator("[data-nextjs-dialog]")).toHaveCount(0);
   await expect(page.getByText("FORBIDDEN", { exact: true })).toHaveCount(0);
 }
 

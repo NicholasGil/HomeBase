@@ -1,6 +1,7 @@
 import type { Doc } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
 
+import { formatDisplayDateTime } from "./displayTime";
 import { isLenderCategory } from "./vendors";
 
 type DbCtx = QueryCtx | MutationCtx;
@@ -79,13 +80,13 @@ export async function gatherConciergeFacts(
   if (inspection !== undefined) {
     facts.push({
       key: "inspection_when",
-      text: `Inspection is at ${new Date(inspection.startsAt).toISOString()}.`,
+      text: `Inspection is at ${formatDisplayDateTime(inspection.startsAt)}.`,
       source: "appointments",
     });
   } else if (transaction.keyDates.inspectionDueAt !== undefined) {
     facts.push({
       key: "inspection_when",
-      text: `Inspection is due ${new Date(transaction.keyDates.inspectionDueAt).toISOString()}.`,
+      text: `Inspection is due ${formatDisplayDateTime(transaction.keyDates.inspectionDueAt)}.`,
       source: "transactions.keyDates",
     });
   }
@@ -149,7 +150,7 @@ export async function gatherConciergeFacts(
   if (showing !== undefined) {
     facts.push({
       key: "first_showing",
-      text: `Leave for the first showing at ${new Date(showing.startsAt).toISOString()}.`,
+      text: `Leave for the first showing at ${formatDisplayDateTime(showing.startsAt)}.`,
       source: "appointments",
     });
   }

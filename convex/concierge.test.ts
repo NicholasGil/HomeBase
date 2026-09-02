@@ -2,6 +2,7 @@ import { convexTest } from "convex-test";
 import { describe, expect, it } from "vitest";
 
 import { api, internal } from "./_generated/api";
+import { containsRawIsoDateTime } from "./lib/displayTime";
 import schema from "./schema";
 import { modules } from "./test.setup";
 
@@ -116,6 +117,18 @@ describe("concierge scope", () => {
     );
     expectNoFindingsText(facts);
 
+    const inspectionWhen = facts.find((fact) => fact.key === "inspection_when");
+    const firstShowing = facts.find((fact) => fact.key === "first_showing");
+    expect(inspectionWhen?.text).toBe(
+      "Inspection is at Tue, Sep 8, 2026, 10:00 AM CDT.",
+    );
+    expect(firstShowing?.text).toBe(
+      "Leave for the first showing at Sat, Sep 5, 2026, 2:00 PM CDT.",
+    );
+    for (const fact of facts) {
+      expect(containsRawIsoDateTime(fact.text)).toBe(false);
+    }
+
     await expect(
       asAlex.query(api.concierge.gatherContext, { transactionId: blairId }),
     ).rejects.toThrow("FORBIDDEN");
@@ -134,6 +147,24 @@ describe("concierge scope", () => {
       alexId,
       "FORBIDDEN",
     );
+  });
+
+  it("formats the inspection due fallback as Chicago-local text", async () => {
+    const t = await seeded();
+    const asEllis = t.withIdentity({ subject: "clerk_buyer_d" });
+    const [ellis] = await asEllis.query(api.transactions.listMine, {});
+    if (ellis === undefined) {
+      throw new Error("seed transaction missing");
+    }
+    const facts = await asEllis.query(api.concierge.gatherContext, {
+      transactionId: ellis._id,
+    });
+    const inspectionWhen = facts.find((fact) => fact.key === "inspection_when");
+    expect(inspectionWhen?.source).toBe("transactions.keyDates");
+    expect(inspectionWhen?.text).toMatch(
+      /^Inspection is due [A-Z][a-z]{2}, [A-Z][a-z]{2} \d{1,2}, \d{4}, \d{1,2}:\d{2} [AP]M C[SD]T\.$/,
+    );
+    expect(containsRawIsoDateTime(inspectionWhen?.text ?? "")).toBe(false);
   });
 
   it("does not return inspection findings text without document access", async () => {

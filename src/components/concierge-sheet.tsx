@@ -63,7 +63,7 @@ export function ConciergeSheet({ scope }: { scope: ConciergeScope }) {
         side={sidePanel ? "right" : "bottom"}
         showCloseButton={false}
         data-testid="concierge-sheet"
-        className="gap-0 bg-background pb-[env(safe-area-inset-bottom)] data-[side=bottom]:h-[85vh] data-[side=bottom]:rounded-t-[28px] data-[side=right]:w-[420px] data-[side=right]:sm:max-w-none"
+        className="gap-0 bg-background pb-[env(safe-area-inset-bottom)] data-[side=bottom]:h-[85vh] data-[side=bottom]:rounded-t-4xl data-[side=right]:w-[420px] data-[side=right]:sm:max-w-none"
       >
         <div
           aria-hidden

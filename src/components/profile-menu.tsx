@@ -70,7 +70,7 @@ export function ProfileMenu({
           id={menuId}
           role="menu"
           data-testid="profile-menu"
-          className="absolute right-0 top-[calc(100%+0.5rem)] z-30 w-64 rounded-[14px] bg-card p-3 shadow-[0_8px_24px_rgba(15,23,42,0.12)] ring-1 ring-black/8"
+          className="absolute right-0 top-[calc(100%+0.5rem)] z-30 w-64 rounded-xl bg-card p-3 shadow-[0_8px_24px_rgba(15,23,42,0.12)] ring-1 ring-black/8"
         >
           <div className="space-y-1 px-1.5 pb-3">
             <p className="text-sm font-medium">{name}</p>

@@ -4,9 +4,47 @@ import { DoneList } from "@/components/done-list";
 import { PhotoTile } from "@/components/listing-card";
 import { MoneyFigureView } from "@/components/money-figure-view";
 import { Badge } from "@/components/ui/badge";
-import { JourneyTracker } from "@/components/journey-tracker";
+import {
+  JourneyTracker,
+  type JourneyOrientation,
+} from "@/components/journey-tracker";
 import type { BuyerDashboardView } from "../../convex/lib/dashboardView";
 import { nextActionHref, owedTodayHref } from "@/lib/dashboard-links";
+import { cn } from "@/lib/utils";
+
+/*
+  lg placement of the five hero nodes. `horizontal` (dashboard): two columns,
+  rail beside the Next card. `responsive` (transaction page): the rail turns
+  vertical and takes a 15rem column for all four rows, the rest stack left.
+*/
+export const HERO_GRID_CLASS: Record<
+  JourneyOrientation,
+  {
+    grid: string;
+    where: string;
+    rail: string;
+    next: string;
+    owe: string;
+    doneWaiting: string;
+  }
+> = {
+  horizontal: {
+    grid: "lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:grid-rows-[auto_auto_1fr]",
+    where: "lg:col-start-1 lg:row-start-1",
+    rail: "lg:col-start-2 lg:row-start-2 lg:self-start",
+    next: "lg:col-start-1 lg:row-start-2",
+    owe: "lg:col-start-2 lg:row-start-1",
+    doneWaiting: "lg:col-start-1 lg:row-start-3",
+  },
+  responsive: {
+    grid: "lg:grid-cols-[minmax(0,1fr)_15rem] lg:grid-rows-[auto_auto_auto_1fr]",
+    where: "lg:col-start-1 lg:row-start-1",
+    rail: "lg:col-start-2 lg:row-start-1 lg:row-span-4 lg:self-start",
+    next: "lg:col-start-1 lg:row-start-2",
+    owe: "lg:col-start-1 lg:row-start-3",
+    doneWaiting: "lg:col-start-1 lg:row-start-4",
+  },
+};
 
 export function OwedTodayFigure({
   owed,
@@ -22,15 +60,18 @@ export function BuyerDashboardViewPanel({
   view,
   buyerName,
   eyebrow,
+  journeyOrientation = "horizontal",
 }: {
   view: BuyerDashboardView;
   buyerName?: string;
   eyebrow?: string;
+  journeyOrientation?: JourneyOrientation;
 }) {
   const owed = view.owedToday;
   const place = view.propertyAddress
     ? `${view.propertyAddress.city}, ${view.propertyAddress.state}`
     : null;
+  const at = HERO_GRID_CLASS[journeyOrientation];
 
   return (
     <div className="space-y-10">
@@ -53,11 +94,21 @@ export function BuyerDashboardViewPanel({
         {/*
           DOM order is the 375px reading order: where, rail, next, owe,
           done/waiting. At lg the same nodes are placed into two columns
-          (left: where / next / done+waiting, right: owe / rail) so the
-          Playwright specs see one DOM regardless of viewport.
+          (see HERO_GRID_CLASS) so the Playwright specs see one DOM
+          regardless of viewport.
         */}
-        <div className="grid gap-3 px-5 pt-3 pb-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:grid-rows-[auto_auto_1fr] lg:gap-x-8 lg:gap-y-6 lg:px-6 lg:py-6">
-          <div className="min-w-0 space-y-1 lg:col-start-1 lg:row-start-1 lg:flex lg:flex-col lg:justify-end">
+        <div
+          className={cn(
+            "grid gap-3 px-5 pt-3 pb-5 lg:gap-x-8 lg:gap-y-6 lg:px-6 lg:py-6",
+            at.grid,
+          )}
+        >
+          <div
+            className={cn(
+              "min-w-0 space-y-1 lg:flex lg:flex-col lg:justify-end",
+              at.where,
+            )}
+          >
             {eyebrow ? (
               <div className="lg:mb-auto">
                 <Badge variant="sage">{eyebrow}</Badge>
@@ -80,12 +131,16 @@ export function BuyerDashboardViewPanel({
 
           <JourneyTracker
             stages={view.stages}
-            className="lg:col-start-2 lg:row-start-2 lg:self-start"
+            orientation={journeyOrientation}
+            className={at.rail}
           />
 
           <section
             data-testid="ten-second-next"
-            className="rounded-[14px] bg-sand px-4 py-3.5 lg:col-start-1 lg:row-start-2 lg:px-5 lg:py-6"
+            className={cn(
+              "rounded-[14px] bg-sand px-4 py-3.5 lg:px-5 lg:py-6",
+              at.next,
+            )}
           >
             <p className="text-xs font-medium uppercase tracking-[0.2em] text-next">
               Next
@@ -112,7 +167,10 @@ export function BuyerDashboardViewPanel({
 
           <section
             data-testid="ten-second-owe"
-            className="rounded-[14px] bg-sky px-4 py-3.5 lg:col-start-2 lg:row-start-1 lg:px-5 lg:py-6"
+            className={cn(
+              "rounded-[14px] bg-sky px-4 py-3.5 lg:px-5 lg:py-6",
+              at.owe,
+            )}
           >
             {/*
               The figure sits outside the link so the estimate's Assumptions
@@ -131,7 +189,9 @@ export function BuyerDashboardViewPanel({
             </div>
           </section>
 
-          <div className="grid grid-cols-2 gap-4 lg:col-start-1 lg:row-start-3 lg:gap-6">
+          <div
+            className={cn("grid grid-cols-2 gap-4 lg:gap-6", at.doneWaiting)}
+          >
             <section data-testid="ten-second-done" className="min-w-0">
               <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
                 Done

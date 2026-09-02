@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import { HERO_GRID_CLASS } from "@/components/buyer-dashboard-view";
+import type { JourneyOrientation } from "@/components/journey-tracker";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { tripStackClassName } from "@/lib/trip-ui";
@@ -141,49 +143,125 @@ export function InfoCardSkeleton({
   );
 }
 
+/** The dot rail: a centered current dot flanked by two labelled neighbours. */
+function JourneyRailSkeleton({ vertical }: { vertical: boolean }) {
+  return (
+    <>
+      <div
+        className={cn(
+          "mt-2 flex items-start justify-center gap-0 py-1",
+          vertical && "lg:hidden",
+        )}
+      >
+        {Array.from({ length: 7 }, (_, index) => {
+          const near = Math.abs(index - 3) <= 1;
+          return (
+            <div
+              key={index}
+              className={cn(
+                "flex min-h-11 flex-col items-center",
+                near ? "w-20" : "w-11",
+              )}
+            >
+              <Skeleton
+                className={cn(
+                  "rounded-full",
+                  index === 3 ? "size-8 bg-next/20" : "size-6",
+                )}
+              />
+              {near ? <Skeleton className="mt-1.5 h-3 w-14" /> : null}
+            </div>
+          );
+        })}
+      </div>
+      {vertical ? (
+        <div className="mt-2 hidden lg:block">
+          {Array.from({ length: 13 }, (_, index) => (
+            <div
+              key={index}
+              className="flex min-h-11 items-center gap-3 px-2"
+            >
+              <Skeleton
+                className={cn(
+                  "shrink-0 rounded-full",
+                  index === 7 ? "size-8 bg-next/20" : "size-6",
+                )}
+              />
+              <Skeleton
+                className={cn("h-4", index % 3 === 0 ? "w-28" : "w-20")}
+              />
+            </div>
+          ))}
+        </div>
+      ) : null}
+    </>
+  );
+}
+
 /**
  * The ten-second hero. Node order and grid placement copy
- * `BuyerDashboardViewPanel` so the skeleton and the loaded card occupy the
- * same rows at 375 and the same two columns at lg.
+ * `BuyerDashboardViewPanel` (see `HERO_GRID_CLASS`) so the skeleton and the
+ * loaded card occupy the same rows at 375 and the same columns at lg.
  */
-export function TenSecondHeroSkeleton() {
+export function TenSecondHeroSkeleton({
+  journeyOrientation = "horizontal",
+}: {
+  journeyOrientation?: JourneyOrientation;
+}) {
+  const at = HERO_GRID_CLASS[journeyOrientation];
   return (
     <section className="overflow-hidden rounded-[16px] bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04)] ring-1 ring-black/6">
       <Skeleton className="h-32 w-full rounded-none bg-sand lg:h-40" />
-      <div className="grid gap-3 px-5 pt-3 pb-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:grid-rows-[auto_auto_1fr] lg:gap-x-8 lg:gap-y-6 lg:px-6 lg:py-6">
-        <div className="min-w-0 space-y-2 lg:col-start-1 lg:row-start-1 lg:flex lg:flex-col lg:justify-end">
+      <div
+        className={cn(
+          "grid gap-3 px-5 pt-3 pb-5 lg:gap-x-8 lg:gap-y-6 lg:px-6 lg:py-6",
+          at.grid,
+        )}
+      >
+        <div
+          className={cn(
+            "min-w-0 space-y-2 lg:flex lg:flex-col lg:justify-end",
+            at.where,
+          )}
+        >
           <Skeleton className="h-5 w-36 rounded-full lg:mb-auto" />
           <Skeleton className="h-4 w-44" />
           <Skeleton className="h-10 w-56 lg:h-12" />
           <Skeleton className="h-4 w-60" />
         </div>
 
-        <div className="min-w-0 lg:col-start-2 lg:row-start-2 lg:self-start">
+        <div className={cn("min-w-0", at.rail)}>
           <div className="flex items-baseline justify-between">
             <Skeleton className="h-4 w-16" />
             <Skeleton className="h-4 w-10" />
           </div>
-          <div className="mt-2 flex gap-2 overflow-hidden py-1">
-            <Skeleton className="h-11 w-36 shrink-0 rounded-full" />
-            <Skeleton className="h-11 w-32 shrink-0 rounded-full bg-next/20" />
-            <Skeleton className="h-11 w-28 shrink-0 rounded-full" />
-          </div>
+          <JourneyRailSkeleton vertical={journeyOrientation === "responsive"} />
         </div>
 
-        <div className="rounded-[14px] bg-sand px-4 py-3.5 lg:col-start-1 lg:row-start-2 lg:px-5 lg:py-6">
+        <div
+          className={cn(
+            "rounded-[14px] bg-sand px-4 py-3.5 lg:px-5 lg:py-6",
+            at.next,
+          )}
+        >
           <Skeleton className="h-4 w-12 bg-sand-foreground/15" />
           <Skeleton className="mt-2 h-8 w-4/5 bg-sand-foreground/15 lg:mt-3 lg:h-9" />
           <Skeleton className="mt-2 h-5 w-16 rounded-full bg-sand-foreground/15 lg:mt-3" />
         </div>
 
-        <div className="rounded-[14px] bg-sky px-4 py-3.5 lg:col-start-2 lg:row-start-1 lg:px-5 lg:py-6">
+        <div
+          className={cn(
+            "rounded-[14px] bg-sky px-4 py-3.5 lg:px-5 lg:py-6",
+            at.owe,
+          )}
+        >
           <Skeleton className="h-4 w-20 bg-sky-foreground/15" />
           <Skeleton className="mt-1 h-4 w-40 bg-sky-foreground/15" />
           <Skeleton className="mt-3 h-11 w-40 bg-sky-foreground/15 lg:mt-4" />
           <Skeleton className="mt-2 h-5 w-32 rounded-full bg-sky-foreground/15" />
         </div>
 
-        <div className="grid grid-cols-2 gap-4 lg:col-start-1 lg:row-start-3 lg:gap-6">
+        <div className={cn("grid grid-cols-2 gap-4 lg:gap-6", at.doneWaiting)}>
           <div className="space-y-2">
             <Skeleton className="h-4 w-12" />
             <Skeleton className="h-5 w-full" />
@@ -239,8 +317,11 @@ export function DashboardSkeleton() {
 export function TransactionSkeleton() {
   return (
     <div className="space-y-10">
-      <TenSecondHeroSkeleton />
-      <StageColumnsSkeleton />
+      <div className="space-y-10">
+        <TenSecondHeroSkeleton journeyOrientation="responsive" />
+        <StageColumnsSkeleton />
+      </div>
+      <InfoCardSkeleton lines={1} button />
     </div>
   );
 }

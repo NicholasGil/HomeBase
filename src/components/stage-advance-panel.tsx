@@ -1,8 +1,9 @@
 "use client";
 
-import { useMutation } from "convex/react";
-import { useState } from "react";
+import { ArrowRight } from "lucide-react";
+import { useId } from "react";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,53 +13,135 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { BuyerDashboardView } from "../../convex/lib/dashboardView";
-import type { Id } from "../../convex/_generated/dataModel";
-import { api } from "../../convex/_generated/api";
+import { cn } from "@/lib/utils";
+
+export type StageAdvanceReason =
+  | "ready"
+  | "blocked"
+  | "last-stage"
+  | "unavailable";
+
+export const FIXTURE_ADVANCE_UNAVAILABLE =
+  "Advancing writes to the live file; this fixture preview is read-only.";
+
+/**
+ * The advance control is always on the page. It is enabled only when the
+ * server-computed `canAdvance` is true; otherwise it stays visible, disabled,
+ * with the reason beside it. Blocking logic lives in Convex, not here.
+ */
+export function stageAdvanceReason(
+  view: Pick<BuyerDashboardView, "canAdvance" | "blockingTasks" | "nextStage">,
+  hasHandler: boolean,
+): { kind: StageAdvanceReason; text: string } {
+  if (!view.canAdvance) {
+    const blocker = view.blockingTasks[0];
+    if (blocker) {
+      return {
+        kind: "blocked",
+        text: `Blocked while ${blocker.title} is open.`,
+      };
+    }
+    if (view.nextStage === null) {
+      return { kind: "last-stage", text: "This file is on its last stage." };
+    }
+    return { kind: "blocked", text: "Blocked by an open task on this stage." };
+  }
+  if (!hasHandler) {
+    return { kind: "unavailable", text: FIXTURE_ADVANCE_UNAVAILABLE };
+  }
+  return {
+    kind: "ready",
+    text: `Ready. No blocking task is open on this stage.`,
+  };
+}
 
 export function StageAdvancePanel({
   view,
+  onAdvance,
+  busy = false,
+  error = null,
+  className,
 }: {
   view: BuyerDashboardView;
+  /** Omitted in the fixture preview, where no mutation exists to call. */
+  onAdvance?: () => void;
+  busy?: boolean;
+  error?: string | null;
+  className?: string;
 }) {
-  const advance = useMutation(api.transactions.advanceStage);
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const reasonId = useId();
+  const reason = stageAdvanceReason(view, onAdvance !== undefined);
+  const disabled = busy || reason.kind !== "ready";
 
   return (
-    <Card>
+    <Card
+      data-testid="stage-advance-panel"
+      className={cn("hover:translate-y-0 hover:shadow-none", className)}
+    >
       <CardHeader>
         <CardTitle>Advance stage</CardTitle>
         <CardDescription>
-          Licensee action. Blocked while a blocking task on this stage is open.
+          Licensee action. Moves this file from {view.where.label}
+          {view.nextStage ? ` to ${view.nextStage.label}` : " onward"}. Blocked
+          while a blocking task on this stage is open.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
-        <p className="text-sm">
-          {view.canAdvance
-            ? `Next: ${view.nextStage?.label ?? "none"}`
-            : view.blockingTasks[0]
-              ? `Blocked by ${view.blockingTasks[0].title}`
-              : "No next stage"}
-        </p>
-        <Button
-          disabled={busy || !view.canAdvance}
-          onClick={() => {
-            setBusy(true);
-            setError(null);
-            void advance({
-              transactionId: view.transactionId as Id<"transactions">,
-            })
-              .catch((cause: unknown) => {
-                setError(cause instanceof Error ? cause.message : "STAGE_BLOCKED");
-              })
-              .finally(() => {
-                setBusy(false);
-              });
-          }}
-        >
-          Advance stage
-        </Button>
-        {error ? <p className="text-sm text-destructive">{error}</p> : null}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+          <Button
+            type="button"
+            variant="next"
+            data-testid="stage-advance"
+            className="min-h-11 shrink-0 px-4"
+            disabled={disabled}
+            aria-describedby={reasonId}
+            onClick={() => {
+              onAdvance?.();
+            }}
+          >
+            {busy
+              ? "Advancing…"
+              : view.nextStage
+                ? `Advance to ${view.nextStage.label}`
+                : "Advance stage"}
+            <ArrowRight data-icon="inline-end" aria-hidden />
+          </Button>
+          <p
+            id={reasonId}
+            data-testid="stage-advance-reason"
+            data-reason={reason.kind}
+            className={cn(
+              "text-sm leading-5",
+              reason.kind === "ready" ? "text-sage-foreground" : "text-muted-foreground",
+            )}
+          >
+            {reason.text}
+          </p>
+        </div>
+        {view.blockingTasks.length > 0 ? (
+          <ul
+            data-testid="stage-advance-blockers"
+            aria-label="Blocking tasks"
+            className="space-y-1.5 text-sm"
+          >
+            {view.blockingTasks.map((task) => (
+              <li
+                key={task.title}
+                className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-lg bg-sand/60 px-3 py-2"
+              >
+                <span className="min-w-0">{task.title}</span>
+                <Badge variant="sage" className="shrink-0">
+                  {task.assigneeRole}
+                </Badge>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        {error ? (
+          <p role="alert" className="text-sm text-destructive">
+            {error}
+          </p>
+        ) : null}
       </CardContent>
     </Card>
   );

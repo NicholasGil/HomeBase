@@ -10,6 +10,7 @@ import { AppShell } from "@/components/app-shell";
 import { BuyerDashboardViewPanel } from "@/components/buyer-dashboard-view";
 import { LiveTransactionPage } from "@/components/live-transaction-page";
 import { QueryErrorBoundary } from "@/components/query-error-boundary";
+import { StageAdvancePanel } from "@/components/stage-advance-panel";
 import { assertCanRenderWithoutAuth, isAuthConfigured } from "@/lib/auth-config";
 import { seedBuyerNameForTransaction } from "@/lib/seed-dashboard";
 
@@ -33,11 +34,16 @@ async function FixtureTransaction({ transactionId }: { transactionId: string }) 
           Back to command center
         </Link>
       ) : null}
-      <BuyerDashboardViewPanel
-        view={loaded.view}
-        buyerName={seedBuyerNameForTransaction(transactionId) ?? undefined}
-        eyebrow="Opened by id"
-      />
+      <div className="space-y-10">
+        <BuyerDashboardViewPanel
+          view={loaded.view}
+          buyerName={seedBuyerNameForTransaction(transactionId) ?? undefined}
+          eyebrow="Opened by id"
+          journeyOrientation="responsive"
+        />
+        {/* No mutation exists in the fixture preview, so the control renders disabled with that reason. */}
+        <StageAdvancePanel view={loaded.view} />
+      </div>
     </>
   );
 }

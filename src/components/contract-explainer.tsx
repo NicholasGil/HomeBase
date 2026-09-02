@@ -68,7 +68,7 @@ export function ContractExplainer({
           </Card>
         ))}
       </div>
-      <Card data-testid="agent-thread">
+      <Card id="agent-thread" data-testid="agent-thread">
         <CardHeader>
           <CardTitle>Routed to your licensee</CardTitle>
           <CardDescription>

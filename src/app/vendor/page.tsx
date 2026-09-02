@@ -70,7 +70,7 @@ export default async function VendorPage({
 
   return (
     <AppShell>
-      <QueryErrorBoundary fallback={<VendorPortalDenied />}>
+      <QueryErrorBoundary message="The vendor portal did not load.">
         <LiveVendorPortal />
       </QueryErrorBoundary>
     </AppShell>

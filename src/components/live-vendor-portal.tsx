@@ -3,7 +3,10 @@
 import { useMutation, useQuery } from "convex/react";
 import { useState } from "react";
 
-import { VendorPortalDenied } from "@/components/vendor-portal";
+import {
+  VendorAccessExpired,
+  VendorPortalDenied,
+} from "@/components/vendor-portal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -37,14 +40,7 @@ export function LiveVendorPortal() {
         </p>
       </section>
       {portal.assignments.length === 0 ? (
-        <Card data-testid="vendor-access-expired">
-          <CardHeader>
-            <CardTitle>No live assignment</CardTitle>
-            <CardDescription>
-              Access ended or this vendor has no file.
-            </CardDescription>
-          </CardHeader>
-        </Card>
+        <VendorAccessExpired />
       ) : (
         portal.assignments.map((assignment) => (
           <LiveAssignment key={assignment.assignmentId} assignment={assignment} />

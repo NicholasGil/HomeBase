@@ -4,7 +4,7 @@ import { loadFixturePropertySearch } from "@/app/actions/search";
 import { getTestSession } from "@/app/actions/test-session";
 import { AppShell } from "@/components/app-shell";
 import { FixtureLoginPrompt } from "@/components/fixture-login-prompt";
-import { ListingDetail } from "@/components/listing-detail";
+import { ListingDenied, ListingDetail } from "@/components/listing-detail";
 import { LiveListingDetail } from "@/components/live-listing-detail";
 import { QueryErrorBoundary } from "@/components/query-error-boundary";
 import {
@@ -16,14 +16,6 @@ import { loadFixtureListing } from "@/lib/search-access";
 import { CANONICAL_SEARCH_QUERY } from "../../../../convex/lib/propertySearch";
 
 export const dynamic = "force-dynamic";
-
-function ListingDenied({ children }: { children: string }) {
-  return (
-    <p className="text-sm text-muted-foreground" data-testid="listing-denied">
-      {children}
-    </p>
-  );
-}
 
 export default async function ListingPage({
   params,
@@ -65,11 +57,7 @@ export default async function ListingPage({
     if (!loaded.ok) {
       return (
         <AppShell>
-          <ListingDenied>
-            {loaded.reason === "NOT_FOUND"
-              ? "This sample listing is not available."
-              : "You cannot open this listing."}
-          </ListingDenied>
+          <ListingDenied />
         </AppShell>
       );
     }
@@ -88,13 +76,7 @@ export default async function ListingPage({
 
   return (
     <AppShell>
-      <QueryErrorBoundary
-        fallback={
-          <p className="text-sm text-muted-foreground" data-testid="listing-denied">
-            You cannot open this listing.
-          </p>
-        }
-      >
+      <QueryErrorBoundary message="This listing did not load.">
         <LiveListingDetail
           listingId={listingId}
           query={query}

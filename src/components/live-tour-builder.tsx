@@ -4,6 +4,8 @@ import { useMutation, useQuery } from "convex/react";
 import { useState } from "react";
 
 import { ListingCardFrame } from "@/components/listing-card";
+import { ToursSectionSkeleton } from "@/components/route-skeletons";
+import { NoTourYet } from "@/components/no-tour-yet";
 import { TourMap } from "@/components/tour-map";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,7 +32,7 @@ export function LiveTourBuilder() {
   const [feedbackNotice, setFeedbackNotice] = useState(false);
 
   if (candidates === undefined || tours === undefined) {
-    return <p className="text-sm text-muted-foreground">Loading tours…</p>;
+    return <ToursSectionSkeleton />;
   }
 
   const tour = tours[0];
@@ -196,7 +198,9 @@ export function LiveTourBuilder() {
             ))}
           </ol>
         </div>
-      ) : null}
+      ) : (
+        <NoTourYet />
+      )}
     </section>
   );
 }

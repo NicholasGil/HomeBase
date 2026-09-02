@@ -27,9 +27,62 @@ import {
 } from "@/app/actions/homeownership";
 import { seedDashboardForBuyer } from "@/lib/seed-dashboard";
 import { fixtureBuyerIsClosed } from "@/lib/homeownership-access";
+import type { TestBuyerSession } from "@/lib/test-session";
 import { tripStackClassName } from "@/lib/trip-ui";
 
 export const dynamic = "force-dynamic";
+
+/*
+  Each fixture region loads its own data inside its own error boundary, so a
+  failed loader degrades that one section to a Retry card instead of taking
+  the whole page down. Region order is the DOM order the specs read.
+*/
+
+async function FixtureHubRegion({ session }: { session: TestBuyerSession }) {
+  const hub = await loadFixtureHub(session.transactionId);
+  if (!hub.ok) {
+    return null;
+  }
+  return (
+    <HomeownershipHubView
+      view={hub.view}
+      reengageAction={reengageFixtureVendorFromForm}
+    />
+  );
+}
+
+async function FixtureToursRegion({ notice }: { notice?: string }) {
+  const tours = await loadFixtureTours();
+  return (
+    <FixtureTourBuilder
+      tours={tours.tours.ok ? tours.tours.tours : []}
+      notice={notice}
+      returnTo="/dashboard"
+    />
+  );
+}
+
+async function FixtureOffersRegion({ gate }: { gate?: string }) {
+  const offers = await loadFixtureOffers();
+  return (
+    <FixtureOfferCenter
+      denied={!offers.ok}
+      center={offers.ok ? offers.center : null}
+      gateFromSubmit={gate}
+    />
+  );
+}
+
+async function FixtureExplainerRegion() {
+  const explainer = await loadFixtureExplainer();
+  return (
+    <ContractExplainer
+      denied={!explainer.sections.ok}
+      sections={explainer.sections.ok ? explainer.sections.sections : []}
+      thread={explainer.thread}
+    />
+  );
+}
 
 export default async function DashboardPage({
   searchParams,
@@ -69,43 +122,36 @@ export default async function DashboardPage({
       throw new Error("fixture mode requires a buyer session");
     }
     const params = await searchParams;
-    const tours = await loadFixtureTours();
-    const offers = await loadFixtureOffers();
-    const explainer = await loadFixtureExplainer();
-    const hub = fixtureBuyerIsClosed(session)
-      ? await loadFixtureHub(session.transactionId)
-      : null;
     return (
       <AppShell>
         <div className={tripStackClassName}>
-          <BuyerDashboardViewPanel
-            view={seedDashboardForBuyer(session.clerkId)}
-            buyerName={session.name}
-            eyebrow="Fixture session · not Clerk"
-          />
-          {hub?.ok ? (
-            <HomeownershipHubView
-              view={hub.view}
-              reengageAction={reengageFixtureVendorFromForm}
+          <QueryErrorBoundary message="Your file did not load.">
+            <BuyerDashboardViewPanel
+              view={seedDashboardForBuyer(session.clerkId)}
+              buyerName={session.name}
+              eyebrow="Fixture session · not Clerk"
             />
+          </QueryErrorBoundary>
+          {fixtureBuyerIsClosed(session) ? (
+            <QueryErrorBoundary message="The homeownership hub did not load.">
+              <FixtureHubRegion session={session} />
+            </QueryErrorBoundary>
           ) : null}
-          <FixtureTourBuilder
-            tours={tours.tours.ok ? tours.tours.tours : []}
-            notice={params.notice}
-            returnTo="/dashboard"
-          />
-          <FixtureOfferCenter
-            denied={!offers.ok}
-            center={offers.ok ? offers.center : null}
-            gateFromSubmit={params.gate}
-          />
-          <ContractExplainer
-            denied={!explainer.sections.ok}
-            sections={explainer.sections.ok ? explainer.sections.sections : []}
-            thread={explainer.thread}
-          />
-          <FixtureVendorDirectory />
-          <FixtureVault />
+          <QueryErrorBoundary message="Tours did not load.">
+            <FixtureToursRegion notice={params.notice} />
+          </QueryErrorBoundary>
+          <QueryErrorBoundary message="The offer center did not load.">
+            <FixtureOffersRegion gate={params.gate} />
+          </QueryErrorBoundary>
+          <QueryErrorBoundary message="The contract explainer did not load.">
+            <FixtureExplainerRegion />
+          </QueryErrorBoundary>
+          <QueryErrorBoundary message="The vendor directory did not load.">
+            <FixtureVendorDirectory />
+          </QueryErrorBoundary>
+          <QueryErrorBoundary message="The document vault did not load.">
+            <FixtureVault />
+          </QueryErrorBoundary>
           <ConciergeChat />
         </div>
       </AppShell>
@@ -114,13 +160,7 @@ export default async function DashboardPage({
 
   return (
     <AppShell>
-      <QueryErrorBoundary
-        fallback={
-          <p className="text-sm text-muted-foreground">
-            You cannot open this dashboard.
-          </p>
-        }
-      >
+      <QueryErrorBoundary message="Your dashboard did not load.">
         <LiveBuyerDashboard />
       </QueryErrorBoundary>
     </AppShell>

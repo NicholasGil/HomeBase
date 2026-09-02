@@ -2,6 +2,11 @@
 
 import { useMutation, useQuery } from "convex/react";
 
+import { AccessDeniedCard } from "@/components/access-denied-card";
+import {
+  InfoCardSkeleton,
+  SectionHeadingSkeleton,
+} from "@/components/route-skeletons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,14 +29,21 @@ export function LiveContractExplainer() {
 
   if (mine === undefined) {
     return (
-      <p className="text-sm text-muted-foreground">Loading explainer…</p>
+      <section className="space-y-4">
+        <SectionHeadingSkeleton badges={0} />
+        <div className="grid gap-4 md:grid-cols-2">
+          <InfoCardSkeleton lines={3} />
+          <InfoCardSkeleton lines={3} />
+        </div>
+      </section>
     );
   }
   if (mine === null) {
     return (
-      <p className="text-sm text-muted-foreground" data-testid="explainer-denied">
-        You cannot open this explainer.
-      </p>
+      <AccessDeniedCard
+        testId="explainer-denied"
+        title="You cannot open this explainer."
+      />
     );
   }
 

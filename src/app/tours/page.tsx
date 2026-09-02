@@ -15,6 +15,20 @@ import {
 
 export const dynamic = "force-dynamic";
 
+async function FixtureTours({ notice }: { notice?: string }) {
+  const loaded = await loadFixtureTours();
+  const denied =
+    !loaded.candidates.ok && loaded.candidates.reason === "FORBIDDEN";
+  return (
+    <FixtureTourBuilder
+      denied={denied}
+      tours={loaded.tours.ok ? loaded.tours.tours : []}
+      notice={notice}
+      returnTo="/tours"
+    />
+  );
+}
+
 export default async function ToursPage({
   searchParams,
 }: {
@@ -43,35 +57,23 @@ export default async function ToursPage({
     if (session === null) {
       redirect("/test-login");
     }
-    const loaded = await loadFixtureTours();
     const params = await searchParams;
-    const denied =
-      !loaded.candidates.ok && loaded.candidates.reason === "FORBIDDEN";
     return (
       <AppShell>
         <h1 className="mb-6 text-3xl font-semibold tracking-tight">Tours</h1>
         <p className="mb-8 text-sm text-muted-foreground">
           Signed in as {session.name} · {session.role}
         </p>
-        <FixtureTourBuilder
-          denied={denied}
-          tours={loaded.tours.ok ? loaded.tours.tours : []}
-          notice={params.notice}
-          returnTo="/tours"
-        />
+        <QueryErrorBoundary message="Tours did not load.">
+          <FixtureTours notice={params.notice} />
+        </QueryErrorBoundary>
       </AppShell>
     );
   }
 
   return (
     <AppShell>
-      <QueryErrorBoundary
-        fallback={
-          <p className="text-sm text-muted-foreground">
-            You cannot open tours.
-          </p>
-        }
-      >
+      <QueryErrorBoundary message="Tours did not load.">
         <LiveTourBuilder />
       </QueryErrorBoundary>
     </AppShell>

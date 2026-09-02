@@ -2,6 +2,10 @@ import Link from "next/link";
 
 import { loadSeedTransaction } from "@/app/actions/seed-transaction";
 import { getTestSession } from "@/app/actions/test-session";
+import {
+  AccessDeniedCard,
+  homeActionFor,
+} from "@/components/access-denied-card";
 import { AppShell } from "@/components/app-shell";
 import { BuyerDashboardViewPanel } from "@/components/buyer-dashboard-view";
 import { LiveTransactionPage } from "@/components/live-transaction-page";
@@ -11,6 +15,33 @@ import { seedBuyerNameForTransaction } from "@/lib/seed-dashboard";
 
 export const dynamic = "force-dynamic";
 
+async function FixtureTransaction({ transactionId }: { transactionId: string }) {
+  const session = await getTestSession();
+  const loaded = await loadSeedTransaction({ transactionId });
+  if (!loaded.ok) {
+    return (
+      <AccessDeniedCard
+        title="You cannot open this transaction."
+        action={homeActionFor(session?.role)}
+      />
+    );
+  }
+  return (
+    <>
+      {session?.role === "agent" ? (
+        <Link href="/agent" className="mb-6 inline-block text-sm underline">
+          Back to command center
+        </Link>
+      ) : null}
+      <BuyerDashboardViewPanel
+        view={loaded.view}
+        buyerName={seedBuyerNameForTransaction(transactionId) ?? undefined}
+        eyebrow="Opened by id"
+      />
+    </>
+  );
+}
+
 export default async function TransactionPage({
   params,
 }: PageProps<"/transactions/[transactionId]">) {
@@ -19,42 +50,18 @@ export default async function TransactionPage({
 
   if (!isAuthConfigured()) {
     assertCanRenderWithoutAuth();
-    const session = await getTestSession();
-    const loaded = await loadSeedTransaction({ transactionId });
-    if (!loaded.ok) {
-      return (
-        <AppShell>
-          <p className="text-sm text-muted-foreground">
-            You cannot open this transaction.
-          </p>
-        </AppShell>
-      );
-    }
     return (
       <AppShell>
-        {session?.role === "agent" ? (
-          <Link href="/agent" className="mb-6 inline-block text-sm underline">
-            Back to command center
-          </Link>
-        ) : null}
-        <BuyerDashboardViewPanel
-          view={loaded.view}
-          buyerName={seedBuyerNameForTransaction(transactionId) ?? undefined}
-          eyebrow="Opened by id"
-        />
+        <QueryErrorBoundary message="This transaction did not load.">
+          <FixtureTransaction transactionId={transactionId} />
+        </QueryErrorBoundary>
       </AppShell>
     );
   }
 
   return (
     <AppShell>
-      <QueryErrorBoundary
-        fallback={
-          <p className="text-sm text-muted-foreground">
-            You cannot open this transaction.
-          </p>
-        }
-      >
+      <QueryErrorBoundary message="This transaction did not load.">
         <LiveTransactionPage transactionId={transactionId} />
       </QueryErrorBoundary>
     </AppShell>

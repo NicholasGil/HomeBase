@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { AccessDeniedCard } from "@/components/access-denied-card";
 import { PhotoTile } from "@/components/listing-card";
 import { ListingSignalForms } from "@/components/listing-signals";
 import { MoneyFigureView } from "@/components/money-figure-view";
@@ -7,6 +8,20 @@ import { Badge } from "@/components/ui/badge";
 import type { FixtureSearchSignals } from "@/lib/search-access";
 import { listingPath } from "@/lib/seed-search";
 import type { SearchListing } from "../../convex/lib/propertySearch";
+
+/**
+ * One sentence for every refused listing URL, whether the id is unknown or
+ * the viewer's role cannot search. The card carries no next-action link:
+ * property-search.spec asserts the wrapper's exact text.
+ */
+export function ListingDenied() {
+  return (
+    <AccessDeniedCard
+      testId="listing-denied"
+      title="You cannot open this listing."
+    />
+  );
+}
 
 function specLine(listing: SearchListing) {
   const parts: string[] = [];

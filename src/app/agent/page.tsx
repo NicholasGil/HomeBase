@@ -58,7 +58,7 @@ export default async function AgentPage() {
 
   return (
     <AppShell>
-      <QueryErrorBoundary fallback={<CommandCenterDenied />}>
+      <QueryErrorBoundary message="The command center did not load.">
         <LiveAgentCommandCenter />
       </QueryErrorBoundary>
     </AppShell>

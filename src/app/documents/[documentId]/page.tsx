@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { AppShell } from "@/components/app-shell";
+import { DocumentDenied } from "@/components/document-denied";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -22,6 +23,31 @@ import { seedDocumentTitle } from "@/lib/seed-documents";
 
 export const dynamic = "force-dynamic";
 
+async function FixtureDocument({ documentId }: { documentId: string }) {
+  const loaded = await openSeedDocument({ documentId });
+  if (!loaded.ok) {
+    return <DocumentDenied />;
+  }
+  return (
+    <Card data-testid={`document-open-${loaded.document.type}`}>
+      <CardHeader>
+        <Link href="/vault" className="text-sm underline" data-testid="document-back">
+          Back to vault
+        </Link>
+        <Badge variant="outline">{loaded.via}</Badge>
+        <CardTitle>{seedDocumentTitle(loaded.document.type)}</CardTitle>
+        <CardDescription>{loaded.document.type}</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        <p className="text-sm">{loaded.document.extractedSummary}</p>
+        <p className="text-xs text-muted-foreground">
+          View logged. Transaction {loaded.document.transactionId}.
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default async function DocumentPage({
   params,
 }: PageProps<"/documents/[documentId]">) {
@@ -34,53 +60,18 @@ export default async function DocumentPage({
 
   if (!isAuthConfigured()) {
     assertCanRenderWithoutAuth();
-    const loaded = await openSeedDocument({ documentId });
-    if (!loaded.ok) {
-      return (
-        <AppShell>
-          <p
-            data-testid="document-denied"
-            className="text-sm text-muted-foreground"
-          >
-            You cannot open this document.
-          </p>
-        </AppShell>
-      );
-    }
     return (
       <AppShell>
-        <Card data-testid={`document-open-${loaded.document.type}`}>
-          <CardHeader>
-            <Link href="/vault" className="text-sm underline" data-testid="document-back">
-              Back to vault
-            </Link>
-            <Badge variant="outline">{loaded.via}</Badge>
-            <CardTitle>{seedDocumentTitle(loaded.document.type)}</CardTitle>
-            <CardDescription>{loaded.document.type}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <p className="text-sm">{loaded.document.extractedSummary}</p>
-            <p className="text-xs text-muted-foreground">
-              View logged. Transaction {loaded.document.transactionId}.
-            </p>
-          </CardContent>
-        </Card>
+        <QueryErrorBoundary message="This document did not load.">
+          <FixtureDocument documentId={documentId} />
+        </QueryErrorBoundary>
       </AppShell>
     );
   }
 
   return (
     <AppShell>
-      <QueryErrorBoundary
-        fallback={
-          <p
-            data-testid="document-denied"
-            className="text-sm text-muted-foreground"
-          >
-            You cannot open this document.
-          </p>
-        }
-      >
+      <QueryErrorBoundary message="This document did not load.">
         <LiveDocumentPage documentId={documentId} />
       </QueryErrorBoundary>
     </AppShell>

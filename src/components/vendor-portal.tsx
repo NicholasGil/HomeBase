@@ -6,6 +6,7 @@ import {
   sendFixtureVendorMessageFromForm,
   uploadFixtureVendorWorkFromForm,
 } from "@/app/actions/vendors";
+import { AccessDeniedCard } from "@/components/access-denied-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,9 +22,19 @@ import type { FixtureVendorPortalState } from "@/lib/vendor-access";
 
 export function VendorPortalDenied() {
   return (
-    <p className="text-sm text-muted-foreground" data-testid="vendor-portal-denied">
-      You cannot open this vendor portal.
-    </p>
+    <AccessDeniedCard
+      testId="vendor-portal-denied"
+      title="You cannot open this vendor portal."
+    />
+  );
+}
+
+export function VendorAccessExpired() {
+  return (
+    <AccessDeniedCard
+      testId="vendor-access-expired"
+      title="No file is open to you right now."
+    />
   );
 }
 
@@ -53,14 +64,7 @@ export function VendorPortalView({
       <ActionNotice notice={notice} />
 
       {expired || assignments.length === 0 ? (
-        <Card data-testid="vendor-access-expired">
-          <CardHeader>
-            <CardTitle>No live assignment</CardTitle>
-            <CardDescription>
-              Access ended or this vendor has no file.
-            </CardDescription>
-          </CardHeader>
-        </Card>
+        <VendorAccessExpired />
       ) : (
         assignments.map((assignment) => (
           <AssignmentPanel

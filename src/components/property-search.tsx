@@ -1,5 +1,9 @@
 import Link from "next/link";
 
+import { Heart, SearchX } from "lucide-react";
+
+import { AccessDeniedCard } from "@/components/access-denied-card";
+import { EmptyState } from "@/components/empty-state";
 import { ListingCardFrame } from "@/components/listing-card";
 import { ListingSignalForms } from "@/components/listing-signals";
 import { MoneyFigureView } from "@/components/money-figure-view";
@@ -97,9 +101,10 @@ export function PropertySearch({
 }) {
   if (denied || view === null) {
     return (
-      <p className="text-sm text-muted-foreground" data-testid="search-denied">
-        You cannot open property search.
-      </p>
+      <AccessDeniedCard
+        testId="search-denied"
+        title="You cannot open property search."
+      />
     );
   }
 
@@ -173,14 +178,26 @@ export function PropertySearch({
       />
 
       {shown.length === 0 ? (
-        <p
-          data-testid="search-empty"
-          className="rounded-lg border bg-card px-4 py-6 text-sm text-muted-foreground"
-        >
-          {savedOnly
-            ? "No saved sample homes yet."
-            : `No sample homes match "${view.query}". Try another city or a beds and price search.`}
-        </p>
+        savedOnly ? (
+          <EmptyState
+            testId="search-empty"
+            icon={Heart}
+            title="No saved sample homes yet."
+            description="Save a home from the ranked results and it shows up here."
+            action={{ href: queryHref, label: "See all results" }}
+          />
+        ) : (
+          <EmptyState
+            testId="search-empty"
+            icon={SearchX}
+            title={`No sample homes match "${view.query}".`}
+            description="Try another city, or a beds and price search."
+            action={{
+              href: `/search?q=${encodeURIComponent(CANONICAL_SEARCH_QUERY)}`,
+              label: "Try the canonical query",
+            }}
+          />
+        )
       ) : (
         <ol className="grid gap-6 sm:grid-cols-2">
           {shown.map((row, index) => {

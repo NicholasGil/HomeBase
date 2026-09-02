@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { loadFoundation } from "@/app/actions/foundation";
+import { MoneyFigureView } from "@/components/money-figure-view";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -55,9 +56,14 @@ export default async function FoundationPage() {
                     <Badge variant="secondary">{buyer.stage}</Badge>
                   </div>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {buyer.owedToday.label} · {buyer.owedToday.provenance} · $
-                    {(buyer.owedToday.amountCents / 100).toFixed(2)}
+                    {buyer.owedToday.label}
                   </p>
+                  <MoneyFigureView
+                    figure={{ ...buyer.owedToday, asOf: 0 }}
+                    size="sm"
+                    showLabel={false}
+                    className="mt-2"
+                  />
                 </div>
               ))}
             </CardContent>

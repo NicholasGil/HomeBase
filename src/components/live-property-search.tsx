@@ -98,7 +98,7 @@ export function LivePropertySearch() {
                 {row.reason}
               </p>
               {row.listing.listPrice ? (
-                <MoneyFigureView figure={row.listing.listPrice} />
+                <MoneyFigureView figure={row.listing.listPrice} size="md" />
               ) : (
                 <p className="text-sm text-muted-foreground">None</p>
               )}

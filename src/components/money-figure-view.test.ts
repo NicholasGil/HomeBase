@@ -2,7 +2,10 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
-import { MoneyFigureView } from "@/components/money-figure-view";
+import {
+  ASSUMPTIONS_LABEL,
+  MoneyFigureView,
+} from "@/components/money-figure-view";
 import {
   ESTIMATE_AMOUNT_CLASS_NAME,
   ESTIMATE_LABEL,
@@ -61,5 +64,128 @@ describe("MoneyFigureView", () => {
     expect(html).not.toContain(ESTIMATE_AMOUNT_CLASS_NAME);
     expect(html).toContain("title_issued");
     expect(html).toContain("issued");
+  });
+
+  it("gives every estimate a reachable Assumptions disclosure and issued figures none", () => {
+    const estimate = renderToStaticMarkup(
+      createElement(MoneyFigureView, {
+        figure: moneyFigure({
+          amountCents: 1200000,
+          provenance: "ai_estimate",
+          asOf: Date.UTC(2026, 7, 30),
+        }),
+        size: "md",
+        assumptionsHref: "#assumptions-panel",
+        assumptions: ["Rate 675 bps."],
+      }),
+    );
+    expect(estimate).toContain("<details");
+    expect(estimate).toContain(`<summary`);
+    expect(estimate).toContain(ASSUMPTIONS_LABEL);
+    expect(estimate).toContain('href="#assumptions-panel"');
+    expect(estimate).toContain("Rate 675 bps.");
+    expect(estimate).toContain("Aug 30, 2026");
+    expect(estimate).toContain('data-figure="estimate"');
+    expect(estimate).toContain('data-provenance="ai_estimate"');
+
+    const issued = renderToStaticMarkup(
+      createElement(MoneyFigureView, {
+        figure: moneyFigure({
+          amountCents: 1200000,
+          provenance: "lender_issued",
+          asOf: Date.UTC(2026, 7, 30),
+        }),
+        size: "md",
+        assumptionsHref: "#assumptions-panel",
+      }),
+    );
+    expect(issued).not.toContain("<details");
+    expect(issued).not.toContain(ASSUMPTIONS_LABEL);
+    expect(issued).toContain('data-figure="issued"');
+  });
+
+  it("keeps the three cues at every size and only swaps the type scale", () => {
+    const sizes = ["sm", "md", "display"] as const;
+    for (const size of sizes) {
+      const estimate = renderToStaticMarkup(
+        createElement(MoneyFigureView, {
+          figure: moneyFigure({
+            amountCents: 500000,
+            provenance: "user_entered",
+            asOf: 0,
+          }),
+          size,
+        }),
+      );
+      expect(estimate).toContain(ESTIMATE_LABEL);
+      expect(estimate).toContain("italic");
+      expect(estimate).toContain("user_entered");
+      expect(estimate).toContain(">estimate<");
+      expect(estimate).toContain(ASSUMPTIONS_LABEL);
+      expect(estimate).not.toContain("font-mono");
+
+      const issued = renderToStaticMarkup(
+        createElement(MoneyFigureView, {
+          figure: moneyFigure({
+            amountCents: 500000,
+            provenance: "title_issued",
+            asOf: 0,
+          }),
+          size,
+        }),
+      );
+      expect(issued).toContain("font-mono");
+      expect(issued).toContain("font-semibold");
+      expect(issued).toContain("tabular-nums");
+      expect(issued).toContain("title_issued");
+      expect(issued).toContain(">issued<");
+      expect(issued).not.toContain(ESTIMATE_LABEL);
+      expect(issued).not.toContain("italic");
+    }
+
+    const small = renderToStaticMarkup(
+      createElement(MoneyFigureView, {
+        figure: moneyFigure({ amountCents: 1, provenance: "title_issued", asOf: 0 }),
+        size: "sm",
+      }),
+    );
+    expect(small).toContain("text-base");
+    expect(small).not.toContain("text-4xl");
+    const display = renderToStaticMarkup(
+      createElement(MoneyFigureView, {
+        figure: moneyFigure({ amountCents: 1, provenance: "title_issued", asOf: 0 }),
+        size: "display",
+      }),
+    );
+    expect(display).toContain("text-4xl");
+    expect(display).toContain("lg:text-5xl");
+  });
+
+  it("hides the figure label when the surface already names it", () => {
+    const shown = renderToStaticMarkup(
+      createElement(MoneyFigureView, {
+        figure: moneyFigure({
+          amountCents: 860000,
+          provenance: "ai_estimate",
+          asOf: 0,
+          label: "Earnest money",
+        }),
+        size: "sm",
+      }),
+    );
+    expect(shown).toContain("Earnest money");
+    const hidden = renderToStaticMarkup(
+      createElement(MoneyFigureView, {
+        figure: moneyFigure({
+          amountCents: 860000,
+          provenance: "ai_estimate",
+          asOf: 0,
+          label: "Earnest money",
+        }),
+        size: "sm",
+        showLabel: false,
+      }),
+    );
+    expect(hidden).not.toContain("Earnest money");
   });
 });

@@ -2,66 +2,20 @@ import Link from "next/link";
 
 import { DoneList } from "@/components/done-list";
 import { PhotoTile } from "@/components/listing-card";
+import { MoneyFigureView } from "@/components/money-figure-view";
 import { Badge } from "@/components/ui/badge";
 import { JourneyTracker } from "@/components/journey-tracker";
 import type { BuyerDashboardView } from "../../convex/lib/dashboardView";
 import { nextActionHref, owedTodayHref } from "@/lib/dashboard-links";
-import {
-  ESTIMATE_AMOUNT_CLASS_NAME,
-  ISSUED_AMOUNT_CLASS_NAME,
-  owedTodayDisplay,
-} from "@/lib/owed-today-display";
 
 export function OwedTodayFigure({
   owed,
-  featured,
 }: {
   owed: BuyerDashboardView["owedToday"];
-  featured?: boolean;
 }) {
-  const display = owedTodayDisplay(owed);
-  const amountClassName =
-    featured && display.kind === "issued"
-      ? ISSUED_AMOUNT_CLASS_NAME.replace("text-4xl", "text-4xl lg:text-5xl")
-      : featured && display.kind === "estimate"
-        ? ESTIMATE_AMOUNT_CLASS_NAME.replace("text-3xl", "text-3xl lg:text-4xl")
-        : display.amountClassName;
-
-  switch (display.kind) {
-    case "missing":
-      return (
-        <p className={display.amountClassName}>{display.amountText}</p>
-      );
-    case "estimate":
-      return (
-        <div className="space-y-2">
-          <p className={amountClassName}>
-            <span className="mr-2 align-middle text-xs font-semibold not-italic tracking-[0.18em]">
-              {display.estimateLabel}
-            </span>
-            {display.amountText}
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="sky">{display.provenance}</Badge>
-            <Badge variant="sky">estimate</Badge>
-          </div>
-        </div>
-      );
-    case "issued":
-      return (
-        <div className="space-y-2">
-          <p className={amountClassName}>{display.amountText}</p>
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="default">{display.provenance}</Badge>
-            <Badge variant="sand">issued</Badge>
-          </div>
-        </div>
-      );
-    default: {
-      const _exhaustive: never = display;
-      return _exhaustive;
-    }
-  }
+  return (
+    <MoneyFigureView figure={owed} size="display" showLabel={false} />
+  );
 }
 
 export function BuyerDashboardViewPanel({
@@ -160,6 +114,10 @@ export function BuyerDashboardViewPanel({
             data-testid="ten-second-owe"
             className="rounded-[14px] bg-sky px-4 py-3.5 lg:col-start-2 lg:row-start-1 lg:px-5 lg:py-6"
           >
+            {/*
+              The figure sits outside the link so the estimate's Assumptions
+              disclosure is never interactive content nested in an anchor.
+            */}
             <Link href={owedTodayHref()} className="block">
               <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
                 Due today
@@ -167,10 +125,10 @@ export function BuyerDashboardViewPanel({
               <p className="mt-1 text-sm text-muted-foreground">
                 {owed?.label ?? "No sourced figure on this file"}
               </p>
-              <div className="mt-3 lg:mt-4">
-                <OwedTodayFigure owed={owed} featured />
-              </div>
             </Link>
+            <div className="mt-3 lg:mt-4">
+              <OwedTodayFigure owed={owed} />
+            </div>
           </section>
 
           <div className="grid grid-cols-2 gap-4 lg:col-start-1 lg:row-start-3 lg:gap-6">

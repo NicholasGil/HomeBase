@@ -88,9 +88,10 @@ export function offerRailSteps(input: {
   return [draft, review, submit, esign];
 }
 
+/* Mirrors JourneyTracker: sand check when done, ink ring for "you are here". */
 const STATE_NODE_CLASS: Record<OfferRailState, string> = {
-  done: "bg-foreground text-background",
-  current: "bg-next text-next-foreground ring-4 ring-next/20",
+  done: "bg-sand text-sand-foreground",
+  current: "bg-card text-foreground ring-2 ring-foreground shadow-[0_2px_8px_rgba(15,23,42,0.16)]",
   upcoming: "border border-border bg-background text-muted-foreground",
   locked: "border border-dashed border-border bg-muted text-muted-foreground",
 };

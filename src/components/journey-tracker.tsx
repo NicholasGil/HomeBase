@@ -111,10 +111,11 @@ function StageDot({ stage }: { stage: Stage }) {
     );
   }
   if (stage.state === "current") {
+    // "You are here" is an ink ring, deliberately not the coral CTA fill.
     return (
       <span
         aria-hidden
-        className="relative z-10 flex size-8 items-center justify-center rounded-full bg-next text-xs font-semibold text-next-foreground tabular-nums shadow-[0_2px_8px_rgba(15,23,42,0.16)] ring-4 ring-next/15"
+        className="relative z-10 flex size-8 items-center justify-center rounded-full bg-card text-xs font-semibold text-foreground tabular-nums shadow-[0_2px_8px_rgba(15,23,42,0.16)] ring-2 ring-foreground"
       >
         {String(stage.order).padStart(2, "0")}
       </span>

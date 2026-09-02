@@ -1,6 +1,9 @@
 import Link from "next/link";
 
-import { AccessDeniedCard } from "@/components/access-denied-card";
+import {
+  AccessDeniedCard,
+  type AccessDeniedAction,
+} from "@/components/access-denied-card";
 import { PhotoTile } from "@/components/listing-card";
 import { ListingSignalForms } from "@/components/listing-signals";
 import { MoneyFigureView } from "@/components/money-figure-view";
@@ -11,14 +14,15 @@ import type { SearchListing } from "../../convex/lib/propertySearch";
 
 /**
  * One sentence for every refused listing URL, whether the id is unknown or
- * the viewer's role cannot search. The card carries no next-action link:
- * property-search.spec asserts the wrapper's exact text.
+ * the viewer's role cannot search. The optional action is the viewer's own
+ * home as a way back; it says nothing about what was refused.
  */
-export function ListingDenied() {
+export function ListingDenied({ action }: { action?: AccessDeniedAction }) {
   return (
     <AccessDeniedCard
       testId="listing-denied"
       title="You cannot open this listing."
+      action={action}
     />
   );
 }

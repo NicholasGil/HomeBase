@@ -3,6 +3,8 @@
 import { useMutation, useQuery } from "convex/react";
 import { useState } from "react";
 
+import { AccessDeniedCard } from "@/components/access-denied-card";
+import { OffersSectionSkeleton } from "@/components/route-skeletons";
 import { OfferCenterViewPanel } from "@/components/offer-center";
 import { Button } from "@/components/ui/button";
 import type { OfferCenterView } from "@/lib/offer-access";
@@ -17,14 +19,12 @@ export function LiveOfferCenter() {
   const esignOn = flags?.FLAG_ESIGN === true;
 
   if (center === undefined) {
-    return <p className="text-sm text-muted-foreground">Loading offer…</p>;
+    return <OffersSectionSkeleton />;
   }
 
   if (center === null) {
     return (
-      <p className="text-sm text-muted-foreground" data-testid="offer-denied">
-        You cannot open this offer.
-      </p>
+      <AccessDeniedCard testId="offer-denied" title="You cannot open this offer." />
     );
   }
 

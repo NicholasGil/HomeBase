@@ -15,6 +15,29 @@ import {
 
 export const dynamic = "force-dynamic";
 
+async function FixtureSearch({
+  query,
+  savedOnly,
+  notice,
+  noticePropertyId,
+}: {
+  query?: string;
+  savedOnly: boolean;
+  notice?: string;
+  noticePropertyId?: string;
+}) {
+  const loaded = await loadFixturePropertySearch(query);
+  return (
+    <PropertySearch
+      denied={!loaded.ok}
+      view={loaded.ok ? loaded.view : null}
+      savedOnly={savedOnly}
+      notice={notice}
+      noticePropertyId={noticePropertyId}
+    />
+  );
+}
+
 export default async function SearchPage({
   searchParams,
 }: {
@@ -49,33 +72,27 @@ export default async function SearchPage({
     if (session === null) {
       redirect("/test-login");
     }
-    const loaded = await loadFixturePropertySearch(params.q);
     return (
       <AppShell>
         <h1 className="mb-6 text-3xl font-semibold tracking-tight">Search</h1>
         <p className="mb-8 text-sm text-muted-foreground">
           Signed in as {session.name} · {session.role}
         </p>
-        <PropertySearch
-          denied={!loaded.ok}
-          view={loaded.ok ? loaded.view : null}
-          savedOnly={params.saved === "1"}
-          notice={params.notice}
-          noticePropertyId={params.propertyId}
-        />
+        <QueryErrorBoundary message="Property search did not load.">
+          <FixtureSearch
+            query={params.q}
+            savedOnly={params.saved === "1"}
+            notice={params.notice}
+            noticePropertyId={params.propertyId}
+          />
+        </QueryErrorBoundary>
       </AppShell>
     );
   }
 
   return (
     <AppShell>
-      <QueryErrorBoundary
-        fallback={
-          <p className="text-sm text-muted-foreground">
-            You cannot open property search.
-          </p>
-        }
-      >
+      <QueryErrorBoundary message="Property search did not load.">
         <LivePropertySearch />
       </QueryErrorBoundary>
     </AppShell>

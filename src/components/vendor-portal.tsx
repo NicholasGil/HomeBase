@@ -6,6 +6,10 @@ import {
   sendFixtureVendorMessageFromForm,
   uploadFixtureVendorWorkFromForm,
 } from "@/app/actions/vendors";
+import {
+  AccessDeniedCard,
+  type AccessDeniedAction,
+} from "@/components/access-denied-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,11 +23,22 @@ import type { SeedAssignment } from "@/lib/seed-vendors";
 import { ActionNotice } from "@/components/action-notice";
 import type { FixtureVendorPortalState } from "@/lib/vendor-access";
 
-export function VendorPortalDenied() {
+export function VendorPortalDenied({ action }: { action?: AccessDeniedAction }) {
   return (
-    <p className="text-sm text-muted-foreground" data-testid="vendor-portal-denied">
-      You cannot open this vendor portal.
-    </p>
+    <AccessDeniedCard
+      testId="vendor-portal-denied"
+      title="You cannot open this vendor portal."
+      action={action}
+    />
+  );
+}
+
+export function VendorAccessExpired() {
+  return (
+    <AccessDeniedCard
+      testId="vendor-access-expired"
+      title="No file is open to you right now."
+    />
   );
 }
 
@@ -46,21 +61,16 @@ export function VendorPortalView({
         <Badge variant="sage">Fixture session · not Clerk</Badge>
         <h1 className="text-3xl font-semibold tracking-tight">Vendor portal</h1>
         <p className="text-sm text-muted-foreground">
-          Signed in as {vendorName}. One assigned file. Compensation is none.
+          Signed in as {vendorName}.
+          {expired || assignments.length === 0 ? "" : " One assigned file."}{" "}
+          Compensation is none.
         </p>
       </section>
 
       <ActionNotice notice={notice} />
 
       {expired || assignments.length === 0 ? (
-        <Card data-testid="vendor-access-expired">
-          <CardHeader>
-            <CardTitle>No live assignment</CardTitle>
-            <CardDescription>
-              Access ended or this vendor has no file.
-            </CardDescription>
-          </CardHeader>
-        </Card>
+        <VendorAccessExpired />
       ) : (
         assignments.map((assignment) => (
           <AssignmentPanel

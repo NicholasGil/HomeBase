@@ -18,6 +18,28 @@ import {
 
 export const dynamic = "force-dynamic";
 
+async function FixtureOffers({ gate }: { gate?: string }) {
+  const loaded = await loadFixtureOffers();
+  return (
+    <FixtureOfferCenter
+      denied={!loaded.ok}
+      center={loaded.ok ? loaded.center : null}
+      gateFromSubmit={gate}
+    />
+  );
+}
+
+async function FixtureExplainer() {
+  const explainer = await loadFixtureExplainer();
+  return (
+    <ContractExplainer
+      denied={!explainer.sections.ok}
+      sections={explainer.sections.ok ? explainer.sections.sections : []}
+      thread={explainer.thread}
+    />
+  );
+}
+
 export default async function OffersPage({
   searchParams,
 }: {
@@ -47,8 +69,6 @@ export default async function OffersPage({
     if (session === null) {
       redirect("/test-login");
     }
-    const loaded = await loadFixtureOffers();
-    const explainer = await loadFixtureExplainer();
     return (
       <AppShell>
         <h1 className="mb-6 text-3xl font-semibold tracking-tight">Offers</h1>
@@ -56,16 +76,12 @@ export default async function OffersPage({
           Signed in as {session.name} · {session.role}
         </p>
         <div className="space-y-10">
-          <FixtureOfferCenter
-            denied={!loaded.ok}
-            center={loaded.ok ? loaded.center : null}
-            gateFromSubmit={params.gate}
-          />
-          <ContractExplainer
-            denied={!explainer.sections.ok}
-            sections={explainer.sections.ok ? explainer.sections.sections : []}
-            thread={explainer.thread}
-          />
+          <QueryErrorBoundary message="The offer center did not load.">
+            <FixtureOffers gate={params.gate} />
+          </QueryErrorBoundary>
+          <QueryErrorBoundary message="The contract explainer did not load.">
+            <FixtureExplainer />
+          </QueryErrorBoundary>
         </div>
       </AppShell>
     );
@@ -73,18 +89,14 @@ export default async function OffersPage({
 
   return (
     <AppShell>
-      <QueryErrorBoundary
-        fallback={
-          <p className="text-sm text-muted-foreground">
-            You cannot open this offer.
-          </p>
-        }
-      >
-        <div className="space-y-10">
+      <div className="space-y-10">
+        <QueryErrorBoundary message="The offer center did not load.">
           <LiveOfferCenter />
+        </QueryErrorBoundary>
+        <QueryErrorBoundary message="The contract explainer did not load.">
           <LiveContractExplainer />
-        </div>
-      </QueryErrorBoundary>
+        </QueryErrorBoundary>
+      </div>
     </AppShell>
   );
 }

@@ -12,6 +12,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { DocumentDenied } from "@/components/document-denied";
+import { DocumentSkeleton } from "@/components/route-skeletons";
 import { seedDocumentTitle } from "@/lib/seed-documents";
 import type { Id } from "../../convex/_generated/dataModel";
 import { api } from "../../convex/_generated/api";
@@ -47,15 +49,11 @@ export function LiveDocumentPage({ documentId }: { documentId: string }) {
   }, [documentId, open]);
 
   if (denied) {
-    return (
-      <p data-testid="document-denied" className="text-sm text-muted-foreground">
-        You cannot open this document.
-      </p>
-    );
+    return <DocumentDenied />;
   }
 
   if (opened === null) {
-    return <p className="text-sm text-muted-foreground">Opening document…</p>;
+    return <DocumentSkeleton />;
   }
 
   return (

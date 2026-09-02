@@ -1,4 +1,5 @@
 import { askAboutSectionFromForm } from "@/app/actions/explainer";
+import { AccessDeniedCard } from "@/components/access-denied-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,9 +24,10 @@ export function ContractExplainer({
 }) {
   if (denied) {
     return (
-      <p className="text-sm text-muted-foreground" data-testid="explainer-denied">
-        You cannot open this explainer.
-      </p>
+      <AccessDeniedCard
+        testId="explainer-denied"
+        title="You cannot open this explainer."
+      />
     );
   }
 

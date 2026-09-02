@@ -51,20 +51,16 @@ export default async function VaultPage({
         <p className="mb-8 text-sm text-muted-foreground">
           Signed in as {session.name} · {session.role}
         </p>
-        <FixtureVault notice={params.notice} />
+        <QueryErrorBoundary message="The document vault did not load.">
+          <FixtureVault notice={params.notice} />
+        </QueryErrorBoundary>
       </AppShell>
     );
   }
 
   return (
     <AppShell>
-      <QueryErrorBoundary
-        fallback={
-          <p className="text-sm text-muted-foreground">
-            You cannot open this vault.
-          </p>
-        }
-      >
+      <QueryErrorBoundary message="The document vault did not load.">
         <LiveDocumentVault />
       </QueryErrorBoundary>
     </AppShell>

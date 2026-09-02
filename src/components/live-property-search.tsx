@@ -3,6 +3,10 @@
 import { useMutation, useQuery } from "convex/react";
 import { useState } from "react";
 
+import { SearchX } from "lucide-react";
+
+import { EmptyState } from "@/components/empty-state";
+import { SearchSectionSkeleton } from "@/components/route-skeletons";
 import { ListingCardFrame } from "@/components/listing-card";
 import { MoneyFigureView } from "@/components/money-figure-view";
 import { SearchQueryPill } from "@/components/search-pill";
@@ -21,7 +25,7 @@ export function LivePropertySearch() {
   const recordSignal = useMutation(api.search.recordSignal);
 
   if (result === undefined) {
-    return <p className="text-sm text-muted-foreground">Loading search…</p>;
+    return <SearchSectionSkeleton />;
   }
 
   return (
@@ -70,12 +74,24 @@ export function LivePropertySearch() {
       </form>
 
       {result.results.length === 0 ? (
-        <p
-          data-testid="search-empty"
-          className="rounded-lg border bg-card px-4 py-6 text-sm text-muted-foreground"
+        <EmptyState
+          testId="search-empty"
+          icon={SearchX}
+          title={`No sample homes match "${submitted}".`}
+          description="Try another city, or a beds and price search."
         >
-          {`No sample homes match "${submitted}". Try another city or a beds and price search.`}
-        </p>
+          <Button
+            type="button"
+            variant="outline"
+            className="min-h-11 px-4"
+            onClick={() => {
+              setQuery(CANONICAL_SEARCH_QUERY);
+              setSubmitted(CANONICAL_SEARCH_QUERY);
+            }}
+          >
+            Try the canonical query
+          </Button>
+        </EmptyState>
       ) : (
       <ol className="grid gap-6 sm:grid-cols-2">
         {result.results.map((row, index) => (

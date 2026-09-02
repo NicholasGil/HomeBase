@@ -6,6 +6,7 @@ import {
   MoneyFigureView,
 } from "@/components/money-figure-view";
 import { OfferCostSimulator } from "@/components/offer-cost-simulator";
+import { AccessDeniedCard } from "@/components/access-denied-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,9 +34,7 @@ export function OfferCenterViewPanel({
 }) {
   if (denied || center === null) {
     return (
-      <p className="text-sm text-muted-foreground" data-testid="offer-denied">
-        You cannot open this offer.
-      </p>
+      <AccessDeniedCard testId="offer-denied" title="You cannot open this offer." />
     );
   }
 

@@ -1,5 +1,6 @@
 import { loadFixtureVendorCookies } from "@/app/actions/vendors";
 import { getTestSession } from "@/app/actions/test-session";
+import { homeActionFor } from "@/components/access-denied-card";
 import { AppShell } from "@/components/app-shell";
 import { FixtureLoginPrompt } from "@/components/fixture-login-prompt";
 import { LiveVendorPortal } from "@/components/live-vendor-portal";
@@ -50,7 +51,7 @@ export default async function VendorPage({
     if (!loaded.ok) {
       return (
         <AppShell>
-          <VendorPortalDenied />
+          <VendorPortalDenied action={homeActionFor(session?.role)} />
         </AppShell>
       );
     }
@@ -70,7 +71,7 @@ export default async function VendorPage({
 
   return (
     <AppShell>
-      <QueryErrorBoundary fallback={<VendorPortalDenied />}>
+      <QueryErrorBoundary message="The vendor portal did not load.">
         <LiveVendorPortal />
       </QueryErrorBoundary>
     </AppShell>

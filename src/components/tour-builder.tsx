@@ -3,6 +3,8 @@ import {
   removeStopFromForm,
   submitFeedbackFromForm,
 } from "@/app/actions/tours";
+import { AccessDeniedCard } from "@/components/access-denied-card";
+import { NoTourYet } from "@/components/no-tour-yet";
 import { ActionNotice } from "@/components/action-notice";
 import { ListingCardFrame } from "@/components/listing-card";
 import { TourMap } from "@/components/tour-map";
@@ -36,11 +38,7 @@ export function FixtureTourBuilder({
   const selectedIds = new Set(tour?.stops.map((stop) => stop.propertyId) ?? []);
 
   if (denied) {
-    return (
-      <p className="text-sm text-muted-foreground" data-testid="tour-denied">
-        You cannot open tours.
-      </p>
-    );
+    return <AccessDeniedCard testId="tour-denied" title="You cannot open tours." />;
   }
 
   return (
@@ -100,11 +98,7 @@ export function FixtureTourBuilder({
         </Button>
       </form>
 
-      {tour ? (
-        <TourItineraryPanel tour={tour} />
-      ) : (
-        <p className="text-sm text-muted-foreground">No tour built yet.</p>
-      )}
+      {tour ? <TourItineraryPanel tour={tour} /> : <NoTourYet />}
     </section>
   );
 }

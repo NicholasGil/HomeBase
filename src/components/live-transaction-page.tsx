@@ -3,6 +3,7 @@
 import { useQuery } from "convex/react";
 
 import { BuyerDashboardViewPanel } from "@/components/buyer-dashboard-view";
+import { TransactionSkeleton } from "@/components/route-skeletons";
 import { StageAdvancePanel } from "@/components/stage-advance-panel";
 import type { Id } from "../../convex/_generated/dataModel";
 import { api } from "../../convex/_generated/api";
@@ -17,7 +18,7 @@ export function LiveTransactionPage({
   });
 
   if (view === undefined) {
-    return <p className="text-sm text-muted-foreground">Loading transaction…</p>;
+    return <TransactionSkeleton />;
   }
 
   return (

@@ -1,5 +1,9 @@
 import Link from "next/link";
 
+import {
+  AccessDeniedCard,
+  type AccessDeniedAction,
+} from "@/components/access-denied-card";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -132,10 +136,16 @@ export function AgentCommandCenterView({
   );
 }
 
-export function CommandCenterDenied() {
+export function CommandCenterDenied({
+  action,
+}: {
+  action?: AccessDeniedAction;
+}) {
   return (
-    <p data-testid="command-center-denied" className="text-sm text-muted-foreground">
-      You cannot open the command center.
-    </p>
+    <AccessDeniedCard
+      testId="command-center-denied"
+      title="You cannot open the command center."
+      action={action}
+    />
   );
 }

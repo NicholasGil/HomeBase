@@ -5,6 +5,10 @@ import {
   loadFixtureVault,
   revokeSeedGrantFromForm,
 } from "@/app/actions/documents";
+import { FolderLock } from "lucide-react";
+
+import { homeActionFor } from "@/components/access-denied-card";
+import { EmptyState } from "@/components/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -52,14 +56,13 @@ export async function FixtureVault({ notice }: { notice?: string }) {
 
       <div className="grid gap-4 md:grid-cols-2">
         {documents.length === 0 ? (
-          <Card>
-            <CardHeader>
-              <CardTitle>No documents</CardTitle>
-              <CardDescription>
-                Nothing granted to this viewer on this file.
-              </CardDescription>
-            </CardHeader>
-          </Card>
+          <EmptyState
+            className="md:col-span-2"
+            icon={FolderLock}
+            title="No documents are open to you."
+            description="Documents show up here once they are added to the file or granted to you."
+            action={homeActionFor(session?.role)}
+          />
         ) : (
           documents.map((document) => {
             const documentGrants = visibleGrants.filter(

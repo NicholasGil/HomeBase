@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 import { DoneList } from "@/components/done-list";
 import { PhotoTile } from "@/components/listing-card";
@@ -9,7 +10,6 @@ import {
   type JourneyOrientation,
 } from "@/components/journey-tracker";
 import type { BuyerDashboardView } from "../../convex/lib/dashboardView";
-import { nextActionHref, owedTodayHref } from "@/lib/dashboard-links";
 import { heroPhotoWashClassName } from "@/lib/trip-ui";
 import { cn } from "@/lib/utils";
 
@@ -57,22 +57,55 @@ export function OwedTodayFigure({
   );
 }
 
+/** Same shape the agent command center links with; the route decodes it. */
+export function transactionHref(transactionId: string) {
+  return `/transactions/${transactionId}`;
+}
+
+/** A hero card body: a link into the transaction, or static copy without one. */
+function DrillLink({
+  href,
+  className,
+  children,
+}: {
+  href: string | undefined;
+  className: string;
+  children: ReactNode;
+}) {
+  if (href === undefined) {
+    return <div className={className}>{children}</div>;
+  }
+  return (
+    <Link href={href} className={className}>
+      {children}
+    </Link>
+  );
+}
+
 export function BuyerDashboardViewPanel({
   view,
   buyerName,
   eyebrow,
   journeyOrientation = "horizontal",
+  detailHref = transactionHref(view.transactionId),
 }: {
   view: BuyerDashboardView;
   buyerName?: string;
   eyebrow?: string;
   journeyOrientation?: JourneyOrientation;
+  /**
+   * Where Next, Due today and the stage chips drill in. Defaults to this
+   * transaction's detail route; pass null on that route so the hero carries
+   * no links to itself.
+   */
+  detailHref?: string | null;
 }) {
   const owed = view.owedToday;
   const place = view.propertyAddress
     ? `${view.propertyAddress.city}, ${view.propertyAddress.state}`
     : null;
   const at = HERO_GRID_CLASS[journeyOrientation];
+  const drill = detailHref ?? undefined;
 
   return (
     <div className="space-y-10">
@@ -132,6 +165,7 @@ export function BuyerDashboardViewPanel({
 
           <JourneyTracker
             stages={view.stages}
+            href={drill}
             orientation={journeyOrientation}
             className={at.rail}
           />
@@ -151,18 +185,15 @@ export function BuyerDashboardViewPanel({
                 No open task right now.
               </p>
             ) : (
-              <Link
-                href={nextActionHref({
-                  title: view.next.title,
-                  transactionId: view.transactionId,
-                })}
+              <DrillLink
+                href={drill}
                 className="mt-2 block space-y-2 lg:mt-3 lg:space-y-3"
               >
                 <p className="text-h2 font-semibold tracking-tight text-balance lg:text-h1">
                   {view.next.title}
                 </p>
                 <Badge variant="sage">{view.next.assigneeRole}</Badge>
-              </Link>
+              </DrillLink>
             )}
           </section>
 
@@ -177,14 +208,14 @@ export function BuyerDashboardViewPanel({
               The figure sits outside the link so the estimate's Assumptions
               disclosure is never interactive content nested in an anchor.
             */}
-            <Link href={owedTodayHref()} className="block">
+            <DrillLink href={drill} className="block">
               <p className="text-eyebrow font-medium uppercase tracking-[0.2em] text-muted-foreground">
                 Due today
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
                 {owed?.label ?? "No sourced figure on this file"}
               </p>
-            </Link>
+            </DrillLink>
             <div className="mt-3 lg:mt-4">
               <OwedTodayFigure owed={owed} />
             </div>

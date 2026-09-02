@@ -1,6 +1,7 @@
 "use client";
 
 import { Check } from "lucide-react";
+import Link from "next/link";
 import {
   useId,
   useLayoutEffect,
@@ -66,11 +67,17 @@ const RAIL_CLASS = {
     "lg:flex-col lg:items-stretch lg:overflow-visible lg:snap-none lg:pt-0 lg:pb-0 lg:[mask-image:none] lg:before:hidden lg:after:hidden",
 } as const;
 
+/* The snap item; the chip inside it is the focusable (and, when linked, navigable) surface. */
+const ITEM_CLASS = {
+  horizontal: "shrink-0 snap-center",
+  responsive: "lg:snap-align-none",
+} as const;
+
 const STAGE_CLASS = {
   horizontal:
-    "group relative flex min-h-11 shrink-0 snap-center flex-col items-center rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-card",
+    "group flex min-h-11 flex-col items-center rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-card",
   responsive:
-    "lg:w-auto lg:min-w-0 lg:flex-row lg:items-center lg:gap-3 lg:px-2 lg:snap-align-none",
+    "lg:w-auto lg:min-w-0 lg:flex-row lg:items-center lg:gap-3 lg:px-2",
 } as const;
 
 const DOT_CELL_CLASS = {
@@ -133,10 +140,16 @@ function StageDot({ stage }: { stage: Stage }) {
 
 export function JourneyTracker({
   stages,
+  href,
   className,
   orientation = "horizontal",
 }: {
   stages: BuyerDashboardView["stages"];
+  /**
+   * Where a stage chip drills in (the transaction detail route). Omit on that
+   * route itself: the chips then stay focusable but are not links.
+   */
+  href?: string;
   className?: string;
   orientation?: JourneyOrientation;
 }) {
@@ -170,7 +183,9 @@ export function JourneyTracker({
       return;
     }
     const items = Array.from(rail.querySelectorAll<HTMLElement>("li"));
-    const index = items.findIndex((item) => item === document.activeElement);
+    const index = items.findIndex((item) =>
+      item.contains(document.activeElement),
+    );
     if (index === -1) {
       return;
     }
@@ -198,7 +213,8 @@ export function JourneyTracker({
     if (item === undefined) {
       return;
     }
-    item.focus({ preventScroll: true });
+    const chip = item.querySelector<HTMLElement>("[data-slot='journey-chip']");
+    (chip ?? item).focus({ preventScroll: true });
     centerStage(rail, item, true);
   }
 
@@ -231,27 +247,19 @@ export function JourneyTracker({
             stage.key === activeKey;
           const doneBefore = stage.state !== "upcoming";
           const doneAfter = stage.state === "complete";
-          return (
-            <li
-              key={stage.key}
-              data-testid={`journey-stage-${stage.key}`}
-              data-state={stage.state}
-              aria-current={isCurrent ? "step" : undefined}
-              tabIndex={stage.key === activeKey ? 0 : -1}
-              onFocus={() => setActiveKey(stage.key)}
-              onClick={(event) => {
-                if (railRef.current) {
-                  centerStage(railRef.current, event.currentTarget, true);
-                }
-              }}
-              title={`${stage.label} · ${STATE_TEXT[stage.state]}`}
-              className={cn(
-                STAGE_CLASS.horizontal,
-                near ? "min-w-11 px-1.5" : "w-11",
-                responsive && STAGE_CLASS.responsive,
-                responsive && isCurrent && "lg:rounded-xl lg:bg-sand/50",
-              )}
-            >
+          const chipProps = {
+            "data-slot": "journey-chip",
+            tabIndex: stage.key === activeKey ? 0 : -1,
+            title: `${stage.label} · ${STATE_TEXT[stage.state]}`,
+            className: cn(
+              STAGE_CLASS.horizontal,
+              near ? "min-w-11 px-1.5" : "w-11",
+              responsive && STAGE_CLASS.responsive,
+              responsive && isCurrent && "lg:rounded-xl lg:bg-sand/50",
+            ),
+          };
+          const chip = (
+            <>
               <span
                 className={cn(
                   DOT_CELL_CLASS.horizontal,
@@ -294,6 +302,32 @@ export function JourneyTracker({
               <span className="sr-only">
                 {` · stage ${stage.order} of ${stages.length}, ${STATE_TEXT[stage.state]}`}
               </span>
+            </>
+          );
+          return (
+            <li
+              key={stage.key}
+              data-testid={`journey-stage-${stage.key}`}
+              data-state={stage.state}
+              aria-current={isCurrent ? "step" : undefined}
+              onFocus={() => setActiveKey(stage.key)}
+              onClick={(event) => {
+                if (railRef.current) {
+                  centerStage(railRef.current, event.currentTarget, true);
+                }
+              }}
+              className={cn(
+                ITEM_CLASS.horizontal,
+                responsive && ITEM_CLASS.responsive,
+              )}
+            >
+              {href === undefined ? (
+                <span {...chipProps}>{chip}</span>
+              ) : (
+                <Link href={href} {...chipProps}>
+                  {chip}
+                </Link>
+              )}
             </li>
           );
         })}

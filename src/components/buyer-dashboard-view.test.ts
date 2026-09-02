@@ -25,14 +25,43 @@ describe("BuyerDashboardViewPanel ten-second answers", () => {
     expect(html).toContain("Inspection");
     expect(html).toContain("Sign purchase agreement");
     expect(html).toContain("Schedule inspection");
-    expect(html).toContain('href="/tours"');
-    expect(html).toContain('href="/vault"');
+    expect(html).not.toContain('href="/tours"');
+    expect(html).not.toContain('href="/vault"');
+    expect(html).not.toContain("#assumptions-panel");
     expect(html).toContain("data-state=\"current\"");
     expect(html).toContain("Cannot leave Inspection");
     expect(html).toContain('data-testid="journey-stage-inspection"');
     expect(html).toContain('data-testid="journey-tracker"');
     expect(html).toContain("814 Maple Ave");
     expect(html.indexOf("h-40")).toBeLessThan(html.indexOf("Inspection"));
+  });
+
+  it("drills Next, Due today and every stage chip into the transaction route", () => {
+    const view = seedDashboardForBuyerA();
+    const html = renderToStaticMarkup(
+      createElement(BuyerDashboardViewPanel, { view }),
+    );
+    const href = `href="/transactions/${view.transactionId}"`;
+    const next = /data-testid="ten-second-next".*?<\/section>/.exec(html)?.[0];
+    const owe = /data-testid="ten-second-owe".*?<\/section>/.exec(html)?.[0];
+    expect(next).toContain(href);
+    expect(owe).toContain(href);
+    const tracker = /data-testid="journey-tracker".*?<\/ol>/.exec(html)?.[0];
+    expect(tracker?.match(new RegExp(href, "g"))).toHaveLength(view.stages.length);
+    expect(tracker).toMatch(/<a [^>]*title="Inspection · current stage"/);
+    expect(tracker).toContain(" · stage 8 of 13, current stage</span>");
+    expect(html).not.toMatch(/<a [^>]*><\/a>/);
+  });
+
+  it("renders the hero without self-links on the transaction route", () => {
+    const view = seedDashboardForBuyerA();
+    const html = renderToStaticMarkup(
+      createElement(BuyerDashboardViewPanel, { view, detailHref: null }),
+    );
+    expect(html).not.toContain(`href="/transactions/${view.transactionId}"`);
+    expect(html).toContain('data-testid="ten-second-next"');
+    expect(html).toContain("Schedule inspection");
+    expect(html).toContain('data-testid="journey-stage-inspection"');
   });
 });
 

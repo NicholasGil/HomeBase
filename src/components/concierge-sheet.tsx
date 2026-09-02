@@ -74,7 +74,7 @@ export function ConciergeSheet({ scope }: { scope: ConciergeScope }) {
           className="flex shrink-0 items-start gap-3 border-b border-border/70 px-5 pt-3 pb-4 lg:pt-5"
         >
           <div className="min-w-0 flex-1">
-            <p className="text-[11px] font-medium tracking-[0.12em] text-muted-foreground uppercase">
+            <p className="text-eyebrow font-medium tracking-[0.12em] text-muted-foreground uppercase">
               Transaction concierge
             </p>
             <SheetTitle className="truncate text-base font-semibold tracking-tight">

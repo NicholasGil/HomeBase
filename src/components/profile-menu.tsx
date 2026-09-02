@@ -60,7 +60,7 @@ export function ProfileMenu({
       >
         <span
           aria-hidden
-          className="flex size-8 items-center justify-center rounded-full bg-foreground text-[11px] font-medium text-background"
+          className="flex size-8 items-center justify-center rounded-full bg-foreground text-eyebrow font-medium text-background"
         >
           {name.slice(0, 1)}
         </span>

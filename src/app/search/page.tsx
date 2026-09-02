@@ -74,7 +74,7 @@ export default async function SearchPage({
     }
     return (
       <AppShell>
-        <h1 className="mb-6 text-3xl font-semibold tracking-tight">Search</h1>
+        <h1 className="mb-6 text-h1 font-semibold tracking-tight">Search</h1>
         <p className="mb-8 text-sm text-muted-foreground">
           Signed in as {session.name} · {session.role}
         </p>

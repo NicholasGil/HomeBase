@@ -17,23 +17,20 @@ export const ASSUMPTIONS_PANEL_ID = "assumptions-panel";
 
 /**
  * The display-size classes are the canonical ones exported from
- * owed-today-display; smaller sizes swap only the font-size token so the
- * three cues (face, eyebrow, badge) stay identical at every size.
+ * owed-today-display; smaller sizes swap only the type-scale token so the
+ * three cues (face, eyebrow, badge) stay identical at every size. Estimates
+ * sit one step below issued figures on the scale.
  */
 const AMOUNT_SIZE_CLASS: Record<
   "issued" | "estimate" | "missing",
   Record<MoneyFigureSize, string>
 > = {
-  issued: { sm: "text-base", md: "text-2xl", display: "lg:text-5xl" },
-  estimate: { sm: "text-base", md: "text-xl", display: "lg:text-4xl" },
-  missing: { sm: "text-sm", md: "text-base", display: "text-lg" },
+  issued: { sm: "text-body", md: "text-h2", display: "lg:text-5xl" },
+  estimate: { sm: "text-body", md: "text-h3", display: "lg:text-4xl" },
+  missing: { sm: "text-small", md: "text-body", display: "text-h3" },
 };
 
-const EYEBROW_CLASS: Record<MoneyFigureSize, string> = {
-  sm: "text-[10px]",
-  md: "text-[11px]",
-  display: "text-xs",
-};
+const EYEBROW_CLASS = "text-eyebrow";
 
 const ESTIMATE_NOTE: Record<MoneyProvenance, string> = {
   ai_estimate:
@@ -151,7 +148,7 @@ export function MoneyFigureView({
       <span
         className={cn(
           "font-sans font-semibold tracking-[0.18em] text-sky-foreground uppercase not-italic",
-          EYEBROW_CLASS[size],
+          EYEBROW_CLASS,
         )}
         data-slot="money-eyebrow"
       >

@@ -57,7 +57,7 @@ export async function AppShell({
         <div className="mx-auto flex max-w-5xl items-center gap-4 px-5 py-2">
           <Link
             href={wordmarkHrefFor(context.role)}
-            className="inline-flex min-h-11 shrink-0 items-center text-[15px] font-semibold tracking-tight"
+            className="inline-flex min-h-11 shrink-0 items-center text-body font-semibold tracking-tight"
           >
             HomeBase
           </Link>

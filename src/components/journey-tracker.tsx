@@ -123,7 +123,7 @@ function StageDot({ stage }: { stage: Stage }) {
   return (
     <span
       aria-hidden
-      className="relative z-10 flex size-6 items-center justify-center rounded-full bg-card text-[10px] font-medium text-muted-foreground tabular-nums ring-1 ring-black/10"
+      className="relative z-10 flex size-6 items-center justify-center rounded-full bg-card text-eyebrow font-medium text-muted-foreground tabular-nums ring-1 ring-black/10"
     >
       {String(stage.order).padStart(2, "0")}
     </span>

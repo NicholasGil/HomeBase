@@ -32,7 +32,7 @@ export function ProfileSettings({
       ) : null}
       {eyebrow ? <Badge variant="sage">{eyebrow}</Badge> : null}
       <div className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight">Profile</h1>
+        <h1 className="text-h1 font-semibold tracking-tight">Profile</h1>
         <p className="text-sm text-muted-foreground">
           Display only. These fields come from the fixture session. This page
           does not change a Clerk account.

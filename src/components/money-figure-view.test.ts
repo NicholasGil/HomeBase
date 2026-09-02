@@ -149,7 +149,7 @@ describe("MoneyFigureView", () => {
         size: "sm",
       }),
     );
-    expect(small).toContain("text-base");
+    expect(small).toContain("text-body");
     expect(small).not.toContain("text-4xl");
     const display = renderToStaticMarkup(
       createElement(MoneyFigureView, {

@@ -49,7 +49,7 @@ export function SignatureWorkflow({
   return (
     <section className="space-y-4" data-testid="esign-workflow">
       <div>
-        <h1 className="text-3xl font-semibold tracking-tight">E-signature</h1>
+        <h1 className="text-h1 font-semibold tracking-tight">E-signature</h1>
         <p className="text-sm text-muted-foreground">
           The app owns the workflow, the audit trail, and retention. The
           provider owns cryptography. FLAG_ESIGN is {flagOn ? "on" : "off"}.

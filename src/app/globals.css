@@ -57,6 +57,29 @@
   --radius-4xl: calc(var(--radius) * 2);
 }
 
+/*
+  Pack §2 type scale (size/line-height in px). One utility per role:
+  text-display, text-h1, text-h2, text-h3, text-body, text-small,
+  text-eyebrow. `cn` in lib/utils registers the same names so they merge as
+  font sizes, not text colors.
+*/
+@theme {
+  --text-display: 2.5rem;
+  --text-display--line-height: 2.75rem;
+  --text-h1: 1.875rem;
+  --text-h1--line-height: 2.25rem;
+  --text-h2: 1.375rem;
+  --text-h2--line-height: 1.75rem;
+  --text-h3: 1.0625rem;
+  --text-h3--line-height: 1.5rem;
+  --text-body: 0.9375rem;
+  --text-body--line-height: 1.375rem;
+  --text-small: 0.8125rem;
+  --text-small--line-height: 1.125rem;
+  --text-eyebrow: 0.6875rem;
+  --text-eyebrow--line-height: 1rem;
+}
+
 :root {
   --background: oklch(0.975 0.018 75);
   --foreground: oklch(0.22 0.02 50);

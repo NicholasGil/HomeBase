@@ -45,7 +45,7 @@ export default async function VaultPage({
     const params = await searchParams;
     return (
       <AppShell>
-        <h1 className="mb-6 text-3xl font-semibold tracking-tight">
+        <h1 className="mb-6 text-h1 font-semibold tracking-tight">
           Document vault
         </h1>
         <p className="mb-8 text-sm text-muted-foreground">

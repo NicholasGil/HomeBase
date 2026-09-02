@@ -30,7 +30,7 @@ export default async function FoundationPage() {
       <main className="mx-auto flex max-w-5xl flex-col gap-10 px-6 py-12">
         <section className="space-y-3">
           <Badge variant="outline">Convex schema</Badge>
-          <h1 className="text-3xl font-semibold tracking-tight">
+          <h1 className="text-h1 font-semibold tracking-tight">
             Foundation data
           </h1>
           <p className="max-w-2xl text-sm leading-6 text-muted-foreground">

@@ -24,7 +24,7 @@ export function ShellSkeleton({
     <div className="min-h-full bg-background" aria-busy="true">
       <header className="sticky top-0 z-20 border-b border-sand/80 bg-card/90 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center gap-4 px-5 py-2">
-          <p className="inline-flex min-h-11 shrink-0 items-center text-[15px] font-semibold tracking-tight">
+          <p className="inline-flex min-h-11 shrink-0 items-center text-body font-semibold tracking-tight">
             HomeBase
           </p>
           <Skeleton className="hidden h-9 w-64 rounded-full sm:block" />
@@ -55,7 +55,7 @@ export function ShellSkeleton({
   );
 }
 
-/** `h1.text-3xl.mb-6` plus the "Signed in as" line with its `mb-8`. */
+/** `h1.text-h1.mb-6` plus the "Signed in as" line with its `mb-8`. */
 export function PageTitleSkeleton({ width = "w-40" }: { width?: string }) {
   return (
     <>

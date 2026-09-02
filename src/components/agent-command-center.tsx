@@ -34,7 +34,7 @@ export function AgentCommandCenterView({
         <p className="text-sm text-muted-foreground">
           {agentName ?? "Assigned clients"}
         </p>
-        <h1 className="text-3xl font-semibold tracking-tight">
+        <h1 className="text-h1 font-semibold tracking-tight">
           Command center
         </h1>
         <p className="max-w-2xl text-sm leading-6 text-muted-foreground">

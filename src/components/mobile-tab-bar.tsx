@@ -72,7 +72,7 @@ export function MobileTabBar({ links }: { links: AppNavLink[] }) {
                   aria-current={active ? "page" : undefined}
                   data-active={active ? "true" : undefined}
                   className={cn(
-                    "flex h-full min-h-11 min-w-11 flex-col items-center justify-center gap-0.5 rounded-xl px-0.5 text-center text-[11px] font-medium leading-tight transition-colors",
+                    "flex h-full min-h-11 min-w-11 flex-col items-center justify-center gap-0.5 rounded-xl px-0.5 text-center text-eyebrow font-medium transition-colors",
                     active
                       ? "text-foreground"
                       : "text-muted-foreground hover:text-foreground",

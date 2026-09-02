@@ -55,10 +55,15 @@ export function ProfileMenu({
         aria-expanded={open}
         aria-haspopup="menu"
         aria-controls={menuId}
-        className="flex size-8 shrink-0 items-center justify-center rounded-full bg-foreground text-[11px] font-medium text-background"
+        className="flex size-11 shrink-0 items-center justify-center rounded-full"
         onClick={() => setOpen((current) => !current)}
       >
-        {name.slice(0, 1)}
+        <span
+          aria-hidden
+          className="flex size-8 items-center justify-center rounded-full bg-foreground text-[11px] font-medium text-background"
+        >
+          {name.slice(0, 1)}
+        </span>
       </button>
       {open ? (
         <div

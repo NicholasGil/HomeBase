@@ -21,14 +21,14 @@ export function AppNavLinks({
       data-testid="app-nav"
       data-nav-role={role}
     >
-      <nav aria-label="Primary" className="min-w-0">
+      <nav aria-label="Primary" className="hidden min-w-0 md:block">
         <ul className="flex flex-nowrap items-center gap-0.5 overflow-x-auto">
           {links.map((link) => (
             <li key={`${link.href}-${link.label}`}>
               <Link
                 href={link.href}
                 className={cn(
-                  "inline-flex h-8 items-center rounded-full px-2.5 text-sm text-muted-foreground transition-colors hover:bg-sage hover:text-sage-foreground",
+                  "inline-flex min-h-11 items-center rounded-full px-3 text-sm text-muted-foreground transition-colors hover:bg-sage hover:text-sage-foreground",
                 )}
               >
                 {link.label}

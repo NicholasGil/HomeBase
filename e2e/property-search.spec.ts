@@ -73,7 +73,7 @@ test("vendor cannot open a listing by url", async ({ page }) => {
   await expect(page).toHaveURL(/\/vendor$/);
   await page.goto(`/listings/${SEED_TOUR_PROPERTY_IDS.madison}`);
   await expect(page.getByTestId("listing-denied")).toBeVisible();
-  await expect(page.getByTestId("listing-denied")).toHaveText(
+  await expect(page.getByTestId("listing-denied")).toContainText(
     "You cannot open this listing.",
   );
   await expect(page.getByTestId("listing-detail")).toHaveCount(0);

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { loadFixturePropertySearch } from "@/app/actions/search";
 import { getTestSession } from "@/app/actions/test-session";
+import { homeActionFor } from "@/components/access-denied-card";
 import { AppShell } from "@/components/app-shell";
 import { FixtureLoginPrompt } from "@/components/fixture-login-prompt";
 import { ListingDenied, ListingDetail } from "@/components/listing-detail";
@@ -57,7 +58,7 @@ export default async function ListingPage({
     if (!loaded.ok) {
       return (
         <AppShell>
-          <ListingDenied />
+          <ListingDenied action={homeActionFor(session.role)} />
         </AppShell>
       );
     }

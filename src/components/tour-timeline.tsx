@@ -79,7 +79,7 @@ export function TourTimelineStop({
       <div className="relative col-start-1 row-start-2 flex justify-center">
         <Rail className="group-last:bottom-auto group-last:h-4" />
         <span
-          className="relative z-10 flex size-8 items-center justify-center rounded-full bg-next text-sm font-semibold text-next-foreground"
+          className="relative z-10 flex size-8 items-center justify-center rounded-full bg-foreground text-sm font-semibold text-background"
           aria-label={`Stop ${order}`}
         >
           {order}

@@ -10,6 +10,7 @@ import {
 } from "@/components/journey-tracker";
 import type { BuyerDashboardView } from "../../convex/lib/dashboardView";
 import { nextActionHref, owedTodayHref } from "@/lib/dashboard-links";
+import { heroPhotoWashClassName } from "@/lib/trip-ui";
 import { cn } from "@/lib/utils";
 
 /*
@@ -78,7 +79,7 @@ export function BuyerDashboardViewPanel({
       <section className="overflow-hidden rounded-[16px] bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04)] ring-1 ring-black/6">
         <PhotoTile
           className="h-32 w-full lg:h-40"
-          wash="from-peach via-sand to-next/35"
+          wash={heroPhotoWashClassName}
           seed={view.propertyAddress?.line1}
         >
           {view.propertyAddress ? (

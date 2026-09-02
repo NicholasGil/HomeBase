@@ -1,7 +1,10 @@
 import { submitOfferFromForm } from "@/app/actions/offers";
 import { ESIGN_NOT_ENABLED } from "../../convex/lib/esign";
 import { getFeatureFlags } from "@/lib/flags";
-import { MoneyFigureView } from "@/components/money-figure-view";
+import {
+  ASSUMPTIONS_PANEL_ID,
+  MoneyFigureView,
+} from "@/components/money-figure-view";
 import { OfferCostSimulator } from "@/components/offer-cost-simulator";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,6 +17,8 @@ import {
 } from "@/components/ui/card";
 import type { OfferCenterView } from "@/lib/offer-access";
 import { tripHeadingClassName } from "@/lib/trip-ui";
+
+const ASSUMPTIONS_HREF = `#${ASSUMPTIONS_PANEL_ID}`;
 
 export function OfferCenterViewPanel({
   center,
@@ -73,6 +78,9 @@ export function OfferCenterViewPanel({
             <MoneyFigureView
               figure={center.market.listPrice}
               testId="list-price"
+              size="md"
+              showLabel={false}
+              assumptionsHref={ASSUMPTIONS_HREF}
             />
           </div>
           <div>
@@ -87,6 +95,8 @@ export function OfferCenterViewPanel({
                 key={row.reducedAt}
                 figure={row.newPrice}
                 testId="price-reduction"
+                size="sm"
+                assumptionsHref={ASSUMPTIONS_HREF}
               />
             ))}
           </div>
@@ -106,6 +116,8 @@ export function OfferCenterViewPanel({
               <MoneyFigureView
                 figure={center.market.estimatedPosition.averageComp}
                 testId="average-comp"
+                size="sm"
+                assumptionsHref={ASSUMPTIONS_HREF}
               />
             ) : null}
           </div>
@@ -116,7 +128,12 @@ export function OfferCenterViewPanel({
                 <p className="text-sm">
                   {comp.address.line1}, {comp.address.city} · {comp.source}
                 </p>
-                <MoneyFigureView figure={comp.soldPrice} />
+                <MoneyFigureView
+                  figure={comp.soldPrice}
+                  size="sm"
+                  showLabel={false}
+                  assumptionsHref={ASSUMPTIONS_HREF}
+                />
               </div>
             ))}
           </div>
@@ -137,26 +154,36 @@ export function OfferCenterViewPanel({
               <MoneyFigureView
                 figure={scenario.terms.price}
                 testId={`${scenario.strategy}-price`}
+                size="md"
+                assumptionsHref={ASSUMPTIONS_HREF}
               />
               {scenario.terms.earnestMoney ? (
                 <MoneyFigureView
                   figure={scenario.terms.earnestMoney}
                   testId={`${scenario.strategy}-earnest`}
+                  size="sm"
+                  assumptionsHref={ASSUMPTIONS_HREF}
                 />
               ) : null}
               {scenario.terms.sellerConcessions ? (
                 <MoneyFigureView
                   figure={scenario.terms.sellerConcessions}
                   testId={`${scenario.strategy}-concessions`}
+                  size="sm"
+                  assumptionsHref={ASSUMPTIONS_HREF}
                 />
               ) : null}
               <MoneyFigureView
                 figure={scenario.modeledOutcome.cashToClose}
                 testId={`${scenario.strategy}-cash`}
+                size="sm"
+                assumptionsHref={ASSUMPTIONS_HREF}
               />
               <MoneyFigureView
                 figure={scenario.modeledOutcome.monthlyPayment}
                 testId={`${scenario.strategy}-monthly`}
+                size="sm"
+                assumptionsHref={ASSUMPTIONS_HREF}
               />
               <p>
                 Close in{" "}

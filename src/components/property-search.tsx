@@ -208,6 +208,7 @@ export function PropertySearch({
                     <MoneyFigureView
                       figure={row.listing.listPrice}
                       testId={`search-price-${row.id}`}
+                      size="md"
                     />
                   ) : (
                     <p

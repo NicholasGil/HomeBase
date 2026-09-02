@@ -159,7 +159,12 @@ export function HomeownershipHubView({
           {view.values.map((slot) => (
             <div key={slot.key} data-testid={`hub-value-${slot.key}`}>
               <p className="mb-2 text-sm font-medium">{slot.label}</p>
-              <MoneyFigureView figure={slot.figure} testId={`hub-figure-${slot.key}`} />
+              <MoneyFigureView
+                figure={slot.figure}
+                testId={`hub-figure-${slot.key}`}
+                size="md"
+                showLabel={false}
+              />
             </div>
           ))}
         </CardContent>

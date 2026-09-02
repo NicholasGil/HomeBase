@@ -2,7 +2,10 @@
 
 import { useMemo, useState } from "react";
 
-import { MoneyFigureView } from "@/components/money-figure-view";
+import {
+  ASSUMPTIONS_PANEL_ID,
+  MoneyFigureView,
+} from "@/components/money-figure-view";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -68,7 +71,11 @@ export function OfferCostSimulator({
 
   return (
     <section className="space-y-4" data-testid="offer-simulator">
-      <Card data-testid="assumptions-panel">
+      <Card
+        id={ASSUMPTIONS_PANEL_ID}
+        data-testid="assumptions-panel"
+        className="scroll-mt-24"
+      >
         <CardHeader>
           <CardTitle>Offer cost simulator</CardTitle>
           <CardDescription>
@@ -196,6 +203,12 @@ export function OfferCostSimulator({
               <MoneyFigureView
                 figure={simulation.derived[key]}
                 testId={DERIVED_TEST_IDS[key]}
+                size="md"
+                showLabel={false}
+                assumptionsHref={`#${ASSUMPTIONS_PANEL_ID}`}
+                assumptions={[
+                  `Rate ${simulation.assumptions.rateBps} bps · ${simulation.assumptions.program} · ${simulation.formula.termMonths} months.`,
+                ]}
               />
             </CardContent>
           </Card>

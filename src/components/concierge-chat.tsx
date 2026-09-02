@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { askSeedConcierge } from "@/app/actions/concierge";
+import { ConciergeAnswerView } from "@/components/concierge-answer";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -94,9 +95,7 @@ export function ConciergeChat() {
           </Button>
         </form>
         {answer !== null ? (
-          <p data-testid="concierge-answer" data-kind={kind ?? undefined}>
-            {answer}
-          </p>
+          <ConciergeAnswerView text={answer} kind={kind} />
         ) : null}
       </CardContent>
     </Card>

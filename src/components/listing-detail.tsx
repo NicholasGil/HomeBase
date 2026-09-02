@@ -92,6 +92,7 @@ export function ListingDetail({
           <MoneyFigureView
             figure={listing.listPrice}
             testId={`listing-price-${listing.id}`}
+            size="md"
           />
         ) : (
           <p className="text-sm text-muted-foreground">No list price on this sample.</p>

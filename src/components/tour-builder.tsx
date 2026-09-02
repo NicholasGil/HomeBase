@@ -7,7 +7,18 @@ import { AccessDeniedCard } from "@/components/access-denied-card";
 import { NoTourYet } from "@/components/no-tour-yet";
 import { ActionNotice } from "@/components/action-notice";
 import { ListingCardFrame } from "@/components/listing-card";
+import {
+  TourBuildAction,
+  tourBuildButtonClassName,
+} from "@/components/tour-build-action";
 import { TourMap } from "@/components/tour-map";
+import { TourMapDisclosure } from "@/components/tour-map-disclosure";
+import {
+  TourTimeline,
+  TourTimelineOrigin,
+  TourTimelineStop,
+} from "@/components/tour-timeline";
+import { VerdictPicker } from "@/components/verdict-picker";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -93,9 +104,16 @@ export function FixtureTourBuilder({
             </label>
           ))}
         </div>
-        <Button type="submit" variant="next" data-testid="build-my-tour">
-          Build My Tour
-        </Button>
+        <TourBuildAction hint="Tick the homes you want to see, then build. Stops are ordered by drive time.">
+          <Button
+            type="submit"
+            variant="next"
+            data-testid="build-my-tour"
+            className={tourBuildButtonClassName}
+          >
+            Build My Tour
+          </Button>
+        </TourBuildAction>
       </form>
 
       {tour ? <TourItineraryPanel tour={tour} /> : <NoTourYet />}
@@ -103,7 +121,32 @@ export function FixtureTourBuilder({
   );
 }
 
+const RATING_KEYS = [
+  "kitchen",
+  "location",
+  "yard",
+  "condition",
+  "layout",
+  "value",
+] as const;
+
 function TourItineraryPanel({ tour }: { tour: FixtureTour }) {
+  const listings = seedTourListings();
+  const mappedStops = tour.stops.flatMap((stop) => {
+    const listing = listings.find((row) => row.id === stop.propertyId);
+    if (listing === undefined) {
+      return [];
+    }
+    return [
+      {
+        lat: listing.coordinates.lat,
+        lng: listing.coordinates.lng,
+        label: propertyLine(listing.address),
+        order: stop.order,
+      },
+    ];
+  });
+
   return (
     <div className="space-y-4" data-testid="tour-itinerary">
       <div>
@@ -121,68 +164,59 @@ function TourItineraryPanel({ tour }: { tour: FixtureTour }) {
         {tour.departureNotice.message}
       </div>
 
-      <TourMap
-        origin={{
-          lat: tour.originCoordinates.lat,
-          lng: tour.originCoordinates.lng,
-          label: tour.originLabel,
-        }}
-        stops={tour.stops.flatMap((stop) => {
-          const listing = seedTourListings().find(
-            (row) => row.id === stop.propertyId,
-          );
-          if (listing === undefined) {
-            return [];
-          }
-          return [
-            {
-              lat: listing.coordinates.lat,
-              lng: listing.coordinates.lng,
-              label: propertyLine(listing.address),
-              order: stop.order,
-            },
-          ];
-        })}
-      />
+      <TourMapDisclosure stopCount={tour.stops.length}>
+        <TourMap
+          origin={{
+            lat: tour.originCoordinates.lat,
+            lng: tour.originCoordinates.lng,
+            label: tour.originLabel,
+          }}
+          stops={mappedStops}
+        />
+      </TourMapDisclosure>
 
-      <ol className="space-y-4">
+      <TourTimeline>
+        <TourTimelineOrigin
+          label={tour.originLabel}
+          departAt={formatTourInstant(tour.originDepartAt)}
+        />
         {tour.stops.map((stop) => {
-          const listing = seedTourListings().find(
-            (row) => row.id === stop.propertyId,
-          );
+          const listing = listings.find((row) => row.id === stop.propertyId);
           const feedback = tour.feedback.find(
             (row) => row.stopId === stop.stopId,
           );
           return (
-            <li
+            <TourTimelineStop
               key={stop.stopId}
+              order={stop.order}
+              driveMinutes={stop.driveMinutes}
               data-testid={`tour-stop-${stop.order}`}
               data-property-id={stop.propertyId}
             >
               <Card>
                 <CardHeader>
                   <CardTitle>
-                    Stop {stop.order}
-                    {listing ? ` · ${listing.address.line1}` : ""}
+                    {listing ? listing.address.line1 : `Stop ${stop.order}`}
                   </CardTitle>
                   <CardDescription>
                     Arrive {formatTourInstant(stop.arriveAt)} · depart{" "}
-                    {formatTourInstant(stop.departAt)} · {stop.driveMinutes} min
-                    drive
+                    {formatTourInstant(stop.departAt)}
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <p className="text-sm">{stop.brief}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {stop.directionsSummary}
-                  </p>
-                  <p
-                    data-testid={`window-ok-${stop.order}`}
-                    data-window-violated="false"
-                    className="text-xs text-muted-foreground"
-                  >
-                    Inside listing window
-                  </p>
+                <CardContent className="space-y-4">
+                  <div className="space-y-1">
+                    <p className="text-sm">{stop.brief}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {stop.directionsSummary}
+                    </p>
+                    <p
+                      data-testid={`window-ok-${stop.order}`}
+                      data-window-violated="false"
+                      className="text-xs text-muted-foreground"
+                    >
+                      Inside listing window
+                    </p>
+                  </div>
                   <form action={removeStopFromForm}>
                     <input type="hidden" name="tourId" value={tour.tourId} />
                     <input type="hidden" name="stopId" value={stop.stopId} />
@@ -190,35 +224,24 @@ function TourItineraryPanel({ tour }: { tour: FixtureTour }) {
                       type="submit"
                       variant="outline"
                       data-testid={`remove-stop-${stop.order}`}
+                      className="min-h-11 px-4"
                     >
                       Remove stop
                     </Button>
                   </form>
-                  <form action={submitFeedbackFromForm} className="space-y-2">
+                  <form
+                    action={submitFeedbackFromForm}
+                    className="space-y-3 border-t border-border/70 pt-4"
+                  >
                     <input type="hidden" name="tourId" value={tour.tourId} />
                     <input type="hidden" name="stopId" value={stop.stopId} />
-                    <p className="text-sm font-medium">After the showing</p>
-                    <select
-                      name="verdict"
-                      defaultValue={feedback?.verdict ?? "maybe"}
-                      className="rounded-md border bg-background px-2 py-1 text-sm"
-                    >
-                      <option value="love">love</option>
-                      <option value="maybe">maybe</option>
-                      <option value="no">no</option>
-                    </select>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      {(
-                        [
-                          "kitchen",
-                          "location",
-                          "yard",
-                          "condition",
-                          "layout",
-                          "value",
-                        ] as const
-                      ).map((key) => (
-                        <label key={key} className="flex items-center gap-2">
+                    <VerdictPicker defaultValue={feedback?.verdict ?? "maybe"} />
+                    <div className="grid grid-cols-2 gap-x-3 gap-y-2 text-xs sm:grid-cols-3">
+                      {RATING_KEYS.map((key) => (
+                        <label
+                          key={key}
+                          className="flex min-h-11 items-center justify-between gap-2 capitalize"
+                        >
                           {key}
                           <input
                             type="number"
@@ -226,21 +249,25 @@ function TourItineraryPanel({ tour }: { tour: FixtureTour }) {
                             min={1}
                             max={5}
                             defaultValue={feedback?.ratings[key] ?? 3}
-                            className="w-14 rounded-md border bg-background px-1 py-0.5"
+                            className="h-11 w-14 rounded-md border bg-background px-2 text-center text-sm"
                           />
                         </label>
                       ))}
                     </div>
-                    <Button type="submit" variant="secondary">
+                    <Button
+                      type="submit"
+                      variant="secondary"
+                      className="min-h-11 w-full px-4 sm:w-auto"
+                    >
                       Save feedback
                     </Button>
                   </form>
                 </CardContent>
               </Card>
-            </li>
+            </TourTimelineStop>
           );
         })}
-      </ol>
+      </TourTimeline>
     </div>
   );
 }

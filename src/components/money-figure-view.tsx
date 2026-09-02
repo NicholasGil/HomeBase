@@ -106,6 +106,7 @@ export function MoneyFigureView({
 }: {
   figure: MoneyFigure | null | undefined;
   testId?: string;
+  /** Defaults to display, the scale pinned by owed-today-display's exported classes. */
   size?: MoneyFigureSize;
   /** Set false when the surrounding surface already names the figure. */
   showLabel?: boolean;

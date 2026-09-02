@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { DoneList } from "@/components/done-list";
 import { PhotoTile } from "@/components/listing-card";
 import { Badge } from "@/components/ui/badge";
 import { JourneyTracker } from "@/components/journey-tracker";
@@ -21,9 +22,9 @@ export function OwedTodayFigure({
   const display = owedTodayDisplay(owed);
   const amountClassName =
     featured && display.kind === "issued"
-      ? ISSUED_AMOUNT_CLASS_NAME.replace("text-4xl", "text-5xl")
+      ? ISSUED_AMOUNT_CLASS_NAME.replace("text-4xl", "text-4xl lg:text-5xl")
       : featured && display.kind === "estimate"
-        ? ESTIMATE_AMOUNT_CLASS_NAME.replace("text-3xl", "text-4xl")
+        ? ESTIMATE_AMOUNT_CLASS_NAME.replace("text-3xl", "text-3xl lg:text-4xl")
         : display.amountClassName;
 
   switch (display.kind) {
@@ -81,12 +82,12 @@ export function BuyerDashboardViewPanel({
     <div className="space-y-10">
       <section className="overflow-hidden rounded-[16px] bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04)] ring-1 ring-black/6">
         <PhotoTile
-          className="h-40 w-full sm:h-48"
+          className="h-32 w-full lg:h-40"
           wash="from-peach via-sand to-next/35"
           seed={view.propertyAddress?.line1}
         >
           {view.propertyAddress ? (
-            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/45 to-transparent px-6 py-4 text-white">
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/45 to-transparent px-5 py-3 text-white lg:px-6 lg:py-4">
               <p className="text-sm font-medium">
                 {view.propertyAddress.line1}
               </p>
@@ -95,92 +96,92 @@ export function BuyerDashboardViewPanel({
           ) : null}
         </PhotoTile>
 
-        <div className="space-y-6 px-6 py-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div className="space-y-2">
-              {eyebrow ? <Badge variant="sage">{eyebrow}</Badge> : null}
-              <p className="text-sm text-muted-foreground">
-                {buyerName ?? "Your transaction"}
-                {place ? ` · ${place}` : null}
+        {/*
+          DOM order is the 375px reading order: where, rail, next, owe,
+          done/waiting. At lg the same nodes are placed into two columns
+          (left: where / next / done+waiting, right: owe / rail) so the
+          Playwright specs see one DOM regardless of viewport.
+        */}
+        <div className="grid gap-3 px-5 pt-3 pb-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:grid-rows-[auto_auto_1fr] lg:gap-x-8 lg:gap-y-6 lg:px-6 lg:py-6">
+          <div className="min-w-0 space-y-1 lg:col-start-1 lg:row-start-1 lg:flex lg:flex-col lg:justify-end">
+            {eyebrow ? (
+              <div className="lg:mb-auto">
+                <Badge variant="sage">{eyebrow}</Badge>
+              </div>
+            ) : null}
+            <p className="text-sm text-muted-foreground">
+              {buyerName ?? "Your transaction"}
+              {place ? ` · ${place}` : null}
+            </p>
+            <h1
+              data-testid="ten-second-where"
+              className="text-[40px] leading-[1.05] font-semibold tracking-tight text-balance lg:text-5xl"
+            >
+              {view.where.label}
+            </h1>
+            <p className="text-xs text-muted-foreground lg:text-sm">
+              Status {view.where.status}. Transaction {view.transactionId}.
+            </p>
+          </div>
+
+          <JourneyTracker
+            stages={view.stages}
+            className="lg:col-start-2 lg:row-start-2 lg:self-start"
+          />
+
+          <section
+            data-testid="ten-second-next"
+            className="rounded-[14px] bg-sand px-4 py-3.5 lg:col-start-1 lg:row-start-2 lg:px-5 lg:py-6"
+          >
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-next">
+              Next
+            </p>
+            {view.next === null ? (
+              <p className="mt-2 text-sm text-muted-foreground lg:mt-3">
+                No open task right now.
               </p>
-              <h1
-                data-testid="ten-second-where"
-                className="text-4xl font-semibold tracking-tight"
+            ) : (
+              <Link
+                href={nextActionHref({
+                  title: view.next.title,
+                  transactionId: view.transactionId,
+                })}
+                className="mt-2 block space-y-2 lg:mt-3 lg:space-y-3"
               >
-                {view.where.label}
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Status {view.where.status}. Transaction {view.transactionId}.
-              </p>
-            </div>
-            <JourneyTracker stages={view.stages} />
-          </div>
-
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
-            <section
-              data-testid="ten-second-next"
-              className="rounded-[14px] bg-sand px-5 py-6"
-            >
-              <p className="text-xs font-medium uppercase tracking-[0.2em] text-next">
-                Next
-              </p>
-              {view.next === null ? (
-                <p className="mt-3 text-sm text-muted-foreground">
-                  No open task right now.
+                <p className="text-2xl font-semibold tracking-tight text-balance lg:text-3xl">
+                  {view.next.title}
                 </p>
-              ) : (
-                <Link
-                  href={nextActionHref({
-                    title: view.next.title,
-                    transactionId: view.transactionId,
-                  })}
-                  className="mt-3 block space-y-3"
-                >
-                  <p className="text-3xl font-semibold tracking-tight text-balance">
-                    {view.next.title}
-                  </p>
-                  <Badge variant="sage">{view.next.assigneeRole}</Badge>
-                </Link>
-              )}
-            </section>
-
-            <section
-              data-testid="ten-second-owe"
-              className="rounded-[14px] bg-sky px-5 py-6"
-            >
-              <Link href={owedTodayHref()} className="block">
-                <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                  Due today
-                </p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {owed?.label ?? "No sourced figure on this file"}
-                </p>
-                <div className="mt-4">
-                  <OwedTodayFigure owed={owed} featured />
-                </div>
+                <Badge variant="sage">{view.next.assigneeRole}</Badge>
               </Link>
-            </section>
-          </div>
+            )}
+          </section>
 
-          <div className="grid gap-6 sm:grid-cols-2">
-            <section data-testid="ten-second-done">
+          <section
+            data-testid="ten-second-owe"
+            className="rounded-[14px] bg-sky px-4 py-3.5 lg:col-start-2 lg:row-start-1 lg:px-5 lg:py-6"
+          >
+            <Link href={owedTodayHref()} className="block">
+              <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                Due today
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {owed?.label ?? "No sourced figure on this file"}
+              </p>
+              <div className="mt-3 lg:mt-4">
+                <OwedTodayFigure owed={owed} featured />
+              </div>
+            </Link>
+          </section>
+
+          <div className="grid grid-cols-2 gap-4 lg:col-start-1 lg:row-start-3 lg:gap-6">
+            <section data-testid="ten-second-done" className="min-w-0">
               <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
                 Done
               </p>
-              {view.done.length === 0 ? (
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Nothing marked done yet.
-                </p>
-              ) : (
-                <ul className="mt-2 space-y-1 text-sm">
-                  {view.done.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              )}
+              <DoneList items={view.done} />
             </section>
 
-            <section data-testid="ten-second-waiting">
+            <section data-testid="ten-second-waiting" className="min-w-0">
               <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
                 Waiting on
               </p>

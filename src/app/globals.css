@@ -163,3 +163,25 @@
     @apply font-sans;
   }
 }
+
+/*
+  Sheets and drawers fade instead of sliding when the user asks for reduced
+  motion. Unlayered so it wins over the utilities regardless of specificity.
+*/
+@media (prefers-reduced-motion: reduce) {
+  [data-slot="sheet-content"] {
+    transition-property: opacity;
+  }
+  [data-slot="sheet-content"][data-starting-style],
+  [data-slot="sheet-content"][data-ending-style] {
+    translate: none;
+  }
+  [data-slot="drawer-popup"] {
+    --closed-transform: none;
+    transition-property: opacity;
+  }
+  [data-slot="drawer-popup"][data-starting-style],
+  [data-slot="drawer-popup"][data-ending-style] {
+    opacity: 0;
+  }
+}

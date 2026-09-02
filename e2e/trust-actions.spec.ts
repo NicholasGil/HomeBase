@@ -9,6 +9,16 @@ async function expectNoRuntimeOverlay(page: Page) {
   await expect(page.getByText("FORBIDDEN", { exact: true })).toHaveCount(0);
 }
 
+/** Party → scope → expiry are pre-selected; walk to Review and confirm. */
+async function stepThroughGrantSheet(page: Page) {
+  const sheet = page.getByTestId("grant-sheet");
+  await expect(sheet).toBeVisible();
+  await sheet.getByRole("button", { name: "Continue" }).click();
+  await sheet.getByRole("button", { name: "Continue" }).click();
+  await sheet.getByRole("button", { name: "Continue" }).click();
+  await sheet.getByTestId("grant-confirm").click();
+}
+
 test("empty Build My Tour stays usable and does not overlay", async ({
   page,
 }) => {
@@ -77,6 +87,7 @@ test("vault grant appears without a manual reload", async ({ page }) => {
     .getByTestId("vault-doc-preapproval")
     .getByRole("button", { name: "Grant to Jordan Hale" })
     .click();
+  await stepThroughGrantSheet(page);
   await expect(page.getByText("Granted to lender")).toBeVisible();
   await expectNoRuntimeOverlay(page);
   await expect(page).toHaveURL(/\/vault/);
@@ -93,6 +104,7 @@ test("vendor vault does not show another buyer's access log", async ({
     .getByTestId("vault-doc-preapproval")
     .getByRole("button", { name: "Grant to Jordan Hale" })
     .click();
+  await stepThroughGrantSheet(page);
   await expect(page.getByText("Granted to lender")).toBeVisible();
 
   await page.goto("/test-login");

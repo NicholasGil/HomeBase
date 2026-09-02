@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { DocumentDenied } from "@/components/document-denied";
+import { LiveDocumentAccessPanel } from "@/components/live-document-access";
 import { DocumentSkeleton } from "@/components/route-skeletons";
 import { seedDocumentTitle } from "@/lib/seed-documents";
 import type { Id } from "../../convex/_generated/dataModel";
@@ -57,23 +58,28 @@ export function LiveDocumentPage({ documentId }: { documentId: string }) {
   }
 
   return (
-    <Card data-testid={`document-open-${opened.type}`}>
-      <CardHeader>
-        <Link href="/vault" className="text-sm underline" data-testid="document-back">
-          Back to vault
-        </Link>
-        <Badge variant="outline">{opened.via}</Badge>
-        <CardTitle>{seedDocumentTitle(opened.type)}</CardTitle>
-        <CardDescription>{opened.type}</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-2">
-        {opened.extractedSummary ? (
-          <p className="text-sm">{opened.extractedSummary}</p>
-        ) : null}
-        <p className="text-xs text-muted-foreground">
-          View logged. Transaction {opened.transactionId}.
-        </p>
-      </CardContent>
-    </Card>
+    <div className="space-y-6">
+      <Card data-testid={`document-open-${opened.type}`}>
+        <CardHeader>
+          <Link href="/vault" className="text-sm underline" data-testid="document-back">
+            Back to vault
+          </Link>
+          <Badge variant="outline">{opened.via}</Badge>
+          <CardTitle>{seedDocumentTitle(opened.type)}</CardTitle>
+          <CardDescription>{opened.type}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {opened.extractedSummary ? (
+            <p className="text-sm">{opened.extractedSummary}</p>
+          ) : null}
+          <p className="text-xs text-muted-foreground">
+            View logged. Transaction {opened.transactionId}.
+          </p>
+        </CardContent>
+      </Card>
+      {opened.via === "principal" ? (
+        <LiveDocumentAccessPanel documentId={documentId} type={opened.type} />
+      ) : null}
+    </div>
   );
 }

@@ -1,4 +1,14 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
+
+/** Party → scope → expiry are pre-selected; walk to Review and confirm. */
+async function stepThroughGrantSheet(page: Page) {
+  const sheet = page.getByTestId("grant-sheet");
+  await expect(sheet).toBeVisible();
+  await sheet.getByRole("button", { name: "Continue" }).click();
+  await sheet.getByRole("button", { name: "Continue" }).click();
+  await sheet.getByRole("button", { name: "Continue" }).click();
+  await sheet.getByTestId("grant-confirm").click();
+}
 
 test("grant, third-party view, then revoke is denied", async ({ page }) => {
   await page.goto("/test-login");
@@ -13,6 +23,7 @@ test("grant, third-party view, then revoke is denied", async ({ page }) => {
     .getByTestId("vault-doc-preapproval")
     .getByRole("button", { name: "Grant to Jordan Hale" })
     .click();
+  await stepThroughGrantSheet(page);
   await expect(page.getByText("Granted to lender")).toBeVisible();
 
   await page.goto("/test-login");
@@ -41,6 +52,7 @@ test("grant, third-party view, then revoke is denied", async ({ page }) => {
   await page.goto("/vault");
   await expect(page.getByText("Signed in as Alex Rivera")).toBeVisible();
   await page.getByRole("button", { name: "Revoke" }).click();
+  await page.getByRole("button", { name: "Revoke access" }).click();
   await expect(
     page.getByTestId("vault-doc-preapproval").getByText("Revoked"),
   ).toBeVisible();

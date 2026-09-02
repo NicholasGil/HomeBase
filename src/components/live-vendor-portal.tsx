@@ -7,6 +7,7 @@ import {
   VendorAccessExpired,
   VendorPortalDenied,
 } from "@/components/vendor-portal";
+import { homeActionFor } from "@/components/access-denied-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,7 +29,7 @@ export function LiveVendorPortal() {
   }
 
   if (session.role !== "vendor") {
-    return <VendorPortalDenied />;
+    return <VendorPortalDenied action={homeActionFor(session.role)} />;
   }
 
   return (

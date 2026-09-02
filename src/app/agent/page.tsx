@@ -1,4 +1,5 @@
 import { getTestSession } from "@/app/actions/test-session";
+import { homeActionFor } from "@/components/access-denied-card";
 import {
   AgentCommandCenterView,
   CommandCenterDenied,
@@ -41,7 +42,7 @@ export default async function AgentPage() {
     if (!loaded.ok) {
       return (
         <AppShell>
-          <CommandCenterDenied />
+          <CommandCenterDenied action={homeActionFor(session?.role)} />
         </AppShell>
       );
     }

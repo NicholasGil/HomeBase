@@ -118,9 +118,11 @@ export function ListingGridSkeleton({ count = 2 }: { count?: number }) {
 /** A `Card` with a header (title + description) and `lines` body lines. */
 export function InfoCardSkeleton({
   lines = 1,
+  button = false,
   className,
 }: {
   lines?: number;
+  button?: boolean;
   className?: string;
 }) {
   return (
@@ -129,10 +131,11 @@ export function InfoCardSkeleton({
         <Skeleton className="h-5 w-40" />
         <Skeleton className="h-4 w-28" />
       </div>
-      <div className="space-y-2 px-4">
+      <div className="space-y-3 px-4">
         {Array.from({ length: lines }, (_, index) => (
           <Skeleton key={index} className="h-4 w-full" />
         ))}
+        {button ? <Skeleton className="h-8 w-36 rounded-lg" /> : null}
       </div>
     </Card>
   );
@@ -155,10 +158,16 @@ export function TenSecondHeroSkeleton() {
           <Skeleton className="h-4 w-60" />
         </div>
 
-        <div className="flex gap-2 overflow-hidden lg:col-start-2 lg:row-start-2 lg:self-start">
-          <Skeleton className="h-11 w-36 shrink-0 rounded-full" />
-          <Skeleton className="h-11 w-32 shrink-0 rounded-full bg-next/20" />
-          <Skeleton className="h-11 w-28 shrink-0 rounded-full" />
+        <div className="min-w-0 lg:col-start-2 lg:row-start-2 lg:self-start">
+          <div className="flex items-baseline justify-between">
+            <Skeleton className="h-4 w-16" />
+            <Skeleton className="h-4 w-10" />
+          </div>
+          <div className="mt-2 flex gap-2 overflow-hidden py-1">
+            <Skeleton className="h-11 w-36 shrink-0 rounded-full" />
+            <Skeleton className="h-11 w-32 shrink-0 rounded-full bg-next/20" />
+            <Skeleton className="h-11 w-28 shrink-0 rounded-full" />
+          </div>
         </div>
 
         <div className="rounded-[14px] bg-sand px-4 py-3.5 lg:col-start-1 lg:row-start-2 lg:px-5 lg:py-6">
@@ -241,8 +250,8 @@ export function VaultSectionSkeleton() {
     <section className="space-y-4">
       <SectionHeadingSkeleton badges={0} description="w-96" />
       <div className="grid gap-4 md:grid-cols-2">
-        <InfoCardSkeleton lines={2} />
-        <InfoCardSkeleton lines={2} />
+        <InfoCardSkeleton lines={1} button />
+        <InfoCardSkeleton lines={1} button />
       </div>
       <InfoCardSkeleton lines={1} />
     </section>

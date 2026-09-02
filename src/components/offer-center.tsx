@@ -1,3 +1,5 @@
+import { Lock, ShieldCheck } from "lucide-react";
+
 import { submitOfferFromForm } from "@/app/actions/offers";
 import { ESIGN_NOT_ENABLED } from "../../convex/lib/esign";
 import { getFeatureFlags } from "@/lib/flags";
@@ -6,6 +8,10 @@ import {
   MoneyFigureView,
 } from "@/components/money-figure-view";
 import { OfferCostSimulator } from "@/components/offer-cost-simulator";
+import {
+  OfferStatusRail,
+  offerRailSteps,
+} from "@/components/offer-status-rail";
 import { AccessDeniedCard } from "@/components/access-denied-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,16 +27,25 @@ import { tripHeadingClassName } from "@/lib/trip-ui";
 
 const ASSUMPTIONS_HREF = `#${ASSUMPTIONS_PANEL_ID}`;
 
+const STRATEGY_TAGLINE: Record<string, string> = {
+  stronger: "Optimized toward competitiveness",
+  balanced: "Price against buyer protections",
+  value: "Favorable economics, higher rejection risk",
+};
+
 export function OfferCenterViewPanel({
   center,
   denied,
   gateFromSubmit,
   submitControl,
+  esignEnabled,
 }: {
   center: OfferCenterView | null;
   denied?: boolean;
   gateFromSubmit?: string | null;
   submitControl?: React.ReactNode;
+  /** Live callers pass the flag they already hold; fixture falls back to the server read. */
+  esignEnabled?: boolean;
 }) {
   if (denied || center === null) {
     return (
@@ -38,7 +53,11 @@ export function OfferCenterViewPanel({
     );
   }
 
-  const esignOn = getFeatureFlags().FLAG_ESIGN;
+  const esignOn = esignEnabled ?? getFeatureFlags().FLAG_ESIGN;
+  const railSteps = offerRailSteps({
+    offer: center.offer,
+    esignEnabled: esignOn,
+  });
   const gateReason =
     gateFromSubmit === ESIGN_NOT_ENABLED
       ? (center.offer?.gate.reason ?? "LICENSEE_REVIEW_REQUIRED")
@@ -139,16 +158,32 @@ export function OfferCenterViewPanel({
         </CardContent>
       </Card>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        {center.scenarios.map((scenario) => (
-          <Card
-            key={scenario.strategy}
-            data-testid={`scenario-${scenario.strategy}`}
-          >
-            <CardHeader>
-              <CardTitle className="capitalize">{scenario.strategy}</CardTitle>
-              <CardDescription>Modeled terms and tradeoffs</CardDescription>
-            </CardHeader>
+      <div className="space-y-3">
+        <div className="flex items-baseline justify-between gap-3">
+          <h3 className="text-base font-semibold tracking-tight">
+            Three modeled strategies
+          </h3>
+          <p className="text-xs text-muted-foreground md:hidden">
+            Swipe to compare
+          </p>
+        </div>
+        <div
+          data-testid="scenario-rail"
+          className="-mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-5 px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0 md:pb-0"
+        >
+          {center.scenarios.map((scenario) => (
+            <Card
+              key={scenario.strategy}
+              data-testid={`scenario-${scenario.strategy}`}
+              className="w-[85vw] shrink-0 snap-start md:w-auto md:shrink"
+            >
+              <CardHeader>
+                <CardTitle className="capitalize">{scenario.strategy}</CardTitle>
+                <CardDescription>
+                  {STRATEGY_TAGLINE[scenario.strategy] ??
+                    "Modeled terms and tradeoffs"}
+                </CardDescription>
+              </CardHeader>
             <CardContent className="space-y-3 text-sm">
               <MoneyFigureView
                 figure={scenario.terms.price}
@@ -210,31 +245,40 @@ export function OfferCenterViewPanel({
               </ul>
             </CardContent>
           </Card>
-        ))}
+          ))}
+        </div>
       </div>
 
-      <Card data-testid="offer-gate">
+      <Card data-testid="offer-gate" className="scroll-mt-24">
         <CardHeader>
           <CardTitle>Draft and licensee review</CardTitle>
           <CardDescription>
             No offer leaves draft without a licensee review on the server.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <p data-testid="offer-status">
+        <CardContent className="space-y-4">
+          <p data-testid="offer-status" className="text-sm font-medium">
             {center.offer
               ? `Status ${center.offer.status}`
               : "No draft yet"}
           </p>
-          <p data-testid="licensee-gate" data-gate={gateReason}>
-            {gateReason === "LICENSEE_REVIEW_REQUIRED"
-              ? "A licensee must review this offer before it can leave draft."
-              : gateReason === "already_submitted"
-                ? "This offer is already submitted."
-                : gateReason === "denied"
-                  ? "You cannot submit this offer."
-                : "Ready for licensee-approved submit."}
+          <p
+            data-testid="licensee-gate"
+            data-gate={gateReason}
+            className="flex items-start gap-2.5 rounded-lg bg-sand/70 px-3 py-2.5 text-sm leading-snug text-sand-foreground ring-1 ring-sand-foreground/10"
+          >
+            <ShieldCheck className="mt-0.5 size-4 shrink-0" aria-hidden />
+            <span>
+              {gateReason === "LICENSEE_REVIEW_REQUIRED"
+                ? "A licensee must review this offer before it can leave draft."
+                : gateReason === "already_submitted"
+                  ? "This offer is already submitted."
+                  : gateReason === "denied"
+                    ? "You cannot submit this offer."
+                    : "Ready for licensee-approved submit."}
+            </span>
           </p>
+          <OfferStatusRail steps={railSteps} />
           {submitControl ??
             (esignOn ? (
               <form action={submitOfferFromForm}>
@@ -245,10 +289,13 @@ export function OfferCenterViewPanel({
             ) : (
               <p
                 data-testid="submit-offer-gated"
-                className="rounded-lg border bg-muted/40 px-4 py-3 text-sm text-muted-foreground"
+                className="flex items-start gap-2.5 rounded-lg border bg-muted/40 px-4 py-3 text-sm text-muted-foreground"
               >
-                E-signature is off. Offers cannot be submitted until FLAG_ESIGN
-                is enabled.
+                <Lock className="mt-0.5 size-4 shrink-0" aria-hidden />
+                <span>
+                  E-signature is off. Offers cannot be submitted until
+                  FLAG_ESIGN is enabled.
+                </span>
               </p>
             ))}
         </CardContent>

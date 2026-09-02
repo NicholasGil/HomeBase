@@ -9,8 +9,10 @@ import { FolderLock } from "lucide-react";
 
 import { homeActionFor } from "@/components/access-denied-card";
 import { EmptyState } from "@/components/empty-state";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import {
+  FixtureGrantRow,
+  FixtureGrantSheet,
+} from "@/components/fixture-grant-controls";
 import {
   Card,
   CardContent,
@@ -92,42 +94,25 @@ export async function FixtureVault({ notice }: { notice?: string }) {
                     Open document
                   </Link>
                   {canGrant ? (
-                    <form action={grantSeedDocumentFromForm}>
-                      <input type="hidden" name="documentId" value={document.id} />
-                      <Button
-                        type="submit"
-                        variant="outline"
-                        name="grant"
-                      >
-                        Grant to Jordan Hale
-                      </Button>
-                    </form>
+                    <div>
+                      <FixtureGrantSheet
+                        documentId={document.id}
+                        documentTitle={seedDocumentTitle(document.type)}
+                        action={grantSeedDocumentFromForm}
+                      />
+                    </div>
                   ) : null}
-                  {canGrant
-                    ? documentGrants.map((grant) => (
-                        <form action={revokeSeedGrantFromForm} key={grant.id}>
-                          <input type="hidden" name="grantId" value={grant.id} />
-                          <div className="flex items-center justify-between gap-2">
-                            <Badge
-                              variant={
-                                grant.revokedAt === undefined
-                                  ? "secondary"
-                                  : "outline"
-                              }
-                            >
-                              {grant.revokedAt === undefined
-                                ? `Granted to lender · ${grant.scope}`
-                                : "Revoked"}
-                            </Badge>
-                            {grant.revokedAt === undefined ? (
-                              <Button type="submit" variant="destructive">
-                                Revoke
-                              </Button>
-                            ) : null}
-                          </div>
-                        </form>
-                      ))
-                    : null}
+                  {canGrant && documentGrants.length > 0 ? (
+                    <ul className="space-y-2">
+                      {documentGrants.map((grant) => (
+                        <FixtureGrantRow
+                          key={grant.id}
+                          grant={grant}
+                          action={revokeSeedGrantFromForm}
+                        />
+                      ))}
+                    </ul>
+                  ) : null}
                 </CardContent>
               </Card>
             );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, useQuery } from "convex/react";
+import { Lock } from "lucide-react";
 import { useState } from "react";
 
 import { AccessDeniedCard } from "@/components/access-denied-card";
@@ -34,6 +35,7 @@ export function LiveOfferCenter() {
     <OfferCenterViewPanel
       center={view}
       gateFromSubmit={gate}
+      esignEnabled={esignOn}
       submitControl={
         esignOn ? (
           <div className="flex flex-wrap gap-2">
@@ -70,10 +72,13 @@ export function LiveOfferCenter() {
         ) : (
           <p
             data-testid="submit-offer-gated"
-            className="rounded-lg border bg-muted/40 px-4 py-3 text-sm text-muted-foreground"
+            className="flex items-start gap-2.5 rounded-lg border bg-muted/40 px-4 py-3 text-sm text-muted-foreground"
           >
-            E-signature is off. Offers cannot be submitted until FLAG_ESIGN is
-            enabled.
+            <Lock className="mt-0.5 size-4 shrink-0" aria-hidden />
+            <span>
+              E-signature is off. Offers cannot be submitted until FLAG_ESIGN
+              is enabled.
+            </span>
           </p>
         )
       }

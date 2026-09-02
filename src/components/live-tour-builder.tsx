@@ -6,7 +6,18 @@ import { useState } from "react";
 import { ListingCardFrame } from "@/components/listing-card";
 import { ToursSectionSkeleton } from "@/components/route-skeletons";
 import { NoTourYet } from "@/components/no-tour-yet";
+import {
+  TourBuildAction,
+  tourBuildButtonClassName,
+} from "@/components/tour-build-action";
 import { TourMap } from "@/components/tour-map";
+import { TourMapDisclosure } from "@/components/tour-map-disclosure";
+import {
+  TourTimeline,
+  TourTimelineOrigin,
+  TourTimelineStop,
+} from "@/components/tour-timeline";
+import { isVerdict, VerdictPicker } from "@/components/verdict-picker";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -96,17 +107,26 @@ export function LiveTourBuilder() {
           </label>
         ))}
       </div>
-      <Button
-        type="button"
-        variant="next"
-        data-testid="build-my-tour"
-        disabled={busy || selected.length === 0}
-        onClick={() => {
-          void onBuild();
-        }}
+      <TourBuildAction
+        hint={
+          selected.length === 0
+            ? "Tick the homes you want to see, then build."
+            : `${selected.length} selected. Stops are ordered by drive time.`
+        }
       >
-        Build My Tour
-      </Button>
+        <Button
+          type="button"
+          variant="next"
+          data-testid="build-my-tour"
+          disabled={busy || selected.length === 0}
+          className={tourBuildButtonClassName}
+          onClick={() => {
+            void onBuild();
+          }}
+        >
+          Build My Tour
+        </Button>
+      </TourBuildAction>
 
       {tour ? (
         <div className="space-y-4" data-testid="tour-itinerary">
@@ -119,48 +139,60 @@ export function LiveTourBuilder() {
           >
             {tour.departureNotice.message}
           </div>
-          <TourMap
-            origin={{
-              lat: tour.originCoordinates.lat,
-              lng: tour.originCoordinates.lng,
-              label: tour.originLabel,
-            }}
-            stops={tour.stops.flatMap((stop) => {
-              if (stop.property.coordinates === null) {
-                return [];
-              }
-              return [
-                {
-                  lat: stop.property.coordinates.lat,
-                  lng: stop.property.coordinates.lng,
-                  label: propertyLine(stop.property.address),
-                  order: stop.order,
-                },
-              ];
-            })}
-          />
-          <ol className="space-y-4">
+          <TourMapDisclosure stopCount={tour.stops.length}>
+            <TourMap
+              origin={{
+                lat: tour.originCoordinates.lat,
+                lng: tour.originCoordinates.lng,
+                label: tour.originLabel,
+              }}
+              stops={tour.stops.flatMap((stop) => {
+                if (stop.property.coordinates === null) {
+                  return [];
+                }
+                return [
+                  {
+                    lat: stop.property.coordinates.lat,
+                    lng: stop.property.coordinates.lng,
+                    label: propertyLine(stop.property.address),
+                    order: stop.order,
+                  },
+                ];
+              })}
+            />
+          </TourMapDisclosure>
+          <TourTimeline>
+            <TourTimelineOrigin
+              label={tour.originLabel}
+              departAt={formatTourInstant(tour.originDepartAt)}
+            />
             {tour.stops.map((stop) => (
-              <li key={stop.stopId} data-testid={`tour-stop-${stop.order}`}>
+              <TourTimelineStop
+                key={stop.stopId}
+                order={stop.order}
+                driveMinutes={stop.driveMinutes}
+                data-testid={`tour-stop-${stop.order}`}
+              >
                 <Card>
                   <CardHeader>
-                    <CardTitle>
-                      Stop {stop.order} · {stop.property.address.line1}
-                    </CardTitle>
+                    <CardTitle>{stop.property.address.line1}</CardTitle>
                     <CardDescription>
                       Arrive {formatTourInstant(stop.arriveAt)} · depart{" "}
                       {formatTourInstant(stop.departAt)}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-3">
-                    <p className="text-sm">{stop.property.brief}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {stop.directionsSummary}
-                    </p>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-1">
+                      <p className="text-sm">{stop.property.brief}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {stop.directionsSummary}
+                      </p>
+                    </div>
                     <Button
                       type="button"
                       variant="outline"
                       data-testid={`remove-stop-${stop.order}`}
+                      className="min-h-11 px-4"
                       onClick={() => {
                         void removeStop({
                           tourId: tour.tourId,
@@ -170,13 +202,19 @@ export function LiveTourBuilder() {
                     >
                       Remove stop
                     </Button>
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      onClick={() => {
+                    <form
+                      className="space-y-3 border-t border-border/70 pt-4"
+                      onSubmit={(event) => {
+                        event.preventDefault();
+                        const verdict = new FormData(event.currentTarget).get(
+                          "verdict",
+                        );
+                        if (!isVerdict(verdict)) {
+                          return;
+                        }
                         void submitFeedback({
                           tourStopId: stop.stopId,
-                          verdict: "maybe",
+                          verdict,
                           ratings: {
                             kitchen: 3,
                             location: 3,
@@ -190,13 +228,20 @@ export function LiveTourBuilder() {
                         });
                       }}
                     >
-                      Save feedback
-                    </Button>
+                      <VerdictPicker />
+                      <Button
+                        type="submit"
+                        variant="secondary"
+                        className="min-h-11 w-full px-4 sm:w-auto"
+                      >
+                        Save feedback
+                      </Button>
+                    </form>
                   </CardContent>
                 </Card>
-              </li>
+              </TourTimelineStop>
             ))}
-          </ol>
+          </TourTimeline>
         </div>
       ) : (
         <NoTourYet />

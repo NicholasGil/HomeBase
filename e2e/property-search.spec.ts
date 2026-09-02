@@ -80,6 +80,14 @@ test("vendor cannot open a listing by url", async ({ page }) => {
   await expect(page.getByText("88 Legacy Dr")).toHaveCount(0);
 });
 
+test("unauthenticated listing url does not render the house", async ({
+  page,
+}) => {
+  await page.goto(`/listings/${SEED_TOUR_PROPERTY_IDS.madison}`);
+  await expect(page.getByTestId("listing-detail")).toHaveCount(0);
+  await expect(page.getByText("88 Legacy Dr")).toHaveCount(0);
+});
+
 test("feature flags stay off including MLS", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByText("FLAG_MLS")).toBeVisible();

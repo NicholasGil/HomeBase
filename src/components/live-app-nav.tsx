@@ -3,7 +3,8 @@
 import { useConvexAuth, useQuery } from "convex/react";
 
 import { AppNavLinks } from "@/components/app-nav";
-import { navLinksFor, type AppNavRole } from "@/lib/app-nav";
+import { MobileTabBar } from "@/components/mobile-tab-bar";
+import { navLinksFor, type AppNavLink, type AppNavRole } from "@/lib/app-nav";
 import { api } from "../../convex/_generated/api";
 
 const NAV_ROLES = [
@@ -18,7 +19,17 @@ function isAppNavRole(value: string): value is Exclude<AppNavRole, "guest"> {
   return (NAV_ROLES as readonly string[]).includes(value);
 }
 
-export function LiveAppNav() {
+type LiveNavState =
+  | { status: "loading" }
+  | { status: "guest" }
+  | {
+      status: "ready";
+      role: Exclude<AppNavRole, "guest">;
+      name: string;
+      links: AppNavLink[];
+    };
+
+function useLiveNavState(): LiveNavState {
   const { isAuthenticated, isLoading } = useConvexAuth();
   const session = useQuery(api.me.getSession, isAuthenticated ? {} : "skip");
   const dashboard = useQuery(
@@ -27,11 +38,11 @@ export function LiveAppNav() {
   );
 
   if (isLoading || (isAuthenticated && session === undefined)) {
-    return <div data-testid="app-nav" data-nav-role="guest" />;
+    return { status: "loading" };
   }
 
   if (!isAuthenticated || session === undefined || !isAppNavRole(session.role)) {
-    return <AppNavLinks links={[]} role="guest" />;
+    return { status: "guest" };
   }
 
   const buyerClosed =
@@ -41,15 +52,36 @@ export function LiveAppNav() {
       ? `/homeownership/${dashboard.transactionId}`
       : undefined;
 
+  return {
+    status: "ready",
+    role: session.role,
+    name: session.name,
+    links: navLinksFor({ role: session.role, buyerClosed, hubHref }),
+  };
+}
+
+export function LiveAppNav() {
+  const state = useLiveNavState();
+
+  if (state.status === "loading") {
+    return <div data-testid="app-nav" data-nav-role="guest" />;
+  }
+
+  if (state.status === "guest") {
+    return <AppNavLinks links={[]} role="guest" />;
+  }
+
   return (
-    <AppNavLinks
-      links={navLinksFor({
-        role: session.role,
-        buyerClosed,
-        hubHref,
-      })}
-      role={session.role}
-      viewerName={session.name}
-    />
+    <AppNavLinks links={state.links} role={state.role} viewerName={state.name} />
   );
+}
+
+export function LiveMobileTabBar() {
+  const state = useLiveNavState();
+
+  if (state.status !== "ready") {
+    return null;
+  }
+
+  return <MobileTabBar links={state.links} />;
 }

@@ -59,9 +59,9 @@ export function MobileTabBar({ links }: { links: AppNavLink[] }) {
       <nav
         aria-label="Primary tabs"
         data-testid="app-tab-bar"
-        className="fixed inset-x-0 bottom-0 z-20 border-t border-sand/80 bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
+        className="fixed inset-x-0 bottom-0 z-20 bg-card/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-1px_0_0_var(--color-sand)] backdrop-blur md:hidden"
       >
-        <ul className="mx-auto flex h-(--tab-bar-height) max-w-5xl items-stretch px-2">
+        <ul className="mx-auto flex h-(--tab-bar-height) max-w-5xl items-stretch px-1">
           {links.map((link) => {
             const Icon = iconFor(link.href);
             const active = isActive(pathname, link.href);
@@ -72,7 +72,7 @@ export function MobileTabBar({ links }: { links: AppNavLink[] }) {
                   aria-current={active ? "page" : undefined}
                   data-active={active ? "true" : undefined}
                   className={cn(
-                    "flex min-h-11 h-full min-w-11 flex-col items-center justify-center gap-1 rounded-xl px-1 text-[11px] font-medium leading-none transition-colors",
+                    "flex h-full min-h-11 min-w-11 flex-col items-center justify-center gap-0.5 rounded-xl px-0.5 text-center text-[11px] font-medium leading-tight transition-colors",
                     active
                       ? "text-foreground"
                       : "text-muted-foreground hover:text-foreground",
@@ -86,7 +86,7 @@ export function MobileTabBar({ links }: { links: AppNavLink[] }) {
                   >
                     <Icon className="size-5" aria-hidden />
                   </span>
-                  <span className="max-w-full truncate">{link.label}</span>
+                  <span className="line-clamp-2 max-w-full">{link.label}</span>
                 </Link>
               </li>
             );

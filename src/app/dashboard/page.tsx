@@ -6,7 +6,6 @@ import { BuyerDashboardViewPanel } from "@/components/buyer-dashboard-view";
 import { FixtureLoginPrompt } from "@/components/fixture-login-prompt";
 import { LiveBuyerDashboard } from "@/components/live-buyer-dashboard";
 import { QueryErrorBoundary } from "@/components/query-error-boundary";
-import { ConciergeChat } from "@/components/concierge-chat";
 import { FixtureVault } from "@/components/document-vault";
 import { ContractExplainer } from "@/components/contract-explainer";
 import { FixtureOfferCenter } from "@/components/offer-center";
@@ -35,7 +34,8 @@ export const dynamic = "force-dynamic";
 /*
   Each fixture region loads its own data inside its own error boundary, so a
   failed loader degrades that one section to a Retry card instead of taking
-  the whole page down. Region order is the DOM order the specs read.
+  the whole page down. Region order is the DOM order the specs read. The
+  concierge is not a region: AppShell mounts it globally as a FAB + sheet.
 */
 
 async function FixtureHubRegion({ session }: { session: TestBuyerSession }) {
@@ -152,7 +152,6 @@ export default async function DashboardPage({
           <QueryErrorBoundary message="The document vault did not load.">
             <FixtureVault />
           </QueryErrorBoundary>
-          <ConciergeChat />
         </div>
       </AppShell>
     );

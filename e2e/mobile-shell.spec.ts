@@ -64,7 +64,7 @@ test.describe("mobile shell", () => {
     await expect(page).toHaveURL(/\/dashboard$/);
     // The URL flips while /dashboard/loading.tsx is still on screen; scroll
     // only once the last dashboard region has streamed in.
-    await expect(page.getByTestId("concierge")).toBeVisible();
+    await expect(page.getByTestId("document-vault")).toBeVisible();
 
     await page.evaluate(() =>
       window.scrollTo(0, document.documentElement.scrollHeight),

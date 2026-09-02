@@ -2,6 +2,10 @@ import Link from "next/link";
 
 import { getTestSession } from "@/app/actions/test-session";
 import { AppNavLinks } from "@/components/app-nav";
+import {
+  ConciergeSheet,
+  type ConciergeScope,
+} from "@/components/concierge-sheet";
 import { HeaderSearchHomes } from "@/components/header-search";
 import { LiveAppNav, LiveMobileTabBar } from "@/components/live-app-nav";
 import { MobileTabBar } from "@/components/mobile-tab-bar";
@@ -11,6 +15,24 @@ import {
   wordmarkHrefFor,
 } from "@/lib/app-nav";
 import { isAuthConfigured } from "@/lib/auth-config";
+import { seedDashboardForBuyer } from "@/lib/seed-dashboard";
+import type { TestBuyerSession } from "@/lib/test-session";
+
+/*
+  The concierge is scoped to one transaction, so the sheet header names the
+  file it can talk about. Only buyer sessions get a scope; agents, vendors,
+  and guests never receive the FAB or the sheet tree.
+*/
+function conciergeScopeFor(session: TestBuyerSession): ConciergeScope {
+  const view = seedDashboardForBuyer(session.clerkId);
+  const address = view.propertyAddress;
+  return {
+    address: address
+      ? `${address.line1}, ${address.city}`
+      : "No property on this file yet",
+    stage: view.where.label,
+  };
+}
 
 export async function AppShell({
   children,
@@ -24,6 +46,10 @@ export async function AppShell({
   const context = navContextFromFixtureSession(session);
   const links = navLinksFor(context);
   const liveNav = live && session === null;
+  const conciergeScope =
+    session !== null && session.role === "buyer"
+      ? conciergeScopeFor(session)
+      : null;
 
   return (
     <div className="min-h-full bg-background">
@@ -53,6 +79,7 @@ export async function AppShell({
       </header>
       <main className="mx-auto max-w-5xl px-5 py-10">{children}</main>
       {liveNav ? <LiveMobileTabBar /> : <MobileTabBar links={links} />}
+      {conciergeScope ? <ConciergeSheet scope={conciergeScope} /> : null}
     </div>
   );
 }

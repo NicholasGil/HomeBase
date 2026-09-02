@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import {
+  ASK_MY_AGENT_HREF,
   ConciergeAnswerView,
   parseSourcedMoneyLine,
 } from "@/components/concierge-answer";
@@ -80,5 +81,38 @@ describe("ConciergeAnswerView", () => {
     expect(html).toContain("another client");
     expect(html).not.toContain("$");
     expect(html).not.toContain("<details");
+  });
+
+  it("renders refusals in sand with an Ask my agent handoff", () => {
+    const refused = ask("What happens next on Blair Chen's file?");
+    const html = renderToStaticMarkup(
+      createElement(ConciergeAnswerView, { text: refused.text, kind: refused.kind }),
+    );
+    expect(html).toContain("bg-sand");
+    expect(html).toContain('data-testid="concierge-ask-agent"');
+    expect(html).toContain(`href="${ASK_MY_AGENT_HREF}"`);
+    expect(html).toContain("Ask my agent");
+  });
+
+  it("treats ask_agent replies as refusals with the same handoff", () => {
+    const advice = ask("Should I offer more?");
+    expect(advice.kind).toBe("ask_agent");
+    const html = renderToStaticMarkup(
+      createElement(ConciergeAnswerView, { text: advice.text, kind: advice.kind }),
+    );
+    expect(html).toContain('data-kind="ask_agent"');
+    expect(html).toContain("bg-sand");
+    expect(html).toContain('data-testid="concierge-ask-agent"');
+    expect(html).not.toContain("$");
+  });
+
+  it("keeps plain answers out of sand and without a handoff", () => {
+    const answer = ask("What happens next?");
+    const html = renderToStaticMarkup(
+      createElement(ConciergeAnswerView, { text: answer.text, kind: answer.kind }),
+    );
+    expect(html).toContain('data-kind="answer"');
+    expect(html).not.toContain("bg-sand");
+    expect(html).not.toContain("concierge-ask-agent");
   });
 });

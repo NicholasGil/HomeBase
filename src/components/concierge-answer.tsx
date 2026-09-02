@@ -1,4 +1,8 @@
+import Link from "next/link";
+
 import { MoneyFigureView } from "@/components/money-figure-view";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   MONEY_PROVENANCE,
   type MoneyFigure,
@@ -55,6 +59,20 @@ export function parseSourcedMoneyLine(text: string): SourcedMoneyLine | null {
   };
 }
 
+/**
+ * Where "Ask my agent" lands: the licensee thread the contract explainer
+ * already routes to. The concierge never answers strategy, price, or legal
+ * meaning itself, so a refusal always hands off rather than dead-ending.
+ */
+export const ASK_MY_AGENT_HREF = "/offers#agent-thread";
+
+const REPLY_BUBBLE =
+  "mr-auto max-w-[92%] rounded-2xl rounded-bl-md px-4 py-3 text-sm";
+
+export function isConciergeRefusal(kind: string | null): boolean {
+  return kind === "refuse" || kind === "ask_agent";
+}
+
 export function ConciergeAnswerView({
   text,
   kind,
@@ -62,11 +80,37 @@ export function ConciergeAnswerView({
   text: string;
   kind: string | null;
 }) {
+  if (isConciergeRefusal(kind)) {
+    return (
+      <div
+        data-testid="concierge-answer"
+        data-kind={kind ?? undefined}
+        className={cn(REPLY_BUBBLE, "space-y-3 bg-sand text-sand-foreground")}
+      >
+        <p>{text}</p>
+        <Link
+          href={ASK_MY_AGENT_HREF}
+          data-testid="concierge-ask-agent"
+          className={cn(
+            buttonVariants({ variant: "outline" }),
+            "h-10 rounded-full border-sand-foreground/20 bg-card px-4 text-foreground hover:bg-card/80",
+          )}
+        >
+          Ask my agent
+        </Link>
+      </div>
+    );
+  }
+
   const sourced = kind === "answer" ? parseSourcedMoneyLine(text) : null;
 
   if (sourced === null) {
     return (
-      <p data-testid="concierge-answer" data-kind={kind ?? undefined}>
+      <p
+        data-testid="concierge-answer"
+        data-kind={kind ?? undefined}
+        className={cn(REPLY_BUBBLE, "bg-card ring-1 ring-black/5")}
+      >
         {text}
       </p>
     );
@@ -76,7 +120,7 @@ export function ConciergeAnswerView({
     <div
       data-testid="concierge-answer"
       data-kind={kind ?? undefined}
-      className="space-y-2"
+      className={cn(REPLY_BUBBLE, "space-y-2 bg-card ring-1 ring-black/5")}
     >
       <p>{sourced.lead}</p>
       <MoneyFigureView figure={sourced.figure} size="md" />

@@ -59,25 +59,20 @@ function AssumptionsDisclosure({
   figure,
   href,
   lines,
-  size,
 }: {
   figure: MoneyFigure;
   href?: string;
   lines?: readonly string[];
-  size: MoneyFigureSize;
 }) {
   return (
     <details
-      className={cn(
-        "group/assumptions min-w-0 not-italic",
-        size === "sm" ? "basis-full" : null,
-      )}
+      className="min-w-0 not-italic open:basis-full"
       data-slot="money-assumptions"
     >
       <summary className="inline-flex min-h-5 cursor-pointer list-none items-center text-xs font-medium text-sky-foreground underline decoration-sky-foreground/40 underline-offset-4 hover:decoration-sky-foreground marker:content-none focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-ring/50">
         {ASSUMPTIONS_LABEL}
       </summary>
-      <div className="mt-2 space-y-1 rounded-lg bg-sky/50 px-3 py-2 text-left text-xs leading-relaxed text-sky-foreground">
+      <div className="mt-2 space-y-1 rounded-lg bg-sky/50 px-3 py-2 text-left text-xs leading-relaxed text-sky-foreground ring-1 ring-sky-foreground/10">
         <p>{ESTIMATE_NOTE[figure.provenance]}</p>
         {figure.asOf > 0 ? <p>As of {formatAsOf(figure.asOf)}.</p> : null}
         {lines?.map((line) => <p key={line}>{line}</p>)}
@@ -164,46 +159,11 @@ export function MoneyFigureView({
     );
   }
 
-  const badges = (
-    <>
-      <Badge variant={isEstimate ? "sky" : "default"}>{figure.provenance}</Badge>
-      <Badge variant={isEstimate ? "sky" : "outline"}>
-        {isEstimate ? "estimate" : "issued"}
-      </Badge>
-    </>
-  );
-
-  if (size === "sm") {
-    return (
-      <div
-        className={cn("flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1", className)}
-        data-testid={testId}
-        data-provenance={figure.provenance}
-        data-figure={display.kind}
-      >
-        {label ? (
-          <span className="basis-full text-xs text-muted-foreground">{label}</span>
-        ) : null}
-        <p className={cn(amountClassName, "inline-flex items-baseline gap-1.5")}>
-          {eyebrow}
-          <span>{display.amountText}</span>
-        </p>
-        {badges}
-        {isEstimate ? (
-          <AssumptionsDisclosure
-            figure={figure}
-            href={assumptionsHref}
-            lines={assumptions}
-            size={size}
-          />
-        ) : null}
-      </div>
-    );
-  }
+  const estimateBadgeClassName = "border-sky-foreground/25";
 
   return (
     <div
-      className={cn("min-w-0 space-y-2", className)}
+      className={cn("min-w-0", size === "sm" ? "space-y-1" : "space-y-2", className)}
       data-testid={testId}
       data-provenance={figure.provenance}
       data-figure={display.kind}
@@ -211,16 +171,31 @@ export function MoneyFigureView({
       {label ? (
         <p className="text-xs font-medium text-muted-foreground">{label}</p>
       ) : null}
-      {eyebrow ? <p className="leading-none">{eyebrow}</p> : null}
-      <p className={amountClassName}>{display.amountText}</p>
-      <div className="flex flex-wrap items-center gap-2">
-        {badges}
+      {eyebrow !== null && size !== "sm" ? (
+        <p className="leading-none">{eyebrow}</p>
+      ) : null}
+      <p className={cn(amountClassName, "flex flex-wrap items-baseline gap-x-1.5")}>
+        {size === "sm" ? eyebrow : null}
+        <span>{display.amountText}</span>
+      </p>
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <Badge
+          variant={isEstimate ? "sky" : "default"}
+          className={isEstimate ? estimateBadgeClassName : undefined}
+        >
+          {figure.provenance}
+        </Badge>
+        <Badge
+          variant={isEstimate ? "sky" : "outline"}
+          className={isEstimate ? estimateBadgeClassName : undefined}
+        >
+          {isEstimate ? "estimate" : "issued"}
+        </Badge>
         {isEstimate ? (
           <AssumptionsDisclosure
             figure={figure}
             href={assumptionsHref}
             lines={assumptions}
-            size={size}
           />
         ) : null}
       </div>

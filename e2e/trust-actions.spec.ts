@@ -25,6 +25,7 @@ test("empty Build My Tour stays usable and does not overlay", async ({
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Blair Chen" }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
+  await page.goto("/tours");
   await expect(page.getByTestId("tour-builder")).toBeVisible();
 
   for (const checkbox of await page.locator('input[name="propertyIds"]').all()) {

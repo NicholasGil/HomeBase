@@ -13,6 +13,8 @@ async function stepThroughGrantSheet(page: Page) {
 test("grant, third-party view, then revoke is denied", async ({ page }) => {
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Alex Rivera" }).click();
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await page.goto("/vault");
   await expect(page.getByTestId("document-vault")).toBeVisible();
   await expect(page.getByTestId("vault-doc-preapproval")).toBeVisible();
   await expect(page.getByTestId("vault-doc-inspection_report")).toBeVisible();

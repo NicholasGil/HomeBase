@@ -4,10 +4,8 @@ import { useQuery } from "convex/react";
 import { Search } from "lucide-react";
 
 import { BuyerDashboardViewPanel } from "@/components/buyer-dashboard-view";
+import { DashboardSummaryCards } from "@/components/dashboard-summary-cards";
 import { EmptyState } from "@/components/empty-state";
-import { LiveContractExplainer } from "@/components/live-contract-explainer";
-import { LiveOfferCenter } from "@/components/live-offer-center";
-import { LiveTourBuilder } from "@/components/live-tour-builder";
 import { LiveHomeownershipHub } from "@/components/live-homeownership-hub";
 import { LiveVendorDirectory } from "@/components/live-vendor-directory";
 import { QueryErrorBoundary } from "@/components/query-error-boundary";
@@ -35,23 +33,19 @@ export function LiveBuyerDashboard({ buyerName }: { buyerName?: string }) {
 
   return (
     <div className={tripStackClassName}>
-      <BuyerDashboardViewPanel view={view} buyerName={buyerName} />
+      <BuyerDashboardViewPanel
+        view={view}
+        buyerName={buyerName}
+        detail="summary"
+      />
       {view.where.status === "closed" ? (
         <QueryErrorBoundary message="The homeownership hub did not load.">
           <LiveHomeownershipHub transactionId={view.transactionId} />
         </QueryErrorBoundary>
       ) : null}
+      <DashboardSummaryCards view={view} />
       <QueryErrorBoundary message="The vendor directory did not load.">
         <LiveVendorDirectory transactionId={view.transactionId} />
-      </QueryErrorBoundary>
-      <QueryErrorBoundary message="Tours did not load.">
-        <LiveTourBuilder />
-      </QueryErrorBoundary>
-      <QueryErrorBoundary message="The offer center did not load.">
-        <LiveOfferCenter />
-      </QueryErrorBoundary>
-      <QueryErrorBoundary message="The contract explainer did not load.">
-        <LiveContractExplainer />
       </QueryErrorBoundary>
     </div>
   );

@@ -82,12 +82,34 @@ function DrillLink({
   );
 }
 
+/**
+ * `full` (transaction page): the hero plus the three stage columns. `summary`
+ * (dashboard): the hero plus one line for the advance gate and deadlines; the
+ * task list and contacts live on the transaction page the dashboard links to.
+ */
+export type DashboardDetail = "full" | "summary";
+
+function AdvanceGate({ view }: { view: BuyerDashboardView }) {
+  if (view.canAdvance) {
+    return <p>Ready for {view.nextStage?.label ?? "the next stage"}.</p>;
+  }
+  return (
+    <p data-testid="stage-blocked">
+      Cannot leave {view.where.label}
+      {view.blockingTasks[0]
+        ? ` while ${view.blockingTasks[0].title} is open.`
+        : "."}
+    </p>
+  );
+}
+
 export function BuyerDashboardViewPanel({
   view,
   buyerName,
   eyebrow,
   journeyOrientation = "horizontal",
   detailHref = transactionHref(view.transactionId),
+  detail = "full",
 }: {
   view: BuyerDashboardView;
   buyerName?: string;
@@ -99,6 +121,7 @@ export function BuyerDashboardViewPanel({
    * no links to itself.
    */
   detailHref?: string | null;
+  detail?: DashboardDetail;
 }) {
   const owed = view.owedToday;
   const place = view.propertyAddress
@@ -243,6 +266,19 @@ export function BuyerDashboardViewPanel({
         </div>
       </section>
 
+      {detail === "summary" ? (
+        <section
+          data-testid="stage-gate-summary"
+          className="flex flex-wrap items-baseline gap-x-6 gap-y-1 text-sm"
+        >
+          <AdvanceGate view={view} />
+          {view.deadlines.map((deadline) => (
+            <p key={deadline.label} className="text-muted-foreground">
+              {deadline.label}
+            </p>
+          ))}
+        </section>
+      ) : (
       <section className="grid gap-8 md:grid-cols-3">
         <div>
           <h2 className="text-sm font-medium">This stage</h2>
@@ -276,16 +312,7 @@ export function BuyerDashboardViewPanel({
             Stage advance stays blocked while a blocking task is open.
           </p>
           <div className="mt-3 space-y-2 text-sm">
-            {view.canAdvance ? (
-              <p>Ready for {view.nextStage?.label ?? "the next stage"}.</p>
-            ) : (
-              <p data-testid="stage-blocked">
-                Cannot leave {view.where.label}
-                {view.blockingTasks[0]
-                  ? ` while ${view.blockingTasks[0].title} is open.`
-                  : "."}
-              </p>
-            )}
+            <AdvanceGate view={view} />
             {view.deadlines.map((deadline) => (
               <p key={deadline.label} className="text-muted-foreground">
                 {deadline.label}
@@ -312,6 +339,7 @@ export function BuyerDashboardViewPanel({
           </div>
         </div>
       </section>
+      )}
     </div>
   );
 }

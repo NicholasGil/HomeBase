@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { VendorMoreDisclosure } from "@/components/vendor-more-disclosure";
 import type { ListedSeedVendor } from "@/lib/seed-vendors";
 import { tripHeadingClassName } from "@/lib/trip-ui";
 
@@ -73,19 +74,45 @@ export function VendorDirectoryView({
         <p className="text-sm text-muted-foreground" data-testid="vendor-directory-empty">
           No vendors surface on this stage.
         </p>
+      ) : inspectors.length >= 2 ? (
+        <VendorMoreDisclosure count={rest.length}>
+          <VendorGrid
+            vendors={rest}
+            transactionId={transactionId}
+            requestedVendorIds={requestedVendorIds}
+          />
+        </VendorMoreDisclosure>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2">
-          {(inspectors.length >= 2 ? rest : vendors).map((vendor) => (
-            <VendorCard
-              key={vendor.id}
-              vendor={vendor}
-              transactionId={transactionId}
-              requested={requestedVendorIds.includes(vendor.id)}
-            />
-          ))}
-        </div>
+        <VendorGrid
+          vendors={vendors}
+          transactionId={transactionId}
+          requestedVendorIds={requestedVendorIds}
+        />
       )}
     </section>
+  );
+}
+
+function VendorGrid({
+  vendors,
+  transactionId,
+  requestedVendorIds,
+}: {
+  vendors: ListedSeedVendor[];
+  transactionId: string;
+  requestedVendorIds: string[];
+}) {
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      {vendors.map((vendor) => (
+        <VendorCard
+          key={vendor.id}
+          vendor={vendor}
+          transactionId={transactionId}
+          requested={requestedVendorIds.includes(vendor.id)}
+        />
+      ))}
+    </div>
   );
 }
 
@@ -112,21 +139,23 @@ function VendorCard({
           {compare ? " · compare" : null}
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-3 text-sm">
+      <CardContent className="space-y-2 text-sm">
         <p>{vendor.notes}</p>
         <p className="text-muted-foreground">{vendor.credentials}</p>
-        <p>
+        <p className="break-words">
           {vendor.contact.phone ?? "No phone"}
           {vendor.contact.email ? ` · ${vendor.contact.email}` : null}
         </p>
-        <Badge variant="sage">Compensation: none</Badge>
-        <form action={requestFixtureAppointmentFromForm}>
-          <input type="hidden" name="transactionId" value={transactionId} />
-          <input type="hidden" name="vendorId" value={vendor.id} />
-          <Button type="submit" variant="outline">
-            {requested ? "Appointment requested" : "Request appointment"}
-          </Button>
-        </form>
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+          <Badge variant="sage">Compensation: none</Badge>
+          <form action={requestFixtureAppointmentFromForm}>
+            <input type="hidden" name="transactionId" value={transactionId} />
+            <input type="hidden" name="vendorId" value={vendor.id} />
+            <Button type="submit" variant="outline">
+              {requested ? "Appointment requested" : "Request appointment"}
+            </Button>
+          </form>
+        </div>
       </CardContent>
     </Card>
   );

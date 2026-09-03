@@ -295,6 +295,30 @@ export function StageColumnsSkeleton() {
   );
 }
 
+/** Four route pointers: icon disc, eyebrow, title, one detail line. */
+function SummaryCardsSkeleton() {
+  return (
+    <section className="space-y-4">
+      <SectionHeadingSkeleton badges={0} description="w-72" />
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {Array.from({ length: 4 }, (_, index) => (
+          <div
+            key={index}
+            className="flex items-center gap-3 rounded-[14px] bg-card p-3 ring-1 ring-black/6 sm:flex-col sm:items-start sm:gap-4 sm:p-4"
+          >
+            <Skeleton className="size-10 shrink-0 rounded-full" />
+            <div className="min-w-0 flex-1 space-y-1.5">
+              <Skeleton className="h-3 w-12" />
+              <Skeleton className="h-5 w-28" />
+              <Skeleton className="h-4 w-full" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export function DashboardSkeleton() {
   return (
     <div className={tripStackClassName}>
@@ -302,13 +326,13 @@ export function DashboardSkeleton() {
         <TenSecondHeroSkeleton />
         <StageColumnsSkeleton />
       </div>
-      <section className="space-y-6">
-        <SectionHeadingSkeleton />
-        <ListingGridSkeleton />
-      </section>
-      <section className="space-y-6">
-        <SectionHeadingSkeleton />
-        <InfoCardSkeleton lines={3} />
+      <SummaryCardsSkeleton />
+      <section className="space-y-4">
+        <SectionHeadingSkeleton badges={0} description="w-4/5" />
+        <div className="grid gap-4 md:grid-cols-2">
+          <InfoCardSkeleton lines={3} button />
+          <InfoCardSkeleton lines={3} button />
+        </div>
       </section>
     </div>
   );

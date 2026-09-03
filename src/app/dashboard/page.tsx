@@ -1,19 +1,14 @@
 import { redirect } from "next/navigation";
 
 import { getTestSession } from "@/app/actions/test-session";
+import { ActionNotice } from "@/components/action-notice";
 import { AppShell } from "@/components/app-shell";
 import { BuyerDashboardViewPanel } from "@/components/buyer-dashboard-view";
+import { DashboardSummaryCards } from "@/components/dashboard-summary-cards";
 import { FixtureLoginPrompt } from "@/components/fixture-login-prompt";
 import { LiveBuyerDashboard } from "@/components/live-buyer-dashboard";
 import { QueryErrorBoundary } from "@/components/query-error-boundary";
-import { FixtureVault } from "@/components/document-vault";
-import { ContractExplainer } from "@/components/contract-explainer";
-import { FixtureOfferCenter } from "@/components/offer-center";
-import { FixtureTourBuilder } from "@/components/tour-builder";
 import { FixtureVendorDirectory } from "@/components/fixture-vendor-directory";
-import { loadFixtureExplainer } from "@/app/actions/explainer";
-import { loadFixtureOffers } from "@/app/actions/offers";
-import { loadFixtureTours } from "@/app/actions/tours";
 import {
   dashboardRenderMode,
   mustFailClosed,
@@ -32,10 +27,13 @@ import { tripStackClassName } from "@/lib/trip-ui";
 export const dynamic = "force-dynamic";
 
 /*
-  Each fixture region loads its own data inside its own error boundary, so a
-  failed loader degrades that one section to a Retry card instead of taking
-  the whole page down. Region order is the DOM order the specs read. The
-  concierge is not a region: AppShell mounts it globally as a FAB + sheet.
+  The dashboard is the ten-second fold plus pointers. Tours, offers, the
+  explainer, and the vault each own a route; the dashboard links to them
+  instead of inlining their builders. The vendor directory stays because it
+  is stage-triggered and has no route of its own. Each region loads inside
+  its own error boundary so one failed loader degrades to a Retry card.
+  Region order is the DOM order the specs read. The concierge is not a
+  region: AppShell mounts it globally as a FAB + sheet.
 */
 
 async function FixtureHubRegion({ session }: { session: TestBuyerSession }) {
@@ -51,43 +49,10 @@ async function FixtureHubRegion({ session }: { session: TestBuyerSession }) {
   );
 }
 
-async function FixtureToursRegion({ notice }: { notice?: string }) {
-  const tours = await loadFixtureTours();
-  return (
-    <FixtureTourBuilder
-      tours={tours.tours.ok ? tours.tours.tours : []}
-      notice={notice}
-      returnTo="/dashboard"
-    />
-  );
-}
-
-async function FixtureOffersRegion({ gate }: { gate?: string }) {
-  const offers = await loadFixtureOffers();
-  return (
-    <FixtureOfferCenter
-      denied={!offers.ok}
-      center={offers.ok ? offers.center : null}
-      gateFromSubmit={gate}
-    />
-  );
-}
-
-async function FixtureExplainerRegion() {
-  const explainer = await loadFixtureExplainer();
-  return (
-    <ContractExplainer
-      denied={!explainer.sections.ok}
-      sections={explainer.sections.ok ? explainer.sections.sections : []}
-      thread={explainer.thread}
-    />
-  );
-}
-
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ notice?: string; gate?: string }>;
+  searchParams: Promise<{ notice?: string }>;
 }) {
   if (mustFailClosed()) {
     throw new ProductionAuthMisconfiguredError();
@@ -122,14 +87,16 @@ export default async function DashboardPage({
       throw new Error("fixture mode requires a buyer session");
     }
     const params = await searchParams;
+    const view = seedDashboardForBuyer(session.clerkId);
     return (
       <AppShell>
         <div className={tripStackClassName}>
           <QueryErrorBoundary message="Your file did not load.">
             <BuyerDashboardViewPanel
-              view={seedDashboardForBuyer(session.clerkId)}
+              view={view}
               buyerName={session.name}
               eyebrow="Fixture session · not Clerk"
+              detail="summary"
             />
           </QueryErrorBoundary>
           {fixtureBuyerIsClosed(session) ? (
@@ -137,20 +104,12 @@ export default async function DashboardPage({
               <FixtureHubRegion session={session} />
             </QueryErrorBoundary>
           ) : null}
-          <QueryErrorBoundary message="Tours did not load.">
-            <FixtureToursRegion notice={params.notice} />
-          </QueryErrorBoundary>
-          <QueryErrorBoundary message="The offer center did not load.">
-            <FixtureOffersRegion gate={params.gate} />
-          </QueryErrorBoundary>
-          <QueryErrorBoundary message="The contract explainer did not load.">
-            <FixtureExplainerRegion />
-          </QueryErrorBoundary>
+          <DashboardSummaryCards view={view} />
           <QueryErrorBoundary message="The vendor directory did not load.">
-            <FixtureVendorDirectory />
-          </QueryErrorBoundary>
-          <QueryErrorBoundary message="The document vault did not load.">
-            <FixtureVault />
+            <div className="space-y-4">
+              <ActionNotice notice={params.notice} />
+              <FixtureVendorDirectory />
+            </div>
           </QueryErrorBoundary>
         </div>
       </AppShell>

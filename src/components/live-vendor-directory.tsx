@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { VendorMoreDisclosure } from "@/components/vendor-more-disclosure";
 import type { Id } from "../../convex/_generated/dataModel";
 import { tripHeadingClassName } from "@/lib/trip-ui";
 import { api } from "../../convex/_generated/api";
@@ -84,35 +85,45 @@ export function LiveVendorDirectory({
         <p className="text-sm text-muted-foreground" data-testid="vendor-directory-empty">
           No vendors surface on this stage.
         </p>
+      ) : inspectors.length >= 2 ? (
+        <VendorMoreDisclosure count={rest.length}>
+          {renderGrid(rest)}
+        </VendorMoreDisclosure>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2">
-          {(inspectors.length >= 2 ? rest : directory.vendors).map((vendor) => (
-            <Card key={vendor._id} data-testid={`vendor-card-${vendor._id}`}>
-              <CardHeader>
-                <CardTitle>{vendor.name}</CardTitle>
-                <CardDescription>{vendor.category}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm">
-                <p>{vendor.notes}</p>
-                <Badge variant="sage">Compensation: none</Badge>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    void requestAppointment({
-                      transactionId: transactionId as Id<"transactions">,
-                      vendorId: vendor._id,
-                      startsAt: Date.now() + 86_400_000,
-                      endsAt: Date.now() + 86_400_000 + 7_200_000,
-                    });
-                  }}
-                >
-                  Request appointment
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        renderGrid(directory.vendors)
       )}
     </section>
   );
+
+  function renderGrid(vendors: NonNullable<typeof directory>["vendors"]) {
+    return (
+      <div className="grid gap-4 md:grid-cols-2">
+        {vendors.map((vendor) => (
+          <Card key={vendor._id} data-testid={`vendor-card-${vendor._id}`}>
+            <CardHeader>
+              <CardTitle>{vendor.name}</CardTitle>
+              <CardDescription>{vendor.category}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              <p>{vendor.notes}</p>
+              <Badge variant="sage">Compensation: none</Badge>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  void requestAppointment({
+                    transactionId: transactionId as Id<"transactions">,
+                    vendorId: vendor._id,
+                    startsAt: Date.now() + 86_400_000,
+                    endsAt: Date.now() + 86_400_000 + 7_200_000,
+                  });
+                }}
+              >
+                Request appointment
+              </Button>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
 }

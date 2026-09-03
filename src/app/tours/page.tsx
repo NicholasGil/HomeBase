@@ -6,6 +6,7 @@ import { AppShell } from "@/components/app-shell";
 import { FixtureLoginPrompt } from "@/components/fixture-login-prompt";
 import { LiveTourBuilder } from "@/components/live-tour-builder";
 import { QueryErrorBoundary } from "@/components/query-error-boundary";
+import { RouteHeader } from "@/components/route-header";
 import { FixtureTourBuilder } from "@/components/tour-builder";
 import {
   dashboardRenderMode,
@@ -60,10 +61,10 @@ export default async function ToursPage({
     const params = await searchParams;
     return (
       <AppShell>
-        <h1 className="mb-6 text-h1 font-semibold tracking-tight">Tours</h1>
-        <p className="mb-8 text-sm text-muted-foreground">
-          Signed in as {session.name} · {session.role}
-        </p>
+        <RouteHeader
+          title="Tours"
+          caption={`Signed in as ${session.name} · ${session.role}`}
+        />
         <QueryErrorBoundary message="Tours did not load.">
           <FixtureTours notice={params.notice} />
         </QueryErrorBoundary>

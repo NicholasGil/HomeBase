@@ -6,6 +6,7 @@ import { FixtureVault } from "@/components/document-vault";
 import { FixtureLoginPrompt } from "@/components/fixture-login-prompt";
 import { LiveDocumentVault } from "@/components/live-document-vault";
 import { QueryErrorBoundary } from "@/components/query-error-boundary";
+import { RouteHeader } from "@/components/route-header";
 import {
   dashboardRenderMode,
   mustFailClosed,
@@ -45,12 +46,10 @@ export default async function VaultPage({
     const params = await searchParams;
     return (
       <AppShell>
-        <h1 className="mb-6 text-h1 font-semibold tracking-tight">
-          Document vault
-        </h1>
-        <p className="mb-8 text-sm text-muted-foreground">
-          Signed in as {session.name} · {session.role}
-        </p>
+        <RouteHeader
+          title="Document vault"
+          caption={`Signed in as ${session.name} · ${session.role}`}
+        />
         <QueryErrorBoundary message="The document vault did not load.">
           <FixtureVault notice={params.notice} />
         </QueryErrorBoundary>

@@ -55,13 +55,13 @@ export function ShellSkeleton({
   );
 }
 
-/** `h1.text-h1.mb-6` plus the "Signed in as" line with its `mb-8`. */
+/** `RouteHeader`: the 44px display title over the 18px caption, then `mb-8`. */
 export function PageTitleSkeleton({ width = "w-40" }: { width?: string }) {
   return (
-    <>
-      <Skeleton className={cn("mb-6 h-9", width)} />
-      <Skeleton className="mb-8 h-5 w-56" />
-    </>
+    <div className="mb-8 space-y-1.5">
+      <Skeleton className={cn("h-11", width)} />
+      <Skeleton className="h-4.5 w-56" />
+    </div>
   );
 }
 

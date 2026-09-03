@@ -10,6 +10,7 @@ import { ContractExplainer } from "@/components/contract-explainer";
 import { LiveContractExplainer } from "@/components/live-contract-explainer";
 import { FixtureOfferCenter } from "@/components/offer-center";
 import { QueryErrorBoundary } from "@/components/query-error-boundary";
+import { RouteHeader } from "@/components/route-header";
 import {
   dashboardRenderMode,
   mustFailClosed,
@@ -71,10 +72,10 @@ export default async function OffersPage({
     }
     return (
       <AppShell>
-        <h1 className="mb-6 text-h1 font-semibold tracking-tight">Offers</h1>
-        <p className="mb-8 text-sm text-muted-foreground">
-          Signed in as {session.name} · {session.role}
-        </p>
+        <RouteHeader
+          title="Offers"
+          caption={`Signed in as ${session.name} · ${session.role}`}
+        />
         <div className="space-y-10">
           <QueryErrorBoundary message="The offer center did not load.">
             <FixtureOffers gate={params.gate} />

@@ -37,6 +37,8 @@ function readSidePanel() {
  * mobile tab bar (plus the device safe-area inset) and opens the chat in a
  * bottom sheet below `lg`, or a 420px right panel at `lg` and up. Rendering is
  * gated by role in AppShell, so agents and vendors never receive this tree.
+ * `--fab-dock-clearance` (globals.css) lifts it clear of a route's sticky
+ * bottom action so the two never share a rectangle.
  *
  * The side is chosen from a media query rather than responsive classes so the
  * primitive's own per-side positioning and enter/exit motion stay intact. The
@@ -55,7 +57,7 @@ export function ConciergeSheet({ scope }: { scope: ConciergeScope }) {
       <SheetTrigger
         data-testid="concierge-fab"
         aria-label="Ask the concierge"
-        className="fixed right-4 bottom-[calc(var(--tab-bar-height)+env(safe-area-inset-bottom)+1rem)] z-30 flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_10px_28px_rgba(15,23,42,0.22)] transition-transform outline-none hover:scale-[1.03] focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-95 md:right-6 md:bottom-[calc(env(safe-area-inset-bottom)+1.5rem)]"
+        className="fixed right-4 bottom-[calc(var(--tab-bar-height)+env(safe-area-inset-bottom)+1rem+var(--fab-dock-clearance))] z-30 flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_10px_28px_rgba(15,23,42,0.22)] transition-[bottom,transform] outline-none hover:scale-[1.03] focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-95 md:right-6 md:bottom-[calc(env(safe-area-inset-bottom)+1.5rem+var(--fab-dock-clearance))]"
       >
         <MessageCircleQuestionMark className="size-6" aria-hidden />
       </SheetTrigger>

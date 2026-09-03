@@ -42,14 +42,21 @@ export async function FixtureVault({ notice }: { notice?: string }) {
 
   return (
     <section className="space-y-4" data-testid="document-vault">
-      <div className="flex items-end justify-between gap-3">
+      {/*
+        Below `md` the link sits under the copy on the left: at the row's right
+        edge it would scroll straight under the concierge FAB.
+      */}
+      <div className="flex flex-col items-start gap-1 md:flex-row md:items-end md:justify-between md:gap-3">
         <div>
           <h2 className={tripHeadingClassName}>Document vault</h2>
           <p className="text-sm text-muted-foreground">
             Access is decided in a server function. The page does not filter.
           </p>
         </div>
-        <Link href="/vault" className="text-sm underline">
+        <Link
+          href="/vault"
+          className="inline-flex min-h-11 items-center text-sm underline"
+        >
           Open vault
         </Link>
       </div>

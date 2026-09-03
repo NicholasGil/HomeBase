@@ -3,6 +3,7 @@
 import { useMutation, useQuery } from "convex/react";
 import { useState } from "react";
 
+import { AddToTourToggle } from "@/components/add-to-tour-toggle";
 import { ListingCardFrame } from "@/components/listing-card";
 import { ToursSectionSkeleton } from "@/components/route-skeletons";
 import { NoTourYet } from "@/components/no-tour-yet";
@@ -81,30 +82,27 @@ export function LiveTourBuilder() {
 
       <div className="grid gap-5 sm:grid-cols-2">
         {candidates.map((listing) => (
-          <label key={listing._id} className="block cursor-pointer">
-            <ListingCardFrame
-              testId={`tour-candidate-${listing._id}`}
-              addressLine={listing.address.line1}
-              cityState={`${listing.address.city}, ${listing.address.state}`}
-              sample
-            >
-              <p className="text-sm">{listing.brief}</p>
-              <span className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={selected.includes(listing._id)}
-                  onChange={(event) => {
-                    if (event.target.checked) {
-                      setSelected([...selected, listing._id]);
-                    } else {
-                      setSelected(selected.filter((id) => id !== listing._id));
-                    }
-                  }}
-                />
-                Add to tour
-              </span>
-            </ListingCardFrame>
-          </label>
+          <ListingCardFrame
+            key={listing._id}
+            testId={`tour-candidate-${listing._id}`}
+            addressLine={listing.address.line1}
+            cityState={`${listing.address.city}, ${listing.address.state}`}
+            sample
+          >
+            <p className="text-sm">{listing.brief}</p>
+            <AddToTourToggle
+              className="-ml-3"
+              checked={selected.includes(listing._id)}
+              data-testid={`select-${listing._id}`}
+              onChange={(event) => {
+                if (event.target.checked) {
+                  setSelected([...selected, listing._id]);
+                } else {
+                  setSelected(selected.filter((id) => id !== listing._id));
+                }
+              }}
+            />
+          </ListingCardFrame>
         ))}
       </div>
       <TourBuildAction

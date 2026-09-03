@@ -5,8 +5,8 @@ import { describe, expect, it } from "vitest";
 import {
   BuyerDashboardViewPanel,
   OwedTodayFigure,
-  taskAnchorId,
 } from "@/components/buyer-dashboard-view";
+import { taskAnchorId } from "@/components/task-anchor";
 import {
   ESTIMATE_AMOUNT_CLASS_NAME,
   ESTIMATE_LABEL,

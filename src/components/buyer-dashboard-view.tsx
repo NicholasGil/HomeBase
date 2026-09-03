@@ -1,6 +1,5 @@
-import { Check, Circle, CircleDashed, CircleOff } from "lucide-react";
 import Link from "next/link";
-import type { ComponentType, ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import {
   ContactReach,
@@ -9,6 +8,8 @@ import {
 import { DoneList } from "@/components/done-list";
 import { PhotoTile } from "@/components/listing-card";
 import { MoneyFigureView } from "@/components/money-figure-view";
+import { StageTaskRows } from "@/components/stage-task-rows";
+import { taskAnchorId } from "@/components/task-anchor";
 import { Badge } from "@/components/ui/badge";
 import {
   JourneyTracker,
@@ -17,7 +18,6 @@ import {
 import type {
   BuyerDashboardView,
   DashboardContact,
-  DashboardTask,
 } from "../../convex/lib/dashboardView";
 import { heroPhotoWashClassName } from "@/lib/trip-ui";
 import { cn } from "@/lib/utils";
@@ -101,14 +101,6 @@ export type DashboardDetail = "full" | "summary";
 /** A contact the view names, plus phone/email when the source carries them. */
 export type ReachableContact = DashboardContact & ContactReachDetails;
 
-/** Fragment id of a task row in the This-stage list. */
-export function taskAnchorId(title: string) {
-  return `task-${title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "")}`;
-}
-
 /**
  * The gate line. With `href` (the dashboard) the blocking task is a link into
  * the transaction route at its row; without one (the transaction page) the
@@ -143,78 +135,6 @@ function AdvanceGate({
       )}{" "}
       is open.
     </p>
-  );
-}
-
-const TASK_STATUS: Record<
-  DashboardTask["status"],
-  { icon: ComponentType<{ className?: string }>; iconClass: string; text: string }
-> = {
-  open: { icon: Circle, iconClass: "text-next", text: "open" },
-  blocked: {
-    icon: CircleDashed,
-    iconClass: "text-muted-foreground",
-    text: "blocked",
-  },
-  done: { icon: Check, iconClass: "text-sage-foreground", text: "done" },
-  canceled: {
-    icon: CircleOff,
-    iconClass: "text-muted-foreground",
-    text: "canceled",
-  },
-};
-
-const SETTLED_TASK: ReadonlySet<DashboardTask["status"]> = new Set([
-  "done",
-  "canceled",
-]);
-
-/**
- * Read-only rows: no task route or task mutation reaches the buyer, so each
- * row is a status mark, the title, the owner and the status word, with an
- * anchor id so the dashboard's gate line can land on it.
- */
-function StageTaskRows({ tasks }: { tasks: DashboardTask[] }) {
-  if (tasks.length === 0) {
-    return (
-      <p className="mt-3 text-sm text-muted-foreground">No tasks on this stage.</p>
-    );
-  }
-  return (
-    <ul
-      aria-label="Tasks on this stage"
-      className="mt-3 divide-y divide-border/70 text-sm"
-    >
-      {tasks.map((task) => {
-        const status = TASK_STATUS[task.status];
-        const Icon = status.icon;
-        const settled = SETTLED_TASK.has(task.status);
-        return (
-          <li
-            key={task.title}
-            id={taskAnchorId(task.title)}
-            data-task-status={task.status}
-            className="-mx-2 flex items-center gap-3 rounded-lg px-2 py-2.5 scroll-mt-24 target:bg-sand/60"
-          >
-            <Icon
-              className={cn("size-4 shrink-0", status.iconClass)}
-              aria-hidden
-            />
-            <span
-              className={cn("min-w-0 flex-1", settled && "text-muted-foreground")}
-            >
-              {task.title}
-            </span>
-            <span className="shrink-0 text-right text-xs text-muted-foreground">
-              {task.assigneeRole} · {status.text}
-              {task.blocksStage && !settled ? (
-                <span className="block">blocks advance</span>
-              ) : null}
-            </span>
-          </li>
-        );
-      })}
-    </ul>
   );
 }
 

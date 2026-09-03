@@ -40,6 +40,7 @@ async function FixtureTransaction({ transactionId }: { transactionId: string }) 
           buyerName={seedBuyerNameForTransaction(transactionId) ?? undefined}
           eyebrow="Opened by id"
           journeyOrientation="responsive"
+          detailHref={null}
         />
         {/* No mutation exists in the fixture preview, so the control renders disabled with that reason. */}
         <StageAdvancePanel view={loaded.view} />

@@ -55,6 +55,25 @@ describe("JourneyTracker", () => {
     expect(html.match(/tabindex="0"/g)).toHaveLength(1);
   });
 
+  it("renders no anchors without an href and one named link per stage with it", () => {
+    expect(html).not.toContain("<a ");
+
+    const linked = renderToStaticMarkup(
+      createElement(JourneyTracker, { stages, href: "/transactions/seed:buyer-a" }),
+    );
+    expect(linked.match(/<a /g)).toHaveLength(stages.length);
+    expect(linked.match(/href="\/transactions\/seed:buyer-a"/g)).toHaveLength(
+      stages.length,
+    );
+    expect(linked).not.toMatch(/<a [^>]*><\/a>/);
+    const inspection = stageMarkup(linked, "inspection");
+    expect(inspection).toMatch(/<a [^>]*tabindex="0"/);
+    expect(inspection).toContain("Inspection</span>");
+    expect(inspection).toContain(" · stage 8 of 13, current stage</span>");
+    expect(stageMarkup(linked, "appraisal")).toMatch(/<a [^>]*tabindex="-1"/);
+    expect(linked.match(/tabindex="0"/g)).toHaveLength(1);
+  });
+
   it("gives every stage a 44px hit area and only the responsive rail a vertical lg form", () => {
     expect(stageMarkup(html, "title")).toContain("min-h-11");
     expect(stageMarkup(html, "title")).toContain("w-11");

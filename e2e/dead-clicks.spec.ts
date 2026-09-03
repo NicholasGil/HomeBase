@@ -62,11 +62,37 @@ test("agent client and priority rows open the transaction", async ({ page }) => 
   await expect(page.getByTestId("ten-second-where")).toBeVisible();
 });
 
-test("dashboard next card opens tours", async ({ page }) => {
+test("dashboard next, due and stage chips open the buyer's transaction", async ({
+  page,
+}) => {
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Alex Rivera" }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
-  await page.getByTestId("ten-second-next").click();
-  await expect(page).toHaveURL(/\/tours$/);
-  await expect(page.getByTestId("tour-builder")).toBeVisible();
+  await expect(
+    page.getByTestId("journey-tracker").locator('a[href="#assumptions-panel"]'),
+  ).toHaveCount(0);
+  await expect(page.getByTestId("journey-tracker").locator("a")).toHaveCount(
+    13,
+  );
+
+  await page.getByTestId("ten-second-next").getByRole("link").click();
+  await expect(page).toHaveURL(/\/transactions\/seed:buyer-a$/);
+  await expect(page.getByTestId("ten-second-where")).toHaveText("Inspection");
+  await expect(page.getByText("You cannot open this transaction.")).toHaveCount(
+    0,
+  );
+
+  await page.goto("/dashboard");
+  await page.getByTestId("ten-second-owe").getByRole("link").click();
+  await expect(page).toHaveURL(/\/transactions\/seed:buyer-a$/);
+
+  await page.goto("/dashboard");
+  await page
+    .getByTestId("journey-stage-inspection")
+    .getByRole("link", { name: /Inspection/ })
+    .click();
+  await expect(page).toHaveURL(/\/transactions\/seed:buyer-a$/);
+  await expect(
+    page.getByTestId("journey-stage-inspection").locator("a"),
+  ).toHaveCount(0);
 });

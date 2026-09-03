@@ -56,6 +56,7 @@ export function LiveTransactionPage({
         view={view}
         eyebrow="Opened by id"
         journeyOrientation="responsive"
+        detailHref={null}
       />
       <LiveStageAdvancePanel view={view} />
     </div>

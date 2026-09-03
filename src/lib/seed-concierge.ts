@@ -1,4 +1,5 @@
 import type { ConciergeFact } from "../../lib/llm/types";
+import { formatDisplayDateTime } from "../../convex/lib/displayTime";
 import { SEED_CLERK_IDS, SEED_CONCIERGE } from "../../convex/seedPlan";
 import type { TestBuyerClerkId } from "@/lib/seed-dashboard";
 
@@ -20,7 +21,7 @@ export function seedConciergeFacts(clerkId: TestBuyerClerkId): ConciergeFact[] {
     },
     {
       key: "inspection_when",
-      text: `Inspection is at ${new Date(SEED_CONCIERGE.inspectionStartsAt).toISOString()}.`,
+      text: `Inspection is at ${formatDisplayDateTime(SEED_CONCIERGE.inspectionStartsAt)}.`,
       source: "appointments",
     },
     {
@@ -54,7 +55,7 @@ export function seedConciergeFacts(clerkId: TestBuyerClerkId): ConciergeFact[] {
     },
     {
       key: "first_showing",
-      text: `Leave for the first showing at ${new Date(SEED_CONCIERGE.showingStartsAt).toISOString()}.`,
+      text: `Leave for the first showing at ${formatDisplayDateTime(SEED_CONCIERGE.showingStartsAt)}.`,
       source: "appointments",
     },
   ];

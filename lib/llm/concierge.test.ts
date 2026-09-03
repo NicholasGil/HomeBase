@@ -7,6 +7,7 @@ import { completeConcierge } from "./index";
 import { containsRawPii, redactPii } from "./redact";
 import { CANONICAL_QUESTIONS } from "./types";
 import { seedConciergeFacts } from "../../src/lib/seed-concierge";
+import { containsRawIsoDateTime } from "../../convex/lib/displayTime";
 import { SEED_CLERK_IDS } from "../../convex/seedPlan";
 
 const facts = seedConciergeFacts(SEED_CLERK_IDS.buyerA);
@@ -27,7 +28,9 @@ describe("concierge", () => {
       completeConcierge({ question, facts, otherClientNames: ["Blair Chen"] }),
     );
     expect(answers[0]?.text).toContain("Schedule inspection");
-    expect(answers[1]?.text).toContain("Inspection is at");
+    expect(answers[1]?.text).toBe(
+      "Inspection is at Tue, Sep 8, 2026, 10:00 AM CDT.",
+    );
     expect(answers[2]?.text).toContain("repair_request");
     expect(answers[3]?.text).toContain("$450.00");
     expect(answers[3]?.text).toContain("title_issued");
@@ -35,8 +38,25 @@ describe("concierge", () => {
     expect(answers[5]?.text).toContain("$430,000.00");
     expect(answers[5]?.text).toContain("user_entered");
     expect(answers[6]?.text).toContain("Jordan Hale");
-    expect(answers[7]?.text).toContain("first showing");
+    expect(answers[7]?.text).toBe(
+      "Leave for the first showing at Sat, Sep 5, 2026, 2:00 PM CDT.",
+    );
     expect(answers.every((answer) => answer.kind !== "refuse")).toBe(true);
+  });
+
+  it("shows inspection and showing times as Chicago-local text, never raw ISO", () => {
+    const timed = [
+      "when is my inspection",
+      "when do I leave for my first showing",
+    ].map((question) =>
+      completeConcierge({ question, facts, otherClientNames: ["Blair Chen"] }),
+    );
+    for (const answer of timed) {
+      expect(answer.kind).toBe("answer");
+      expect(containsRawIsoDateTime(answer.text)).toBe(false);
+      expect(answer.text).not.toMatch(/T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z/);
+      expect(answer.text).toMatch(/\b(CDT|CST)\b/);
+    }
   });
 
   it("refuses another client's transaction and never invents a dollar", () => {

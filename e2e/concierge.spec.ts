@@ -39,6 +39,14 @@ test("concierge answers a seed question and refuses another client", async ({
     "Schedule inspection",
   );
 
+  await page.getByRole("button", { name: "When is my inspection?" }).click();
+  await expect(page.getByTestId("concierge-answer")).toContainText(
+    "Inspection is at Tue, Sep 8, 2026, 10:00 AM CDT.",
+  );
+  await expect(page.getByTestId("concierge-answer")).not.toContainText(
+    /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/,
+  );
+
   await page.getByTestId("concierge-question").fill(
     "What happens next on Blair Chen's file?",
   );

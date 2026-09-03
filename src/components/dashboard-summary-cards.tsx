@@ -14,6 +14,8 @@ type SummaryCard = {
   label: string;
   title: string;
   detail: string;
+  /** The spelled-out action, so the card reads as a door and not a stat. */
+  cta: string;
   badge?: string;
   icon: ComponentType<{ className?: string }>;
   tone: string;
@@ -44,6 +46,7 @@ export function summaryCardsFor(view: BuyerDashboardView): SummaryCard[] {
       detail: mentions(nextTitle, ["tour", "showing", "schedule"])
         ? `Next: ${nextTitle}.`
         : "Build a tour, reorder stops, log a verdict.",
+      cta: "Open tours",
       icon: Route,
       tone: "bg-sage/60 text-sage-foreground",
     },
@@ -55,6 +58,7 @@ export function summaryCardsFor(view: BuyerDashboardView): SummaryCard[] {
       detail: mentions(nextTitle, ["offer"])
         ? `Next: ${nextTitle}.`
         : "Three strategies, cost simulator, contract explainer.",
+      cta: "Open offer center",
       icon: Landmark,
       tone: "bg-peach/70 text-sand-foreground",
     },
@@ -66,6 +70,7 @@ export function summaryCardsFor(view: BuyerDashboardView): SummaryCard[] {
       detail: view.owedToday
         ? `${view.owedToday.label}.`
         : "Upload, share with an expiry, revoke any time.",
+      cta: "Open vault",
       icon: FileText,
       tone: "bg-sky/70 text-sky-foreground",
     },
@@ -78,6 +83,7 @@ export function summaryCardsFor(view: BuyerDashboardView): SummaryCard[] {
         openTasks === 0
           ? "No open task on this stage."
           : `${openTasks} open ${openTasks === 1 ? "task" : "tasks"} on this stage.`,
+      cta: "Open transaction",
       badge: view.canAdvance ? "ready to advance" : "advance blocked",
       icon: MapPinned,
       tone: "bg-sand text-sand-foreground",
@@ -103,7 +109,7 @@ export function DashboardSummaryCards({ view }: { view: BuyerDashboardView }) {
                 href={card.href}
                 data-testid={`dashboard-link-${card.key}`}
                 className={cn(
-                  "flex min-h-11 items-center gap-3 rounded-[14px] bg-card p-3 ring-1 ring-black/6 sm:flex-col sm:items-start sm:gap-4 sm:p-4",
+                  "group flex h-full min-h-11 items-start gap-3 rounded-[14px] bg-card p-3 ring-1 ring-black/6 sm:flex-col sm:gap-4 sm:p-4",
                   cardLiftClassName,
                 )}
               >
@@ -116,26 +122,33 @@ export function DashboardSummaryCards({ view }: { view: BuyerDashboardView }) {
                 >
                   <Icon className="size-4" />
                 </span>
-                <span className="min-w-0 flex-1 space-y-0.5">
-                  <span className="block text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                <span className="flex min-w-0 flex-1 flex-col gap-0.5 self-stretch">
+                  <span className="text-eyebrow font-medium uppercase tracking-[0.2em] text-muted-foreground">
                     {card.label}
                   </span>
-                  <span className="block font-heading text-base leading-snug font-medium">
+                  <span className="font-heading text-h3 font-medium">
                     {card.title}
                   </span>
-                  <span className="block text-sm text-muted-foreground">
+                  <span className="text-small text-muted-foreground">
                     {card.detail}
                   </span>
                   {card.badge ? (
-                    <Badge variant="outline" className="mt-1.5">
+                    <Badge variant="outline" className="mt-1.5 self-start">
                       {card.badge}
                     </Badge>
                   ) : null}
+                  {/*
+                    The spelled-out action is the card's door handle: the
+                    whole card is the link, this line says where it goes.
+                  */}
+                  <span className="mt-2 inline-flex min-h-6 items-center gap-1 self-start text-small font-semibold text-foreground underline-offset-4 group-hover:underline sm:mt-auto sm:pt-3">
+                    {card.cta}
+                    <ArrowRight
+                      aria-hidden
+                      className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5"
+                    />
+                  </span>
                 </span>
-                <ArrowRight
-                  aria-hidden
-                  className="size-4 shrink-0 text-muted-foreground sm:mt-auto sm:self-end"
-                />
               </Link>
             </li>
           );

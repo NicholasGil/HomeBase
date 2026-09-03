@@ -161,6 +161,20 @@ describe("MoneyFigureView", () => {
     expect(display).toContain("lg:text-5xl");
   });
 
+  it("carries one chip per figure with the provenance token as quiet text", () => {
+    for (const provenance of ["ai_estimate", "title_issued"] as const) {
+      const html = renderToStaticMarkup(
+        createElement(MoneyFigureView, {
+          figure: moneyFigure({ amountCents: 500000, provenance, asOf: 0 }),
+          size: "sm",
+        }),
+      );
+      expect(html.match(/data-slot="badge"/g)?.length).toBe(1);
+      expect(html).toContain(`data-slot="money-provenance">${provenance}<`);
+      expect(html).not.toContain("bg-primary");
+    }
+  });
+
   it("hides the figure label when the surface already names it", () => {
     const shown = renderToStaticMarkup(
       createElement(MoneyFigureView, {

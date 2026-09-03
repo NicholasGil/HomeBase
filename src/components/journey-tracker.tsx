@@ -1,8 +1,9 @@
 "use client";
 
-import { Check } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import {
+  useEffect,
   useId,
   useLayoutEffect,
   useRef,
@@ -60,12 +61,85 @@ function centerScriptFor(railId: string) {
   return `{var r=document.getElementById(${JSON.stringify(railId)});if(r&&r.scrollWidth>r.clientWidth){var c=r.querySelector('[data-state="current"]');if(c)r.scrollLeft=c.offsetLeft+c.offsetWidth/2-r.clientWidth/2}}`;
 }
 
+/* How many stages one end-cap press moves the rail: about half a 375 screen. */
+const CAP_STEP = 3;
+
+/* A stage within this many px of the middle counts as centred. */
+const EDGE_SLACK = 2;
+
+type Overflow = { start: boolean; end: boolean };
+
+/*
+  Measured against the first and last stage rather than the scroll extent:
+  the half-width spacers let the track scroll a little past either end stage,
+  and that empty run is not "more stages".
+*/
+function overflowOf(rail: HTMLElement): Overflow {
+  const items = rail.querySelectorAll<HTMLElement>("li");
+  const first = items[0];
+  const last = items[items.length - 1];
+  if (!railOverflows(rail) || first === undefined || last === undefined) {
+    return { start: false, end: false };
+  }
+  const middle = rail.scrollLeft + rail.clientWidth / 2;
+  return {
+    start: first.offsetLeft + first.offsetWidth / 2 < middle - EDGE_SLACK,
+    end: last.offsetLeft + last.offsetWidth / 2 > middle + EDGE_SLACK,
+  };
+}
+
+/* The item whose centre sits nearest the middle of the visible track. */
+function centeredIndex(rail: HTMLElement, items: HTMLElement[]) {
+  const middle = rail.scrollLeft + rail.clientWidth / 2;
+  let nearest = 0;
+  let distance = Number.POSITIVE_INFINITY;
+  items.forEach((item, index) => {
+    const gap = Math.abs(item.offsetLeft + item.offsetWidth / 2 - middle);
+    if (gap < distance) {
+      distance = gap;
+      nearest = index;
+    }
+  });
+  return nearest;
+}
+
+/*
+  The frame bleeds to the viewport edge below `lg` so the track can run
+  edge to edge; the caps sit on that frame, over the faded ends of the track.
+*/
+const FRAME_CLASS = {
+  horizontal: "relative -mx-5 mt-2 lg:mx-0",
+  responsive: "",
+} as const;
+
+/*
+  The track is fully clear for its first 0.5rem and fades in over the next
+  2.5rem: wider than a far node (2.75rem), so anything cut by the frame edge
+  is visibly dissolving rather than sliced through, and the cap discs sit on
+  ghosted track.
+*/
 const RAIL_CLASS = {
   horizontal:
-    "relative -mx-5 mt-2 flex snap-x snap-mandatory items-start overflow-x-auto pt-1 pb-2 outline-none [mask-image:linear-gradient(to_right,transparent,black_1.25rem,black_calc(100%-1.25rem),transparent)] [scrollbar-width:none] before:w-1/2 before:shrink-0 after:w-1/2 after:shrink-0 lg:mx-0 [&::-webkit-scrollbar]:hidden",
+    "flex snap-x snap-mandatory items-start overflow-x-auto pt-1 pb-2 outline-none [mask-image:linear-gradient(to_right,transparent_0.5rem,black_3rem,black_calc(100%-3rem),transparent_calc(100%-0.5rem))] [scrollbar-width:none] before:w-1/2 before:shrink-0 after:w-1/2 after:shrink-0 [&::-webkit-scrollbar]:hidden",
   responsive:
     "lg:flex-col lg:items-stretch lg:overflow-visible lg:snap-none lg:pt-0 lg:pb-0 lg:[mask-image:none] lg:before:hidden lg:after:hidden",
 } as const;
+
+/*
+  End caps: a 44px hit area centred on the dot row (pt-1 + h-8 cell puts the
+  dot centre 20px down) around a small disc. A cap is disabled, and fades out,
+  once the rail has nothing more in its direction; the vertical lg rail has
+  none. Buttons carry no tabindex so the rail keeps its single roving stop.
+*/
+const CAP_CLASS = {
+  horizontal:
+    "absolute -top-0.5 z-10 flex size-11 items-center justify-center rounded-full outline-none transition-opacity duration-200 focus-visible:ring-2 focus-visible:ring-ring/60 disabled:pointer-events-none disabled:opacity-0",
+  responsive: "lg:hidden",
+} as const;
+
+/* Lifted well clear of the track so a node passing under it reads as behind. */
+const CAP_DISC_CLASS =
+  "flex size-7 items-center justify-center rounded-full bg-card text-foreground shadow-[0_2px_8px_rgba(15,23,42,0.18)] ring-1 ring-black/10 transition-colors group-hover/cap:bg-sand";
 
 /* The snap item; the chip inside it is the focusable (and, when linked, navigable) surface. */
 const ITEM_CLASS = {
@@ -177,6 +251,46 @@ export function JourneyTracker({
     }
   }, [current?.key]);
 
+  // The caps start out assuming the rail overflows both ways (true for a
+  // mid-flight file on every phone) and settle on the real answer once the
+  // rail has laid out; scroll and resize keep them honest afterwards.
+  const [overflow, setOverflow] = useState<Overflow>({
+    start: stages.length > 1,
+    end: stages.length > 1,
+  });
+
+  useEffect(() => {
+    const rail = railRef.current;
+    if (rail === null) {
+      return;
+    }
+    const update = () => setOverflow(overflowOf(rail));
+    update();
+    rail.addEventListener("scroll", update, { passive: true });
+    const observer = new ResizeObserver(update);
+    observer.observe(rail);
+    return () => {
+      rail.removeEventListener("scroll", update);
+      observer.disconnect();
+    };
+  }, []);
+
+  function step(direction: -1 | 1) {
+    const rail = railRef.current;
+    if (rail === null) {
+      return;
+    }
+    const items = Array.from(rail.querySelectorAll<HTMLElement>("li"));
+    const target = Math.min(
+      Math.max(centeredIndex(rail, items) + direction * CAP_STEP, 0),
+      items.length - 1,
+    );
+    const item = items[target];
+    if (item !== undefined) {
+      centerStage(rail, item, true);
+    }
+  }
+
   function moveFocus(event: KeyboardEvent<HTMLOListElement>) {
     const rail = railRef.current;
     if (rail === null) {
@@ -228,110 +342,147 @@ export function JourneyTracker({
           </p>
         ) : null}
       </div>
-      <ol
-        id={railId}
-        ref={railRef}
-        data-testid="journey-tracker"
-        data-orientation={orientation}
-        aria-label="Journey stages"
-        onKeyDown={moveFocus}
+      <div
         className={cn(
-          RAIL_CLASS.horizontal,
-          responsive && RAIL_CLASS.responsive,
+          FRAME_CLASS.horizontal,
+          responsive && FRAME_CLASS.responsive,
         )}
       >
-        {stages.map((stage, index) => {
-          const isCurrent = stage.state === "current";
-          const near =
-            (currentIndex !== -1 && Math.abs(index - currentIndex) <= 1) ||
-            stage.key === activeKey;
-          const doneBefore = stage.state !== "upcoming";
-          const doneAfter = stage.state === "complete";
-          const chipProps = {
-            "data-slot": "journey-chip",
-            tabIndex: stage.key === activeKey ? 0 : -1,
-            title: `${stage.label} · ${STATE_TEXT[stage.state]}`,
-            className: cn(
-              STAGE_CLASS.horizontal,
-              near ? "min-w-11 px-1.5" : "w-11",
-              responsive && STAGE_CLASS.responsive,
-              responsive && isCurrent && "lg:rounded-xl lg:bg-sand/50",
-            ),
-          };
-          const chip = (
-            <>
-              <span
+        <ol
+          id={railId}
+          ref={railRef}
+          data-testid="journey-tracker"
+          data-orientation={orientation}
+          aria-label="Journey stages"
+          onKeyDown={moveFocus}
+          className={cn(
+            RAIL_CLASS.horizontal,
+            responsive && RAIL_CLASS.responsive,
+          )}
+        >
+          {stages.map((stage, index) => {
+            const isCurrent = stage.state === "current";
+            const near =
+              (currentIndex !== -1 && Math.abs(index - currentIndex) <= 1) ||
+              stage.key === activeKey;
+            const doneBefore = stage.state !== "upcoming";
+            const doneAfter = stage.state === "complete";
+            const chipProps = {
+              "data-slot": "journey-chip",
+              tabIndex: stage.key === activeKey ? 0 : -1,
+              title: `${stage.label} · ${STATE_TEXT[stage.state]}`,
+              className: cn(
+                STAGE_CLASS.horizontal,
+                near ? "min-w-11 px-1.5" : "w-11",
+                responsive && STAGE_CLASS.responsive,
+                responsive && isCurrent && "lg:rounded-xl lg:bg-sand/50",
+              ),
+            };
+            const chip = (
+              <>
+                <span
+                  className={cn(
+                    DOT_CELL_CLASS.horizontal,
+                    responsive && DOT_CELL_CLASS.responsive,
+                  )}
+                >
+                  {index > 0 ? (
+                    <span
+                      aria-hidden
+                      className={cn(
+                        LINE_BEFORE_CLASS.horizontal,
+                        responsive && LINE_BEFORE_CLASS.responsive,
+                        doneBefore ? LINE_DONE : LINE_TODO,
+                      )}
+                    />
+                  ) : null}
+                  {index < stages.length - 1 ? (
+                    <span
+                      aria-hidden
+                      className={cn(
+                        LINE_AFTER_CLASS.horizontal,
+                        responsive && LINE_AFTER_CLASS.responsive,
+                        doneAfter ? LINE_DONE : LINE_TODO,
+                      )}
+                    />
+                  ) : null}
+                  <StageDot stage={stage} />
+                </span>
+                <span
+                  className={cn(
+                    near ? LABEL_CLASS.horizontal : "sr-only",
+                    responsive && LABEL_CLASS.responsive,
+                    isCurrent && "text-foreground lg:font-semibold",
+                    stage.state === "complete" && "text-sand-foreground",
+                    stage.state === "upcoming" && "text-muted-foreground",
+                  )}
+                >
+                  {stage.label}
+                </span>
+                <span className="sr-only">
+                  {` · stage ${stage.order} of ${stages.length}, ${STATE_TEXT[stage.state]}`}
+                </span>
+              </>
+            );
+            return (
+              <li
+                key={stage.key}
+                data-testid={`journey-stage-${stage.key}`}
+                data-state={stage.state}
+                aria-current={isCurrent ? "step" : undefined}
+                onFocus={() => setActiveKey(stage.key)}
+                onClick={(event) => {
+                  if (railRef.current) {
+                    centerStage(railRef.current, event.currentTarget, true);
+                  }
+                }}
                 className={cn(
-                  DOT_CELL_CLASS.horizontal,
-                  responsive && DOT_CELL_CLASS.responsive,
+                  ITEM_CLASS.horizontal,
+                  responsive && ITEM_CLASS.responsive,
                 )}
               >
-                {index > 0 ? (
-                  <span
-                    aria-hidden
-                    className={cn(
-                      LINE_BEFORE_CLASS.horizontal,
-                      responsive && LINE_BEFORE_CLASS.responsive,
-                      doneBefore ? LINE_DONE : LINE_TODO,
-                    )}
-                  />
-                ) : null}
-                {index < stages.length - 1 ? (
-                  <span
-                    aria-hidden
-                    className={cn(
-                      LINE_AFTER_CLASS.horizontal,
-                      responsive && LINE_AFTER_CLASS.responsive,
-                      doneAfter ? LINE_DONE : LINE_TODO,
-                    )}
-                  />
-                ) : null}
-                <StageDot stage={stage} />
-              </span>
-              <span
-                className={cn(
-                  near ? LABEL_CLASS.horizontal : "sr-only",
-                  responsive && LABEL_CLASS.responsive,
-                  isCurrent && "text-foreground lg:font-semibold",
-                  stage.state === "complete" && "text-sand-foreground",
-                  stage.state === "upcoming" && "text-muted-foreground",
+                {href === undefined ? (
+                  <span {...chipProps}>{chip}</span>
+                ) : (
+                  <Link href={href} {...chipProps}>
+                    {chip}
+                  </Link>
                 )}
-              >
-                {stage.label}
-              </span>
-              <span className="sr-only">
-                {` · stage ${stage.order} of ${stages.length}, ${STATE_TEXT[stage.state]}`}
-              </span>
-            </>
-          );
-          return (
-            <li
-              key={stage.key}
-              data-testid={`journey-stage-${stage.key}`}
-              data-state={stage.state}
-              aria-current={isCurrent ? "step" : undefined}
-              onFocus={() => setActiveKey(stage.key)}
-              onClick={(event) => {
-                if (railRef.current) {
-                  centerStage(railRef.current, event.currentTarget, true);
-                }
-              }}
-              className={cn(
-                ITEM_CLASS.horizontal,
-                responsive && ITEM_CLASS.responsive,
-              )}
-            >
-              {href === undefined ? (
-                <span {...chipProps}>{chip}</span>
-              ) : (
-                <Link href={href} {...chipProps}>
-                  {chip}
-                </Link>
-              )}
-            </li>
-          );
-        })}
-      </ol>
+              </li>
+            );
+          })}
+        </ol>
+        <button
+          type="button"
+          aria-label="Earlier stages"
+          disabled={!overflow.start}
+          onClick={() => step(-1)}
+          className={cn(
+            "group/cap left-0.5",
+            CAP_CLASS.horizontal,
+            responsive && CAP_CLASS.responsive,
+          )}
+        >
+          <span className={CAP_DISC_CLASS}>
+            <ChevronLeft className="size-4" aria-hidden />
+          </span>
+        </button>
+        <button
+          type="button"
+          aria-label="Later stages"
+          disabled={!overflow.end}
+          onClick={() => step(1)}
+          className={cn(
+            "group/cap right-0.5",
+            CAP_CLASS.horizontal,
+            responsive && CAP_CLASS.responsive,
+          )}
+        >
+          <span className={CAP_DISC_CLASS}>
+            <ChevronRight className="size-4" aria-hidden />
+          </span>
+        </button>
+      </div>
       <InlineScript html={centerScriptFor(railId)} />
     </div>
   );

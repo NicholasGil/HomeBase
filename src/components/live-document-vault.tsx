@@ -29,7 +29,9 @@ export function LiveDocumentVault() {
 
   return (
     <section className="space-y-4" data-testid="document-vault">
-      <h1 className="text-h1 font-semibold tracking-tight">Document vault</h1>
+      <h1 className="text-display font-semibold tracking-tight text-balance">
+        Document vault
+      </h1>
       <div className="grid gap-4 md:grid-cols-2">
         {documents.length === 0 ? (
           <EmptyState

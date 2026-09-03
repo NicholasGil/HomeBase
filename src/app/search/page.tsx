@@ -7,6 +7,7 @@ import { FixtureLoginPrompt } from "@/components/fixture-login-prompt";
 import { LivePropertySearch } from "@/components/live-property-search";
 import { PropertySearch } from "@/components/property-search";
 import { QueryErrorBoundary } from "@/components/query-error-boundary";
+import { RouteHeader } from "@/components/route-header";
 import {
   dashboardRenderMode,
   mustFailClosed,
@@ -74,10 +75,10 @@ export default async function SearchPage({
     }
     return (
       <AppShell>
-        <h1 className="mb-6 text-h1 font-semibold tracking-tight">Search</h1>
-        <p className="mb-8 text-sm text-muted-foreground">
-          Signed in as {session.name} · {session.role}
-        </p>
+        <RouteHeader
+          title="Search"
+          caption={`Signed in as ${session.name} · ${session.role}`}
+        />
         <QueryErrorBoundary message="Property search did not load.">
           <FixtureSearch
             query={params.q}

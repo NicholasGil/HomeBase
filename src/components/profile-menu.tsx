@@ -79,7 +79,7 @@ export function ProfileMenu({
           <Link
             href="/profile"
             role="menuitem"
-            className="flex h-9 items-center rounded-full px-3 text-sm text-foreground transition-colors hover:bg-sage hover:text-sage-foreground"
+            className="flex min-h-11 items-center rounded-full px-3 text-sm text-foreground transition-colors hover:bg-sage hover:text-sage-foreground"
             onClick={() => setOpen(false)}
           >
             Profile settings
@@ -89,7 +89,7 @@ export function ProfileMenu({
               <button
                 type="submit"
                 role="menuitem"
-                className="flex h-9 w-full items-center rounded-full px-3 text-left text-sm text-muted-foreground transition-colors hover:bg-sand hover:text-sand-foreground"
+                className="flex min-h-11 w-full items-center rounded-full px-3 text-left text-sm text-muted-foreground transition-colors hover:bg-sand hover:text-sand-foreground"
               >
                 Sign out
               </button>

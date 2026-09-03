@@ -93,7 +93,7 @@ export function ConciergeAnswerView({
           data-testid="concierge-ask-agent"
           className={cn(
             buttonVariants({ variant: "outline" }),
-            "h-10 rounded-full border-sand-foreground/20 bg-card px-4 text-foreground hover:bg-card/80",
+            "rounded-full border-sand-foreground/20 bg-card px-4 text-foreground hover:bg-card/80",
           )}
         >
           Ask my agent

@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import { loadSeedTransaction } from "@/app/actions/seed-transaction";
 import { getTestSession } from "@/app/actions/test-session";
 import {
@@ -11,6 +9,7 @@ import { BuyerDashboardViewPanel } from "@/components/buyer-dashboard-view";
 import { LiveTransactionPage } from "@/components/live-transaction-page";
 import { QueryErrorBoundary } from "@/components/query-error-boundary";
 import { StageAdvancePanel } from "@/components/stage-advance-panel";
+import { TextLink } from "@/components/text-link";
 import { assertCanRenderWithoutAuth, isAuthConfigured } from "@/lib/auth-config";
 import { seedBuyerNameForTransaction } from "@/lib/seed-dashboard";
 
@@ -30,9 +29,9 @@ async function FixtureTransaction({ transactionId }: { transactionId: string }) 
   return (
     <>
       {session?.role === "agent" ? (
-        <Link href="/agent" className="mb-6 inline-block text-sm underline">
+        <TextLink href="/agent" className="mb-6">
           Back to command center
-        </Link>
+        </TextLink>
       ) : null}
       <div className="space-y-10">
         <BuyerDashboardViewPanel

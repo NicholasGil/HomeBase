@@ -2,7 +2,6 @@
 
 import { useMutation } from "convex/react";
 import { useEffect, useState } from "react";
-import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -15,6 +14,7 @@ import {
 import { DocumentDenied } from "@/components/document-denied";
 import { LiveDocumentAccessPanel } from "@/components/live-document-access";
 import { DocumentSkeleton } from "@/components/route-skeletons";
+import { TextLink } from "@/components/text-link";
 import { seedDocumentTitle } from "@/lib/seed-documents";
 import type { Id } from "../../convex/_generated/dataModel";
 import { api } from "../../convex/_generated/api";
@@ -61,9 +61,13 @@ export function LiveDocumentPage({ documentId }: { documentId: string }) {
     <div className="space-y-6">
       <Card data-testid={`document-open-${opened.type}`}>
         <CardHeader>
-          <Link href="/vault" className="text-sm underline" data-testid="document-back">
+          <TextLink
+            href="/vault"
+            className="-mt-3 justify-self-start"
+            data-testid="document-back"
+          >
             Back to vault
-          </Link>
+          </TextLink>
           <Badge variant="outline">{opened.via}</Badge>
           <CardTitle>{seedDocumentTitle(opened.type)}</CardTitle>
           <CardDescription>{opened.type}</CardDescription>

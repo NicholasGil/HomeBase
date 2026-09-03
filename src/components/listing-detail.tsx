@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import {
   AccessDeniedCard,
   type AccessDeniedAction,
@@ -7,6 +5,7 @@ import {
 import { PhotoTile } from "@/components/listing-card";
 import { ListingSignalForms } from "@/components/listing-signals";
 import { MoneyFigureView } from "@/components/money-figure-view";
+import { TextLink } from "@/components/text-link";
 import { Badge } from "@/components/ui/badge";
 import type { FixtureSearchSignals } from "@/lib/search-access";
 import { listingPath } from "@/lib/seed-search";
@@ -61,18 +60,18 @@ export function ListingDetail({
   const cityState = `${listing.address.city}, ${listing.address.state}`;
   return (
     <article className="space-y-6" data-testid="listing-detail" data-property-id={listing.id}>
-      <Link href={`/search?q=${encodeURIComponent(query)}`} className="text-sm underline">
+      <TextLink href={`/search?q=${encodeURIComponent(query)}`}>
         Back to search
-      </Link>
+      </TextLink>
       {notice === "saved" ? (
         <p
           data-testid="search-notice"
-          className="rounded-lg border bg-sage/40 px-4 py-3 text-sm"
+          className="flex flex-wrap items-center gap-x-1 rounded-lg border bg-sage/40 px-4 py-1 text-sm"
         >
           Saved.{" "}
-          <Link href={`/search?q=${encodeURIComponent(query)}&saved=1`} className="underline">
+          <TextLink href={`/search?q=${encodeURIComponent(query)}&saved=1`}>
             See saved homes
-          </Link>
+          </TextLink>
         </p>
       ) : null}
       {notice === "disliked" ? (

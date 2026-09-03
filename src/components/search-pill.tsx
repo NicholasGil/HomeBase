@@ -43,7 +43,6 @@ export function SearchQueryPill({
       <Button
         type="submit"
         variant="next"
-        size="lg"
         className="rounded-full px-5"
         data-testid="search-submit"
       >

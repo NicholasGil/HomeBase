@@ -1,6 +1,5 @@
-import Link from "next/link";
-
 import { MoneyFigureView } from "@/components/money-figure-view";
+import { TextLink } from "@/components/text-link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -112,12 +111,9 @@ export function HomeownershipHubView({
                     : ""}
                 </p>
                 {warranty.documentId ? (
-                  <Link
-                    href={`/documents/${warranty.documentId}`}
-                    className="text-sm underline underline-offset-4"
-                  >
+                  <TextLink href={`/documents/${warranty.documentId}`}>
                     Open retained document
-                  </Link>
+                  </TextLink>
                 ) : null}
               </li>
             ))}
@@ -134,12 +130,9 @@ export function HomeownershipHubView({
                   data-testid={`hub-doc-${document.type}`}
                 >
                   <span>{seedDocumentTitle(document.type)}</span>
-                  <Link
-                    href={`/documents/${document.id}`}
-                    className="underline underline-offset-4"
-                  >
+                  <TextLink href={`/documents/${document.id}`} className="px-2">
                     Open
-                  </Link>
+                  </TextLink>
                 </li>
               ))}
             </ul>

@@ -8,6 +8,7 @@ import { ListingCardFrame } from "@/components/listing-card";
 import { ListingSignalForms } from "@/components/listing-signals";
 import { MoneyFigureView } from "@/components/money-figure-view";
 import { SearchQueryPill } from "@/components/search-pill";
+import { TextLink } from "@/components/text-link";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { CANONICAL_SEARCH_QUERY } from "../../convex/lib/propertySearch";
@@ -53,12 +54,12 @@ function SearchNotice({
     return (
       <p
         data-testid="search-notice"
-        className="rounded-lg border bg-sage/40 px-4 py-3 text-sm"
+        className="flex flex-wrap items-center gap-x-1 rounded-lg border bg-sage/40 px-4 py-1 text-sm"
       >
         Saved.{" "}
-        <Link href={`/search?q=${encodeURIComponent(query)}&saved=1`} className="underline">
+        <TextLink href={`/search?q=${encodeURIComponent(query)}&saved=1`}>
           See saved homes
-        </Link>
+        </TextLink>
       </p>
     );
   }

@@ -9,6 +9,7 @@ import { EmptyState } from "@/components/empty-state";
 import { SearchSectionSkeleton } from "@/components/route-skeletons";
 import { ListingCardFrame } from "@/components/listing-card";
 import { MoneyFigureView } from "@/components/money-figure-view";
+import { seedPropertyPhoto } from "@/components/property-photo";
 import { SearchQueryPill } from "@/components/search-pill";
 import { listingPath } from "@/lib/seed-search";
 import { Badge } from "@/components/ui/badge";
@@ -40,10 +41,10 @@ export function LivePropertySearch() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Badge variant="sage" data-testid="search-sample-banner">
+          <Badge variant="quiet" data-testid="search-sample-banner">
             sample data
           </Badge>
-          <Badge variant="sky" data-testid="search-mls-flag">
+          <Badge variant="quiet" data-testid="search-mls-flag">
             FLAG_MLS {result.mlsEnabled ? "on" : "off"}
           </Badge>
         </div>
@@ -106,6 +107,7 @@ export function LivePropertySearch() {
               cityState={`${row.listing.address.city}, ${row.listing.address.state}`}
               sample={row.sampleData}
               sampleTestId="search-sample-label"
+              photo={seedPropertyPhoto(row.listing.address.line1)}
             >
               <p
                 className="line-clamp-2 text-sm text-muted-foreground"

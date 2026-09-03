@@ -8,6 +8,7 @@ import { AddToTourToggle } from "@/components/add-to-tour-toggle";
 import { NoTourYet } from "@/components/no-tour-yet";
 import { ActionNotice } from "@/components/action-notice";
 import { ListingCardFrame } from "@/components/listing-card";
+import { seedPropertyPhoto } from "@/components/property-photo";
 import {
   TourBuildAction,
   tourBuildButtonClassName,
@@ -55,7 +56,7 @@ export function FixtureTourBuilder({
 
   return (
     <section className="space-y-6" data-testid="tour-builder">
-      <div className="flex items-end justify-between gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 className={tripHeadingClassName}>
             Showing scheduler
@@ -65,7 +66,7 @@ export function FixtureTourBuilder({
             distance path until a Routes API key exists.
           </p>
         </div>
-        <Badge variant="sage">sample listings</Badge>
+        <Badge variant="quiet">sample listings</Badge>
       </div>
 
       {notice === "feedback" ? (
@@ -87,8 +88,9 @@ export function FixtureTourBuilder({
               key={listing.id}
               testId={`tour-candidate-${listing.id}`}
               addressLine={listing.address.line1}
-              cityState={`${listing.address.city}, ${listing.address.state} · sample data`}
+              cityState={`${listing.address.city}, ${listing.address.state}`}
               sample
+              photo={seedPropertyPhoto(listing.address.line1)}
             >
               <p className="text-sm">{listing.brief}</p>
               <AddToTourToggle

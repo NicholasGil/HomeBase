@@ -94,9 +94,11 @@ function AssumptionsDisclosure({
 
 /**
  * The single renderer for every dollar figure. Three cues at every size:
- * issued figures are mono, semibold, tabular with a dark provenance badge;
- * estimates are italic sans with an ESTIMATE eyebrow, sky provenance badge,
- * and a reachable Assumptions disclosure. A missing figure is "None".
+ * issued figures are mono, semibold, tabular with an outline "issued" chip;
+ * estimates are italic sans with an ESTIMATE eyebrow, a sky "estimate" chip,
+ * and a reachable Assumptions disclosure. The provenance token rides beside
+ * the chip as quiet text so one figure carries one chip. A missing figure is
+ * "None".
  */
 export function MoneyFigureView({
   figure,
@@ -184,17 +186,17 @@ export function MoneyFigureView({
       </p>
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <Badge
-          variant={isEstimate ? "sky" : "default"}
-          className={isEstimate ? estimateBadgeClassName : undefined}
-        >
-          {figure.provenance}
-        </Badge>
-        <Badge
           variant={isEstimate ? "sky" : "outline"}
           className={isEstimate ? estimateBadgeClassName : undefined}
         >
           {isEstimate ? "estimate" : "issued"}
         </Badge>
+        <span
+          className="text-eyebrow tracking-wide text-muted-foreground"
+          data-slot="money-provenance"
+        >
+          {figure.provenance}
+        </span>
         {isEstimate ? (
           <AssumptionsDisclosure
             figure={figure}

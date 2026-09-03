@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { AddToTourToggle } from "@/components/add-to-tour-toggle";
 import { ListingCardFrame } from "@/components/listing-card";
+import { seedPropertyPhoto } from "@/components/property-photo";
 import { ToursSectionSkeleton } from "@/components/route-skeletons";
 import { NoTourYet } from "@/components/no-tour-yet";
 import {
@@ -59,7 +60,7 @@ export function LiveTourBuilder() {
 
   return (
     <section className="space-y-6" data-testid="tour-builder">
-      <div className="flex items-end justify-between gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 className={tripHeadingClassName}>
             Showing scheduler
@@ -68,7 +69,7 @@ export function LiveTourBuilder() {
             Select properties, then Build My Tour.
           </p>
         </div>
-        <Badge variant="sage">sample listings</Badge>
+        <Badge variant="quiet">sample listings</Badge>
       </div>
 
       {feedbackNotice ? (
@@ -88,6 +89,7 @@ export function LiveTourBuilder() {
             addressLine={listing.address.line1}
             cityState={`${listing.address.city}, ${listing.address.state}`}
             sample
+            photo={seedPropertyPhoto(listing.address.line1)}
           >
             <p className="text-sm">{listing.brief}</p>
             <AddToTourToggle

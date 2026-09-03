@@ -5,6 +5,7 @@ import {
 import { PhotoTile } from "@/components/listing-card";
 import { ListingSignalForms } from "@/components/listing-signals";
 import { MoneyFigureView } from "@/components/money-figure-view";
+import { seedPropertyPhoto } from "@/components/property-photo";
 import { TextLink } from "@/components/text-link";
 import { Badge } from "@/components/ui/badge";
 import type { FixtureSearchSignals } from "@/lib/search-access";
@@ -90,8 +91,16 @@ export function ListingDetail({
           Restored.
         </p>
       ) : null}
-      <PhotoTile className="h-56 w-full rounded-2xl sm:h-72" seed={listing.id}>
-        <Badge variant="sage" className="absolute top-3 right-3">
+      <PhotoTile
+        className="h-56 w-full rounded-2xl sm:h-72"
+        seed={listing.id}
+        photo={seedPropertyPhoto(listing.address.line1)}
+        priority
+      >
+        <Badge
+          variant="quiet"
+          className="absolute top-3 right-3 bg-card/90 backdrop-blur-sm"
+        >
           sample data
         </Badge>
       </PhotoTile>

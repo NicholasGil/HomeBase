@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/empty-state";
 import { ListingCardFrame } from "@/components/listing-card";
 import { ListingSignalForms } from "@/components/listing-signals";
 import { MoneyFigureView } from "@/components/money-figure-view";
+import { seedPropertyPhoto } from "@/components/property-photo";
 import { SearchQueryPill } from "@/components/search-pill";
 import { TextLink } from "@/components/text-link";
 import { Badge } from "@/components/ui/badge";
@@ -126,10 +127,10 @@ export function PropertySearch({
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Badge variant="sage" data-testid="search-sample-banner">
+          <Badge variant="quiet" data-testid="search-sample-banner">
             sample data
           </Badge>
-          <Badge variant="sky" data-testid="search-mls-flag">
+          <Badge variant="quiet" data-testid="search-mls-flag">
             FLAG_MLS {view.mlsEnabled ? "on" : "off"}
           </Badge>
         </div>
@@ -215,6 +216,7 @@ export function PropertySearch({
                   cityState={`${row.listing.address.city}, ${row.listing.address.state}`}
                   sample={row.sampleData}
                   sampleTestId="search-sample-label"
+                  photo={seedPropertyPhoto(row.listing.address.line1)}
                 >
                   <p
                     className="line-clamp-2 text-sm text-muted-foreground"

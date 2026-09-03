@@ -8,6 +8,7 @@ import {
 import { DoneList } from "@/components/done-list";
 import { PhotoTile } from "@/components/listing-card";
 import { MoneyFigureView } from "@/components/money-figure-view";
+import { seedPropertyPhoto } from "@/components/property-photo";
 import { StageTaskRows } from "@/components/stage-task-rows";
 import { taskAnchorId } from "@/components/task-anchor";
 import { Badge } from "@/components/ui/badge";
@@ -179,14 +180,19 @@ export function BuyerDashboardViewPanel({
           className="h-24 w-full lg:h-40"
           wash={heroPhotoWashClassName}
           seed={view.propertyAddress?.line1}
+          photo={seedPropertyPhoto(view.propertyAddress?.line1)}
+          priority
         >
           {eyebrow ? (
-            <Badge variant="sage" className="absolute top-3 left-3">
+            <Badge
+              variant="quiet"
+              className="absolute top-3 left-3 bg-card/90 backdrop-blur-sm"
+            >
               {eyebrow}
             </Badge>
           ) : null}
           {view.propertyAddress ? (
-            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/45 to-transparent px-5 py-3 text-white lg:px-6 lg:py-4">
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-5 py-3 text-white lg:px-6 lg:py-4">
               <p className="text-sm font-medium">
                 {view.propertyAddress.line1}
               </p>

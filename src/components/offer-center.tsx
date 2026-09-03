@@ -67,7 +67,7 @@ export function OfferCenterViewPanel({
 
   return (
     <section className="space-y-8" data-testid="offer-center">
-      <div className="flex items-end justify-between gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 className={tripHeadingClassName}>Offer center</h2>
           <p className="text-sm text-muted-foreground">
@@ -75,7 +75,7 @@ export function OfferCenterViewPanel({
             only.
           </p>
         </div>
-        <Badge variant="sage">{center.market.sampleData}</Badge>
+        <Badge variant="quiet">{center.market.sampleData}</Badge>
       </div>
 
       <Card data-testid="offer-market">

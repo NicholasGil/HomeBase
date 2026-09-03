@@ -19,6 +19,9 @@ const badgeVariants = cva(
         sage: "bg-sage text-sage-foreground [a]:hover:bg-sage/80",
         sky: "bg-sky text-sky-foreground [a]:hover:bg-sky/80",
         sand: "bg-sand text-sand-foreground [a]:hover:bg-sand/80",
+        /* Honest-label chips (sample data, provenance, flags): present, not loud. */
+        quiet:
+          "border-border text-muted-foreground [a]:hover:bg-muted [a]:hover:text-foreground",
         ghost:
           "hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50",
         link: "text-primary underline-offset-4 hover:underline",

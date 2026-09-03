@@ -119,6 +119,7 @@
   --chart-5: oklch(0.4 0.04 50);
   --radius: 0.75rem;
   --tab-bar-height: 4rem;
+  --fab-dock-clearance: 0px;
   --sidebar: oklch(0.98 0.016 75);
   --sidebar-foreground: oklch(0.22 0.02 50);
   --sidebar-primary: oklch(0.22 0.02 50);
@@ -170,6 +171,17 @@
   --sidebar-accent-foreground: oklch(0.97 0.004 260);
   --sidebar-border: oklch(1 0.004 260 / 10%);
   --sidebar-ring: oklch(0.68 0.18 18);
+}
+
+/*
+  While a route pins an action to the bottom of the viewport (the tour
+  builder's Build My Tour), the concierge FAB floats above it instead of over
+  it, and `main` reserves matching room so scroll-end content clears the FAB
+  too. 5rem covers the action's tallest form (72px wash + 12px offset) with a
+  12px gap; at `md` the action is shorter, so the gap simply grows.
+*/
+:root:has([data-slot="tour-build-action"]) {
+  --fab-dock-clearance: 5rem;
 }
 
 @utility scrollbar-none {

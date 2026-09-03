@@ -17,6 +17,7 @@ import {
 import { isAuthConfigured } from "@/lib/auth-config";
 import { seedDashboardForBuyer } from "@/lib/seed-dashboard";
 import type { TestBuyerSession } from "@/lib/test-session";
+import { cn } from "@/lib/utils";
 
 /*
   The concierge is scoped to one transaction, so the sheet header names the
@@ -77,7 +78,17 @@ export async function AppShell({
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-5xl px-5 py-10">{children}</main>
+      <main
+        className={cn(
+          "mx-auto max-w-5xl px-5 py-10",
+          // Room for the 56px FAB plus its offsets, so nothing the buyer needs
+          // to tap ends up under it once the page is scrolled to the end.
+          conciergeScope !== null &&
+            "pb-[calc(6rem+var(--fab-dock-clearance))]",
+        )}
+      >
+        {children}
+      </main>
       {liveNav ? <LiveMobileTabBar /> : <MobileTabBar links={links} />}
       {conciergeScope ? <ConciergeSheet scope={conciergeScope} /> : null}
     </div>

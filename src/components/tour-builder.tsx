@@ -4,6 +4,7 @@ import {
   submitFeedbackFromForm,
 } from "@/app/actions/tours";
 import { AccessDeniedCard } from "@/components/access-denied-card";
+import { AddToTourToggle } from "@/components/add-to-tour-toggle";
 import { NoTourYet } from "@/components/no-tour-yet";
 import { ActionNotice } from "@/components/action-notice";
 import { ListingCardFrame } from "@/components/listing-card";
@@ -82,26 +83,22 @@ export function FixtureTourBuilder({
         <input type="hidden" name="returnTo" value={returnTo} />
         <div className="grid gap-5 sm:grid-cols-2">
           {listings.map((listing) => (
-            <label key={listing.id} className="block cursor-pointer">
-              <ListingCardFrame
-                testId={`tour-candidate-${listing.id}`}
-                addressLine={listing.address.line1}
-                cityState={`${listing.address.city}, ${listing.address.state} · sample data`}
-                sample
-              >
-                <p className="text-sm">{listing.brief}</p>
-                <span className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    name="propertyIds"
-                    value={listing.id}
-                    defaultChecked={selectedIds.has(listing.id)}
-                    data-testid={`select-${listing.id}`}
-                  />
-                  Add to tour
-                </span>
-              </ListingCardFrame>
-            </label>
+            <ListingCardFrame
+              key={listing.id}
+              testId={`tour-candidate-${listing.id}`}
+              addressLine={listing.address.line1}
+              cityState={`${listing.address.city}, ${listing.address.state} · sample data`}
+              sample
+            >
+              <p className="text-sm">{listing.brief}</p>
+              <AddToTourToggle
+                className="-ml-3"
+                name="propertyIds"
+                value={listing.id}
+                defaultChecked={selectedIds.has(listing.id)}
+                data-testid={`select-${listing.id}`}
+              />
+            </ListingCardFrame>
           ))}
         </div>
         <TourBuildAction hint="Tick the homes you want to see, then build. Stops are ordered by drive time.">

@@ -37,6 +37,19 @@ const DERIVED_TEST_IDS = {
   totalMonthly: "sim-totalMonthly",
 } as const;
 
+/* 44px tall so every control is a full-size tap target. */
+const controlClassName =
+  "h-11 w-full rounded-md border bg-background px-3 text-sm";
+
+/*
+  The concierge FAB is fixed 72px in from the viewport's right edge below `md`
+  (right-4 + 56px) and 80px from `md`. Full-width inputs scroll straight under
+  it, so the control grid gives back that column plus a 12px gap: with `main`
+  (20px) and the card (16px) already inset, that is 48px below `md` and 56px
+  from `md`. From `xl` the centered content column clears the FAB on its own.
+*/
+const controlGridClassName = "grid gap-4 pr-12 md:grid-cols-2 md:pr-14 xl:pr-0";
+
 export function OfferCostSimulator({
   listPriceCents,
 }: {
@@ -82,81 +95,85 @@ export function OfferCostSimulator({
             Assumptions stay on this panel. Every output is an {ESTIMATE_LABEL}.
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-2">
-          <label className="space-y-1 text-sm">
-            Purchase price
-            <input
-              type="number"
-              data-testid="sim-price"
-              className="w-full rounded-md border bg-background px-3 py-2"
-              value={purchasePriceCents / 100}
-              onChange={(event) =>
-                setPurchasePriceCents(
-                  Math.round(Number(event.target.value) * 100),
-                )
-              }
-            />
-          </label>
-          <label className="space-y-1 text-sm">
-            Down payment
-            <input
-              type="number"
-              data-testid="sim-down"
-              className="w-full rounded-md border bg-background px-3 py-2"
-              value={downPaymentCents / 100}
-              onChange={(event) =>
-                setDownPaymentCents(Math.round(Number(event.target.value) * 100))
-              }
-            />
-          </label>
-          <label className="space-y-1 text-sm">
-            Seller concessions
-            <input
-              type="number"
-              data-testid="sim-concessions"
-              className="w-full rounded-md border bg-background px-3 py-2"
-              value={sellerConcessionsCents / 100}
-              onChange={(event) =>
-                setSellerConcessionsCents(
-                  Math.round(Number(event.target.value) * 100),
-                )
-              }
-            />
-          </label>
-          <label className="space-y-1 text-sm">
-            Rate assumption (%)
-            <input
-              type="number"
-              step="0.01"
-              data-testid="sim-rate"
-              className="w-full rounded-md border bg-background px-3 py-2"
-              value={rateBps / 100}
-              onChange={(event) =>
-                setRateBps(Math.round(Number(event.target.value) * 100))
-              }
-            />
-          </label>
-          <label className="space-y-1 text-sm md:col-span-2">
-            Loan program
-            <select
-              data-testid="sim-program"
-              className="w-full rounded-md border bg-background px-3 py-2"
-              value={program}
-              onChange={(event) => {
-                const next = event.target.value;
-                if (isFinancingProgram(next)) {
-                  setProgram(next);
+        <CardContent className="space-y-4">
+          <div className={controlGridClassName}>
+            <label className="space-y-1 text-sm">
+              Purchase price
+              <input
+                type="number"
+                data-testid="sim-price"
+                className={controlClassName}
+                value={purchasePriceCents / 100}
+                onChange={(event) =>
+                  setPurchasePriceCents(
+                    Math.round(Number(event.target.value) * 100),
+                  )
                 }
-              }}
-            >
-              {PROGRAMS.map((value) => (
-                <option key={value} value={value}>
-                  {value}
-                </option>
-              ))}
-            </select>
-          </label>
-          <div className="md:col-span-2 space-y-2 text-xs text-muted-foreground">
+              />
+            </label>
+            <label className="space-y-1 text-sm">
+              Down payment
+              <input
+                type="number"
+                data-testid="sim-down"
+                className={controlClassName}
+                value={downPaymentCents / 100}
+                onChange={(event) =>
+                  setDownPaymentCents(
+                    Math.round(Number(event.target.value) * 100),
+                  )
+                }
+              />
+            </label>
+            <label className="space-y-1 text-sm">
+              Seller concessions
+              <input
+                type="number"
+                data-testid="sim-concessions"
+                className={controlClassName}
+                value={sellerConcessionsCents / 100}
+                onChange={(event) =>
+                  setSellerConcessionsCents(
+                    Math.round(Number(event.target.value) * 100),
+                  )
+                }
+              />
+            </label>
+            <label className="space-y-1 text-sm">
+              Rate assumption (%)
+              <input
+                type="number"
+                step="0.01"
+                data-testid="sim-rate"
+                className={controlClassName}
+                value={rateBps / 100}
+                onChange={(event) =>
+                  setRateBps(Math.round(Number(event.target.value) * 100))
+                }
+              />
+            </label>
+            <label className="space-y-1 text-sm md:col-span-2">
+              Loan program
+              <select
+                data-testid="sim-program"
+                className={controlClassName}
+                value={program}
+                onChange={(event) => {
+                  const next = event.target.value;
+                  if (isFinancingProgram(next)) {
+                    setProgram(next);
+                  }
+                }}
+              >
+                {PROGRAMS.map((value) => (
+                  <option key={value} value={value}>
+                    {value}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <div className="space-y-2 text-xs text-muted-foreground">
             <div className="flex flex-wrap gap-2">
               <Badge variant="sky">
                 {simulation.assumptions.program}

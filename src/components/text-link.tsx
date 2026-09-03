@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
  * notice without turning into a button.
  */
 export const textLinkClassName =
-  "inline-flex min-h-11 items-center text-sm underline underline-offset-4";
+  "inline-flex min-h-11 min-w-11 items-center text-sm underline underline-offset-4";
 
 export function TextLink({
   className,

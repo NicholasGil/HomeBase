@@ -82,7 +82,7 @@ function AssumptionsDisclosure({
         {href ? (
           <a
             href={href}
-            className="inline-block font-medium underline underline-offset-4"
+            className="inline-flex min-h-11 items-center font-medium underline underline-offset-4"
           >
             Open the assumptions panel
           </a>

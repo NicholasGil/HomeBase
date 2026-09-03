@@ -2,6 +2,7 @@ import { ArrowRight, FileText, Landmark, MapPinned, Route } from "lucide-react";
 import Link from "next/link";
 import type { ComponentType } from "react";
 
+import { transactionHref } from "@/components/buyer-dashboard-view";
 import { Badge } from "@/components/ui/badge";
 import type { BuyerDashboardView } from "../../convex/lib/dashboardView";
 import { cardLiftClassName, tripHeadingClassName } from "@/lib/trip-ui";
@@ -70,7 +71,7 @@ export function summaryCardsFor(view: BuyerDashboardView): SummaryCard[] {
     },
     {
       key: "transaction",
-      href: `/transactions/${view.transactionId}`,
+      href: transactionHref(view.transactionId),
       label: "Transaction",
       title: view.where.label,
       detail:

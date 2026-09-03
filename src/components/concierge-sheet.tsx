@@ -87,13 +87,14 @@ export function ConciergeSheet({ scope }: { scope: ConciergeScope }) {
               <span>Explains this file only. Never advises.</span>
             </SheetDescription>
           </div>
+          {/* Dismiss is quiet chrome: sand, never the coral reserved for `--next`. */}
           <SheetClose
             aria-label="Close concierge"
             render={
               <Button
                 variant="ghost"
                 size="icon-lg"
-                className="size-11 shrink-0 rounded-full"
+                className="size-11 shrink-0 rounded-full bg-sand text-sand-foreground hover:bg-peach/70 hover:text-foreground focus-visible:border-transparent focus-visible:ring-sand-foreground/40"
               />
             }
           >

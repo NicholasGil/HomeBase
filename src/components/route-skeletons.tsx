@@ -166,7 +166,7 @@ function JourneyRailSkeleton({ vertical }: { vertical: boolean }) {
               <Skeleton
                 className={cn(
                   "rounded-full",
-                  index === 3 ? "size-8 bg-next/20" : "size-6",
+                  index === 3 ? "size-8 ring-2 ring-foreground/15" : "size-6",
                 )}
               />
               {near ? <Skeleton className="mt-1.5 h-3 w-14" /> : null}
@@ -184,7 +184,7 @@ function JourneyRailSkeleton({ vertical }: { vertical: boolean }) {
               <Skeleton
                 className={cn(
                   "shrink-0 rounded-full",
-                  index === 7 ? "size-8 bg-next/20" : "size-6",
+                  index === 7 ? "size-8 ring-2 ring-foreground/15" : "size-6",
                 )}
               />
               <Skeleton

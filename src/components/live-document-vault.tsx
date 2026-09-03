@@ -9,6 +9,7 @@ import { homeActionFor } from "@/components/access-denied-card";
 import { EmptyState } from "@/components/empty-state";
 import { LiveGrantControls } from "@/components/live-document-access";
 import { VaultSectionSkeleton } from "@/components/route-skeletons";
+import { TextLink } from "@/components/text-link";
 import {
   Card,
   CardContent,
@@ -77,10 +78,8 @@ function LiveDocumentCard({
         <CardTitle>{seedDocumentTitle(type)}</CardTitle>
         <CardDescription>{type}</CardDescription>
       </CardHeader>
-      <CardContent className="relative z-10 space-y-3">
-        <Link href={`/documents/${documentId}`} className="text-sm underline">
-          Open document
-        </Link>
+      <CardContent className="relative z-10 space-y-3 pointer-events-none [&_a]:pointer-events-auto [&_button]:pointer-events-auto [&_ul]:pointer-events-auto">
+        <TextLink href={`/documents/${documentId}`}>Open document</TextLink>
         {canManage ? (
           <LiveGrantControls documentId={documentId} type={type} />
         ) : null}

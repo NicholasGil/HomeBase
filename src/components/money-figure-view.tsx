@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import { ChevronDown } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
 import {
   ESTIMATE_AMOUNT_CLASS_NAME,
@@ -63,11 +65,15 @@ function AssumptionsDisclosure({
 }) {
   return (
     <details
-      className="min-w-0 not-italic open:basis-full"
+      className="group/assumptions min-w-0 not-italic open:basis-full"
       data-slot="money-assumptions"
     >
-      <summary className="inline-flex min-h-5 cursor-pointer list-none items-center text-xs font-medium text-sky-foreground underline decoration-sky-foreground/40 underline-offset-4 hover:decoration-sky-foreground marker:content-none focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-ring/50">
+      <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-1 rounded-md pr-1 text-xs font-medium text-sky-foreground underline decoration-sky-foreground/40 underline-offset-4 select-none marker:content-none hover:decoration-sky-foreground focus-visible:outline-2 focus-visible:outline-ring/50 [&::-webkit-details-marker]:hidden">
         {ASSUMPTIONS_LABEL}
+        <ChevronDown
+          className="size-3.5 shrink-0 transition-transform group-open/assumptions:rotate-180 motion-reduce:transition-none"
+          aria-hidden
+        />
       </summary>
       <div className="mt-2 space-y-1 rounded-lg bg-sky/50 px-3 py-2 text-left text-xs leading-relaxed text-sky-foreground ring-1 ring-sky-foreground/10">
         <p>{ESTIMATE_NOTE[figure.provenance]}</p>
@@ -76,7 +82,7 @@ function AssumptionsDisclosure({
         {href ? (
           <a
             href={href}
-            className="inline-block font-medium underline underline-offset-4"
+            className="inline-flex min-h-11 items-center font-medium underline underline-offset-4"
           >
             Open the assumptions panel
           </a>

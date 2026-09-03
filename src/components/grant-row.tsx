@@ -37,7 +37,7 @@ export function RevokeGrantConfirm({
       <Button
         type="button"
         variant="destructive"
-        className="min-h-11 px-3 md:min-h-8"
+        className="px-3"
         onClick={() => {
           setError(null);
           setConfirming(true);
@@ -68,7 +68,7 @@ export function RevokeGrantConfirm({
         <Button
           type="button"
           variant="ghost"
-          className="min-h-11 px-3 md:min-h-8"
+          className="px-3"
           disabled={pending}
           onClick={() => setConfirming(false)}
         >
@@ -78,7 +78,7 @@ export function RevokeGrantConfirm({
           ref={confirmRef}
           type="button"
           variant="destructive"
-          className="min-h-11 px-3 md:min-h-8"
+          className="px-3"
           disabled={pending}
           onClick={() => {
             setError(null);

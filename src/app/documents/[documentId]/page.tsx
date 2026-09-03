@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import { AppShell } from "@/components/app-shell";
 import { DocumentAccessPanel } from "@/components/document-access-panel";
 import { DocumentDenied } from "@/components/document-denied";
@@ -17,6 +15,7 @@ import {
 } from "@/components/ui/card";
 import { LiveDocumentPage } from "@/components/live-document-page";
 import { QueryErrorBoundary } from "@/components/query-error-boundary";
+import { TextLink } from "@/components/text-link";
 import {
   grantSeedDocumentFromForm,
   loadFixtureVault,
@@ -51,9 +50,13 @@ async function FixtureDocument({ documentId }: { documentId: string }) {
     <div className="space-y-6">
       <Card data-testid={`document-open-${loaded.document.type}`}>
         <CardHeader>
-          <Link href="/vault" className="text-sm underline" data-testid="document-back">
+          <TextLink
+            href="/vault"
+            className="-mt-3 justify-self-start"
+            data-testid="document-back"
+          >
             Back to vault
-          </Link>
+          </TextLink>
           <Badge variant="outline">{loaded.via}</Badge>
           <CardTitle>{title}</CardTitle>
           <CardDescription>{loaded.document.type}</CardDescription>

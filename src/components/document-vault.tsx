@@ -21,6 +21,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ActionNotice } from "@/components/action-notice";
+import { TextLink } from "@/components/text-link";
 import {
   listFixtureDocuments,
   vaultAuditForViewer,
@@ -53,12 +54,7 @@ export async function FixtureVault({ notice }: { notice?: string }) {
             Access is decided in a server function. The page does not filter.
           </p>
         </div>
-        <Link
-          href="/vault"
-          className="inline-flex min-h-11 items-center text-sm underline"
-        >
-          Open vault
-        </Link>
+        <TextLink href="/vault">Open vault</TextLink>
       </div>
 
       <ActionNotice notice={notice} />
@@ -93,13 +89,15 @@ export async function FixtureVault({ notice }: { notice?: string }) {
                   <CardTitle>{seedDocumentTitle(document.type)}</CardTitle>
                   <CardDescription>{document.type}</CardDescription>
                 </CardHeader>
-                <CardContent className="relative z-10 space-y-3">
-                  <Link
-                    href={`/documents/${document.id}`}
-                    className="text-sm underline"
-                  >
+                {/*
+                  Only the controls catch taps; the rest of the body falls
+                  through to the cover link above, so the card stays one big
+                  "open" target around its 44px controls.
+                */}
+                <CardContent className="relative z-10 space-y-3 pointer-events-none [&_a]:pointer-events-auto [&_button]:pointer-events-auto [&_ul]:pointer-events-auto">
+                  <TextLink href={`/documents/${document.id}`}>
                     Open document
-                  </Link>
+                  </TextLink>
                   {canGrant ? (
                     <div>
                       <FixtureGrantSheet

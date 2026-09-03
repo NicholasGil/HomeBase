@@ -1,6 +1,5 @@
-import Link from "next/link";
-
 import { endTestSessionFromForm } from "@/app/actions/test-session";
+import { TextLink } from "@/components/text-link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -26,9 +25,9 @@ export function ProfileSettings({
   return (
     <section className="space-y-6" data-testid="profile-settings">
       {backHref ? (
-        <Link href={backHref} className="text-sm underline" data-testid="profile-back">
+        <TextLink href={backHref} data-testid="profile-back">
           {backLabel ?? "Back"}
-        </Link>
+        </TextLink>
       ) : null}
       {eyebrow ? <Badge variant="sage">{eyebrow}</Badge> : null}
       <div className="space-y-2">

@@ -132,10 +132,7 @@ export function StageAdvancePanel({
               className="divide-y divide-border/70 text-sm"
             >
               {view.blockingTasks.map((task) => (
-                <li
-                  key={task.title}
-                  className="flex items-center gap-3 py-2"
-                >
+                <li key={task.title} className="flex items-center gap-3 py-2">
                   <CircleDashed
                     className="size-4 shrink-0 text-muted-foreground"
                     aria-hidden

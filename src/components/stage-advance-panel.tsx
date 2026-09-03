@@ -1,9 +1,8 @@
 "use client";
 
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, CircleDashed } from "lucide-react";
 import { useId } from "react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -119,23 +118,36 @@ export function StageAdvancePanel({
           </p>
         </div>
         {view.blockingTasks.length > 0 ? (
-          <ul
-            data-testid="stage-advance-blockers"
-            aria-label="Blocking tasks"
-            className="space-y-1.5 text-sm"
-          >
-            {view.blockingTasks.map((task) => (
-              <li
-                key={task.title}
-                className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-lg bg-sand/60 px-3 py-2"
-              >
-                <span className="min-w-0">{task.title}</span>
-                <Badge variant="sage" className="shrink-0">
-                  {task.assigneeRole}
-                </Badge>
-              </li>
-            ))}
-          </ul>
+          <div className="space-y-1.5">
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+              Still open on this stage
+            </p>
+            {/*
+              A reason list, not a menu: plain rows with a status mark. There is
+              no task route or buyer-side task action to send these to.
+            */}
+            <ul
+              data-testid="stage-advance-blockers"
+              aria-label="Blocking tasks"
+              className="divide-y divide-border/70 text-sm"
+            >
+              {view.blockingTasks.map((task) => (
+                <li
+                  key={task.title}
+                  className="flex items-center gap-3 py-2"
+                >
+                  <CircleDashed
+                    className="size-4 shrink-0 text-muted-foreground"
+                    aria-hidden
+                  />
+                  <span className="min-w-0 flex-1">{task.title}</span>
+                  <span className="shrink-0 text-xs text-muted-foreground">
+                    {task.assigneeRole}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
         ) : null}
         {error ? (
           <p role="alert" className="text-sm text-destructive">

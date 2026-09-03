@@ -1,6 +1,7 @@
 import {
   requestFixtureAppointmentFromForm,
 } from "@/app/actions/vendors";
+import { ContactReach } from "@/components/contact-links";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -142,10 +143,12 @@ function VendorCard({
       <CardContent className="space-y-2 text-sm">
         <p>{vendor.notes}</p>
         <p className="text-muted-foreground">{vendor.credentials}</p>
-        <p className="break-words">
-          {vendor.contact.phone ?? "No phone"}
-          {vendor.contact.email ? ` · ${vendor.contact.email}` : null}
-        </p>
+        <ContactReach
+          name={vendor.name}
+          phone={vendor.contact.phone}
+          email={vendor.contact.email}
+          className="-my-1"
+        />
         <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
           <Badge variant="sage">Compensation: none</Badge>
           <form action={requestFixtureAppointmentFromForm}>

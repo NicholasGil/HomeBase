@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery } from "convex/react";
 
+import { ContactReach } from "@/components/contact-links";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -47,6 +48,12 @@ export function LiveVendorDirectory({
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <p>{vendor.notes}</p>
+            <ContactReach
+              name={vendor.name}
+              phone={vendor.contact.phone}
+              email={vendor.contact.email}
+              className="-my-1"
+            />
             <Badge variant="sage">Compensation: none</Badge>
             <Button
               variant="outline"
@@ -91,6 +98,12 @@ export function LiveVendorDirectory({
                 <CardContent className="space-y-3 text-sm">
                   <p>{vendor.notes}</p>
                   <p className="text-muted-foreground">{vendor.credentials}</p>
+                  <ContactReach
+                    name={vendor.name}
+                    phone={vendor.contact.phone}
+                    email={vendor.contact.email}
+                    className="-my-1"
+                  />
                   <Badge variant="sage">Compensation: none</Badge>
                   <Button
                     variant="outline"

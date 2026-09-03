@@ -46,7 +46,7 @@ export function IdentitySecurity({
   return (
     <section className="space-y-4" data-testid="identity-security">
       <div>
-        <h1 className="text-3xl font-semibold tracking-tight">
+        <h1 className="text-h1 font-semibold tracking-tight">
           Identity and unlock
         </h1>
         <p className="text-sm text-muted-foreground">

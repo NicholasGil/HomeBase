@@ -60,7 +60,7 @@ export default async function ToursPage({
     const params = await searchParams;
     return (
       <AppShell>
-        <h1 className="mb-6 text-3xl font-semibold tracking-tight">Tours</h1>
+        <h1 className="mb-6 text-h1 font-semibold tracking-tight">Tours</h1>
         <p className="mb-8 text-sm text-muted-foreground">
           Signed in as {session.name} · {session.role}
         </p>

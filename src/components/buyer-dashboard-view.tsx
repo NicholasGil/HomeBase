@@ -120,7 +120,7 @@ export function BuyerDashboardViewPanel({
             </p>
             <h1
               data-testid="ten-second-where"
-              className="text-[40px] leading-[1.05] font-semibold tracking-tight text-balance lg:text-5xl"
+              className="text-display font-semibold tracking-tight text-balance lg:text-5xl"
             >
               {view.where.label}
             </h1>
@@ -142,7 +142,7 @@ export function BuyerDashboardViewPanel({
               at.next,
             )}
           >
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-next">
+            <p className="text-eyebrow font-medium uppercase tracking-[0.2em] text-next">
               Next
             </p>
             {view.next === null ? (
@@ -157,7 +157,7 @@ export function BuyerDashboardViewPanel({
                 })}
                 className="mt-2 block space-y-2 lg:mt-3 lg:space-y-3"
               >
-                <p className="text-2xl font-semibold tracking-tight text-balance lg:text-3xl">
+                <p className="text-h2 font-semibold tracking-tight text-balance lg:text-h1">
                   {view.next.title}
                 </p>
                 <Badge variant="sage">{view.next.assigneeRole}</Badge>
@@ -177,7 +177,7 @@ export function BuyerDashboardViewPanel({
               disclosure is never interactive content nested in an anchor.
             */}
             <Link href={owedTodayHref()} className="block">
-              <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+              <p className="text-eyebrow font-medium uppercase tracking-[0.2em] text-muted-foreground">
                 Due today
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
@@ -193,17 +193,17 @@ export function BuyerDashboardViewPanel({
             className={cn("grid grid-cols-2 gap-4 lg:gap-6", at.doneWaiting)}
           >
             <section data-testid="ten-second-done" className="min-w-0">
-              <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+              <p className="text-eyebrow font-medium uppercase tracking-[0.2em] text-muted-foreground">
                 Done
               </p>
               <DoneList items={view.done} />
             </section>
 
             <section data-testid="ten-second-waiting" className="min-w-0">
-              <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+              <p className="text-eyebrow font-medium uppercase tracking-[0.2em] text-muted-foreground">
                 Waiting on
               </p>
-              <p className="mt-2 text-lg font-medium">
+              <p className="mt-2 text-h3 font-medium">
                 {view.waitingOn ?? "Nobody"}
               </p>
             </section>

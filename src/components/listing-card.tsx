@@ -83,7 +83,7 @@ export function ListingCardFrame({
         seed={propertyId ?? addressLine}
       >
         {rank !== undefined ? (
-          <span className="absolute top-3 left-3 rounded-full bg-card/90 px-2 py-0.5 text-[11px] font-medium text-foreground">
+          <span className="absolute top-3 left-3 rounded-full bg-card/90 px-2 py-0.5 text-eyebrow font-medium text-foreground">
             #{rank}
           </span>
         ) : null}

@@ -59,7 +59,7 @@ export function VendorPortalView({
     <div className="space-y-8" data-testid="vendor-portal">
       <section className="space-y-2">
         <Badge variant="sage">Fixture session · not Clerk</Badge>
-        <h1 className="text-3xl font-semibold tracking-tight">Vendor portal</h1>
+        <h1 className="text-h1 font-semibold tracking-tight">Vendor portal</h1>
         <p className="text-sm text-muted-foreground">
           Signed in as {vendorName}.
           {expired || assignments.length === 0 ? "" : " One assigned file."}{" "}

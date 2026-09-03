@@ -42,7 +42,7 @@ export function HomeownershipHubView({
     <section className="space-y-8" data-testid="homeownership-hub">
       <div className="space-y-2">
         <Badge variant="sage">Post-close</Badge>
-        <h1 className="text-3xl font-semibold tracking-tight">
+        <h1 className="text-h1 font-semibold tracking-tight">
           Homeownership hub
         </h1>
         <p className="text-sm text-muted-foreground">

@@ -211,10 +211,10 @@ export function TenSecondHeroSkeleton({
   const at = HERO_GRID_CLASS[journeyOrientation];
   return (
     <section className="overflow-hidden rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04)] ring-1 ring-black/6">
-      <Skeleton className="h-32 w-full rounded-none bg-sand lg:h-40" />
+      <Skeleton className="h-24 w-full rounded-none bg-sand lg:h-40" />
       <div
         className={cn(
-          "grid gap-3 px-5 pt-3 pb-5 lg:gap-x-8 lg:gap-y-6 lg:px-6 lg:py-6",
+          "grid gap-2.5 px-5 pt-2.5 pb-5 lg:gap-x-8 lg:gap-y-6 lg:px-6 lg:py-6",
           at.grid,
         )}
       >
@@ -224,7 +224,6 @@ export function TenSecondHeroSkeleton({
             at.where,
           )}
         >
-          <Skeleton className="h-5 w-36 rounded-full lg:mb-auto" />
           <Skeleton className="h-4 w-44" />
           <Skeleton className="h-10 w-56 lg:h-12" />
           <Skeleton className="h-4 w-60" />
@@ -240,28 +239,37 @@ export function TenSecondHeroSkeleton({
 
         <div
           className={cn(
-            "rounded-xl bg-sand px-4 py-3.5 lg:px-5 lg:py-6",
+            "rounded-xl bg-sand px-4 py-3 lg:px-5 lg:py-6",
             at.next,
           )}
         >
-          <Skeleton className="h-4 w-12 bg-sand-foreground/15" />
-          <Skeleton className="mt-2 h-8 w-4/5 bg-sand-foreground/15 lg:mt-3 lg:h-9" />
-          <Skeleton className="mt-2 h-5 w-16 rounded-full bg-sand-foreground/15 lg:mt-3" />
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-4 w-12 bg-sand-foreground/15" />
+            <Skeleton className="h-5 w-16 rounded-full bg-sand-foreground/15" />
+          </div>
+          <Skeleton className="mt-1.5 h-7 w-4/5 bg-sand-foreground/15 lg:mt-3 lg:h-9" />
         </div>
 
         <div
           className={cn(
-            "rounded-xl bg-sky px-4 py-3.5 lg:px-5 lg:py-6",
+            "rounded-xl bg-sky px-4 py-3 lg:px-5 lg:py-6",
             at.owe,
           )}
         >
-          <Skeleton className="h-4 w-20 bg-sky-foreground/15" />
-          <Skeleton className="mt-1 h-4 w-40 bg-sky-foreground/15" />
-          <Skeleton className="mt-3 h-11 w-40 bg-sky-foreground/15 lg:mt-4" />
+          <div className="flex items-baseline gap-2 lg:block">
+            <Skeleton className="h-4 w-20 bg-sky-foreground/15" />
+            <Skeleton className="h-4 w-40 bg-sky-foreground/15 lg:mt-1" />
+          </div>
+          <Skeleton className="mt-2 h-9 w-40 bg-sky-foreground/15 lg:mt-4" />
           <Skeleton className="mt-2 h-5 w-32 rounded-full bg-sky-foreground/15" />
         </div>
 
-        <div className={cn("grid grid-cols-2 gap-4 lg:gap-6", at.doneWaiting)}>
+        <div
+          className={cn(
+            "grid grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] gap-3 lg:grid-cols-2 lg:gap-6",
+            at.doneWaiting,
+          )}
+        >
           <div className="space-y-2">
             <Skeleton className="h-4 w-12" />
             <Skeleton className="h-5 w-full" />
@@ -295,6 +303,30 @@ export function StageColumnsSkeleton() {
   );
 }
 
+/** Four route pointers: icon disc, eyebrow, title, one detail line. */
+function SummaryCardsSkeleton() {
+  return (
+    <section className="space-y-4">
+      <SectionHeadingSkeleton badges={0} description="w-72" />
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {Array.from({ length: 4 }, (_, index) => (
+          <div
+            key={index}
+            className="flex items-center gap-3 rounded-[14px] bg-card p-3 ring-1 ring-black/6 sm:flex-col sm:items-start sm:gap-4 sm:p-4"
+          >
+            <Skeleton className="size-10 shrink-0 rounded-full" />
+            <div className="min-w-0 flex-1 space-y-1.5">
+              <Skeleton className="h-3 w-12" />
+              <Skeleton className="h-5 w-28" />
+              <Skeleton className="h-4 w-full" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export function DashboardSkeleton() {
   return (
     <div className={tripStackClassName}>
@@ -302,13 +334,13 @@ export function DashboardSkeleton() {
         <TenSecondHeroSkeleton />
         <StageColumnsSkeleton />
       </div>
-      <section className="space-y-6">
-        <SectionHeadingSkeleton />
-        <ListingGridSkeleton />
-      </section>
-      <section className="space-y-6">
-        <SectionHeadingSkeleton />
-        <InfoCardSkeleton lines={3} />
+      <SummaryCardsSkeleton />
+      <section className="space-y-4">
+        <SectionHeadingSkeleton badges={0} description="w-4/5" />
+        <div className="grid gap-4 md:grid-cols-2">
+          <InfoCardSkeleton lines={3} button />
+          <InfoCardSkeleton lines={3} button />
+        </div>
       </section>
     </div>
   );

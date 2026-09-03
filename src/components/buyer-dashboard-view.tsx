@@ -82,12 +82,34 @@ function DrillLink({
   );
 }
 
+/**
+ * `full` (transaction page): the hero plus the three stage columns. `summary`
+ * (dashboard): the hero plus one line for the advance gate and deadlines; the
+ * task list and contacts live on the transaction page the dashboard links to.
+ */
+export type DashboardDetail = "full" | "summary";
+
+function AdvanceGate({ view }: { view: BuyerDashboardView }) {
+  if (view.canAdvance) {
+    return <p>Ready for {view.nextStage?.label ?? "the next stage"}.</p>;
+  }
+  return (
+    <p data-testid="stage-blocked">
+      Cannot leave {view.where.label}
+      {view.blockingTasks[0]
+        ? ` while ${view.blockingTasks[0].title} is open.`
+        : "."}
+    </p>
+  );
+}
+
 export function BuyerDashboardViewPanel({
   view,
   buyerName,
   eyebrow,
   journeyOrientation = "horizontal",
   detailHref = transactionHref(view.transactionId),
+  detail = "full",
 }: {
   view: BuyerDashboardView;
   buyerName?: string;
@@ -99,6 +121,7 @@ export function BuyerDashboardViewPanel({
    * no links to itself.
    */
   detailHref?: string | null;
+  detail?: DashboardDetail;
 }) {
   const owed = view.owedToday;
   const place = view.propertyAddress
@@ -111,10 +134,15 @@ export function BuyerDashboardViewPanel({
     <div className="space-y-10">
       <section className="overflow-hidden rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04)] ring-1 ring-black/6">
         <PhotoTile
-          className="h-32 w-full lg:h-40"
+          className="h-24 w-full lg:h-40"
           wash={heroPhotoWashClassName}
           seed={view.propertyAddress?.line1}
         >
+          {eyebrow ? (
+            <Badge variant="sage" className="absolute top-3 left-3">
+              {eyebrow}
+            </Badge>
+          ) : null}
           {view.propertyAddress ? (
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/45 to-transparent px-5 py-3 text-white lg:px-6 lg:py-4">
               <p className="text-sm font-medium">
@@ -133,7 +161,7 @@ export function BuyerDashboardViewPanel({
         */}
         <div
           className={cn(
-            "grid gap-3 px-5 pt-3 pb-5 lg:gap-x-8 lg:gap-y-6 lg:px-6 lg:py-6",
+            "grid gap-2.5 px-5 pt-2.5 pb-5 lg:gap-x-8 lg:gap-y-6 lg:px-6 lg:py-6",
             at.grid,
           )}
         >
@@ -143,11 +171,6 @@ export function BuyerDashboardViewPanel({
               at.where,
             )}
           >
-            {eyebrow ? (
-              <div className="lg:mb-auto">
-                <Badge variant="sage">{eyebrow}</Badge>
-              </div>
-            ) : null}
             <p className="text-sm text-muted-foreground">
               {buyerName ?? "Your transaction"}
               {place ? ` · ${place}` : null}
@@ -173,26 +196,31 @@ export function BuyerDashboardViewPanel({
           <section
             data-testid="ten-second-next"
             className={cn(
-              "rounded-xl bg-sand px-4 py-3.5 lg:px-5 lg:py-6",
+              "rounded-xl bg-sand px-4 py-3 lg:px-5 lg:py-6",
               at.next,
             )}
           >
-            <p className="text-eyebrow font-medium uppercase tracking-[0.2em] text-next">
-              Next
-            </p>
             {view.next === null ? (
-              <p className="mt-2 text-sm text-muted-foreground lg:mt-3">
-                No open task right now.
-              </p>
-            ) : (
-              <DrillLink
-                href={drill}
-                className="mt-2 block space-y-2 lg:mt-3 lg:space-y-3"
-              >
-                <p className="text-h2 font-semibold tracking-tight text-balance lg:text-h1">
-                  {view.next.title}
+              <>
+                <p className="text-eyebrow font-medium uppercase tracking-[0.2em] text-next">
+                  Next
                 </p>
-                <Badge variant="sage">{view.next.assigneeRole}</Badge>
+                <p className="mt-2 text-sm text-muted-foreground lg:mt-3">
+                  No open task right now.
+                </p>
+              </>
+            ) : (
+              <DrillLink href={drill} className="block">
+                {/* Assignee shares the eyebrow row so the card is two lines tall. */}
+                <span className="flex items-center justify-between gap-3">
+                  <span className="text-eyebrow font-medium uppercase tracking-[0.2em] text-next">
+                    Next
+                  </span>
+                  <Badge variant="sage">{view.next.assigneeRole}</Badge>
+                </span>
+                <span className="mt-1.5 block text-h2 font-semibold tracking-tight text-balance lg:mt-3 lg:text-h1">
+                  {view.next.title}
+                </span>
               </DrillLink>
             )}
           </section>
@@ -200,29 +228,37 @@ export function BuyerDashboardViewPanel({
           <section
             data-testid="ten-second-owe"
             className={cn(
-              "rounded-xl bg-sky px-4 py-3.5 lg:px-5 lg:py-6",
+              "rounded-xl bg-sky px-4 py-3 lg:px-5 lg:py-6",
               at.owe,
             )}
           >
             {/*
               The figure sits outside the link so the estimate's Assumptions
               disclosure is never interactive content nested in an anchor.
+              Below lg the eyebrow and label share one line so Done/Waiting
+              stays on the 375 fold; from lg the label drops under it.
             */}
-            <DrillLink href={drill} className="block">
+            <DrillLink
+              href={drill}
+              className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 lg:block"
+            >
               <p className="text-eyebrow font-medium uppercase tracking-[0.2em] text-muted-foreground">
                 Due today
               </p>
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="min-w-0 text-small text-muted-foreground lg:mt-1 lg:text-body">
                 {owed?.label ?? "No sourced figure on this file"}
               </p>
             </DrillLink>
-            <div className="mt-3 lg:mt-4">
+            <div className="mt-2 lg:mt-4">
               <OwedTodayFigure owed={owed} />
             </div>
           </section>
 
           <div
-            className={cn("grid grid-cols-2 gap-4 lg:gap-6", at.doneWaiting)}
+            className={cn(
+              "grid grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] gap-3 lg:grid-cols-2 lg:gap-6",
+              at.doneWaiting,
+            )}
           >
             <section data-testid="ten-second-done" className="min-w-0">
               <p className="text-eyebrow font-medium uppercase tracking-[0.2em] text-muted-foreground">
@@ -243,75 +279,80 @@ export function BuyerDashboardViewPanel({
         </div>
       </section>
 
-      <section className="grid gap-8 md:grid-cols-3">
-        <div>
-          <h2 className="text-sm font-medium">This stage</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Tasks that live on {view.where.label}.
-          </p>
-          {view.currentStageTasks.length === 0 ? (
-            <p className="mt-3 text-sm text-muted-foreground">
-              No tasks on this stage.
+      {detail === "summary" ? (
+        <section
+          data-testid="stage-gate-summary"
+          className="flex flex-wrap items-baseline gap-x-6 gap-y-1 text-sm"
+        >
+          <AdvanceGate view={view} />
+          {view.deadlines.map((deadline) => (
+            <p key={deadline.label} className="text-muted-foreground">
+              {deadline.label}
             </p>
-          ) : (
-            <ul className="mt-3 space-y-2 text-sm">
-              {view.currentStageTasks.map((task) => (
-                <li
-                  key={task.title}
-                  className="flex items-center justify-between gap-2"
-                >
-                  <span>{task.title}</span>
-                  <Badge variant={task.status === "blocked" ? "sand" : "sage"}>
-                    {task.status}
-                  </Badge>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        <div>
-          <h2 className="text-sm font-medium">Waiting and deadlines</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Stage advance stays blocked while a blocking task is open.
-          </p>
-          <div className="mt-3 space-y-2 text-sm">
-            {view.canAdvance ? (
-              <p>Ready for {view.nextStage?.label ?? "the next stage"}.</p>
-            ) : (
-              <p data-testid="stage-blocked">
-                Cannot leave {view.where.label}
-                {view.blockingTasks[0]
-                  ? ` while ${view.blockingTasks[0].title} is open.`
-                  : "."}
+          ))}
+        </section>
+      ) : (
+        <section className="grid gap-8 md:grid-cols-3">
+          <div>
+            <h2 className="text-sm font-medium">This stage</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Tasks that live on {view.where.label}.
+            </p>
+            {view.currentStageTasks.length === 0 ? (
+              <p className="mt-3 text-sm text-muted-foreground">
+                No tasks on this stage.
               </p>
+            ) : (
+              <ul className="mt-3 space-y-2 text-sm">
+                {view.currentStageTasks.map((task) => (
+                  <li
+                    key={task.title}
+                    className="flex items-center justify-between gap-2"
+                  >
+                    <span>{task.title}</span>
+                    <Badge variant={task.status === "blocked" ? "sand" : "sage"}>
+                      {task.status}
+                    </Badge>
+                  </li>
+                ))}
+              </ul>
             )}
-            {view.deadlines.map((deadline) => (
-              <p key={deadline.label} className="text-muted-foreground">
-                {deadline.label}
-              </p>
-            ))}
           </div>
-        </div>
 
-        <div>
-          <h2 className="text-sm font-medium">Contacts</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            People on this file.
-          </p>
-          <div className="mt-3 space-y-2 text-sm">
-            {view.contacts.length === 0 ? (
-              <p className="text-muted-foreground">No contacts yet.</p>
-            ) : (
-              view.contacts.map((contact) => (
-                <p key={`${contact.role}-${contact.name}`}>
-                  {contact.name} · {contact.role}
+          <div>
+            <h2 className="text-sm font-medium">Waiting and deadlines</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Stage advance stays blocked while a blocking task is open.
+            </p>
+            <div className="mt-3 space-y-2 text-sm">
+              <AdvanceGate view={view} />
+              {view.deadlines.map((deadline) => (
+                <p key={deadline.label} className="text-muted-foreground">
+                  {deadline.label}
                 </p>
-              ))
-            )}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+
+          <div>
+            <h2 className="text-sm font-medium">Contacts</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              People on this file.
+            </p>
+            <div className="mt-3 space-y-2 text-sm">
+              {view.contacts.length === 0 ? (
+                <p className="text-muted-foreground">No contacts yet.</p>
+              ) : (
+                view.contacts.map((contact) => (
+                  <p key={`${contact.role}-${contact.name}`}>
+                    {contact.name} · {contact.role}
+                  </p>
+                ))
+              )}
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   );
 }

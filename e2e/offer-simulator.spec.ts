@@ -12,6 +12,8 @@ const DERIVED = [
 test("a $10k price change updates all six estimates", async ({ page }) => {
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Blair Chen" }).click();
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await page.goto("/offers");
   await expect(page.getByTestId("offer-simulator")).toBeVisible();
   await expect(page.getByTestId("assumptions-panel")).toBeVisible();
   const formula = page.getByTestId("simulator-formula");

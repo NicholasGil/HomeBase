@@ -8,6 +8,7 @@ test("tour build then remove stop 2 re-optimizes the remainder", async ({
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Blair Chen" }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
+  await page.goto("/tours");
   await expect(page.getByTestId("tour-builder")).toBeVisible();
 
   for (const id of Object.values(SEED_TOUR_PROPERTY_IDS)) {

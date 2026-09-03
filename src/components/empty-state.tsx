@@ -39,7 +39,7 @@ export function EmptyState({
     <Empty
       data-testid={testId}
       className={cn(
-        "rounded-[14px] border border-dashed border-border bg-card/60 py-8",
+        "rounded-2xl border border-dashed border-border bg-card/60 py-8",
         className,
       )}
     >

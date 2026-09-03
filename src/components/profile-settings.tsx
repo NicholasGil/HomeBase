@@ -38,7 +38,7 @@ export function ProfileSettings({
           does not change a Clerk account.
         </p>
       </div>
-      <div className="overflow-hidden rounded-[16px] bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04)] ring-1 ring-black/6">
+      <div className="overflow-hidden rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04)] ring-1 ring-black/6">
         <dl className="divide-y divide-border/70">
           <ProfileField label="Name" value={name} />
           <ProfileField label="Role" value={role} />

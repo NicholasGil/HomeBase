@@ -91,7 +91,7 @@ export function ListingDetail({
           Restored.
         </p>
       ) : null}
-      <PhotoTile className="h-56 w-full rounded-[16px] sm:h-72" seed={listing.id}>
+      <PhotoTile className="h-56 w-full rounded-2xl sm:h-72" seed={listing.id}>
         <Badge variant="sage" className="absolute top-3 right-3">
           sample data
         </Badge>

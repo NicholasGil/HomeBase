@@ -29,7 +29,7 @@ export function QueryErrorFallback({
     <Empty
       role="alert"
       data-testid="query-error"
-      className="rounded-[14px] bg-card py-8 ring-1 ring-black/6"
+      className="rounded-2xl bg-card py-8 ring-1 ring-black/6"
     >
       <EmptyHeader>
         <EmptyMedia variant="icon" className="text-muted-foreground">

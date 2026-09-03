@@ -54,7 +54,7 @@ export function AccessDeniedCard({
     <Empty
       data-testid={testId}
       className={cn(
-        "rounded-[14px] bg-card py-10 ring-1 ring-black/6",
+        "rounded-2xl bg-card py-10 ring-1 ring-black/6",
         className,
       )}
     >

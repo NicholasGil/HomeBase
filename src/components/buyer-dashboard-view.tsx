@@ -75,7 +75,7 @@ export function BuyerDashboardViewPanel({
 
   return (
     <div className="space-y-10">
-      <section className="overflow-hidden rounded-[16px] bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04)] ring-1 ring-black/6">
+      <section className="overflow-hidden rounded-2xl bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04)] ring-1 ring-black/6">
         <PhotoTile
           className="h-32 w-full lg:h-40"
           wash="from-peach via-sand to-next/35"
@@ -138,7 +138,7 @@ export function BuyerDashboardViewPanel({
           <section
             data-testid="ten-second-next"
             className={cn(
-              "rounded-[14px] bg-sand px-4 py-3.5 lg:px-5 lg:py-6",
+              "rounded-xl bg-sand px-4 py-3.5 lg:px-5 lg:py-6",
               at.next,
             )}
           >
@@ -168,7 +168,7 @@ export function BuyerDashboardViewPanel({
           <section
             data-testid="ten-second-owe"
             className={cn(
-              "rounded-[14px] bg-sky px-4 py-3.5 lg:px-5 lg:py-6",
+              "rounded-xl bg-sky px-4 py-3.5 lg:px-5 lg:py-6",
               at.owe,
             )}
           >

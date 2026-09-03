@@ -279,66 +279,66 @@ export function BuyerDashboardViewPanel({
           ))}
         </section>
       ) : (
-      <section className="grid gap-8 md:grid-cols-3">
-        <div>
-          <h2 className="text-sm font-medium">This stage</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Tasks that live on {view.where.label}.
-          </p>
-          {view.currentStageTasks.length === 0 ? (
-            <p className="mt-3 text-sm text-muted-foreground">
-              No tasks on this stage.
+        <section className="grid gap-8 md:grid-cols-3">
+          <div>
+            <h2 className="text-sm font-medium">This stage</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Tasks that live on {view.where.label}.
             </p>
-          ) : (
-            <ul className="mt-3 space-y-2 text-sm">
-              {view.currentStageTasks.map((task) => (
-                <li
-                  key={task.title}
-                  className="flex items-center justify-between gap-2"
-                >
-                  <span>{task.title}</span>
-                  <Badge variant={task.status === "blocked" ? "sand" : "sage"}>
-                    {task.status}
-                  </Badge>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        <div>
-          <h2 className="text-sm font-medium">Waiting and deadlines</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Stage advance stays blocked while a blocking task is open.
-          </p>
-          <div className="mt-3 space-y-2 text-sm">
-            <AdvanceGate view={view} />
-            {view.deadlines.map((deadline) => (
-              <p key={deadline.label} className="text-muted-foreground">
-                {deadline.label}
+            {view.currentStageTasks.length === 0 ? (
+              <p className="mt-3 text-sm text-muted-foreground">
+                No tasks on this stage.
               </p>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <h2 className="text-sm font-medium">Contacts</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            People on this file.
-          </p>
-          <div className="mt-3 space-y-2 text-sm">
-            {view.contacts.length === 0 ? (
-              <p className="text-muted-foreground">No contacts yet.</p>
             ) : (
-              view.contacts.map((contact) => (
-                <p key={`${contact.role}-${contact.name}`}>
-                  {contact.name} · {contact.role}
-                </p>
-              ))
+              <ul className="mt-3 space-y-2 text-sm">
+                {view.currentStageTasks.map((task) => (
+                  <li
+                    key={task.title}
+                    className="flex items-center justify-between gap-2"
+                  >
+                    <span>{task.title}</span>
+                    <Badge variant={task.status === "blocked" ? "sand" : "sage"}>
+                      {task.status}
+                    </Badge>
+                  </li>
+                ))}
+              </ul>
             )}
           </div>
-        </div>
-      </section>
+
+          <div>
+            <h2 className="text-sm font-medium">Waiting and deadlines</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Stage advance stays blocked while a blocking task is open.
+            </p>
+            <div className="mt-3 space-y-2 text-sm">
+              <AdvanceGate view={view} />
+              {view.deadlines.map((deadline) => (
+                <p key={deadline.label} className="text-muted-foreground">
+                  {deadline.label}
+                </p>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h2 className="text-sm font-medium">Contacts</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              People on this file.
+            </p>
+            <div className="mt-3 space-y-2 text-sm">
+              {view.contacts.length === 0 ? (
+                <p className="text-muted-foreground">No contacts yet.</p>
+              ) : (
+                view.contacts.map((contact) => (
+                  <p key={`${contact.role}-${contact.name}`}>
+                    {contact.name} · {contact.role}
+                  </p>
+                ))
+              )}
+            </div>
+          </div>
+        </section>
       )}
     </div>
   );

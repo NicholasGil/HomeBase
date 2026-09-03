@@ -5,15 +5,38 @@ import {
   homeActionFor,
 } from "@/components/access-denied-card";
 import { AppShell } from "@/components/app-shell";
-import { BuyerDashboardViewPanel } from "@/components/buyer-dashboard-view";
+import {
+  BuyerDashboardViewPanel,
+  type ReachableContact,
+} from "@/components/buyer-dashboard-view";
 import { LiveTransactionPage } from "@/components/live-transaction-page";
 import { QueryErrorBoundary } from "@/components/query-error-boundary";
 import { StageAdvancePanel } from "@/components/stage-advance-panel";
 import { TextLink } from "@/components/text-link";
 import { assertCanRenderWithoutAuth, isAuthConfigured } from "@/lib/auth-config";
 import { seedBuyerNameForTransaction } from "@/lib/seed-dashboard";
+import { SEED_PLAN } from "../../../../convex/seedPlan";
 
 export const dynamic = "force-dynamic";
+
+/**
+ * The dashboard view names contacts only. The seed plan carries the agent's
+ * phone and email, so the fixture preview can make those values dialable;
+ * the live route stays name-only until the view carries them.
+ */
+function reachableSeedContacts(
+  contacts: ReachableContact[],
+): ReachableContact[] {
+  return contacts.map((contact) =>
+    contact.role === "agent" && contact.name === SEED_PLAN.agent.name
+      ? {
+          ...contact,
+          phone: SEED_PLAN.agent.phone,
+          email: SEED_PLAN.agent.email,
+        }
+      : contact,
+  );
+}
 
 async function FixtureTransaction({ transactionId }: { transactionId: string }) {
   const session = await getTestSession();
@@ -40,6 +63,7 @@ async function FixtureTransaction({ transactionId }: { transactionId: string }) 
           eyebrow="Opened by id"
           journeyOrientation="responsive"
           detailHref={null}
+          contacts={reachableSeedContacts(loaded.view.contacts)}
         />
         {/* No mutation exists in the fixture preview, so the control renders disabled with that reason. */}
         <StageAdvancePanel view={loaded.view} />

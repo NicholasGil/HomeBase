@@ -6,6 +6,7 @@ import {
   BuyerDashboardViewPanel,
   OwedTodayFigure,
 } from "@/components/buyer-dashboard-view";
+import { taskAnchorId } from "@/components/task-anchor";
 import {
   ESTIMATE_AMOUNT_CLASS_NAME,
   ESTIMATE_LABEL,
@@ -58,10 +59,80 @@ describe("BuyerDashboardViewPanel ten-second answers", () => {
     const html = renderToStaticMarkup(
       createElement(BuyerDashboardViewPanel, { view, detailHref: null }),
     );
-    expect(html).not.toContain(`href="/transactions/${view.transactionId}"`);
+    expect(html).not.toContain(`href="/transactions/${view.transactionId}`);
     expect(html).toContain('data-testid="ten-second-next"');
     expect(html).toContain("Schedule inspection");
     expect(html).toContain('data-testid="journey-stage-inspection"');
+  });
+});
+
+describe("BuyerDashboardViewPanel stage detail", () => {
+  it("links the dashboard gate line to the blocking task's row on the transaction page", () => {
+    const view = seedDashboardForBuyerA();
+    const html = renderToStaticMarkup(
+      createElement(BuyerDashboardViewPanel, { view, detail: "summary" }),
+    );
+    const gate = /data-testid="stage-blocked".*?<\/p>/.exec(html)?.[0];
+    expect(gate).toContain(
+      `href="/transactions/${view.transactionId}#${taskAnchorId("Schedule inspection")}"`,
+    );
+    expect(gate).toContain(">Schedule inspection</a>");
+    expect(gate).toContain("Cannot leave Inspection");
+  });
+
+  it("renders task rows as static anchored records, not links or buttons", () => {
+    const view = seedDashboardForBuyerA();
+    const html = renderToStaticMarkup(
+      createElement(BuyerDashboardViewPanel, { view, detailHref: null }),
+    );
+    const rows = /aria-label="Tasks on this stage".*?<\/ul>/.exec(html)?.[0];
+    expect(rows).toBeDefined();
+    expect(rows).toContain(`id="${taskAnchorId("Schedule inspection")}"`);
+    expect(rows).toContain(`id="${taskAnchorId("Review inspection report")}"`);
+    expect(rows).toContain('data-task-status="open"');
+    expect(rows).toContain('data-task-status="blocked"');
+    expect(rows).toContain("blocks advance");
+    expect(rows).not.toContain("<a ");
+    expect(rows).not.toContain("<button");
+    // The transaction page's own gate line stays plain: the task is beside it.
+    const gate = /data-testid="stage-blocked".*?<\/p>/.exec(html)?.[0];
+    expect(gate).not.toContain("<a ");
+    expect(gate).toContain("Schedule inspection");
+  });
+
+  it("renders contacts as name and role, with tel and mailto only when supplied", () => {
+    const view = seedDashboardForBuyerA();
+    const plain = renderToStaticMarkup(
+      createElement(BuyerDashboardViewPanel, { view, detailHref: null }),
+    );
+    expect(plain).toContain("Casey Holt");
+    expect(plain).not.toContain("tel:");
+    expect(plain).not.toContain("mailto:");
+
+    const reachable = renderToStaticMarkup(
+      createElement(BuyerDashboardViewPanel, {
+        view,
+        detailHref: null,
+        contacts: view.contacts.map((contact) => ({
+          ...contact,
+          phone: "256-555-0100",
+          email: "casey.holt@example.com",
+        })),
+      }),
+    );
+    expect(reachable).toContain('href="tel:+12565550100"');
+    expect(reachable).toContain('href="mailto:casey.holt@example.com"');
+    expect(reachable).toContain("Call Casey Holt");
+  });
+
+  it("slugs task titles into stable fragment ids", () => {
+    expect(taskAnchorId("Schedule inspection")).toBe("task-schedule-inspection");
+    expect(taskAnchorId("Review inspection report")).toBe(
+      "task-review-inspection-report",
+    );
+    expect(taskAnchorId("  Order title & survey! ")).toBe(
+      "task-order-title-survey",
+    );
   });
 });
 

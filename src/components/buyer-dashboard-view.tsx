@@ -1,15 +1,24 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import {
+  ContactReach,
+  type ContactReachDetails,
+} from "@/components/contact-links";
 import { DoneList } from "@/components/done-list";
 import { PhotoTile } from "@/components/listing-card";
 import { MoneyFigureView } from "@/components/money-figure-view";
+import { StageTaskRows } from "@/components/stage-task-rows";
+import { taskAnchorId } from "@/components/task-anchor";
 import { Badge } from "@/components/ui/badge";
 import {
   JourneyTracker,
   type JourneyOrientation,
 } from "@/components/journey-tracker";
-import type { BuyerDashboardView } from "../../convex/lib/dashboardView";
+import type {
+  BuyerDashboardView,
+  DashboardContact,
+} from "../../convex/lib/dashboardView";
 import { heroPhotoWashClassName } from "@/lib/trip-ui";
 import { cn } from "@/lib/utils";
 
@@ -89,16 +98,42 @@ function DrillLink({
  */
 export type DashboardDetail = "full" | "summary";
 
-function AdvanceGate({ view }: { view: BuyerDashboardView }) {
+/** A contact the view names, plus phone/email when the source carries them. */
+export type ReachableContact = DashboardContact & ContactReachDetails;
+
+/**
+ * The gate line. With `href` (the dashboard) the blocking task is a link into
+ * the transaction route at its row; without one (the transaction page) the
+ * task sits in the adjacent column and the line stays plain text.
+ */
+function AdvanceGate({
+  view,
+  href,
+}: {
+  view: BuyerDashboardView;
+  href?: string;
+}) {
   if (view.canAdvance) {
     return <p>Ready for {view.nextStage?.label ?? "the next stage"}.</p>;
   }
+  const blocker = view.blockingTasks[0];
+  if (blocker === undefined) {
+    return <p data-testid="stage-blocked">Cannot leave {view.where.label}.</p>;
+  }
   return (
     <p data-testid="stage-blocked">
-      Cannot leave {view.where.label}
-      {view.blockingTasks[0]
-        ? ` while ${view.blockingTasks[0].title} is open.`
-        : "."}
+      Cannot leave {view.where.label} while{" "}
+      {href === undefined ? (
+        blocker.title
+      ) : (
+        <Link
+          href={`${href}#${taskAnchorId(blocker.title)}`}
+          className="font-medium text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground"
+        >
+          {blocker.title}
+        </Link>
+      )}{" "}
+      is open.
     </p>
   );
 }
@@ -110,6 +145,7 @@ export function BuyerDashboardViewPanel({
   journeyOrientation = "horizontal",
   detailHref = transactionHref(view.transactionId),
   detail = "full",
+  contacts = view.contacts,
 }: {
   view: BuyerDashboardView;
   buyerName?: string;
@@ -122,6 +158,12 @@ export function BuyerDashboardViewPanel({
    */
   detailHref?: string | null;
   detail?: DashboardDetail;
+  /**
+   * The view names contacts without phone or email. A caller that has them
+   * (the fixture knows its seeded agent) passes the same people enriched so
+   * the values render as tel:/mailto: links.
+   */
+  contacts?: ReachableContact[];
 }) {
   const owed = view.owedToday;
   const place = view.propertyAddress
@@ -284,7 +326,7 @@ export function BuyerDashboardViewPanel({
           data-testid="stage-gate-summary"
           className="flex flex-wrap items-baseline gap-x-6 gap-y-1 text-sm"
         >
-          <AdvanceGate view={view} />
+          <AdvanceGate view={view} href={drill} />
           {view.deadlines.map((deadline) => (
             <p key={deadline.label} className="text-muted-foreground">
               {deadline.label}
@@ -296,27 +338,10 @@ export function BuyerDashboardViewPanel({
           <div>
             <h2 className="text-sm font-medium">This stage</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Tasks that live on {view.where.label}.
+              Tasks that live on {view.where.label}, who owns each, and where
+              it stands.
             </p>
-            {view.currentStageTasks.length === 0 ? (
-              <p className="mt-3 text-sm text-muted-foreground">
-                No tasks on this stage.
-              </p>
-            ) : (
-              <ul className="mt-3 space-y-2 text-sm">
-                {view.currentStageTasks.map((task) => (
-                  <li
-                    key={task.title}
-                    className="flex items-center justify-between gap-2"
-                  >
-                    <span>{task.title}</span>
-                    <Badge variant={task.status === "blocked" ? "sand" : "sage"}>
-                      {task.status}
-                    </Badge>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <StageTaskRows tasks={view.currentStageTasks} />
           </div>
 
           <div>
@@ -325,7 +350,7 @@ export function BuyerDashboardViewPanel({
               Stage advance stays blocked while a blocking task is open.
             </p>
             <div className="mt-3 space-y-2 text-sm">
-              <AdvanceGate view={view} />
+              <AdvanceGate view={view} href={drill} />
               {view.deadlines.map((deadline) => (
                 <p key={deadline.label} className="text-muted-foreground">
                   {deadline.label}
@@ -339,17 +364,38 @@ export function BuyerDashboardViewPanel({
             <p className="mt-1 text-sm text-muted-foreground">
               People on this file.
             </p>
-            <div className="mt-3 space-y-2 text-sm">
-              {view.contacts.length === 0 ? (
-                <p className="text-muted-foreground">No contacts yet.</p>
-              ) : (
-                view.contacts.map((contact) => (
-                  <p key={`${contact.role}-${contact.name}`}>
-                    {contact.name} · {contact.role}
-                  </p>
-                ))
-              )}
-            </div>
+            {contacts.length === 0 ? (
+              <p className="mt-3 text-sm text-muted-foreground">
+                No contacts yet.
+              </p>
+            ) : (
+              <ul
+                aria-label="Contacts on this file"
+                className="mt-3 divide-y divide-border/70 text-sm"
+              >
+                {contacts.map((contact) => (
+                  <li
+                    key={`${contact.role}-${contact.name}`}
+                    data-contact-role={contact.role}
+                    className="py-2 first:pt-0"
+                  >
+                    <p>
+                      <span className="font-medium">{contact.name}</span>
+                      <span className="text-muted-foreground">
+                        {" "}
+                        · {contact.role}
+                      </span>
+                    </p>
+                    <ContactReach
+                      name={contact.name}
+                      phone={contact.phone}
+                      email={contact.email}
+                      className="-mb-2"
+                    />
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </section>
       )}

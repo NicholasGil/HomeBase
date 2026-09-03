@@ -75,8 +75,7 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.9 0.02 75);
   --input: oklch(0.9 0.02 75);
-  /* Focus ring is ink, not coral: `--next` is reserved for the primary CTA. */
-  --ring: oklch(0.22 0.02 50);
+  --ring: oklch(0.63 0.21 18);
   --next: oklch(0.63 0.21 18);
   --next-foreground: oklch(0.995 0 0);
   --sand: oklch(0.94 0.045 70);
@@ -100,7 +99,7 @@
   --sidebar-accent: oklch(0.95 0.03 75);
   --sidebar-accent-foreground: oklch(0.22 0.02 50);
   --sidebar-border: oklch(0.9 0.02 75);
-  --sidebar-ring: oklch(0.22 0.02 50);
+  --sidebar-ring: oklch(0.63 0.21 18);
 }
 
 .dark {
@@ -121,7 +120,7 @@
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0.004 260 / 10%);
   --input: oklch(1 0.004 260 / 14%);
-  --ring: oklch(0.97 0.004 260);
+  --ring: oklch(0.68 0.18 18);
   --next: oklch(0.68 0.18 18);
   --next-foreground: oklch(0.16 0.01 265);
   --sand: oklch(0.32 0.04 70);
@@ -143,7 +142,7 @@
   --sidebar-accent: oklch(0.28 0.01 265);
   --sidebar-accent-foreground: oklch(0.97 0.004 260);
   --sidebar-border: oklch(1 0.004 260 / 10%);
-  --sidebar-ring: oklch(0.97 0.004 260);
+  --sidebar-ring: oklch(0.68 0.18 18);
 }
 
 @utility scrollbar-none {

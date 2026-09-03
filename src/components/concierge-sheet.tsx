@@ -43,6 +43,11 @@ function readSidePanel() {
  * The side is chosen from a media query rather than responsive classes so the
  * primitive's own per-side positioning and enter/exit motion stay intact. The
  * popup only mounts after a tap, so the server snapshot never reaches paint.
+ *
+ * While the sheet is open the FAB shrinks away (`data-popup-open`, set by the
+ * primitive on its trigger) so it never shows through the backdrop or peeks
+ * past a sheet edge as a second, dead concierge button. The sheet's own close
+ * control and the backdrop are the ways out; the FAB returns as it closes.
  */
 export function ConciergeSheet({ scope }: { scope: ConciergeScope }) {
   const [open, setOpen] = useState(false);
@@ -57,7 +62,7 @@ export function ConciergeSheet({ scope }: { scope: ConciergeScope }) {
       <SheetTrigger
         data-testid="concierge-fab"
         aria-label="Ask the concierge"
-        className="fixed right-4 bottom-[calc(var(--tab-bar-height)+env(safe-area-inset-bottom)+1rem+var(--fab-dock-clearance))] z-30 flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_10px_28px_rgba(15,23,42,0.22)] transition-[bottom,transform] outline-none hover:scale-[1.03] focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-95 md:right-6 md:bottom-[calc(env(safe-area-inset-bottom)+1.5rem+var(--fab-dock-clearance))]"
+        className="fixed right-4 bottom-[calc(var(--tab-bar-height)+env(safe-area-inset-bottom)+1rem+var(--fab-dock-clearance))] z-30 flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_10px_28px_rgba(15,23,42,0.22)] transition-[bottom,transform,opacity] duration-200 outline-none hover:scale-[1.03] focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-95 data-popup-open:pointer-events-none data-popup-open:scale-75 data-popup-open:opacity-0 md:right-6 md:bottom-[calc(env(safe-area-inset-bottom)+1.5rem+var(--fab-dock-clearance))]"
       >
         <MessageCircleQuestionMark className="size-6" aria-hidden />
       </SheetTrigger>

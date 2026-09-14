@@ -53,7 +53,7 @@ export function ConciergeChat({ className }: { className?: string }) {
     >
       <div
         aria-label="Suggested questions"
-        className="flex flex-wrap items-start gap-2 pb-1"
+        className="flex min-h-0 max-h-36 shrink flex-wrap items-start gap-2 overflow-y-auto pb-1 md:max-h-none md:shrink-0 md:overflow-visible"
       >
         {CONCIERGE_STARTERS.map((starter) => (
           <Button
@@ -95,7 +95,7 @@ export function ConciergeChat({ className }: { className?: string }) {
       </div>
 
       <form
-        className="flex gap-2 border-t border-border/70 pt-3"
+        className="flex shrink-0 gap-2 border-t border-border/70 bg-card pt-3"
         onSubmit={(event) => {
           event.preventDefault();
           void submit(question);

@@ -119,6 +119,8 @@
   --chart-5: oklch(0.4 0.04 50);
   --radius: 0.75rem;
   --tab-bar-height: 4rem;
+  /* Sticky app header (py-2 + min-h-11) plus coach main top padding (py-6). */
+  --coach-mobile-chrome: calc(3.75rem + 1.5rem);
   --fab-dock-clearance: 0px;
   --sidebar: oklch(0.98 0.016 75);
   --sidebar-foreground: oklch(0.22 0.02 50);

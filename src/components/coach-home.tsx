@@ -23,7 +23,9 @@ export function CoachHome({
       <section
         aria-label="Personal coach"
         className={cn(
-          "flex min-h-[min(70vh,640px)] flex-col overflow-x-hidden rounded-3xl border border-border/80 bg-card shadow-sm",
+          "flex min-h-0 flex-col overflow-hidden rounded-3xl border border-border/80 bg-card shadow-sm",
+          "max-md:max-h-[calc(100dvh-var(--coach-mobile-chrome)-var(--tab-bar-height)-env(safe-area-inset-bottom)-0.5rem)]",
+          "md:min-h-[min(70vh,640px)]",
         )}
       >
         <header

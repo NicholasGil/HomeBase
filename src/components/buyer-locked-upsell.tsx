@@ -84,7 +84,10 @@ export function BuyerLockedUpsellRail({
     <aside
       aria-label="Full OS preview"
       data-testid="locked-upsell-rail"
-      className={cn("space-y-3", className)}
+      className={cn(
+        "space-y-3 pb-[calc(var(--tab-bar-height)+env(safe-area-inset-bottom)+0.5rem)] md:pb-0",
+        className,
+      )}
     >
       <p className="text-eyebrow font-medium tracking-[0.12em] text-muted-foreground uppercase">
         Full transaction OS

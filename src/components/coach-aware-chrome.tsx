@@ -31,7 +31,7 @@ export function CoachAwareMain({
           fabScope !== null &&
             "pb-[calc(6rem+var(--fab-dock-clearance))]",
           coachHome &&
-            "py-6 pb-[calc(var(--tab-bar-height)+env(safe-area-inset-bottom)+1rem)] md:py-8 md:pb-8",
+            "py-6 pb-[calc(var(--tab-bar-height)+env(safe-area-inset-bottom)+1.5rem)] md:py-8 md:pb-8",
         )}
       >
         {children}

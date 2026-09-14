@@ -12,9 +12,9 @@ export default function AppPage() {
           <p className="max-w-xl text-sm leading-6 text-muted-foreground">
             After Clerk is connected, this page reads <code>me.getSession</code>{" "}
             and sends buyer, agent, broker, admin, and vendor to their home
-            route. Local preview: buyers use{" "}
-            <a className="underline" href="/dashboard">
-              /dashboard
+            route.             Local preview: buyers use{" "}
+            <a className="underline" href="/coach">
+              /coach
             </a>
             .
           </p>

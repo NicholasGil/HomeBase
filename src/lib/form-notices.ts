@@ -23,6 +23,7 @@ export function isFormNoticeCode(value: string): value is FormNoticeCode {
 }
 
 const ALLOWED_RETURN_PATHS = [
+  "/coach",
   "/dashboard",
   "/tours",
   "/vendor",

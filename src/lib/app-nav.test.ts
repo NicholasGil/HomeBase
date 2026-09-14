@@ -16,8 +16,14 @@ function labels(role: Parameters<typeof navLinksFor>[0]["role"], extra?: {
 }
 
 describe("navLinksFor", () => {
-  it("keeps buyer chrome to Home, Search, Tours, and Vault", () => {
-    expect(labels("buyer")).toEqual(["Home", "Search", "Tours", "Vault"]);
+  it("keeps buyer chrome to Coach plus locked Search, Pipeline, and Vault", () => {
+    expect(labels("buyer")).toEqual(["Coach", "Search", "Pipeline", "Vault"]);
+    expect(navLinksFor({ role: "buyer" }).map((link) => link.locked)).toEqual([
+      undefined,
+      true,
+      true,
+      true,
+    ]);
     expect(labels("buyer")).not.toContain("Command center");
     expect(labels("buyer")).not.toContain("Vendor portal");
     expect(labels("buyer")).not.toContain("Sign");
@@ -32,7 +38,7 @@ describe("navLinksFor", () => {
         buyerClosed: true,
         hubHref: "/homeownership/seed:buyer-h",
       }),
-    ).toEqual(["Home", "Search", "Tours", "Vault", "Hub"]);
+    ).toEqual(["Coach", "Search", "Pipeline", "Vault", "Hub"]);
     expect(labels("buyer", { buyerClosed: true })).not.toContain("Hub");
   });
 
@@ -70,7 +76,7 @@ describe("navContextFromFixtureSession", () => {
     });
     expect(navContextFromFixtureSession(casey.session).role).toBe("agent");
     expect(navContextFromFixtureSession(jordan.session).role).toBe("vendor");
-    expect(wordmarkHrefFor("buyer")).toBe("/dashboard");
+    expect(wordmarkHrefFor("buyer")).toBe("/coach");
     expect(wordmarkHrefFor("vendor")).toBe("/vendor");
     expect(wordmarkHrefFor("guest")).toBe("/");
   });

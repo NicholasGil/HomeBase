@@ -3,13 +3,14 @@
 import {
   Briefcase,
   FolderLock,
-  House,
   KeyRound,
   LayoutDashboard,
   LayoutGrid,
-  type LucideIcon,
+  LockKeyhole,
+  MessageCircle,
   Route,
   Search,
+  type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -18,7 +19,8 @@ import type { AppNavLink } from "@/lib/app-nav";
 import { cn } from "@/lib/utils";
 
 const TAB_ICONS: ReadonlyArray<readonly [prefix: string, icon: LucideIcon]> = [
-  ["/dashboard", House],
+  ["/coach", MessageCircle],
+  ["/dashboard", LayoutDashboard],
   ["/search", Search],
   ["/tours", Route],
   ["/vault", FolderLock],
@@ -65,26 +67,38 @@ export function MobileTabBar({ links }: { links: AppNavLink[] }) {
           {links.map((link) => {
             const Icon = iconFor(link.href);
             const active = isActive(pathname, link.href);
+            const locked = link.locked === true;
             return (
               <li key={`${link.href}-${link.label}`} className="min-w-0 flex-1">
                 <Link
                   href={link.href}
                   aria-current={active ? "page" : undefined}
+                  aria-label={
+                    locked ? `${link.label} (locked preview)` : link.label
+                  }
                   data-active={active ? "true" : undefined}
+                  data-locked={locked ? "true" : undefined}
                   className={cn(
                     "flex h-full min-h-11 min-w-11 flex-col items-center justify-center gap-0.5 rounded-xl px-0.5 text-center text-eyebrow font-medium transition-colors",
                     active
                       ? "text-foreground"
                       : "text-muted-foreground hover:text-foreground",
+                    locked && !active ? "opacity-90" : "",
                   )}
                 >
                   <span
                     className={cn(
-                      "flex h-7 w-12 items-center justify-center rounded-full transition-colors",
+                      "relative flex h-7 w-12 items-center justify-center rounded-full transition-colors",
                       active ? "bg-sage text-sage-foreground" : "",
                     )}
                   >
                     <Icon className="size-5" aria-hidden />
+                    {locked ? (
+                      <LockKeyhole
+                        className="absolute -top-0.5 -right-0.5 size-3 text-muted-foreground"
+                        aria-hidden
+                      />
+                    ) : null}
                   </span>
                   <span className="line-clamp-2 max-w-full">{link.label}</span>
                 </Link>

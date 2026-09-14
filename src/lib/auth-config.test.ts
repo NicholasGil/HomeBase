@@ -73,6 +73,7 @@ describe("production fail-closed", () => {
   });
 
   it("marks dashboard and role homes as protected paths", () => {
+    expect(isProtectedPath("/coach")).toBe(true);
     expect(isProtectedPath("/dashboard")).toBe(true);
     expect(isProtectedPath("/vault")).toBe(true);
     expect(isProtectedPath("/tours")).toBe(true);

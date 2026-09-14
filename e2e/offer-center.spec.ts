@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("offer draft is blocked by the licensee gate", async ({ page }) => {
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Blair Chen" }).click();
-  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page).toHaveURL(/\/coach$/);
   await page.goto("/offers");
   await expect(page.getByTestId("offer-center")).toBeVisible();
   await expect(page.getByTestId("scenario-stronger")).toBeVisible();
@@ -33,13 +33,13 @@ test("offer draft is blocked by the licensee gate", async ({ page }) => {
 test("another buyer cannot submit Blair's draft", async ({ page }) => {
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Blair Chen" }).click();
-  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page).toHaveURL(/\/coach$/);
   await page.goto("/offers");
   await expect(page.getByTestId("offer-center")).toBeVisible();
 
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Alex Rivera" }).click();
-  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page).toHaveURL(/\/coach$/);
   await page.goto("/offers");
   await expect(page.getByText("Signed in as Alex Rivera")).toBeVisible();
   await expect(page.getByTestId("offer-center")).toBeVisible();

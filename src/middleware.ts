@@ -22,6 +22,7 @@ export default async function middleware(
   );
   const isProtectedRoute = createRouteMatcher([
     "/app(.*)",
+    "/coach(.*)",
     "/dashboard(.*)",
     "/transactions(.*)",
     "/agent(.*)",

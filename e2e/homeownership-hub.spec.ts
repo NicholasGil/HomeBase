@@ -3,12 +3,12 @@ import { expect, test } from "@playwright/test";
 test("closed buyer sees the four hub surfaces", async ({ page }) => {
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Indira Shah" }).click();
-  await expect(page).toHaveURL(/\/dashboard$/);
-  await expect(page.getByText("Indira Shah")).toBeVisible();
+  await expect(page).toHaveURL(/\/coach$/);
+  await expect(page.getByTestId("profile-avatar")).toBeVisible();
   await expect(
     page.getByTestId("app-nav").getByRole("link", { name: "Hub" }),
   ).toBeVisible();
-  await expect(page.getByTestId("homeownership-hub")).toBeVisible();
+  await expect(page.getByTestId("homeownership-hub")).toHaveCount(0);
   await page.goto("/homeownership/seed:buyer-h");
   await expect(page.getByTestId("homeownership-hub")).toBeVisible();
   await expect(page.getByTestId("hub-maintenance")).toBeVisible();
@@ -47,8 +47,8 @@ test("other buyer, vendor, and unauthenticated callers are denied", async ({
 
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Alex Rivera" }).click();
-  await expect(page).toHaveURL(/\/dashboard$/);
-  await expect(page.getByText("Alex Rivera")).toBeVisible();
+  await expect(page).toHaveURL(/\/coach$/);
+  await expect(page.getByTestId("profile-avatar")).toBeVisible();
   await expect(page.getByTestId("homeownership-hub")).toHaveCount(0);
   await page.goto("/homeownership/seed:buyer-h");
   await expect(page.getByTestId("homeownership-hub-denied")).toBeVisible();
@@ -56,7 +56,7 @@ test("other buyer, vendor, and unauthenticated callers are denied", async ({
 
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Blair Chen" }).click();
-  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page).toHaveURL(/\/coach$/);
   await page.goto("/homeownership/seed:buyer-h");
   await expect(page.getByTestId("homeownership-hub-denied")).toBeVisible();
 
@@ -71,8 +71,8 @@ test("other buyer, vendor, and unauthenticated callers are denied", async ({
 test("a non-closed transaction does not expose the hub", async ({ page }) => {
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Alex Rivera" }).click();
-  await expect(page).toHaveURL(/\/dashboard$/);
-  await expect(page.getByText("Alex Rivera")).toBeVisible();
+  await expect(page).toHaveURL(/\/coach$/);
+  await expect(page.getByTestId("profile-avatar")).toBeVisible();
   await page.goto("/homeownership/seed:buyer-a");
   await expect(page.getByTestId("homeownership-hub-denied")).toBeVisible();
   await expect(page.getByTestId("homeownership-hub")).toHaveCount(0);
@@ -82,8 +82,7 @@ test("a non-closed transaction does not expose the hub", async ({ page }) => {
 test("retained hub documents stay grant-gated on open", async ({ page }) => {
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Indira Shah" }).click();
-  await expect(page).toHaveURL(/\/dashboard$/);
-  await expect(page.getByTestId("homeownership-hub")).toBeVisible();
+  await expect(page).toHaveURL(/\/coach$/);
   await page.goto("/homeownership/seed:buyer-h");
   await expect(page.getByTestId("homeownership-hub")).toBeVisible();
   await page
@@ -95,8 +94,8 @@ test("retained hub documents stay grant-gated on open", async ({ page }) => {
 
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Alex Rivera" }).click();
-  await expect(page).toHaveURL(/\/dashboard$/);
-  await expect(page.getByText("Alex Rivera")).toBeVisible();
+  await expect(page).toHaveURL(/\/coach$/);
+  await expect(page.getByTestId("profile-avatar")).toBeVisible();
   await page.goto("/documents/seed-doc-closing-disclosure");
   await expect(page.getByTestId("document-denied")).toBeVisible();
   await expect(page.getByText("Title issued a $405,000")).toHaveCount(0);
@@ -111,8 +110,7 @@ test("retained hub documents stay grant-gated on open", async ({ page }) => {
 test("vendor re-engage stays none and flags stay off", async ({ page }) => {
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Indira Shah" }).click();
-  await expect(page).toHaveURL(/\/dashboard$/);
-  await expect(page.getByTestId("homeownership-hub")).toBeVisible();
+  await expect(page).toHaveURL(/\/coach$/);
   await page.goto("/homeownership/seed:buyer-h");
   await expect(page.getByTestId("homeownership-hub")).toBeVisible();
   await page

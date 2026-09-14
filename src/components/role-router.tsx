@@ -7,7 +7,7 @@ import { useEffect } from "react";
 import { api } from "../../convex/_generated/api";
 
 const ROLE_HOME = {
-  buyer: "/dashboard",
+  buyer: "/coach",
   agent: "/agent",
   broker: "/broker",
   admin: "/admin",

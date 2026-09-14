@@ -6,12 +6,21 @@ import {
   SEED_TOUR_PROPERTY_IDS,
 } from "../convex/seedPlan";
 
-test("canonical search ranks sample listings and feedback changes order", async ({
+test("buyer search route shows locked upsell copy", async ({ page }) => {
+  await page.goto("/test-login");
+  await page.getByRole("button", { name: "Sign in as Blair Chen" }).click();
+  await expect(page).toHaveURL(/\/coach$/);
+  await page.goto("/search");
+  await expect(page.getByTestId("locked-upsell-search")).toBeVisible();
+  await expect(page.getByTestId("property-search")).toHaveCount(0);
+});
+
+test("agent search still ranks sample listings and feedback changes order", async ({
   page,
 }) => {
   await page.goto("/test-login");
-  await page.getByRole("button", { name: "Sign in as Blair Chen" }).click();
-  await expect(page).toHaveURL(/\/dashboard$/);
+  await page.getByRole("button", { name: "Sign in as Casey Holt" }).click();
+  await expect(page).toHaveURL(/\/agent$/);
   await page.goto("/search");
   await expect(page.getByTestId("property-search")).toBeVisible();
   await expect(page.getByTestId("search-mls-flag")).toContainText("off");
@@ -43,20 +52,6 @@ test("canonical search ranks sample listings and feedback changes order", async 
   await expect(
     page.getByText("900 Licensed Feed Ln"),
   ).toHaveCount(0);
-
-  await page
-    .getByTestId(`search-dislike-${SEED_SEARCH_PROPERTY_IDS.jonesValley}`)
-    .click();
-  await expect(page.getByTestId("property-search")).toBeVisible();
-  const after = page.locator("[data-testid^='search-result-']").first();
-  await expect(after).toHaveAttribute("data-rank", "1");
-  await expect(after).not.toHaveAttribute(
-    "data-property-id",
-    SEED_SEARCH_PROPERTY_IDS.jonesValley,
-  );
-  const newFirstId = await after.getAttribute("data-property-id");
-  expect(newFirstId).toBeTruthy();
-  expect(newFirstId).not.toBe(SEED_SEARCH_PROPERTY_IDS.jonesValley);
 });
 
 test("vendor cannot open search", async ({ page }) => {

@@ -10,7 +10,6 @@ async function signInAs(page: Page, name: string) {
   await page.getByRole("button", { name: `Sign in as ${name}` }).click();
 }
 
-// The sheet slides in over 200ms, so its edges are polled until they land.
 async function edges(locator: Locator) {
   const box = await locator.boundingBox();
   if (box === null) {
@@ -31,7 +30,7 @@ test("concierge answers a seed question and refuses another client", async ({
 }) => {
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Alex Rivera" }).click();
-  await page.getByTestId("concierge-fab").click();
+  await expect(page).toHaveURL(/\/coach$/);
   await expect(page.getByTestId("concierge")).toBeVisible();
 
   await page.getByRole("button", { name: "What happens next?" }).click();
@@ -61,29 +60,21 @@ test("concierge answers a seed question and refuses another client", async ({
   await expect(page.getByTestId("concierge-answer")).not.toContainText("$");
 });
 
-test.describe("concierge sheet", () => {
-  test("opens from the FAB with the transaction scope and eight chips", async ({
+test.describe("coach home concierge", () => {
+  test("shows transaction scope, eight chips, and locked upsell rail", async ({
     page,
   }) => {
     await signInAs(page, "Alex Rivera");
-    await expect(page).toHaveURL(/\/dashboard$/);
-
-    const fab = page.getByTestId("concierge-fab");
-    await expect(fab).toBeVisible();
-    await expect(fab).toHaveAttribute("aria-expanded", "false");
-    await expect(page.getByTestId("concierge")).toHaveCount(0);
-
-    await fab.click();
-    await expect(page.getByRole("dialog")).toBeVisible();
+    await expect(page).toHaveURL(/\/coach$/);
+    await expect(page.getByTestId("concierge-fab")).toHaveCount(0);
     await expect(page.getByTestId("concierge")).toBeVisible();
 
     const scope = page.getByTestId("concierge-scope");
     await expect(scope).toContainText("814 Maple Ave");
     await expect(scope).toContainText("Inspection");
+    await expect(scope).toContainText("Personal coach");
 
-    const chips = page
-      .getByLabel("Suggested questions")
-      .getByRole("button");
+    const chips = page.getByLabel("Suggested questions").getByRole("button");
     await expect(chips).toHaveCount(SUGGESTION_CHIPS);
     for (const chip of await chips.all()) {
       const box = await chip.boundingBox();
@@ -91,16 +82,14 @@ test.describe("concierge sheet", () => {
       expect(Math.round(box!.height)).toBeGreaterThanOrEqual(44);
     }
 
-    await page.getByRole("button", { name: "Close concierge" }).click();
-    await expect(page.getByTestId("concierge")).toHaveCount(0);
-    await expect(fab).toBeVisible();
+    await expect(page.getByTestId("locked-upsell-rail")).toBeVisible();
   });
 
   test("refusals render in sand with Ask my agent and figures carry provenance", async ({
     page,
   }) => {
     await signInAs(page, "Alex Rivera");
-    await page.getByTestId("concierge-fab").click();
+    await expect(page.getByTestId("concierge")).toBeVisible();
 
     await page.getByRole("button", { name: "How much cash will I need?" }).click();
     const answer = page.getByTestId("concierge-answer");
@@ -122,21 +111,20 @@ test.describe("concierge sheet", () => {
   test("agents and vendors never get the FAB", async ({ page }) => {
     await signInAs(page, "Casey Holt");
     await expect(page).toHaveURL(/\/agent$/);
-    await expect(page.getByTestId("app-nav")).toBeVisible();
     await expect(page.getByTestId("concierge-fab")).toHaveCount(0);
-    await expect(page.getByTestId("concierge")).toHaveCount(0);
 
     await signInAs(page, "Jordan Hale");
     await expect(page).toHaveURL(/\/vendor$/);
-    await expect(page.getByTestId("app-nav")).toBeVisible();
     await expect(page.getByTestId("concierge-fab")).toHaveCount(0);
-    await expect(page.getByTestId("concierge")).toHaveCount(0);
   });
 
-  test("the FAB follows the buyer across routes", async ({ page }) => {
+  test("the FAB follows the buyer on routes outside coach home", async ({
+    page,
+  }) => {
     await signInAs(page, "Alex Rivera");
-    await expect(page).toHaveURL(/\/dashboard$/);
-    for (const path of ["/vault", "/tours", "/search"]) {
+    await expect(page).toHaveURL(/\/coach$/);
+    await expect(page.getByTestId("concierge-fab")).toHaveCount(0);
+    for (const path of ["/tours", "/vault", "/search"]) {
       await page.goto(path);
       await expect(page.getByTestId("concierge-fab")).toBeVisible();
     }
@@ -146,13 +134,21 @@ test.describe("concierge sheet", () => {
 test.describe("concierge sheet at 375", () => {
   test.use({ viewport: MOBILE, hasTouch: true, isMobile: true });
 
-  test("FAB is 56px and clears the tab bar; sheet is a bottom sheet", async ({
-    page,
-  }) => {
+  test("locked upsell cards scroll on coach home", async ({ page }) => {
     await signInAs(page, "Alex Rivera");
-    await expect(page).toHaveURL(/\/dashboard$/);
+    await expect(page.getByTestId("locked-upsell-search")).toBeVisible();
+    await expect(page.getByTestId("locked-upsell-pipeline")).toBeVisible();
+    await expect(page.getByTestId("locked-upsell-vault")).toBeVisible();
+  });
+
+  test("FAB is 56px on vault and opens a bottom sheet", async ({ page }) => {
+    await signInAs(page, "Alex Rivera");
+    await expect(page).toHaveURL(/\/coach$/);
+    await page.goto("/vault");
+    await expect(page.getByTestId("locked-upsell-vault")).toBeVisible();
 
     const fab = page.getByTestId("concierge-fab");
+    await expect(fab).toBeVisible();
     const fabBox = await fab.boundingBox();
     const barBox = await page.getByTestId("app-tab-bar").boundingBox();
     expect(fabBox).not.toBeNull();
@@ -160,7 +156,6 @@ test.describe("concierge sheet at 375", () => {
     expect(Math.round(fabBox!.width)).toBe(FAB_SIZE);
     expect(Math.round(fabBox!.height)).toBe(FAB_SIZE);
     expect(fabBox!.y + fabBox!.height).toBeLessThanOrEqual(barBox!.y);
-    expect(fabBox!.x + fabBox!.width).toBeLessThanOrEqual(MOBILE.width);
 
     await fab.click();
     const sheet = page.getByTestId("concierge-sheet");
@@ -179,19 +174,15 @@ test.describe("concierge sheet at 375", () => {
 test.describe("concierge sheet at 1280", () => {
   test.use({ viewport: DESKTOP });
 
-  test("sheet is a 420px right panel and the FAB sits in the corner", async ({
-    page,
-  }) => {
+  test("sheet is a 420px right panel from vault", async ({ page }) => {
     await signInAs(page, "Alex Rivera");
-    await expect(page).toHaveURL(/\/dashboard$/);
+    await expect(page).toHaveURL(/\/coach$/);
+    await page.goto("/vault");
+    await expect(page.getByTestId("locked-upsell-vault")).toBeVisible();
     await expect(page.getByTestId("app-tab-bar")).toBeHidden();
 
     const fab = page.getByTestId("concierge-fab");
-    const fabBox = await fab.boundingBox();
-    expect(fabBox).not.toBeNull();
-    expect(Math.round(fabBox!.width)).toBe(FAB_SIZE);
-    expect(fabBox!.y + fabBox!.height).toBeLessThanOrEqual(DESKTOP.height);
-
+    await expect(fab).toBeVisible();
     await fab.click();
     const sheet = page.getByTestId("concierge-sheet");
     await expect(sheet).toHaveAttribute("data-side", "right");

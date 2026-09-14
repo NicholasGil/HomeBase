@@ -53,14 +53,14 @@ export function ConciergeChat({ className }: { className?: string }) {
     >
       <div
         aria-label="Suggested questions"
-        className="scrollbar-none -mx-5 flex min-h-0 shrink-0 snap-x snap-mandatory gap-2 overflow-x-auto overscroll-x-contain px-5 pb-1 md:mx-0 md:flex-wrap md:overflow-visible md:snap-none"
+        className="-mx-5 flex min-h-0 shrink-0 flex-wrap gap-2 px-5 pb-1 md:mx-0"
       >
         {CONCIERGE_STARTERS.map((starter) => (
           <Button
             key={starter}
             type="button"
             variant="secondary"
-            className="h-auto min-h-11 w-max max-w-[min(17.5rem,calc(100vw-3rem))] shrink-0 snap-start rounded-full bg-sage px-4 py-2 text-left text-sm whitespace-normal text-sage-foreground hover:bg-sage/80"
+            className="h-auto min-h-11 w-max max-w-[min(17.5rem,calc(100vw-3rem))] shrink-0 rounded-full bg-sage px-4 py-2 text-left text-sm whitespace-normal text-sage-foreground hover:bg-sage/80"
             disabled={busy}
             onClick={() => {
               setQuestion(starter);

@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("FLAG_ESIGN off rejects provider send and sign", async ({ page }) => {
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Alex Rivera" }).click();
-  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page).toHaveURL(/\/coach$/);
   await page.goto("/sign");
   await expect(page.getByTestId("esign-workflow")).toBeVisible();
   await expect(page.getByTestId("esign-status")).toContainText("prepare");
@@ -23,7 +23,7 @@ test("FLAG_IDV off and disallowed state reject high-risk actions", async ({
 }) => {
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Alex Rivera" }).click();
-  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page).toHaveURL(/\/coach$/);
   await page.goto("/identity");
   await expect(page.getByTestId("identity-security")).toBeVisible();
   await expect(page.getByTestId("idv-flag")).toContainText("off");

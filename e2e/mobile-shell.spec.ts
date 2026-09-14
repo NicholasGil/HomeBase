@@ -4,7 +4,7 @@ const MOBILE = { width: 375, height: 812 };
 const DESKTOP = { width: 1280, height: 800 };
 
 const ROUTES = [
-  { name: "Alex Rivera", role: "buyer", path: "/dashboard", tabs: 4 },
+  { name: "Alex Rivera", role: "buyer", path: "/coach", tabs: 4 },
   { name: "Casey Holt", role: "agent", path: "/agent", tabs: 4 },
   { name: "Jordan Hale", role: "vendor", path: "/vendor", tabs: 2 },
 ] as const;
@@ -57,29 +57,29 @@ test.describe("mobile shell", () => {
     });
   }
 
-  test("dashboard content is not hidden under the bar when scrolled to bottom", async ({
+  test("coach content is not hidden under the bar when scrolled to bottom", async ({
     page,
   }) => {
     await signInAs(page, "Alex Rivera");
-    await expect(page).toHaveURL(/\/dashboard$/);
-    // The URL flips while /dashboard/loading.tsx is still on screen; scroll
-    // only once the last dashboard region has streamed in.
-    await expect(page.getByTestId("vendor-directory")).toBeVisible();
+    await expect(page).toHaveURL(/\/coach$/);
+    await expect(page.getByTestId("coach-home")).toBeVisible();
 
     await page.evaluate(() =>
       window.scrollTo(0, document.documentElement.scrollHeight),
     );
 
     const barBox = await page.getByTestId("app-tab-bar").boundingBox();
-    const mainBox = await page.locator("main").boundingBox();
+    const upsellBox = await page
+      .getByTestId("locked-upsell-vault")
+      .boundingBox();
     expect(barBox).not.toBeNull();
-    expect(mainBox).not.toBeNull();
-    expect(mainBox!.y + mainBox!.height).toBeLessThanOrEqual(barBox!.y);
+    expect(upsellBox).not.toBeNull();
+    expect(upsellBox!.y + upsellBox!.height).toBeLessThanOrEqual(barBox!.y);
   });
 
   test("tapping a tab navigates and moves the active state", async ({ page }) => {
     await signInAs(page, "Alex Rivera");
-    await expect(page).toHaveURL(/\/dashboard$/);
+    await expect(page).toHaveURL(/\/coach$/);
     const bar = page.getByTestId("app-tab-bar");
     await bar.getByRole("link", { name: "Vault" }).click();
     await expect(page).toHaveURL(/\/vault$/);
@@ -95,7 +95,7 @@ test.describe("desktop shell", () => {
 
   test("header pills stay and the tab bar is hidden", async ({ page }) => {
     await signInAs(page, "Alex Rivera");
-    await expect(page).toHaveURL(/\/dashboard$/);
+    await expect(page).toHaveURL(/\/coach$/);
     await expect(page.getByTestId("app-tab-bar")).toBeHidden();
     const nav = page
       .getByTestId("app-nav")

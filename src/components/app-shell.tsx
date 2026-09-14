@@ -3,12 +3,11 @@ import Link from "next/link";
 import { getTestSession } from "@/app/actions/test-session";
 import { AppNavLinks } from "@/components/app-nav";
 import {
-  ConciergeSheet,
-  type ConciergeScope,
-} from "@/components/concierge-sheet";
-import { HeaderSearchHomes } from "@/components/header-search";
+  CoachAwareMain,
+  CoachAwareMobileTabBar,
+} from "@/components/coach-aware-chrome";
+import { type ConciergeScope } from "@/components/concierge-sheet";
 import { LiveAppNav, LiveMobileTabBar } from "@/components/live-app-nav";
-import { MobileTabBar } from "@/components/mobile-tab-bar";
 import {
   navContextFromFixtureSession,
   navLinksFor,
@@ -17,7 +16,6 @@ import {
 import { isAuthConfigured } from "@/lib/auth-config";
 import { seedDashboardForBuyer } from "@/lib/seed-dashboard";
 import type { TestBuyerSession } from "@/lib/test-session";
-import { cn } from "@/lib/utils";
 
 /*
   The concierge is scoped to one transaction, so the sheet header names the
@@ -62,7 +60,6 @@ export async function AppShell({
           >
             HomeBase
           </Link>
-          {context.role === "buyer" ? <HeaderSearchHomes /> : null}
           <div className="ml-auto flex min-w-0 items-center gap-2">
             {nav}
             {liveNav ? (
@@ -78,19 +75,14 @@ export async function AppShell({
           </div>
         </div>
       </header>
-      <main
-        className={cn(
-          "mx-auto max-w-5xl px-5 py-10",
-          // Room for the 56px FAB plus its offsets, so nothing the buyer needs
-          // to tap ends up under it once the page is scrolled to the end.
-          conciergeScope !== null &&
-            "pb-[calc(6rem+var(--fab-dock-clearance))]",
-        )}
-      >
+      <CoachAwareMain conciergeScope={conciergeScope}>
         {children}
-      </main>
-      {liveNav ? <LiveMobileTabBar /> : <MobileTabBar links={links} />}
-      {conciergeScope ? <ConciergeSheet scope={conciergeScope} /> : null}
+      </CoachAwareMain>
+      {liveNav ? (
+        <LiveMobileTabBar />
+      ) : (
+        <CoachAwareMobileTabBar links={links} />
+      )}
     </div>
   );
 }

@@ -27,11 +27,18 @@ export function AppNavLinks({
             <li key={`${link.href}-${link.label}`}>
               <Link
                 href={link.href}
+                aria-label={
+                  link.locked ? `${link.label} (locked preview)` : undefined
+                }
                 className={cn(
                   "inline-flex min-h-11 items-center rounded-full px-3 text-sm text-muted-foreground transition-colors hover:bg-sage hover:text-sage-foreground",
+                  link.locked ? "border border-dashed border-border/80" : "",
                 )}
               >
                 {link.label}
+                {link.locked ? (
+                  <span className="sr-only"> (locked preview)</span>
+                ) : null}
               </Link>
             </li>
           ))}

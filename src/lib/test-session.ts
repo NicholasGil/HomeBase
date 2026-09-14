@@ -147,5 +147,5 @@ export function fixtureHomePath(session: TestSession) {
   if (session.role === "agent") {
     return "/agent";
   }
-  return "/dashboard";
+  return "/coach";
 }

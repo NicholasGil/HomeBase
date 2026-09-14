@@ -1,3 +1,7 @@
+import {
+  BUYER_COACH_HOME,
+  BUYER_LOCKED_UPSELLS,
+} from "@/lib/buyer-shell";
 import { buyerHubPath, fixtureBuyerIsClosed } from "@/lib/homeownership-access";
 import type { Role } from "@/lib/domain";
 import type { TestSession } from "@/lib/test-session";
@@ -7,6 +11,7 @@ export type AppNavRole = Role | "guest";
 export type AppNavLink = {
   href: string;
   label: string;
+  locked?: boolean;
 };
 
 export type AppNavContext = {
@@ -26,10 +31,12 @@ export function navLinksFor(input: {
       return [];
     case "buyer": {
       const links: AppNavLink[] = [
-        { href: "/dashboard", label: "Home" },
-        { href: "/search", label: "Search" },
-        { href: "/tours", label: "Tours" },
-        { href: "/vault", label: "Vault" },
+        { href: BUYER_COACH_HOME, label: "Coach" },
+        ...BUYER_LOCKED_UPSELLS.map((upsell) => ({
+          href: upsell.href,
+          label: upsell.label,
+          locked: true as const,
+        })),
       ];
       if (input.buyerClosed === true && input.hubHref) {
         links.push({ href: input.hubHref, label: "Hub" });
@@ -60,7 +67,7 @@ export function navLinksFor(input: {
 export function wordmarkHrefFor(role: AppNavRole): string {
   switch (role) {
     case "buyer":
-      return "/dashboard";
+      return BUYER_COACH_HOME;
     case "agent":
     case "broker":
     case "admin":

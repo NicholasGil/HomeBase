@@ -2,6 +2,7 @@ export type AuthEnv = Record<string, string | undefined>;
 
 export const PROTECTED_PATH_PREFIXES = [
   "/app",
+  "/coach",
   "/dashboard",
   "/transactions",
   "/agent",

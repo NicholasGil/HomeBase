@@ -2,28 +2,32 @@ import { redirect } from "next/navigation";
 
 import { getTestSession } from "@/app/actions/test-session";
 import { AppShell } from "@/components/app-shell";
-import { BuyerLockedRouteGate } from "@/components/buyer-locked-upsell";
+import { CoachHome } from "@/components/coach-home";
 import { FixtureLoginPrompt } from "@/components/fixture-login-prompt";
-import { LiveBuyerDashboard } from "@/components/live-buyer-dashboard";
-import { LiveBuyerLockedRoute } from "@/components/live-buyer-locked-route";
+import { LiveCoachHome } from "@/components/live-coach-home";
 import { QueryErrorBoundary } from "@/components/query-error-boundary";
 import {
   dashboardRenderMode,
   mustFailClosed,
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
-import { buyerLockedUpsell } from "@/lib/buyer-shell";
+import { seedDashboardForBuyer } from "@/lib/seed-dashboard";
+import type { TestBuyerSession } from "@/lib/test-session";
 
 export const dynamic = "force-dynamic";
 
-/*
-  Buyer pipeline (ten-second dashboard, journey, vendor directory) is a locked
-  upsell in the coach-first shell. Buyers land on /coach; this route shows
-  honest locked copy until the full OS is enabled. Agents and other roles
-  still redirect to their own homes when they hit /dashboard in fixture mode.
-*/
+function conciergeScopeFor(session: TestBuyerSession) {
+  const view = seedDashboardForBuyer(session.clerkId);
+  const address = view.propertyAddress;
+  return {
+    address: address
+      ? `${address.line1}, ${address.city}`
+      : "No property on this file yet",
+    stage: view.where.label,
+  };
+}
 
-export default async function DashboardPage() {
+export default async function CoachPage() {
   if (mustFailClosed()) {
     throw new ProductionAuthMisconfiguredError();
   }
@@ -45,7 +49,7 @@ export default async function DashboardPage() {
 
   if (mode === "fixture") {
     if (session === null) {
-      throw new Error("fixture mode requires a test session");
+      redirect("/test-login");
     }
     if (session.role === "vendor") {
       redirect("/vendor");
@@ -58,17 +62,19 @@ export default async function DashboardPage() {
     }
     return (
       <AppShell>
-        <BuyerLockedRouteGate upsell={buyerLockedUpsell("pipeline")} />
+        <CoachHome
+          scope={conciergeScopeFor(session)}
+          buyerName={session.name}
+          eyebrow="Fixture session · not Clerk"
+        />
       </AppShell>
     );
   }
 
   return (
     <AppShell>
-      <QueryErrorBoundary message="Your dashboard did not load.">
-        <LiveBuyerLockedRoute area="pipeline">
-          <LiveBuyerDashboard />
-        </LiveBuyerLockedRoute>
+      <QueryErrorBoundary message="Your coach did not load.">
+        <LiveCoachHome />
       </QueryErrorBoundary>
     </AppShell>
   );

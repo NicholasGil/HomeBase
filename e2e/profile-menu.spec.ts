@@ -1,9 +1,9 @@
 import { expect, type Page, test } from "@playwright/test";
 
 const FIXTURE_ACCOUNTS = [
-  { name: "Alex Rivera", role: "buyer", home: /\/dashboard$/ },
-  { name: "Blair Chen", role: "buyer", home: /\/dashboard$/ },
-  { name: "Indira Shah", role: "buyer", home: /\/dashboard$/ },
+  { name: "Alex Rivera", role: "buyer", home: /\/coach$/ },
+  { name: "Blair Chen", role: "buyer", home: /\/coach$/ },
+  { name: "Indira Shah", role: "buyer", home: /\/coach$/ },
   { name: "Casey Holt", role: "agent", home: /\/agent$/ },
   { name: "Jordan Hale", role: "vendor", home: /\/vendor$/ },
 ] as const;
@@ -56,7 +56,7 @@ test("buyer avatar opens profile settings and signs out to fixture login", async
   page,
 }) => {
   await signInAs(page, "Alex Rivera");
-  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page).toHaveURL(/\/coach$/);
 
   const avatar = page.getByTestId("profile-avatar");
   await avatar.press("Enter");
@@ -107,7 +107,7 @@ test("buyer avatar menu stays on search, tours, vault, and the closed hub", asyn
   page,
 }) => {
   await signInAs(page, "Alex Rivera");
-  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page).toHaveURL(/\/coach$/);
   for (const path of ["/search", "/tours", "/vault"]) {
     await page.goto(path);
     await expectProfileMenu(page, { name: "Alex Rivera", role: "buyer" });
@@ -115,7 +115,7 @@ test("buyer avatar menu stays on search, tours, vault, and the closed hub", asyn
   }
 
   await signInAs(page, "Indira Shah");
-  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page).toHaveURL(/\/coach$/);
   await page.goto("/homeownership/seed:buyer-h");
   await expect(page.getByTestId("homeownership-hub")).toBeVisible();
   await expectProfileMenu(page, { name: "Indira Shah", role: "buyer" });

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { getTestSession } from "@/app/actions/test-session";
 import { AppShell } from "@/components/app-shell";
+import { BuyerLockedRouteGate } from "@/components/buyer-locked-upsell";
 import { FixtureVault } from "@/components/document-vault";
 import { FixtureLoginPrompt } from "@/components/fixture-login-prompt";
 import { LiveDocumentVault } from "@/components/live-document-vault";
@@ -12,6 +13,8 @@ import {
   mustFailClosed,
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
+import { buyerLockedUpsell } from "@/lib/buyer-shell";
+import { LiveBuyerLockedRoute } from "@/components/live-buyer-locked-route";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +46,17 @@ export default async function VaultPage({
     if (session === null) {
       redirect("/test-login");
     }
+    if (session.role === "buyer") {
+      return (
+        <AppShell>
+          <RouteHeader
+            title="Document vault"
+            caption={`Signed in as ${session.name} · buyer`}
+          />
+          <BuyerLockedRouteGate upsell={buyerLockedUpsell("vault")} />
+        </AppShell>
+      );
+    }
     const params = await searchParams;
     return (
       <AppShell>
@@ -60,7 +74,9 @@ export default async function VaultPage({
   return (
     <AppShell>
       <QueryErrorBoundary message="The document vault did not load.">
-        <LiveDocumentVault />
+        <LiveBuyerLockedRoute area="vault">
+          <LiveDocumentVault />
+        </LiveBuyerLockedRoute>
       </QueryErrorBoundary>
     </AppShell>
   );

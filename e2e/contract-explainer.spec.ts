@@ -5,7 +5,7 @@ test("Ask my agent routes the section to the licensee thread", async ({
 }) => {
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Blair Chen" }).click();
-  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page).toHaveURL(/\/coach$/);
   await page.goto("/offers");
   await expect(page.getByTestId("contract-explainer")).toBeVisible();
   await expect(page.getByTestId("explainer-section-earnest-money")).toContainText(

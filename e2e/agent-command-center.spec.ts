@@ -51,7 +51,7 @@ test("agent sees eight clients with exceptions first", async ({ page }) => {
 test("buyer cannot load the command center", async ({ page }) => {
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Alex Rivera" }).click();
-  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page).toHaveURL(/\/coach$/);
   await page.goto("/agent");
   await expect(page.getByTestId("command-center-denied")).toBeVisible();
   await expect(page.getByTestId("command-center")).toHaveCount(0);

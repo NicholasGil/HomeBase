@@ -1,6 +1,9 @@
 import { redirect } from "next/navigation";
 
+import { BuyerLockedRouteGate } from "@/components/buyer-locked-upsell";
+import { LiveBuyerLockedRoute } from "@/components/live-buyer-locked-route";
 import { loadFixturePropertySearch } from "@/app/actions/search";
+import { buyerLockedUpsell } from "@/lib/buyer-shell";
 import { getTestSession } from "@/app/actions/test-session";
 import { AppShell } from "@/components/app-shell";
 import { FixtureLoginPrompt } from "@/components/fixture-login-prompt";
@@ -73,6 +76,17 @@ export default async function SearchPage({
     if (session === null) {
       redirect("/test-login");
     }
+    if (session.role === "buyer") {
+      return (
+        <AppShell>
+          <RouteHeader
+            title="Search"
+            caption={`Signed in as ${session.name} · buyer`}
+          />
+          <BuyerLockedRouteGate upsell={buyerLockedUpsell("search")} />
+        </AppShell>
+      );
+    }
     return (
       <AppShell>
         <RouteHeader
@@ -94,7 +108,9 @@ export default async function SearchPage({
   return (
     <AppShell>
       <QueryErrorBoundary message="Property search did not load.">
-        <LivePropertySearch />
+        <LiveBuyerLockedRoute area="search">
+          <LivePropertySearch />
+        </LiveBuyerLockedRoute>
       </QueryErrorBoundary>
     </AppShell>
   );

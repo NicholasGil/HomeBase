@@ -53,14 +53,14 @@ export function ConciergeChat({ className }: { className?: string }) {
     >
       <div
         aria-label="Suggested questions"
-        className="scrollbar-none -mx-5 flex snap-x snap-mandatory gap-2 overflow-x-auto px-5 pb-1"
+        className="-mx-5 flex min-h-0 shrink-0 flex-wrap gap-2 px-5 pb-1 md:mx-0"
       >
         {CONCIERGE_STARTERS.map((starter) => (
           <Button
             key={starter}
             type="button"
             variant="secondary"
-            className="h-11 shrink-0 snap-start rounded-full bg-sage px-4 text-sm text-sage-foreground hover:bg-sage/80"
+            className="h-auto min-h-11 w-max max-w-[min(17.5rem,calc(100vw-3rem))] shrink-0 rounded-full bg-sage px-4 py-2 text-left text-sm whitespace-normal text-sage-foreground hover:bg-sage/80"
             disabled={busy}
             onClick={() => {
               setQuestion(starter);
@@ -94,29 +94,34 @@ export function ConciergeChat({ className }: { className?: string }) {
         ) : null}
       </div>
 
-      <form
-        className="flex gap-2 border-t border-border/70 pt-3"
-        onSubmit={(event) => {
-          event.preventDefault();
-          void submit(question);
-        }}
+      <div
+        className="shrink-0 max-md:sticky max-md:z-10 max-md:-mx-5 max-md:bottom-[var(--coach-compose-clearance)] max-md:px-5 max-md:pb-[env(safe-area-inset-bottom)] md:static"
+        data-testid="concierge-compose"
       >
-        <input
-          data-testid="concierge-question"
-          className="min-h-11 min-w-0 flex-1 rounded-full border bg-background px-4 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-          value={question}
-          onChange={(event) => setQuestion(event.target.value)}
-          placeholder="Ask about this transaction"
-        />
-        <Button
-          type="submit"
-          data-testid="concierge-ask"
-          className="h-11 rounded-full px-5"
-          disabled={busy || question.trim().length === 0}
+        <form
+          className="flex gap-2 border-t border-border/70 bg-card/95 pt-3 shadow-[0_-8px_24px_-12px_rgba(15,23,42,0.14)] backdrop-blur md:bg-card md:shadow-none md:backdrop-blur-none"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void submit(question);
+          }}
         >
-          Ask
-        </Button>
-      </form>
+          <input
+            data-testid="concierge-question"
+            className="min-h-11 min-w-0 flex-1 rounded-full border bg-background px-4 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            value={question}
+            onChange={(event) => setQuestion(event.target.value)}
+            placeholder="Ask about this transaction"
+          />
+          <Button
+            type="submit"
+            data-testid="concierge-ask"
+            className="h-11 rounded-full px-5"
+            disabled={busy || question.trim().length === 0}
+          >
+            Ask
+          </Button>
+        </form>
+      </div>
     </section>
   );
 }

@@ -31,7 +31,7 @@ describe("AccessDeniedCard", () => {
       }),
     );
     expect(html.match(/<a /g)).toHaveLength(1);
-    expect(html).toContain('href="/dashboard"');
+    expect(html).toContain('href="/coach"');
     expect(html).toContain("min-h-11");
   });
 });
@@ -39,7 +39,7 @@ describe("AccessDeniedCard", () => {
 describe("homeActionFor", () => {
   it("sends each role to its own home and never names the refused thing", () => {
     expect(homeActionFor("buyer")).toEqual({
-      href: "/dashboard",
+      href: "/coach",
       label: "Back to your file",
     });
     expect(homeActionFor("agent").href).toBe("/agent");

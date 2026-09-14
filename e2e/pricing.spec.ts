@@ -29,7 +29,12 @@ test("pricing CTA returns to coach without payment UI", async ({ page }) => {
   await page.getByRole("button", { name: "Sign in as Alex Rivera" }).click();
   await expect(page).toHaveURL(/\/coach$/);
 
-  await page.getByTestId("coach-pricing-link").click();
+  const pricingLink = page.getByTestId("coach-pricing-link");
+  const linkBox = await pricingLink.boundingBox();
+  expect(linkBox).not.toBeNull();
+  expect(linkBox!.height).toBeGreaterThanOrEqual(44);
+
+  await pricingLink.click();
   await expect(page).toHaveURL(/\/pricing$/);
   await expect(page.getByTestId("pricing-billing-disclaimer")).toContainText(
     /no payment/i,

@@ -3,7 +3,9 @@ import { redirect } from "next/navigation";
 import { loadFixtureTours } from "@/app/actions/tours";
 import { getTestSession } from "@/app/actions/test-session";
 import { AppShell } from "@/components/app-shell";
+import { BuyerLockedRouteGate } from "@/components/buyer-locked-upsell";
 import { FixtureLoginPrompt } from "@/components/fixture-login-prompt";
+import { LiveBuyerLockedRoute } from "@/components/live-buyer-locked-route";
 import { LiveTourBuilder } from "@/components/live-tour-builder";
 import { QueryErrorBoundary } from "@/components/query-error-boundary";
 import { RouteHeader } from "@/components/route-header";
@@ -13,6 +15,7 @@ import {
   mustFailClosed,
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
+import { buyerLockedUpsell } from "@/lib/buyer-shell";
 
 export const dynamic = "force-dynamic";
 
@@ -58,6 +61,17 @@ export default async function ToursPage({
     if (session === null) {
       redirect("/test-login");
     }
+    if (session.role === "buyer") {
+      return (
+        <AppShell>
+          <RouteHeader
+            title="Tours"
+            caption={`Signed in as ${session.name} · buyer`}
+          />
+          <BuyerLockedRouteGate upsell={buyerLockedUpsell("tours")} />
+        </AppShell>
+      );
+    }
     const params = await searchParams;
     return (
       <AppShell>
@@ -75,7 +89,9 @@ export default async function ToursPage({
   return (
     <AppShell>
       <QueryErrorBoundary message="Tours did not load.">
-        <LiveTourBuilder />
+        <LiveBuyerLockedRoute area="tours">
+          <LiveTourBuilder />
+        </LiveBuyerLockedRoute>
       </QueryErrorBoundary>
     </AppShell>
   );

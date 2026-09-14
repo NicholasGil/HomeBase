@@ -11,6 +11,7 @@ test("buyer login lands on coach and denies another transaction by URL", async (
   await expect(page.getByTestId("concierge-scope")).toContainText("814 Maple Ave");
   await expect(page.getByTestId("concierge-scope")).toContainText("Inspection");
   await expect(page.getByTestId("locked-upsell-search")).toBeVisible();
+  await expect(page.getByTestId("locked-upsell-tours")).toBeVisible();
   await expect(page.getByTestId("locked-upsell-pipeline")).toBeVisible();
   await expect(page.getByTestId("locked-upsell-vault")).toBeVisible();
   await expect(page.getByTestId("profile-avatar")).toBeVisible();
@@ -24,6 +25,9 @@ test("buyer login lands on coach and denies another transaction by URL", async (
   ).toBeVisible();
   await expect(
     page.getByTestId("app-nav").getByRole("link", { name: "Search" }),
+  ).toBeVisible();
+  await expect(
+    page.getByTestId("app-nav").getByRole("link", { name: "Tours" }),
   ).toBeVisible();
   await expect(
     page.getByTestId("app-nav").getByRole("link", { name: "Pipeline" }),

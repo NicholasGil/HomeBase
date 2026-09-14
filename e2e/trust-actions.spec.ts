@@ -9,12 +9,24 @@ async function expectNoRuntimeOverlay(page: Page) {
   await expect(page.getByText("FORBIDDEN", { exact: true })).toHaveCount(0);
 }
 
-test("empty Build My Tour stays usable and does not overlay", async ({
+test("buyer tours route shows locked upsell and does not overlay", async ({
   page,
 }) => {
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Blair Chen" }).click();
   await expect(page).toHaveURL(/\/coach$/);
+  await page.goto("/tours");
+  await expect(page.getByTestId("locked-upsell-tours")).toBeVisible();
+  await expect(page.getByTestId("tour-builder")).toHaveCount(0);
+  await expectNoRuntimeOverlay(page);
+});
+
+test("empty Build My Tour stays usable and does not overlay", async ({
+  page,
+}) => {
+  await page.goto("/test-login");
+  await page.getByRole("button", { name: "Sign in as Casey Holt" }).click();
+  await expect(page).toHaveURL(/\/agent$/);
   await page.goto("/tours");
   await expect(page.getByTestId("tour-builder")).toBeVisible();
 

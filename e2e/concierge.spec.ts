@@ -85,6 +85,17 @@ test.describe("coach home concierge", () => {
     await expect(page.getByTestId("locked-upsell-rail")).toBeVisible();
   });
 
+  test("coach tours learn more opens the locked tours gate", async ({ page }) => {
+    await signInAs(page, "Alex Rivera");
+    await page
+      .getByTestId("locked-upsell-tours")
+      .getByRole("link", { name: "Learn more" })
+      .click();
+    await expect(page).toHaveURL(/\/tours$/);
+    await expect(page.getByTestId("locked-upsell-tours")).toBeVisible();
+    await expect(page.getByTestId("tour-builder")).toHaveCount(0);
+  });
+
   test("refusals render in sand with Ask my agent and figures carry provenance", async ({
     page,
   }) => {
@@ -137,6 +148,7 @@ test.describe("concierge sheet at 375", () => {
   test("locked upsell cards scroll on coach home", async ({ page }) => {
     await signInAs(page, "Alex Rivera");
     await expect(page.getByTestId("locked-upsell-search")).toBeVisible();
+    await expect(page.getByTestId("locked-upsell-tours")).toBeVisible();
     await expect(page.getByTestId("locked-upsell-pipeline")).toBeVisible();
     await expect(page.getByTestId("locked-upsell-vault")).toBeVisible();
   });

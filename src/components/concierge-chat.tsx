@@ -52,46 +52,50 @@ export function ConciergeChat({ className }: { className?: string }) {
       className={cn("flex min-h-0 flex-col", className)}
     >
       <div
-        aria-label="Suggested questions"
-        className="-mx-5 flex min-h-0 shrink-0 flex-wrap gap-2 px-5 pb-1 md:mx-0"
-      >
-        {CONCIERGE_STARTERS.map((starter) => (
-          <Button
-            key={starter}
-            type="button"
-            variant="secondary"
-            className="h-auto min-h-11 w-max max-w-[min(17.5rem,calc(100vw-3rem))] shrink-0 rounded-full bg-sage px-4 py-2 text-left text-sm whitespace-normal text-sage-foreground hover:bg-sage/80"
-            disabled={busy}
-            onClick={() => {
-              setQuestion(starter);
-              void submit(starter);
-            }}
-          >
-            {starter}
-          </Button>
-        ))}
-      </div>
-
-      <div
-        aria-live="polite"
-        className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto py-4"
-      >
-        {asked === null ? (
-          <p className="my-auto text-center text-sm text-muted-foreground">
-            Pick a question above or ask about this transaction. I explain what
-            is on this file; I do not advise.
-          </p>
-        ) : (
-          <p className="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-primary px-4 py-2.5 text-sm text-primary-foreground">
-            {asked}
-          </p>
+        className={cn(
+          "flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto py-4",
+          "max-md:pb-[var(--coach-compose-inset)]",
         )}
-        {busy ? (
-          <p className="text-sm text-muted-foreground">Checking this file…</p>
-        ) : null}
-        {answer !== null ? (
-          <ConciergeAnswerView text={answer} kind={kind} />
-        ) : null}
+      >
+        <div
+          aria-label="Suggested questions"
+          className="-mx-5 flex flex-wrap gap-2 px-5 md:mx-0"
+        >
+          {CONCIERGE_STARTERS.map((starter) => (
+            <Button
+              key={starter}
+              type="button"
+              variant="secondary"
+              className="h-auto min-h-11 w-max max-w-[min(17.5rem,calc(100vw-3rem))] shrink-0 rounded-full bg-sage px-4 py-2 text-left text-sm whitespace-normal text-sage-foreground hover:bg-sage/80"
+              disabled={busy}
+              onClick={() => {
+                setQuestion(starter);
+                void submit(starter);
+              }}
+            >
+              {starter}
+            </Button>
+          ))}
+        </div>
+
+        <div aria-live="polite" className="flex min-h-0 flex-1 flex-col gap-3">
+          {asked === null ? (
+            <p className="my-auto text-center text-sm text-muted-foreground">
+              Pick a question above or ask about this transaction. I explain what
+              is on this file; I do not advise.
+            </p>
+          ) : (
+            <p className="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-primary px-4 py-2.5 text-sm text-primary-foreground">
+              {asked}
+            </p>
+          )}
+          {busy ? (
+            <p className="text-sm text-muted-foreground">Checking this file…</p>
+          ) : null}
+          {answer !== null ? (
+            <ConciergeAnswerView text={answer} kind={kind} />
+          ) : null}
+        </div>
       </div>
 
       <div

@@ -10,6 +10,28 @@ import {
 } from "@/lib/pricing";
 import { cn } from "@/lib/utils";
 
+function ContinueCoachLink({
+  testId,
+  className,
+}: {
+  testId: string;
+  className?: string;
+}) {
+  return (
+    <Link
+      href={BUYER_COACH_HOME}
+      data-testid={testId}
+      className={cn(
+        buttonVariants({ variant: "default", size: "lg" }),
+        "w-full rounded-full",
+        className,
+      )}
+    >
+      Continue with coach
+    </Link>
+  );
+}
+
 export function PricingPageContent() {
   return (
     <div
@@ -32,6 +54,7 @@ export function PricingPageContent() {
           </span>
           . No plan matrix, no surprise add-ons on this page.
         </p>
+        <ContinueCoachLink testId="pricing-continue-coach-hero" />
       </header>
 
       <section aria-labelledby="pricing-included-heading" className="space-y-3">
@@ -87,16 +110,7 @@ export function PricingPageContent() {
         >
           {PRICING_BILLING_DISCLAIMER}
         </p>
-        <Link
-          href={BUYER_COACH_HOME}
-          data-testid="pricing-continue-coach"
-          className={cn(
-            buttonVariants({ variant: "default", size: "lg" }),
-            "w-full rounded-full",
-          )}
-        >
-          Continue with coach
-        </Link>
+        <ContinueCoachLink testId="pricing-continue-coach" />
       </section>
     </div>
   );

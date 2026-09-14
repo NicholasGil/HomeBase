@@ -124,6 +124,8 @@
   --coach-compose-clearance: calc(
     var(--tab-bar-height) + env(safe-area-inset-bottom) + 0.5rem
   );
+  /* Sticky Ask row inside the coach card (input + top padding + border). */
+  --coach-compose-inset: calc(3.25rem + 0.75rem);
   --fab-dock-clearance: 0px;
   --sidebar: oklch(0.98 0.016 75);
   --sidebar-foreground: oklch(0.22 0.02 50);

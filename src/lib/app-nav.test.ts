@@ -16,10 +16,17 @@ function labels(role: Parameters<typeof navLinksFor>[0]["role"], extra?: {
 }
 
 describe("navLinksFor", () => {
-  it("keeps buyer chrome to Coach plus locked Search, Pipeline, and Vault", () => {
-    expect(labels("buyer")).toEqual(["Coach", "Search", "Pipeline", "Vault"]);
+  it("keeps buyer chrome to Coach plus locked Search, Tours, Pipeline, and Vault", () => {
+    expect(labels("buyer")).toEqual([
+      "Coach",
+      "Search",
+      "Tours",
+      "Pipeline",
+      "Vault",
+    ]);
     expect(navLinksFor({ role: "buyer" }).map((link) => link.locked)).toEqual([
       undefined,
+      true,
       true,
       true,
       true,
@@ -38,7 +45,7 @@ describe("navLinksFor", () => {
         buyerClosed: true,
         hubHref: "/homeownership/seed:buyer-h",
       }),
-    ).toEqual(["Coach", "Search", "Pipeline", "Vault", "Hub"]);
+    ).toEqual(["Coach", "Search", "Tours", "Pipeline", "Vault", "Hub"]);
     expect(labels("buyer", { buyerClosed: true })).not.toContain("Hub");
   });
 

@@ -1,4 +1,4 @@
-export type BuyerLockedArea = "search" | "pipeline" | "vault";
+export type BuyerLockedArea = "search" | "tours" | "pipeline" | "vault";
 
 export type BuyerLockedUpsell = {
   area: BuyerLockedArea;
@@ -23,6 +23,19 @@ export const BUYER_LOCKED_UPSELLS: readonly BuyerLockedUpsell[] = [
       "Map-first search with drive times",
       "Saved homes tied to your file",
       "Share shortlists with your agent",
+    ],
+  },
+  {
+    area: "tours",
+    href: "/tours",
+    label: "Tours",
+    title: "Unlock tours",
+    description:
+      "Build a showing route, reorder stops, and log verdicts after each home. The tour scheduler is part of the full buyer OS — not turned on for your account yet.",
+    bullets: [
+      "Optimized drive order between listings",
+      "Showing windows and departure reminders",
+      "Love / maybe / no feedback per stop",
     ],
   },
   {

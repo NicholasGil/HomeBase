@@ -6,8 +6,8 @@ test("tour build then remove stop 2 re-optimizes the remainder", async ({
   page,
 }) => {
   await page.goto("/test-login");
-  await page.getByRole("button", { name: "Sign in as Blair Chen" }).click();
-  await expect(page).toHaveURL(/\/coach$/);
+  await page.getByRole("button", { name: "Sign in as Casey Holt" }).click();
+  await expect(page).toHaveURL(/\/agent$/);
   await page.goto("/tours");
   await expect(page.getByTestId("tour-builder")).toBeVisible();
 
@@ -56,17 +56,16 @@ test("tour build then remove stop 2 re-optimizes the remainder", async ({
   await page.getByRole("button", { name: "Sign in as Alex Rivera" }).click();
   await expect(page).toHaveURL(/\/coach$/);
   await page.goto("/tours");
-  await expect(page.getByText("Signed in as Alex Rivera")).toBeVisible();
-  await expect(page.getByTestId("tour-builder")).toBeVisible();
-  await expect(page.getByTestId("tour-itinerary")).toHaveCount(0);
+  await expect(page.getByTestId("locked-upsell-tours")).toBeVisible();
+  await expect(page.getByTestId("tour-builder")).toHaveCount(0);
 });
 
 test("another buyer cannot see the built tour", async ({ page }) => {
   await page.goto("/test-login");
-  await page.getByRole("button", { name: "Sign in as Alex Rivera" }).click();
+  await page.getByRole("button", { name: "Sign in as Blair Chen" }).click();
   await expect(page).toHaveURL(/\/coach$/);
   await page.goto("/tours");
-  await expect(page.getByText("Signed in as Alex Rivera")).toBeVisible();
-  await expect(page.getByTestId("tour-builder")).toBeVisible();
+  await expect(page.getByTestId("locked-upsell-tours")).toBeVisible();
+  await expect(page.getByTestId("tour-builder")).toHaveCount(0);
   await expect(page.getByTestId("tour-itinerary")).toHaveCount(0);
 });

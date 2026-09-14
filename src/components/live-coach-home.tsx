@@ -3,28 +3,23 @@
 import { useQuery } from "convex/react";
 
 import { CoachHome } from "@/components/coach-home";
+import { useEnsureBuyerProvisioning } from "@/hooks/use-ensure-buyer-provisioning";
+import { coachScopeForBuyerDashboard } from "@/lib/coach-scope";
 import { api } from "../../convex/_generated/api";
 
 export function LiveCoachHome() {
-  const session = useQuery(api.me.getSession, {});
+  const provisioned = useEnsureBuyerProvisioning();
+  const session = useQuery(api.me.getSession, provisioned ? {} : "skip");
   const dashboard = useQuery(
     api.dashboard.getBuyerDashboard,
-    session?.role === "buyer" ? {} : "skip",
+    provisioned && session?.role === "buyer" ? {} : "skip",
   );
 
-  if (
-    session === undefined ||
-    (session?.role === "buyer" && dashboard === undefined)
-  ) {
+  if (!provisioned || session === undefined) {
     return <p className="text-sm text-muted-foreground">Loading your coach…</p>;
   }
 
-  if (
-    session === null ||
-    session.role !== "buyer" ||
-    dashboard === undefined ||
-    dashboard === null
-  ) {
+  if (session === null || session.role !== "buyer") {
     return (
       <p className="text-sm text-muted-foreground">
         Sign in as a buyer to open your personal coach.
@@ -32,13 +27,11 @@ export function LiveCoachHome() {
     );
   }
 
-  const address = dashboard.propertyAddress;
-  const scope = {
-    address: address
-      ? `${address.line1}, ${address.city}`
-      : "No property on this file yet",
-    stage: dashboard.where.label,
-  };
+  if (dashboard === undefined) {
+    return <p className="text-sm text-muted-foreground">Loading your coach…</p>;
+  }
+
+  const scope = coachScopeForBuyerDashboard(dashboard);
 
   return <CoachHome scope={scope} buyerName={session.name} />;
 }

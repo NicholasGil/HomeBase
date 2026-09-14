@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { getTestSession } from "@/app/actions/test-session";
 import {
   FIXTURE_SEARCH_COOKIE,
+  loadFixtureListing,
   loadFixtureSearch,
   parseFixtureSearch,
   recordFixtureSignal,
@@ -37,6 +38,11 @@ export async function loadFixturePropertySearch(query?: string) {
     searchState: await readSearchState(),
     tourCookie: store.get(FIXTURE_TOUR_COOKIE)?.value,
   });
+}
+
+export async function loadFixtureListingForViewer(listingId: string) {
+  const session = await getTestSession();
+  return loadFixtureListing({ session, listingId });
 }
 
 function noticeForSignal(kind: "save" | "dislike" | "clear") {

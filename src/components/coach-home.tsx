@@ -1,9 +1,13 @@
+import Link from "next/link";
+
 import { ConciergeChat } from "@/components/concierge-chat";
 import {
   BuyerLockedUpsellRail,
 } from "@/components/buyer-locked-upsell";
 import type { ConciergeScope } from "@/components/concierge-sheet";
 import { BUYER_LOCKED_UPSELLS } from "@/lib/buyer-shell";
+import { textLinkClassName } from "@/components/text-link";
+import { COACH_ENTRY_PRICE_LABEL } from "@/lib/pricing";
 import { cn } from "@/lib/utils";
 
 export function CoachHome({
@@ -32,9 +36,21 @@ export function CoachHome({
           data-testid="concierge-scope"
           className="shrink-0 border-b border-border/70 px-5 pt-5 pb-4"
         >
-          <p className="text-eyebrow font-medium tracking-[0.12em] text-muted-foreground uppercase">
-            Personal coach
-          </p>
+          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+            <p className="text-eyebrow font-medium tracking-[0.12em] text-muted-foreground uppercase">
+              Personal coach
+            </p>
+            <Link
+              href="/pricing"
+              data-testid="coach-pricing-link"
+              className={cn(
+                textLinkClassName,
+                "max-w-full text-xs font-medium text-muted-foreground hover:text-foreground",
+              )}
+            >
+              Coach — {COACH_ENTRY_PRICE_LABEL} · See pricing
+            </Link>
+          </div>
           {eyebrow ? (
             <p className="mt-1 text-xs text-muted-foreground">{eyebrow}</p>
           ) : null}

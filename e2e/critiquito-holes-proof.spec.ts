@@ -52,7 +52,11 @@ test("critiquito holes proof @375 — design queue post-#56", async ({ page }) =
     fullPage: false,
   });
 
+  const pricingDisclaimer = page.getByTestId("pricing-locked-os-disclaimer");
   await page.getByTestId("pricing-not-included-heading").scrollIntoViewIfNeeded();
+  await pricingDisclaimer.scrollIntoViewIfNeeded();
+  await expect(pricingDisclaimer).toBeInViewport();
+  await expect(pricingDisclaimer).toHaveText(BUYER_LOCKED_OS_PAYMENT_DISCLAIMER);
   await page.screenshot({
     path: path.join(PROOF_DIR, "pricing-upsell-section-375.png"),
     fullPage: false,
@@ -70,7 +74,11 @@ test("critiquito holes proof @375 — design queue post-#56", async ({ page }) =
   });
 
   await signInAlex(page);
-  await expect(page.getByTestId("locked-upsell-rail-summary")).toBeVisible();
+  const fileSessionLockSummary = page.getByTestId("locked-upsell-rail-summary");
+  await expect(fileSessionLockSummary).toBeVisible();
+  await fileSessionLockSummary.scrollIntoViewIfNeeded();
+  await expect(fileSessionLockSummary).toBeInViewport();
+  await expect(fileSessionLockSummary.getByText("Full OS locked")).toBeVisible();
   await page.screenshot({
     path: path.join(PROOF_DIR, "coach-file-session-lock-summary-375.png"),
     fullPage: false,

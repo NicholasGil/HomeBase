@@ -1,6 +1,9 @@
-import { LockKeyhole } from "lucide-react";
 import Link from "next/link";
 
+import {
+  LockChromeEyebrow,
+  LockChromeIcon,
+} from "@/components/lock-chrome";
 import {
   Card,
   CardContent,
@@ -10,6 +13,9 @@ import {
 } from "@/components/ui/card";
 import type { BuyerLockedUpsell } from "@/lib/buyer-shell";
 import { cn } from "@/lib/utils";
+
+const lockedUpsellCardClassName =
+  "border-dashed border-border/70 bg-muted/25 shadow-none ring-0 hover:translate-none hover:shadow-none";
 
 export function BuyerLockedUpsellCard({
   upsell,
@@ -23,28 +29,32 @@ export function BuyerLockedUpsellCard({
   return (
     <Card
       data-testid={`locked-upsell-${upsell.area}`}
+      data-locked-upsell="true"
       className={cn(
-        "border-dashed bg-muted/40 shadow-none",
+        lockedUpsellCardClassName,
         compact ? "gap-3 py-0" : "",
         className,
       )}
     >
       <CardHeader className={compact ? "gap-2 px-4 pt-4 pb-0" : undefined}>
-        <div className="flex items-start gap-2">
-          <span
-            className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-sand text-sand-foreground"
-            aria-hidden
-          >
-            <LockKeyhole className="size-4" />
-          </span>
+        <div className="flex items-start gap-2.5">
+          <LockChromeIcon className="size-8" />
           <div className="min-w-0 space-y-1">
-            <p className="text-eyebrow font-medium tracking-[0.12em] text-muted-foreground uppercase">
-              Locked · full OS
-            </p>
-            <CardTitle className={compact ? "text-base" : undefined}>
+            <LockChromeEyebrow />
+            <CardTitle
+              className={cn(
+                "font-normal text-muted-foreground",
+                compact ? "text-small" : "text-h3",
+              )}
+            >
               {upsell.title}
             </CardTitle>
-            <CardDescription className="text-pretty">
+            <CardDescription
+              className={cn(
+                "text-pretty",
+                compact ? "text-small" : "text-body",
+              )}
+            >
               {upsell.description}
             </CardDescription>
           </div>

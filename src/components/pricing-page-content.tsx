@@ -44,14 +44,24 @@ export function PricingPageContent({
       data-testid="pricing-page"
       className="mx-auto flex max-w-lg flex-col gap-8 px-5 py-8 pb-[calc(var(--tab-bar-height)+env(safe-area-inset-bottom)+1.5rem)] md:pb-8"
     >
-      <header className="space-y-3">
+      <header
+        data-testid="pricing-coach-hero"
+        className="space-y-4 rounded-2xl border border-border/80 bg-card px-5 py-6 shadow-sm"
+      >
         <p className="text-eyebrow font-medium tracking-[0.12em] text-muted-foreground uppercase">
           Simple entry
         </p>
-        <h1 className="text-display font-semibold tracking-tight text-balance">
-          Personal coach entry{" "}
-          <span data-testid="pricing-coach-price">{COACH_ENTRY_PRICE_LABEL}</span>
-        </h1>
+        <div className="space-y-1">
+          <h1 className="text-h2 font-semibold tracking-tight text-balance text-foreground">
+            Personal coach entry
+          </h1>
+          <p
+            data-testid="pricing-coach-price"
+            className="text-display font-semibold tracking-tight text-foreground"
+          >
+            {COACH_ENTRY_PRICE_LABEL}
+          </p>
+        </div>
         <p className="text-pretty text-body text-muted-foreground">
           One starting tier — like a gym membership for your home purchase. Your
           always-on coach is the entry point at{" "}
@@ -63,6 +73,7 @@ export function PricingPageContent({
         <ContinueCoachLink
           href={continueCoachHref}
           testId="pricing-continue-coach-hero"
+          className="shadow-[0_8px_20px_rgba(15,23,42,0.12)]"
         />
       </header>
 
@@ -88,18 +99,21 @@ export function PricingPageContent({
         </div>
       </section>
 
-      <section aria-labelledby="pricing-not-included-heading" className="space-y-3">
+      <section
+        aria-labelledby="pricing-not-included-heading"
+        className="space-y-3 border-t border-border/60 pt-8"
+      >
         <h2
           id="pricing-not-included-heading"
-          className="text-eyebrow font-medium tracking-[0.12em] text-muted-foreground uppercase"
+          className="text-eyebrow font-medium tracking-[0.12em] text-muted-foreground/90 uppercase"
         >
           Not included — full OS upsells
         </h2>
-        <p className="text-body text-muted-foreground">
+        <p className="text-small text-muted-foreground">
           Search, Pipeline, Tours, and Vault stay locked until your agent or
           brokerage enables the full transaction OS.
         </p>
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           {BUYER_LOCKED_UPSELLS.map((upsell) => (
             <BuyerLockedUpsellCard key={upsell.area} upsell={upsell} />
           ))}
@@ -108,9 +122,12 @@ export function PricingPageContent({
 
       <section
         aria-labelledby="pricing-cta-heading"
-        className="space-y-4 rounded-2xl border border-border/80 bg-muted/30 px-5 py-6"
+        className="space-y-4 rounded-2xl border border-dashed border-border/70 bg-muted/20 px-5 py-5"
       >
-        <h2 id="pricing-cta-heading" className="text-h2 font-semibold tracking-tight">
+        <h2
+          id="pricing-cta-heading"
+          className="text-h3 font-semibold tracking-tight text-foreground"
+        >
           Continue with coach
         </h2>
         <p

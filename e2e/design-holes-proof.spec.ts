@@ -70,7 +70,7 @@ test("design holes proof @375 — screenshots + clearance", async ({ page }) => 
 
   await page.goto("/pricing");
   await expect(page.getByTestId("pricing-page")).toBeVisible();
-  await expect(page.getByTestId("pricing-page").locator("h1")).toHaveClass(
+  await expect(page.getByTestId("pricing-coach-price")).toHaveClass(
     /text-display/,
   );
 

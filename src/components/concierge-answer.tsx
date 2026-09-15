@@ -76,16 +76,22 @@ export function isConciergeRefusal(kind: string | null): boolean {
 export function ConciergeAnswerView({
   text,
   kind,
+  className,
 }: {
   text: string;
   kind: string | null;
+  className?: string;
 }) {
   if (isConciergeRefusal(kind)) {
     return (
       <div
         data-testid="concierge-answer"
         data-kind={kind ?? undefined}
-        className={cn(REPLY_BUBBLE, "space-y-3 bg-sand text-sand-foreground")}
+        className={cn(
+          REPLY_BUBBLE,
+          "space-y-3 bg-sand text-sand-foreground",
+          className,
+        )}
       >
         <p>{text}</p>
         <Link
@@ -109,7 +115,7 @@ export function ConciergeAnswerView({
       <p
         data-testid="concierge-answer"
         data-kind={kind ?? undefined}
-        className={cn(REPLY_BUBBLE, "bg-card ring-1 ring-black/5")}
+        className={cn(REPLY_BUBBLE, "bg-card ring-1 ring-black/5", className)}
       >
         {text}
       </p>
@@ -120,7 +126,11 @@ export function ConciergeAnswerView({
     <div
       data-testid="concierge-answer"
       data-kind={kind ?? undefined}
-      className={cn(REPLY_BUBBLE, "space-y-2 bg-card ring-1 ring-black/5")}
+      className={cn(
+        REPLY_BUBBLE,
+        "space-y-2 bg-card ring-1 ring-black/5",
+        className,
+      )}
     >
       <p>{sourced.lead}</p>
       <MoneyFigureView figure={sourced.figure} size="md" />

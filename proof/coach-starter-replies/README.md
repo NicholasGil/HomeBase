@@ -2,7 +2,7 @@
 
 Fixture path: `/test-login` → **Discovery coach — Alex Rivera (no property)** → `/coach`.
 
-Each PNG is captured after tapping one of the three locked first-session chips. The concierge reply is explain-only (`data-kind="answer"`), scoped to an empty Discovery file.
+Each PNG is captured after tapping one of the three locked first-session chips. The explain-only reply bubble (`data-kind="answer"`) sits between the starter chips and the sticky Ask row in the 375px viewport (not below the empty-state fold).
 
 | File | Starter |
 | --- | --- |

@@ -6,6 +6,7 @@ import { expect, test } from "@playwright/test";
 import { COACH_FIRST_SESSION_STARTERS } from "../src/lib/coach-first-session";
 
 const PROOF_DIR = "proof/coach-starter-replies";
+const MIN_ASK_CLEARANCE_PX = 16;
 
 const EXPECTED_SNIPPETS: Record<(typeof COACH_FIRST_SESSION_STARTERS)[number], string> =
   {
@@ -38,6 +39,34 @@ async function sha256File(path: string) {
   return createHash("sha256").update(bytes).digest("hex");
 }
 
+async function expectAnswerBetweenChipsAndAsk(
+  page: import("@playwright/test").Page,
+  thread: import("@playwright/test").Locator,
+  answer: import("@playwright/test").Locator,
+) {
+  const compose = page.getByTestId("concierge-compose");
+  const chips = page.getByLabel("Suggested questions").getByRole("button");
+  const lastChip = chips.last();
+
+  const threadBox = await thread.boundingBox();
+  const answerBox = await answer.boundingBox();
+  const composeBox = await compose.boundingBox();
+  const chipBox = await lastChip.boundingBox();
+  expect(threadBox).not.toBeNull();
+  expect(answerBox).not.toBeNull();
+  expect(composeBox).not.toBeNull();
+  expect(chipBox).not.toBeNull();
+
+  expect(threadBox!.y).toBeGreaterThanOrEqual(chipBox!.y - 2);
+  expect(threadBox!.y + threadBox!.height).toBeLessThanOrEqual(
+    composeBox!.y - MIN_ASK_CLEARANCE_PX + 1,
+  );
+
+  await expect(answer).toBeInViewport();
+  expect(answerBox!.y).toBeGreaterThanOrEqual(chipBox!.y - 2);
+  expect(answerBox!.y).toBeLessThan(composeBox!.y);
+}
+
 test.describe.configure({ mode: "serial" });
 
 test.describe("coach first-session starter replies", () => {
@@ -47,15 +76,21 @@ test.describe("coach first-session starter replies", () => {
     }) => {
       await signInAlexDiscoveryEmpty(page);
       await page.getByRole("button", { name: label }).click();
-      await expect(page.getByText("Checking this file…")).toBeHidden({
+
+      const answer = page
+        .getByTestId("concierge-first-session-thread")
+        .getByTestId("concierge-answer");
+      await expect(answer).toHaveAttribute("data-kind", "answer", {
         timeout: 15_000,
       });
-
-      const answer = page.getByTestId("concierge-answer");
       await expect(answer).toBeVisible();
-      await expect(answer).toHaveAttribute("data-kind", "answer");
       await expect(answer).toContainText(EXPECTED_SNIPPETS[label]);
       await expect(answer).not.toContainText(/should i|waive|offer more/i);
+
+      const thread = page.getByTestId("concierge-first-session-thread");
+      await expect(thread).toBeVisible();
+
+      await expectAnswerBetweenChipsAndAsk(page, thread, answer);
 
       const path = `${PROOF_DIR}/starter-${STARTER_SLUGS[label]}-375.png`;
       await page.screenshot({ path, fullPage: false });

@@ -172,9 +172,11 @@ test("coach first-session proof screenshots @375", async ({ page }) => {
   for (const label of FIRST_SESSION_STARTERS) {
     await signInAlexDiscoveryEmpty(page);
     await page.getByRole("button", { name: label }).click();
-    await expect(page.getByText("Checking this file…")).toBeHidden({
-      timeout: 15_000,
-    });
+    await expect(
+      page
+        .getByTestId("concierge-first-session-thread")
+        .getByTestId("concierge-answer"),
+    ).toHaveAttribute("data-kind", "answer", { timeout: 15_000 });
     const path = PROOF_PATHS.starterExpanded(STARTER_SLUGS[label]);
     expandedPaths.push(path);
     await page.screenshot({ path, fullPage: false });

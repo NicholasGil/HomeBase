@@ -20,15 +20,19 @@ export function BuyerAuthPreviewFallback({ mode }: BuyerAuthPreviewFallbackProps
       data-testid={isSignIn ? "sign-in-fixture-fallback" : "sign-up-fixture-fallback"}
       className="mx-auto flex max-w-lg flex-col gap-4 px-5 py-8"
     >
-      <h1 className="text-2xl font-semibold tracking-tight">
+      <h1 className="text-h1 font-semibold tracking-tight">
         {isSignIn ? "Sign in" : "Create your account"}
       </h1>
-      <p className="max-w-xl text-sm leading-6 text-muted-foreground">
+      <p
+        data-testid="buyer-auth-env-notice"
+        className="max-w-xl text-body text-muted-foreground"
+      >
         {isSignIn
           ? "Buyers sign in with Clerk and land on your personal coach at "
           : "Buyers create an account with Clerk and start on your personal coach at "}
-        <Link className="underline" href="/coach">/coach</Link>. Clerk keys are
-        not set in this environment (production keys are needs-human #1).
+        <Link className="underline" href="/coach">/coach</Link>. Full Clerk
+        sign-in is not available in this preview yet—use the options below to
+        continue in demo or when your deployment is live.
       </p>
       <div className="flex flex-col gap-3">
         {isSignIn ? (
@@ -63,7 +67,7 @@ export function BuyerAuthPreviewFallback({ mode }: BuyerAuthPreviewFallbackProps
           </Link>
         ) : null}
       </div>
-      <p className="text-xs leading-5 text-muted-foreground">
+      <p className="text-small text-muted-foreground">
         Preview, CI, and agents only — not the buyer product path:
       </p>
       <Link

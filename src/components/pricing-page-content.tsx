@@ -115,7 +115,7 @@ export function PricingPageContent({
         </h2>
         <p
           data-testid="pricing-billing-disclaimer"
-          className="text-pretty text-sm leading-6 text-muted-foreground"
+          className="text-pretty text-body text-muted-foreground"
         >
           {PRICING_BILLING_DISCLAIMER}
         </p>

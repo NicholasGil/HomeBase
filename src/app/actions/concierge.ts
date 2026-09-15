@@ -3,6 +3,7 @@
 import { completeConcierge } from "../../../lib/llm";
 import { getTestSession } from "@/app/actions/test-session";
 import { conciergeFactsForCoach } from "@/lib/concierge-facts-for-coach";
+import { clerkBuyerConciergeContext } from "@/lib/concierge-clerk-buyer";
 import { isClerkConfigured } from "@/lib/auth-config";
 import { OTHER_CLIENT_NAMES } from "@/lib/seed-concierge";
 
@@ -27,9 +28,14 @@ export async function askConcierge(input: {
   }
 
   if (discoveryEmpty && isClerkConfigured()) {
-    const { auth } = await import("@clerk/nextjs/server");
-    const { userId } = await auth();
-    if (userId !== null) {
+    const clerkBuyer = await clerkBuyerConciergeContext();
+    if (clerkBuyer !== null) {
+      if (!clerkBuyer.ok) {
+        return { ok: false as const, reason: clerkBuyer.reason };
+      }
+      if (!clerkBuyer.discoveryEmpty) {
+        return { ok: false as const, reason: "FORBIDDEN" as const };
+      }
       const facts = conciergeFactsForCoach({ session: null, discoveryEmpty: true });
       if (facts === null) {
         return { ok: false as const, reason: "FORBIDDEN" as const };

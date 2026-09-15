@@ -9,8 +9,7 @@ export function conciergeFactsForCoach(input: {
 }): ConciergeFact[] | null {
   if (input.session?.role === "buyer") {
     return seedConciergeFacts(input.session.clerkId, {
-      emptyCoachFile:
-        input.session.emptyCoachFile === true || input.discoveryEmpty,
+      emptyCoachFile: input.session.emptyCoachFile === true,
     });
   }
   if (input.discoveryEmpty) {

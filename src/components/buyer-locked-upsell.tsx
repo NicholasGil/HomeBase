@@ -51,19 +51,19 @@ export function BuyerLockedUpsellCard({
         </div>
       </CardHeader>
       <CardContent className={compact ? "px-4 pb-4" : undefined}>
-        <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+        <ul className="list-disc space-y-1 pl-5 text-body text-muted-foreground">
           {upsell.bullets.map((line) => (
             <li key={line}>{line}</li>
           ))}
         </ul>
-        <p className="mt-4 text-xs leading-5 text-muted-foreground">
+        <p className="mt-4 text-small text-muted-foreground">
           No payment is taken here. Your agent or brokerage enables these areas
           when you are ready for the full transaction OS.
         </p>
         {compact ? (
           <Link
             href={upsell.href}
-            className="mt-3 inline-flex min-h-11 items-center text-sm font-medium text-foreground underline-offset-4 hover:underline"
+            className="mt-3 inline-flex min-h-11 items-center text-body font-medium text-foreground underline-offset-4 hover:underline"
           >
             Learn more
           </Link>
@@ -109,7 +109,7 @@ export function BuyerLockedRouteGate({
       <BuyerLockedUpsellCard upsell={upsell} />
       <Link
         href="/coach"
-        className="inline-flex min-h-11 items-center justify-center rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground"
+        className="inline-flex min-h-11 items-center justify-center rounded-full bg-primary px-5 text-body font-medium text-primary-foreground"
       >
         Back to your coach
       </Link>

@@ -77,32 +77,35 @@ export function CoachHome({
             </span>
           </p>
         </header>
-        {firstSession ? (
-          <div className="shrink-0 px-5 pt-4">
-            <EmptyState
-              testId="coach-first-session-empty"
-              icon={MessageCircle}
-              title="Your personal coach is on"
-              description={
-                <>
-                  HomeBase coach is your daily guide through buying — one place
-                  to ask what things mean and what usually comes next. The{" "}
-                  {COACH_ENTRY_PRICE_LABEL} entry keeps coach on while you
-                  explore; Search, Pipeline, Tours, and Vault unlock when your
-                  agent adds them to your file. Tap a starter below or type a
-                  question — when you have a property, answers stay tied to
-                  that file only.
-                </>
-              }
-              action={{ href: "/pricing", label: "See what’s included" }}
-              className="border-solid bg-muted/30"
-            />
-          </div>
-        ) : null}
         <ConciergeChat
           className="min-h-0 flex-1 px-5 pt-4 pb-5"
           starters={
             firstSession ? COACH_FIRST_SESSION_STARTERS : undefined
+          }
+          pinStartersAboveScrollOnMobile={firstSession}
+          scrollIntro={
+            firstSession
+              ? (
+                  <EmptyState
+                    testId="coach-first-session-empty"
+                    icon={MessageCircle}
+                    title="Your personal coach is on"
+                    description={
+                      <>
+                        HomeBase coach is your daily guide through buying — one
+                        place to ask what things mean and what usually comes
+                        next. The {COACH_ENTRY_PRICE_LABEL} entry keeps coach
+                        on while you explore; Search, Pipeline, Tours, and Vault
+                        unlock when your agent adds them to your file. Tap a
+                        starter above or type a question — when you have a
+                        property, answers stay tied to that file only.
+                      </>
+                    }
+                    action={{ href: "/pricing", label: "See what’s included" }}
+                    className="border-solid bg-muted/30 max-md:gap-3 max-md:py-5 max-md:[&_[data-slot=empty-description]]:line-clamp-4"
+                  />
+                )
+              : undefined
           }
           idleHint={
             firstSession

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 import { askSeedConcierge } from "@/app/actions/concierge";
 import { ConciergeAnswerView } from "@/components/concierge-answer";
@@ -28,11 +28,17 @@ export function ConciergeChat({
   starters = CONCIERGE_STARTERS,
   idleHint = "Pick a question above or ask about this transaction. I explain what is on this file; I do not advise.",
   questionPlaceholder = "Ask about this transaction",
+  /** Renders inside the scroll region (e.g. first-session empty state). */
+  scrollIntro,
+  /** Keep starters fixed above the scroll area on 375 so the fold shows chips + Ask. */
+  pinStartersAboveScrollOnMobile = false,
 }: {
   className?: string;
   starters?: readonly string[];
   idleHint?: string;
   questionPlaceholder?: string;
+  scrollIntro?: ReactNode;
+  pinStartersAboveScrollOnMobile?: boolean;
 }) {
   const [question, setQuestion] = useState("");
   const [asked, setAsked] = useState<string | null>(null);
@@ -55,38 +61,56 @@ export function ConciergeChat({
     setBusy(false);
   }
 
+  const starterChips = (
+    <div
+      aria-label="Suggested questions"
+      className="-mx-5 flex flex-wrap gap-2 px-5 pb-1 md:mx-0"
+    >
+      {starters.map((starter) => (
+        <Button
+          key={starter}
+          type="button"
+          variant="secondary"
+          className="h-auto min-h-11 w-max max-w-[min(17.5rem,calc(100vw-3rem))] shrink-0 rounded-full bg-sage px-4 py-2 text-left text-sm whitespace-normal text-sage-foreground hover:bg-sage/80"
+          disabled={busy}
+          onClick={() => {
+            setQuestion(starter);
+            void submit(starter);
+          }}
+        >
+          {starter}
+        </Button>
+      ))}
+    </div>
+  );
+
   return (
     <section
       data-testid="concierge"
       aria-label="Transaction concierge"
       className={cn("flex min-h-0 flex-col", className)}
     >
+      {pinStartersAboveScrollOnMobile ? (
+        <div className="shrink-0 pt-4 pb-1 max-md:block md:hidden">
+          {starterChips}
+        </div>
+      ) : null}
       <div
         className={cn(
           "flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto py-4",
           "max-md:pb-[var(--coach-compose-inset)]",
+          pinStartersAboveScrollOnMobile && "max-md:pt-0",
         )}
       >
         <div
-          aria-label="Suggested questions"
-          className="-mx-5 flex flex-wrap gap-2 px-5 pb-1 md:mx-0"
+          className={cn(
+            pinStartersAboveScrollOnMobile && "max-md:hidden",
+          )}
         >
-          {starters.map((starter) => (
-            <Button
-              key={starter}
-              type="button"
-              variant="secondary"
-              className="h-auto min-h-11 w-max max-w-[min(17.5rem,calc(100vw-3rem))] shrink-0 rounded-full bg-sage px-4 py-2 text-left text-sm whitespace-normal text-sage-foreground hover:bg-sage/80"
-              disabled={busy}
-              onClick={() => {
-                setQuestion(starter);
-                void submit(starter);
-              }}
-            >
-              {starter}
-            </Button>
-          ))}
+          {starterChips}
         </div>
+
+        {scrollIntro ? <div className="shrink-0">{scrollIntro}</div> : null}
 
         <div aria-live="polite" className="flex min-h-0 flex-1 flex-col gap-3">
           {asked === null ? (

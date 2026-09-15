@@ -4,6 +4,7 @@ import { useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
+import { useEnsureBuyerProvisioning } from "@/hooks/use-ensure-buyer-provisioning";
 import { api } from "../../convex/_generated/api";
 
 const ROLE_HOME = {
@@ -15,15 +16,16 @@ const ROLE_HOME = {
 } as const;
 
 export function RoleRouter() {
-  const session = useQuery(api.me.getSession, {});
+  const provisioned = useEnsureBuyerProvisioning();
+  const session = useQuery(api.me.getSession, provisioned ? {} : "skip");
   const router = useRouter();
 
   useEffect(() => {
-    if (session === undefined) {
+    if (!provisioned || session === undefined) {
       return;
     }
     router.replace(ROLE_HOME[session.role]);
-  }, [router, session]);
+  }, [provisioned, router, session]);
 
   return <p className="text-sm text-muted-foreground">Routing by role…</p>;
 }

@@ -1,29 +1,32 @@
 import { SignIn } from "@clerk/nextjs";
 
 import { AppShell } from "@/components/app-shell";
+import { BuyerAuthPreviewFallback } from "@/components/buyer-auth-preview-fallback";
+import { clerkSignInRedirectProps } from "@/lib/buyer-auth-funnel";
 import { isClerkConfigured } from "@/lib/auth-config";
 
 export default function SignInPage() {
   if (!isClerkConfigured()) {
     return (
       <AppShell>
-        <div className="space-y-3">
-          <h1 className="text-2xl font-semibold tracking-tight">Sign in</h1>
-          <p className="max-w-xl text-sm leading-6 text-muted-foreground">
-            Clerk keys are not set. Use the fixture login at{" "}
-            <a className="underline" href="/test-login">
-              /test-login
-            </a>{" "}
-            until a human creates the Clerk application.
-          </p>
-        </div>
+        <BuyerAuthPreviewFallback mode="sign-in" />
       </AppShell>
     );
   }
 
   return (
     <AppShell>
-      <SignIn />
+      <div className="mx-auto flex max-w-lg flex-col px-5 py-8">
+        <SignIn
+          {...clerkSignInRedirectProps()}
+          appearance={{
+            elements: {
+              rootBox: "w-full",
+              cardBox: "w-full shadow-none",
+            },
+          }}
+        />
+      </div>
     </AppShell>
   );
 }

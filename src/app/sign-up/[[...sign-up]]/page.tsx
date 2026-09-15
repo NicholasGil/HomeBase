@@ -1,25 +1,32 @@
 import { SignUp } from "@clerk/nextjs";
 
 import { AppShell } from "@/components/app-shell";
+import { BuyerAuthPreviewFallback } from "@/components/buyer-auth-preview-fallback";
+import { clerkSignUpRedirectProps } from "@/lib/buyer-auth-funnel";
 import { isClerkConfigured } from "@/lib/auth-config";
 
 export default function SignUpPage() {
   if (!isClerkConfigured()) {
     return (
       <AppShell>
-        <div className="space-y-3">
-          <h1 className="text-2xl font-semibold tracking-tight">Sign up</h1>
-          <p className="max-w-xl text-sm leading-6 text-muted-foreground">
-            Clerk keys are not set. Do not invent production credentials.
-          </p>
-        </div>
+        <BuyerAuthPreviewFallback mode="sign-up" />
       </AppShell>
     );
   }
 
   return (
     <AppShell>
-      <SignUp />
+      <div className="mx-auto flex max-w-lg flex-col px-5 py-8">
+        <SignUp
+          {...clerkSignUpRedirectProps()}
+          appearance={{
+            elements: {
+              rootBox: "w-full",
+              cardBox: "w-full shadow-none",
+            },
+          }}
+        />
+      </div>
     </AppShell>
   );
 }

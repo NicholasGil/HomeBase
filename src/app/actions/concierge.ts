@@ -14,7 +14,9 @@ export async function askSeedConcierge(input: { question: string }) {
   }
   const answer = completeConcierge({
     question: input.question,
-    facts: seedConciergeFacts(session.clerkId),
+    facts: seedConciergeFacts(session.clerkId, {
+      emptyCoachFile: session.emptyCoachFile,
+    }),
     otherClientNames: OTHER_CLIENT_NAMES,
   });
   return { ok: true as const, answer };

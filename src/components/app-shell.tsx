@@ -14,7 +14,7 @@ import {
   wordmarkHrefFor,
 } from "@/lib/app-nav";
 import { isAuthConfigured } from "@/lib/auth-config";
-import { seedDashboardForBuyer } from "@/lib/seed-dashboard";
+import { coachScopeForFixtureBuyer } from "@/lib/coach-fixture-scope";
 import type { TestBuyerSession } from "@/lib/test-session";
 
 /*
@@ -23,14 +23,7 @@ import type { TestBuyerSession } from "@/lib/test-session";
   and guests never receive the FAB or the sheet tree.
 */
 function conciergeScopeFor(session: TestBuyerSession): ConciergeScope {
-  const view = seedDashboardForBuyer(session.clerkId);
-  const address = view.propertyAddress;
-  return {
-    address: address
-      ? `${address.line1}, ${address.city}`
-      : "No property on this file yet",
-    stage: view.where.label,
-  };
+  return coachScopeForFixtureBuyer(session);
 }
 
 export async function AppShell({

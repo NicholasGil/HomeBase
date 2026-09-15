@@ -1,9 +1,16 @@
 import type { ConciergeFact } from "../../lib/llm/types";
 import { formatDisplayDateTime } from "../../convex/lib/displayTime";
 import { SEED_CLERK_IDS, SEED_CONCIERGE } from "../../convex/seedPlan";
+import { discoveryEmptyConciergeFacts } from "@/lib/seed-concierge-discovery";
 import type { TestBuyerClerkId } from "@/lib/seed-dashboard";
 
-export function seedConciergeFacts(clerkId: TestBuyerClerkId): ConciergeFact[] {
+export function seedConciergeFacts(
+  clerkId: TestBuyerClerkId,
+  options?: { emptyCoachFile?: boolean },
+): ConciergeFact[] {
+  if (options?.emptyCoachFile) {
+    return discoveryEmptyConciergeFacts();
+  }
   if (clerkId !== SEED_CLERK_IDS.buyerA) {
     return [
       {

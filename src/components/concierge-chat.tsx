@@ -23,7 +23,17 @@ export const CONCIERGE_STARTERS = [
   "When do I leave for my first showing?",
 ] as const;
 
-export function ConciergeChat({ className }: { className?: string }) {
+export function ConciergeChat({
+  className,
+  starters = CONCIERGE_STARTERS,
+  idleHint = "Pick a question above or ask about this transaction. I explain what is on this file; I do not advise.",
+  questionPlaceholder = "Ask about this transaction",
+}: {
+  className?: string;
+  starters?: readonly string[];
+  idleHint?: string;
+  questionPlaceholder?: string;
+}) {
   const [question, setQuestion] = useState("");
   const [asked, setAsked] = useState<string | null>(null);
   const [answer, setAnswer] = useState<string | null>(null);
@@ -59,9 +69,9 @@ export function ConciergeChat({ className }: { className?: string }) {
       >
         <div
           aria-label="Suggested questions"
-          className="-mx-5 flex flex-wrap gap-2 px-5 md:mx-0"
+          className="-mx-5 flex flex-wrap gap-2 px-5 pb-1 md:mx-0"
         >
-          {CONCIERGE_STARTERS.map((starter) => (
+          {starters.map((starter) => (
             <Button
               key={starter}
               type="button"
@@ -81,8 +91,7 @@ export function ConciergeChat({ className }: { className?: string }) {
         <div aria-live="polite" className="flex min-h-0 flex-1 flex-col gap-3">
           {asked === null ? (
             <p className="my-auto text-center text-sm text-muted-foreground">
-              Pick a question above or ask about this transaction. I explain what
-              is on this file; I do not advise.
+              {idleHint}
             </p>
           ) : (
             <p className="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-primary px-4 py-2.5 text-sm text-primary-foreground">
@@ -114,7 +123,7 @@ export function ConciergeChat({ className }: { className?: string }) {
             className="min-h-11 min-w-0 flex-1 rounded-full border bg-background px-4 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             value={question}
             onChange={(event) => setQuestion(event.target.value)}
-            placeholder="Ask about this transaction"
+            placeholder={questionPlaceholder}
           />
           <Button
             type="submit"

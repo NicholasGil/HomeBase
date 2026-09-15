@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import {
+  encodeTestSessionCookie,
   fixtureHomePath,
   parseTestSessionCookie,
   startTestSessionDecision,
@@ -17,13 +18,18 @@ export async function getTestSession(): Promise<TestSession | null> {
   return parseTestSessionCookie(store.get(TEST_SESSION_COOKIE)?.value);
 }
 
-export async function startTestSession(input: { clerkId: string }) {
-  const started = startTestSessionDecision(input.clerkId);
+export async function startTestSession(input: {
+  clerkId: string;
+  emptyCoachFile?: boolean;
+}) {
+  const started = startTestSessionDecision(input.clerkId, process.env, {
+    emptyCoachFile: input.emptyCoachFile,
+  });
   if (!started.ok) {
     return started;
   }
   const store = await cookies();
-  store.set(TEST_SESSION_COOKIE, started.session.clerkId, {
+  store.set(TEST_SESSION_COOKIE, encodeTestSessionCookie(started.session), {
     httpOnly: true,
     sameSite: "lax",
     path: "/",
@@ -39,7 +45,8 @@ export async function startTestSessionFromForm(formData: FormData) {
   if (typeof clerkId !== "string") {
     redirect("/test-login");
   }
-  const started = await startTestSession({ clerkId });
+  const emptyCoachFile = formData.get("emptyCoachFile") === "1";
+  const started = await startTestSession({ clerkId, emptyCoachFile });
   if (!started.ok) {
     redirect("/test-login");
   }

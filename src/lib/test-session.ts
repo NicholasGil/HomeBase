@@ -23,7 +23,11 @@ export type TestBuyerSession = {
   name: string;
   role: "buyer";
   transactionId: (typeof SEED_TRANSACTION_IDS)[TestBuyerClerkId];
+  /** Fixture-only: Path B–style coach with no property on file yet. */
+  emptyCoachFile?: boolean;
 };
+
+const EMPTY_COACH_FILE_MARKER = "empty";
 
 export type TestVendorSession = {
   clerkId: typeof SEED_CLERK_IDS.lender;
@@ -62,9 +66,17 @@ export function isTestAgentClerkId(
   return value === SEED_CLERK_IDS.agent;
 }
 
+export function encodeTestSessionCookie(session: TestSession): string {
+  if (session.role === "buyer" && session.emptyCoachFile) {
+    return `${session.clerkId}~${EMPTY_COACH_FILE_MARKER}`;
+  }
+  return session.clerkId;
+}
+
 export function startTestSessionDecision(
   clerkId: string,
   env: AuthEnv = process.env,
+  options?: { emptyCoachFile?: boolean },
 ): { ok: true; session: TestSession } | { ok: false; reason: "FORBIDDEN" } {
   if (isProductionDeploy(env)) {
     return { ok: false, reason: "FORBIDDEN" };
@@ -103,6 +115,7 @@ export function startTestSessionDecision(
       name: buyer.name,
       role: "buyer",
       transactionId: SEED_TRANSACTION_IDS[clerkId],
+      emptyCoachFile: options?.emptyCoachFile === true,
     },
   };
 }
@@ -114,7 +127,14 @@ export function parseTestSessionCookie(
   if (value === undefined) {
     return null;
   }
-  const started = startTestSessionDecision(value, env);
+  const parts = value.split("~");
+  const clerkId = parts[0];
+  const marker = parts[1];
+  if (clerkId === undefined || clerkId.length === 0) {
+    return null;
+  }
+  const emptyCoachFile = marker === EMPTY_COACH_FILE_MARKER;
+  const started = startTestSessionDecision(clerkId, env, { emptyCoachFile });
   return started.ok ? started.session : null;
 }
 

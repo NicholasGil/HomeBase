@@ -11,20 +11,13 @@ import {
   mustFailClosed,
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
-import { seedDashboardForBuyer } from "@/lib/seed-dashboard";
+import { coachScopeForFixtureBuyer } from "@/lib/coach-fixture-scope";
 import type { TestBuyerSession } from "@/lib/test-session";
 
 export const dynamic = "force-dynamic";
 
 function conciergeScopeFor(session: TestBuyerSession) {
-  const view = seedDashboardForBuyer(session.clerkId);
-  const address = view.propertyAddress;
-  return {
-    address: address
-      ? `${address.line1}, ${address.city}`
-      : "No property on this file yet",
-    stage: view.where.label,
-  };
+  return coachScopeForFixtureBuyer(session);
 }
 
 export default async function CoachPage() {

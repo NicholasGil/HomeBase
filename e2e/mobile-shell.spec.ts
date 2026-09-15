@@ -70,7 +70,7 @@ test.describe("mobile shell", () => {
 
     const barBox = await page.getByTestId("app-tab-bar").boundingBox();
     const upsellBox = await page
-      .getByTestId("locked-upsell-vault")
+      .getByTestId("locked-upsell-rail-summary")
       .boundingBox();
     expect(barBox).not.toBeNull();
     expect(upsellBox).not.toBeNull();

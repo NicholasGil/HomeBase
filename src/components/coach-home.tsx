@@ -9,6 +9,8 @@ import { BUYER_LOCKED_UPSELLS } from "@/lib/buyer-shell";
 import { textLinkClassName } from "@/components/text-link";
 import { EmptyState } from "@/components/empty-state";
 import {
+  COACH_DISCOVERY_EMPTY_ADDRESS,
+  COACH_DISCOVERY_STAGE_LABEL,
   COACH_FIRST_SESSION_STARTERS,
   isCoachDiscoveryEmptyScope,
 } from "@/lib/coach-first-session";
@@ -60,7 +62,12 @@ export function CoachHome({
                 "max-w-full text-small font-medium text-muted-foreground hover:text-foreground",
               )}
             >
-              Coach — {COACH_ENTRY_PRICE_LABEL} · See pricing
+              <span className="md:hidden">
+                {COACH_ENTRY_PRICE_LABEL} · See pricing
+              </span>
+              <span className="hidden md:inline">
+                Coach — {COACH_ENTRY_PRICE_LABEL} · See pricing
+              </span>
             </Link>
           </div>
           {eyebrow ? (
@@ -75,21 +82,26 @@ export function CoachHome({
           ) : null}
           <h1
             className={cn(
-              "mt-1 truncate text-h2 font-semibold tracking-tight",
-              firstSession && "max-md:text-lg",
+              "mt-0.5 font-semibold tracking-tight text-balance",
+              firstSession
+                ? "max-md:text-h3 md:truncate md:text-h2"
+                : "truncate text-h2",
             )}
           >
-            {scope.address}
+            {firstSession ? COACH_DISCOVERY_STAGE_LABEL : scope.address}
           </h1>
-          <p className="mt-2 flex flex-wrap items-center gap-x-2 text-body text-muted-foreground">
-            <span className="inline-flex h-6 items-center rounded-full bg-sage px-2.5 text-eyebrow font-medium text-sage-foreground">
+          {firstSession ? (
+            <p className="mt-0.5 text-small text-muted-foreground md:sr-only">
+              {COACH_DISCOVERY_EMPTY_ADDRESS}
+            </p>
+          ) : null}
+          <p className="mt-1.5 flex flex-wrap items-center gap-x-2 text-body text-muted-foreground max-md:text-small">
+            <span className="inline-flex h-6 shrink-0 items-center rounded-full bg-sage px-2.5 text-eyebrow font-medium text-sage-foreground">
               {scope.stage}
             </span>
-            <span
-              className={cn(firstSession && "max-md:line-clamp-1 max-md:max-w-full")}
-            >
+            <span>
               {firstSession
-                ? `Hi ${firstName} — your always-on coach for this purchase. I explain; I never advise.`
+                ? `Hi ${firstName} — your coach for this purchase.`
                 : `Hi ${firstName} — I explain this file only. I never advise.`}
             </span>
           </p>
@@ -109,31 +121,29 @@ export function CoachHome({
                   <EmptyState
                     testId="coach-first-session-empty"
                     icon={MessageCircle}
-                    title="Your personal coach is on"
+                    title="Coach is on"
                     description={
                       <>
-                        HomeBase coach is your daily guide through buying — one
-                        place to ask what things mean and what usually comes
-                        next. The {COACH_ENTRY_PRICE_LABEL} entry keeps coach
-                        on while you explore; Search, Pipeline, Tours, and Vault
-                        unlock when your agent adds them to your file. Tap a
-                        starter above or type a question — when you have a
-                        property, answers stay tied to that file only.
+                        Tap a starter or ask below. Search, Pipeline, Tours, and
+                        Vault unlock with the full OS —{" "}
+                        <Link href="/pricing" className={textLinkClassName}>
+                          see pricing
+                        </Link>
+                        .
                       </>
                     }
-                    action={{ href: "/pricing", label: "See what’s included" }}
-                    className="border-solid bg-muted/30 max-md:gap-3 max-md:py-5 max-md:[&_[data-slot=empty-description]]:line-clamp-4"
+                    className="border-solid bg-muted/25 max-md:gap-2 max-md:py-4 max-md:[&_[data-slot=empty-title]]:text-h3 max-md:[&_[data-slot=empty-description]]:text-small"
                   />
                 )
               : undefined
           }
           idleHint={
             firstSession
-              ? "Tap a starter to learn how coach works, or ask anything about buying."
+              ? "Tap a starter or type a question."
               : undefined
           }
           questionPlaceholder={
-            firstSession ? "Ask about buying or a document" : undefined
+            firstSession ? "Ask about buying" : undefined
           }
         />
       </section>

@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+import { BUYER_LOCKED_OS_PAYMENT_DISCLAIMER } from "../src/lib/buyer-shell";
+
 test.use({
   viewport: { width: 375, height: 812 },
   hasTouch: true,
@@ -17,7 +19,12 @@ test("pricing page shows $10/mo coach entry and locked OS upsells", async ({
   for (const area of ["search", "tours", "pipeline", "vault"]) {
     await expect(page.getByTestId(`locked-upsell-${area}`)).toBeVisible();
   }
-  await expect(page.getByText("Locked · full OS").first()).toBeVisible();
+  await expect(page.getByTestId("pricing-locked-os-disclaimer")).toHaveText(
+    BUYER_LOCKED_OS_PAYMENT_DISCLAIMER,
+  );
+  await expect(
+    page.getByText(BUYER_LOCKED_OS_PAYMENT_DISCLAIMER, { exact: true }),
+  ).toHaveCount(1);
 
   const html = await page.content();
   expect(html.toLowerCase()).not.toContain("stripe");

@@ -11,6 +11,10 @@ export type BuyerLockedUpsell = {
 
 export const BUYER_COACH_HOME = "/coach" as const;
 
+/** Shared on pricing + route gates — not repeated on every upsell card. */
+export const BUYER_LOCKED_OS_PAYMENT_DISCLAIMER =
+  "No payment is taken here. Your agent or brokerage enables these areas when you are ready for the full transaction OS.";
+
 export const BUYER_LOCKED_UPSELLS: readonly BuyerLockedUpsell[] = [
   {
     area: "search",

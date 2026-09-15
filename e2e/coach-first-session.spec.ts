@@ -79,7 +79,7 @@ test("empty Discovery coach shows empty state and three starters @375", async ({
   }
 
   await expect(page.getByTestId("locked-upsell-rail")).toBeVisible();
-  await expect(page.getByTestId("locked-upsell-search")).toBeVisible();
+  await expect(page.getByTestId("locked-upsell-rail-summary")).toBeVisible();
 });
 
 test("first-session chips clear sticky Ask at scroll end @375", async ({

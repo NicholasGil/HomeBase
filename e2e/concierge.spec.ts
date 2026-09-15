@@ -83,6 +83,8 @@ test.describe("coach home concierge", () => {
     }
 
     await expect(page.getByTestId("locked-upsell-rail")).toBeVisible();
+    await expect(page.getByTestId("locked-upsell-rail-summary")).toBeHidden();
+    await expect(page.getByTestId("locked-upsell-search")).toBeVisible();
   });
 
   test("coach tours learn more opens the locked tours gate", async ({ page }) => {
@@ -145,12 +147,27 @@ test.describe("coach home concierge", () => {
 test.describe("concierge sheet at 375", () => {
   test.use({ viewport: MOBILE, hasTouch: true, isMobile: true });
 
-  test("locked upsell cards scroll on coach home", async ({ page }) => {
+  test("collapsed Full OS lock summary clears tab bar on coach home @375", async ({
+    page,
+  }) => {
     await signInAs(page, "Alex Rivera");
-    await expect(page.getByTestId("locked-upsell-search")).toBeVisible();
-    await expect(page.getByTestId("locked-upsell-tours")).toBeVisible();
-    await expect(page.getByTestId("locked-upsell-pipeline")).toBeVisible();
-    await expect(page.getByTestId("locked-upsell-vault")).toBeVisible();
+    const summary = page.getByTestId("locked-upsell-rail-summary");
+    await expect(summary).toBeVisible();
+    await expect(page.getByTestId("locked-upsell-search")).not.toBeVisible();
+    await expect(page.getByTestId("locked-upsell-tours")).not.toBeVisible();
+    await expect(page.getByTestId("locked-upsell-pipeline")).not.toBeVisible();
+    await expect(page.getByTestId("locked-upsell-vault")).not.toBeVisible();
+    await expect(page.getByText("Full OS locked")).toBeVisible();
+
+    await page.evaluate(() =>
+      window.scrollTo(0, document.documentElement.scrollHeight),
+    );
+
+    const barBox = await page.getByTestId("app-tab-bar").boundingBox();
+    const summaryBox = await summary.boundingBox();
+    expect(barBox).not.toBeNull();
+    expect(summaryBox).not.toBeNull();
+    expect(summaryBox!.y + summaryBox!.height).toBeLessThanOrEqual(barBox!.y);
   });
 
   test("FAB is 56px on vault and opens a bottom sheet", async ({ page }) => {

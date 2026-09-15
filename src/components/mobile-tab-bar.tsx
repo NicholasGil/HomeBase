@@ -6,7 +6,6 @@ import {
   KeyRound,
   LayoutDashboard,
   LayoutGrid,
-  LockKeyhole,
   MessageCircle,
   Route,
   Search,
@@ -15,6 +14,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { TabLockChromeBadge } from "@/components/lock-chrome";
 import type { AppNavLink } from "@/lib/app-nav";
 import { cn } from "@/lib/utils";
 
@@ -83,7 +83,7 @@ export function MobileTabBar({ links }: { links: AppNavLink[] }) {
                     active
                       ? "text-foreground"
                       : "text-muted-foreground hover:text-foreground",
-                    locked && !active ? "opacity-90" : "",
+                    locked && !active ? "opacity-80" : "",
                   )}
                 >
                   <span
@@ -93,12 +93,7 @@ export function MobileTabBar({ links }: { links: AppNavLink[] }) {
                     )}
                   >
                     <Icon className="size-5" aria-hidden />
-                    {locked ? (
-                      <LockKeyhole
-                        className="absolute -top-0.5 -right-0.5 size-3 text-muted-foreground"
-                        aria-hidden
-                      />
-                    ) : null}
+                    {locked ? <TabLockChromeBadge /> : null}
                   </span>
                   <span className="line-clamp-2 max-w-full">{link.label}</span>
                 </Link>

@@ -1,3 +1,5 @@
+import { answerCoachFirstSessionStarter } from "./coachFirstSession";
+import { isDiscoveryEmptyConciergeFacts } from "./discoveryEmptyFacts";
 import { applyGuardrails, formatUsd, looksLikeAdvice } from "./guardrails";
 import type { ConciergeAnswer, ConciergeFact } from "./types";
 
@@ -29,6 +31,13 @@ export function answerConcierge(
       kind: "ask_agent",
       sources: [],
     };
+  }
+
+  if (isDiscoveryEmptyConciergeFacts(facts)) {
+    const starterAnswer = answerCoachFirstSessionStarter(question, facts);
+    if (starterAnswer !== null) {
+      return applyGuardrails(starterAnswer, facts);
+    }
   }
 
   const next = fact(facts, "next");

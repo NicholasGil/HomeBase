@@ -1,5 +1,6 @@
 import type { Doc } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
+import { discoveryEmptyConciergeFacts } from "../../lib/llm/discoveryEmptyFacts";
 
 import { formatDisplayDateTime } from "./displayTime";
 import { isLenderCategory } from "./vendors";
@@ -26,6 +27,10 @@ export async function gatherConciergeFacts(
   ctx: DbCtx,
   transaction: Doc<"transactions">,
 ): Promise<ConciergeFact[]> {
+  if (transaction.propertyId === undefined) {
+    return discoveryEmptyConciergeFacts();
+  }
+
   const [tasks, documents, appointments, offers, assignments, stages] =
     await Promise.all([
       ctx.db

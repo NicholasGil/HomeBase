@@ -11,8 +11,4 @@ export function isCoachDiscoveryEmptyScope(scope: ConciergeScope): boolean {
 }
 
 /** Three explain-only prompts for Discovery with no property on file yet. */
-export const COACH_FIRST_SESSION_STARTERS = [
-  "What happens next?",
-  "What am I missing for this stage?",
-  "What's already on my file?",
-] as const;
+export { COACH_FIRST_SESSION_STARTER_LABELS as COACH_FIRST_SESSION_STARTERS } from "../../lib/llm/coachFirstSession";

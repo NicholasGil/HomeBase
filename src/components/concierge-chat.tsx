@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 
-import { askSeedConcierge } from "@/app/actions/concierge";
+import { askConcierge } from "@/app/actions/concierge";
 import { ConciergeAnswerView } from "@/components/concierge-answer";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -32,6 +32,8 @@ export function ConciergeChat({
   scrollIntro,
   /** Keep starters fixed above the scroll area on 375 so the fold shows chips + Ask. */
   pinStartersAboveScrollOnMobile = false,
+  /** Discovery coach with no property on file — scoped explain-only facts. */
+  discoveryEmpty = false,
 }: {
   className?: string;
   starters?: readonly string[];
@@ -39,6 +41,7 @@ export function ConciergeChat({
   questionPlaceholder?: string;
   scrollIntro?: ReactNode;
   pinStartersAboveScrollOnMobile?: boolean;
+  discoveryEmpty?: boolean;
 }) {
   const [question, setQuestion] = useState("");
   const [asked, setAsked] = useState<string | null>(null);
@@ -50,7 +53,10 @@ export function ConciergeChat({
     setBusy(true);
     setAsked(nextQuestion);
     setAnswer(null);
-    const result = await askSeedConcierge({ question: nextQuestion });
+    const result = await askConcierge({
+      question: nextQuestion,
+      discoveryEmpty,
+    });
     if (!result.ok) {
       setAnswer("You cannot ask the concierge.");
       setKind("refuse");

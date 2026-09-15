@@ -36,7 +36,7 @@ export function CoachHome({
       <section
         aria-label="Personal coach"
         className={cn(
-          "flex min-h-0 flex-col overflow-x-hidden rounded-3xl border border-border/80 bg-card shadow-sm max-md:overflow-y-hidden",
+          "flex min-h-0 flex-col overflow-x-hidden rounded-2xl border border-border/80 bg-card shadow-sm max-md:overflow-y-hidden",
           "max-md:max-h-[calc(100dvh-var(--coach-mobile-chrome)-var(--coach-compose-clearance))]",
           "md:min-h-[min(70vh,640px)]",
         )}
@@ -54,20 +54,20 @@ export function CoachHome({
               data-testid="coach-pricing-link"
               className={cn(
                 textLinkClassName,
-                "max-w-full text-xs font-medium text-muted-foreground hover:text-foreground",
+                "max-w-full text-small font-medium text-muted-foreground hover:text-foreground",
               )}
             >
               Coach — {COACH_ENTRY_PRICE_LABEL} · See pricing
             </Link>
           </div>
           {eyebrow ? (
-            <p className="mt-1 text-xs text-muted-foreground">{eyebrow}</p>
+            <p className="mt-1 text-small text-muted-foreground">{eyebrow}</p>
           ) : null}
-          <h1 className="mt-1 truncate text-xl font-semibold tracking-tight">
+          <h1 className="mt-1 truncate text-h2 font-semibold tracking-tight">
             {scope.address}
           </h1>
-          <p className="mt-2 flex flex-wrap items-center gap-x-2 text-sm text-muted-foreground">
-            <span className="inline-flex h-6 items-center rounded-full bg-sage px-2.5 text-xs font-medium text-sage-foreground">
+          <p className="mt-2 flex flex-wrap items-center gap-x-2 text-body text-muted-foreground">
+            <span className="inline-flex h-6 items-center rounded-full bg-sage px-2.5 text-eyebrow font-medium text-sage-foreground">
               {scope.stage}
             </span>
             <span>

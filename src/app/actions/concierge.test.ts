@@ -4,14 +4,14 @@ import { COACH_FIRST_SESSION_STARTERS } from "@/lib/coach-first-session";
 import { SEED_CLERK_IDS } from "../../../convex/seedPlan";
 
 const getTestSessionMock = vi.fn();
-const clerkBuyerConciergeContextMock = vi.fn();
+const clerkBuyerConciergeFactsMock = vi.fn();
 
 vi.mock("@/app/actions/test-session", () => ({
   getTestSession: getTestSessionMock,
 }));
 
 vi.mock("@/lib/concierge-clerk-buyer", () => ({
-  clerkBuyerConciergeContext: clerkBuyerConciergeContextMock,
+  clerkBuyerConciergeFacts: clerkBuyerConciergeFactsMock,
 }));
 
 vi.mock("@/lib/auth-config", async (importOriginal) => {
@@ -25,14 +25,12 @@ vi.mock("@/lib/auth-config", async (importOriginal) => {
 describe("askConcierge", () => {
   beforeEach(() => {
     getTestSessionMock.mockReset();
-    clerkBuyerConciergeContextMock.mockReset();
+    clerkBuyerConciergeFactsMock.mockReset();
   });
 
-  async function ask(
-    input: { question: string; discoveryEmpty?: boolean },
-  ) {
+  async function ask(question: string) {
     const { askConcierge } = await import("@/app/actions/concierge");
-    return askConcierge(input);
+    return askConcierge({ question });
   }
 
   it("returns FORBIDDEN for fixture non-buyer without calling Clerk", async () => {
@@ -42,25 +40,19 @@ describe("askConcierge", () => {
       role: "agent",
     });
 
-    const result = await ask({
-      question: COACH_FIRST_SESSION_STARTERS[0]!,
-      discoveryEmpty: true,
-    });
+    const result = await ask(COACH_FIRST_SESSION_STARTERS[0]!);
     expect(result).toEqual({ ok: false, reason: "FORBIDDEN" });
-    expect(clerkBuyerConciergeContextMock).not.toHaveBeenCalled();
+    expect(clerkBuyerConciergeFactsMock).not.toHaveBeenCalled();
   });
 
-  it("returns FORBIDDEN for Clerk non-buyer with discoveryEmpty", async () => {
+  it("returns FORBIDDEN for Clerk non-buyer", async () => {
     getTestSessionMock.mockResolvedValue(null);
-    clerkBuyerConciergeContextMock.mockResolvedValue({
+    clerkBuyerConciergeFactsMock.mockResolvedValue({
       ok: false,
       reason: "FORBIDDEN",
     });
 
-    const result = await ask({
-      question: COACH_FIRST_SESSION_STARTERS[0]!,
-      discoveryEmpty: true,
-    });
+    const result = await ask(COACH_FIRST_SESSION_STARTERS[0]!);
     expect(result).toEqual({ ok: false, reason: "FORBIDDEN" });
   });
 
@@ -73,45 +65,50 @@ describe("askConcierge", () => {
       emptyCoachFile: true,
     });
 
-    const result = await ask({
-      question: COACH_FIRST_SESSION_STARTERS[0]!,
-      discoveryEmpty: true,
-    });
+    const result = await ask(COACH_FIRST_SESSION_STARTERS[0]!);
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.answer.kind).toBe("answer");
-      expect(result.answer.text.length).toBeGreaterThan(10);
+      expect(result.answer.text).toContain("No property is on this file yet");
     }
+    expect(clerkBuyerConciergeFactsMock).not.toHaveBeenCalled();
   });
 
-  it("answers for Convex buyer in discovery-empty scope", async () => {
+  it("answers for Clerk buyer in server-derived discovery-empty scope", async () => {
     getTestSessionMock.mockResolvedValue(null);
-    clerkBuyerConciergeContextMock.mockResolvedValue({
+    clerkBuyerConciergeFactsMock.mockResolvedValue({
       ok: true,
-      discoveryEmpty: true,
+      facts: [
+        {
+          key: "next",
+          text: "No property is on this file yet.",
+          source: "journeyStages",
+        },
+      ],
     });
 
-    const result = await ask({
-      question: COACH_FIRST_SESSION_STARTERS[0]!,
-      discoveryEmpty: true,
+    const result = await ask(COACH_FIRST_SESSION_STARTERS[0]!);
+    expect(result.ok).toBe(true);
+    expect(clerkBuyerConciergeFactsMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("uses Convex file facts for Clerk buyer with a property (ignores any client flag)", async () => {
+    getTestSessionMock.mockResolvedValue(null);
+    clerkBuyerConciergeFactsMock.mockResolvedValue({
+      ok: true,
+      facts: [
+        {
+          key: "next",
+          text: "Next is Schedule inspection, assigned to agent.",
+          source: "tasks",
+        },
+      ],
     });
+
+    const result = await ask(COACH_FIRST_SESSION_STARTERS[0]!);
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(result.answer.kind).toBe("answer");
+      expect(result.answer.text).toContain("Schedule inspection");
     }
-  });
-
-  it("returns FORBIDDEN when buyer has a property but client sends discoveryEmpty", async () => {
-    getTestSessionMock.mockResolvedValue(null);
-    clerkBuyerConciergeContextMock.mockResolvedValue({
-      ok: true,
-      discoveryEmpty: false,
-    });
-
-    const result = await ask({
-      question: COACH_FIRST_SESSION_STARTERS[0]!,
-      discoveryEmpty: true,
-    });
-    expect(result).toEqual({ ok: false, reason: "FORBIDDEN" });
   });
 });

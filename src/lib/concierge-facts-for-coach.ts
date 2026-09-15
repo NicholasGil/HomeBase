@@ -3,17 +3,10 @@ import { discoveryEmptyConciergeFacts } from "../../lib/llm/discoveryEmptyFacts"
 import { seedConciergeFacts } from "@/lib/seed-concierge";
 import type { TestBuyerSession } from "@/lib/test-session";
 
-export function conciergeFactsForCoach(input: {
-  session: TestBuyerSession | null;
-  discoveryEmpty: boolean;
-}): ConciergeFact[] | null {
-  if (input.session?.role === "buyer") {
-    return seedConciergeFacts(input.session.clerkId, {
-      emptyCoachFile: input.session.emptyCoachFile === true,
-    });
-  }
-  if (input.discoveryEmpty && input.session === null) {
+/** Fixture Path A facts — empty file comes from session.emptyCoachFile only. */
+export function conciergeFactsForCoach(session: TestBuyerSession): ConciergeFact[] {
+  if (session.emptyCoachFile === true) {
     return discoveryEmptyConciergeFacts();
   }
-  return null;
+  return seedConciergeFacts(session.clerkId);
 }

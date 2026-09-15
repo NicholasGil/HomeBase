@@ -16,7 +16,7 @@ Each image shows **chips + visible answer bubble + Ask** with ≥16px clearance 
 ## Auth (Clerk / fixture)
 
 - **Fixture non-buyer** (agent/vendor test cookie): `askConcierge` → `FORBIDDEN` (no facts).
-- **Clerk Path B**: `clerkBuyerConciergeContext()` loads Convex `me.getSession` + buyer dashboard; requires **buyer** role and server-derived discovery-empty scope before discovery-empty facts (`src/lib/concierge-clerk-buyer.ts`, `src/app/actions/concierge.ts`).
+- **Clerk Path B**: `clerkBuyerConciergeFacts()` loads Convex `me.getSession` (buyer only), derives discovery-empty from dashboard/coach scope (no client flag), then returns discovery-empty facts or `concierge.gatherContext` (`src/lib/concierge-clerk-buyer.ts`, `src/app/actions/concierge.ts`).
 
 | File | Starter |
 | --- | --- |

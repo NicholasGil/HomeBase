@@ -11,7 +11,7 @@ vi.mock("convex/nextjs", () => ({
   fetchQuery: fetchQueryMock,
 }));
 
-describe("clerkBuyerConciergeContext", () => {
+describe("clerkBuyerConciergeFacts", () => {
   beforeEach(() => {
     vi.resetModules();
     authMock.mockReset();
@@ -25,8 +25,8 @@ describe("clerkBuyerConciergeContext", () => {
 
   it("returns null when Clerk has no user", async () => {
     authMock.mockResolvedValue({ userId: null });
-    const { clerkBuyerConciergeContext } = await load();
-    await expect(clerkBuyerConciergeContext()).resolves.toBeNull();
+    const { clerkBuyerConciergeFacts } = await load();
+    await expect(clerkBuyerConciergeFacts()).resolves.toBeNull();
   });
 
   it("returns FORBIDDEN for signed-in non-buyer membership", async () => {
@@ -35,14 +35,14 @@ describe("clerkBuyerConciergeContext", () => {
       getToken: vi.fn().mockResolvedValue("jwt"),
     });
     fetchQueryMock.mockResolvedValueOnce({ role: "agent" });
-    const { clerkBuyerConciergeContext } = await load();
-    await expect(clerkBuyerConciergeContext()).resolves.toEqual({
+    const { clerkBuyerConciergeFacts } = await load();
+    await expect(clerkBuyerConciergeFacts()).resolves.toEqual({
       ok: false,
       reason: "FORBIDDEN",
     });
   });
 
-  it("returns discoveryEmpty for buyer with no property on file", async () => {
+  it("returns discovery-empty facts for buyer with no dashboard", async () => {
     authMock.mockResolvedValue({
       userId: "user_buyer",
       getToken: vi.fn().mockResolvedValue("jwt"),
@@ -56,10 +56,45 @@ describe("clerkBuyerConciergeContext", () => {
         email: "a@b.c",
       })
       .mockResolvedValueOnce(null);
-    const { clerkBuyerConciergeContext } = await load();
-    await expect(clerkBuyerConciergeContext()).resolves.toEqual({
-      ok: true,
-      discoveryEmpty: true,
+    const { clerkBuyerConciergeFacts } = await load();
+    const result = await clerkBuyerConciergeFacts();
+    expect(result?.ok).toBe(true);
+    if (result?.ok) {
+      expect(result.facts.map((row) => row.key)).toContain("on_file");
+    }
+  });
+
+  it("loads gatherContext when buyer has a property on file", async () => {
+    authMock.mockResolvedValue({
+      userId: "user_buyer",
+      getToken: vi.fn().mockResolvedValue("jwt"),
     });
+    fetchQueryMock
+      .mockResolvedValueOnce({
+        role: "buyer",
+        name: "Alex",
+        userId: "u1",
+        orgId: "o1",
+        email: "a@b.c",
+      })
+      .mockResolvedValueOnce({
+        transactionId: "tx_123",
+        propertyAddress: { line1: "814 Maple Ave", city: "Huntsville" },
+        where: { label: "Inspection" },
+      })
+      .mockResolvedValueOnce([
+        {
+          key: "next",
+          text: "Next is Schedule inspection, assigned to agent.",
+          source: "tasks",
+        },
+      ]);
+    const { clerkBuyerConciergeFacts } = await load();
+    const result = await clerkBuyerConciergeFacts();
+    expect(result?.ok).toBe(true);
+    if (result?.ok) {
+      expect(result.facts[0]?.text).toContain("Schedule inspection");
+    }
+    expect(fetchQueryMock).toHaveBeenCalledTimes(3);
   });
 });

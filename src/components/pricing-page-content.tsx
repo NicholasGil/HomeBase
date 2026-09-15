@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { BuyerLockedUpsellCard } from "@/components/buyer-locked-upsell";
 import { buttonVariants } from "@/components/ui/button";
-import { BUYER_COACH_HOME, BUYER_LOCKED_UPSELLS } from "@/lib/buyer-shell";
+import { BUYER_LOCKED_UPSELLS } from "@/lib/buyer-shell";
 import {
   COACH_ENTRY_PRICE_LABEL,
   COACH_ENTRY_PRICE_MONTHLY_USD,
@@ -11,15 +11,17 @@ import {
 import { cn } from "@/lib/utils";
 
 function ContinueCoachLink({
+  href,
   testId,
   className,
 }: {
+  href: string;
   testId: string;
   className?: string;
 }) {
   return (
     <Link
-      href={BUYER_COACH_HOME}
+      href={href}
       data-testid={testId}
       className={cn(
         buttonVariants({ variant: "default", size: "lg" }),
@@ -32,7 +34,11 @@ function ContinueCoachLink({
   );
 }
 
-export function PricingPageContent() {
+export function PricingPageContent({
+  continueCoachHref,
+}: {
+  continueCoachHref: string;
+}) {
   return (
     <div
       data-testid="pricing-page"
@@ -54,7 +60,10 @@ export function PricingPageContent() {
           </span>
           . No plan matrix, no surprise add-ons on this page.
         </p>
-        <ContinueCoachLink testId="pricing-continue-coach-hero" />
+        <ContinueCoachLink
+          href={continueCoachHref}
+          testId="pricing-continue-coach-hero"
+        />
       </header>
 
       <section aria-labelledby="pricing-included-heading" className="space-y-3">
@@ -110,7 +119,10 @@ export function PricingPageContent() {
         >
           {PRICING_BILLING_DISCLAIMER}
         </p>
-        <ContinueCoachLink testId="pricing-continue-coach" />
+        <ContinueCoachLink
+          href={continueCoachHref}
+          testId="pricing-continue-coach"
+        />
       </section>
     </div>
   );

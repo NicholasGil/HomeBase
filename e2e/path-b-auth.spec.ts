@@ -6,15 +6,27 @@ test.use({
   isMobile: true,
 });
 
-test("sign-in fixture fallback @375 points at test-login", async ({ page }) => {
+test("sign-in product fallback prefers sign-up sold path @375", async ({ page }) => {
   await page.goto("/sign-in");
   await expect(page.getByTestId("sign-in-fixture-fallback")).toBeVisible();
-  const cta = page.getByTestId("sign-in-fixture-fallback-cta");
-  const box = await cta.boundingBox();
+  const soldCta = page.getByTestId("sign-in-sold-path-cta");
+  const box = await soldCta.boundingBox();
   expect(box).not.toBeNull();
   expect(box!.height).toBeGreaterThanOrEqual(44);
-  await cta.click();
+  await soldCta.click();
+  await expect(page).toHaveURL(/\/sign-up$/);
+});
+
+test("sign-in preview fixture reaches test-login", async ({ page }) => {
+  await page.goto("/sign-in");
+  await page.getByTestId("sign-in-preview-fixture-cta").click();
   await expect(page).toHaveURL(/\/test-login$/);
+});
+
+test("pricing continue when signed out routes to sign-up", async ({ page }) => {
+  await page.goto("/pricing");
+  await page.getByTestId("pricing-continue-coach").click();
+  await expect(page).toHaveURL(/\/sign-up$/);
 });
 
 test("fixture login still lands on coach", async ({ page }) => {

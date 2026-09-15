@@ -83,6 +83,8 @@ test.describe("coach home concierge", () => {
     }
 
     await expect(page.getByTestId("locked-upsell-rail")).toBeVisible();
+    await expect(page.getByTestId("locked-upsell-rail-summary")).toBeHidden();
+    await expect(page.getByTestId("locked-upsell-search")).toBeVisible();
   });
 
   test("coach tours learn more opens the locked tours gate", async ({ page }) => {
@@ -145,12 +147,11 @@ test.describe("coach home concierge", () => {
 test.describe("concierge sheet at 375", () => {
   test.use({ viewport: MOBILE, hasTouch: true, isMobile: true });
 
-  test("locked upsell cards scroll on coach home", async ({ page }) => {
+  test("collapsed Full OS lock summary on coach home @375", async ({ page }) => {
     await signInAs(page, "Alex Rivera");
-    await expect(page.getByTestId("locked-upsell-search")).toBeVisible();
-    await expect(page.getByTestId("locked-upsell-tours")).toBeVisible();
-    await expect(page.getByTestId("locked-upsell-pipeline")).toBeVisible();
-    await expect(page.getByTestId("locked-upsell-vault")).toBeVisible();
+    await expect(page.getByTestId("locked-upsell-rail-summary")).toBeVisible();
+    await expect(page.getByTestId("locked-upsell-search")).not.toBeVisible();
+    await expect(page.getByText("Full OS locked")).toBeVisible();
   });
 
   test("FAB is 56px on vault and opens a bottom sheet", async ({ page }) => {

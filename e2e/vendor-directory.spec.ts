@@ -17,7 +17,8 @@ test("coach home surfaces locked OS cards on mobile width", async ({ page }) => 
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Blair Chen" }).click();
   await expect(page).toHaveURL(/\/coach$/);
-  await expect(page.getByTestId("locked-upsell-search")).toBeVisible();
+  await expect(page.getByTestId("locked-upsell-rail-summary")).toBeVisible();
+  await expect(page.getByTestId("locked-upsell-search")).not.toBeVisible();
   await expect(page.getByTestId("vendor-directory")).toHaveCount(0);
 });
 

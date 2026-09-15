@@ -80,7 +80,7 @@ export function ConciergeChat({
   }
 
   const compactFirstSessionAnswer =
-    "max-md:line-clamp-3 max-md:overflow-hidden max-md:px-3 max-md:py-1 max-md:text-xs max-md:leading-snug";
+    "max-md:text-small max-md:leading-snug";
 
   function renderConversation(options?: { omitUserBubble?: boolean }) {
     const omitUserBubble = options?.omitUserBubble === true;
@@ -121,7 +121,11 @@ export function ConciergeChat({
           key={starter}
           type="button"
           variant="secondary"
-          className="h-auto min-h-11 w-max max-w-[min(17.5rem,calc(100vw-3rem))] shrink-0 rounded-full bg-sage px-4 py-2 text-left text-sm whitespace-normal text-sage-foreground hover:bg-sage/80"
+          className={cn(
+            "h-auto min-h-11 w-max max-w-[min(17.5rem,calc(100vw-3rem))] shrink-0 rounded-full bg-sage px-4 py-2 text-left text-sm whitespace-normal text-sage-foreground hover:bg-sage/80",
+            pinFirstSessionMobile &&
+              "max-md:min-h-11 max-md:px-3 max-md:py-1.5 max-md:text-xs max-md:leading-snug",
+          )}
           disabled={busy}
           onClick={() => {
             setQuestion(starter);
@@ -217,7 +221,7 @@ export function ConciergeChat({
         >
           <input
             data-testid="concierge-question"
-            className="min-h-11 min-w-0 flex-1 rounded-full border bg-background px-4 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="min-h-11 min-w-0 flex-1 rounded-full border bg-background px-4 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 max-md:text-[0.8125rem]"
             value={question}
             onChange={(event) => setQuestion(event.target.value)}
             placeholder={questionPlaceholder}

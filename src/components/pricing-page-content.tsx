@@ -2,7 +2,10 @@ import Link from "next/link";
 
 import { BuyerLockedUpsellCard } from "@/components/buyer-locked-upsell";
 import { buttonVariants } from "@/components/ui/button";
-import { BUYER_LOCKED_UPSELLS } from "@/lib/buyer-shell";
+import {
+  BUYER_LOCKED_OS_PAYMENT_DISCLAIMER,
+  BUYER_LOCKED_UPSELLS,
+} from "@/lib/buyer-shell";
 import {
   COACH_ENTRY_PRICE_LABEL,
   COACH_ENTRY_PRICE_MONTHLY_USD,
@@ -105,6 +108,7 @@ export function PricingPageContent({
       >
         <h2
           id="pricing-not-included-heading"
+          data-testid="pricing-not-included-heading"
           className="text-eyebrow font-medium tracking-[0.12em] text-muted-foreground/90 uppercase"
         >
           Not included — full OS upsells
@@ -115,9 +119,19 @@ export function PricingPageContent({
         </p>
         <div className="space-y-2.5">
           {BUYER_LOCKED_UPSELLS.map((upsell) => (
-            <BuyerLockedUpsellCard key={upsell.area} upsell={upsell} />
+            <BuyerLockedUpsellCard
+              key={upsell.area}
+              upsell={upsell}
+              bulletsOnly
+            />
           ))}
         </div>
+        <p
+          data-testid="pricing-locked-os-disclaimer"
+          className="text-pretty text-small text-muted-foreground"
+        >
+          {BUYER_LOCKED_OS_PAYMENT_DISCLAIMER}
+        </p>
       </section>
 
       <section

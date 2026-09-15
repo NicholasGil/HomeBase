@@ -83,7 +83,7 @@ export function MobileTabBar({ links }: { links: AppNavLink[] }) {
                     active
                       ? "text-foreground"
                       : "text-muted-foreground hover:text-foreground",
-                    locked && !active ? "opacity-90" : "",
+                    locked && !active ? "opacity-80" : "",
                   )}
                 >
                   <span

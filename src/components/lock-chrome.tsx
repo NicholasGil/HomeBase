@@ -36,12 +36,15 @@ export function LockChromeEyebrow({ className }: { className?: string }) {
   );
 }
 
-/** Sits on the tab icon pill so the lock is not clipped by the tab bar edge. */
+/** Quiet lock mark on mobile tabs — coach chips/Ask stay primary. */
 export function TabLockChromeBadge({ className }: { className?: string }) {
   return (
-    <LockChromeIcon
-      className={cn("absolute -right-1 -bottom-1 size-4 ring-2 ring-card", className)}
-      iconClassName="size-2.5"
+    <LockKeyhole
+      className={cn(
+        "absolute -right-0.5 -bottom-0.5 size-2.5 text-muted-foreground/65",
+        className,
+      )}
+      aria-hidden
     />
   );
 }

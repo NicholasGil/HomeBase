@@ -88,6 +88,7 @@ test.describe("coach first-session starter replies", () => {
       await expect(answer).toContainText(EXPECTED_SNIPPETS[label]);
       await expect(answer).not.toContainText(/should i|waive|offer more/i);
       await expect(thread).toBeVisible();
+      await expect(page.getByTestId("coach-first-session-empty")).toBeHidden();
 
       await expectAnswerBetweenChipsAndAsk(page, thread, answer);
 

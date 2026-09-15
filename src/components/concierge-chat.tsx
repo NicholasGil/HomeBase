@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -46,6 +46,23 @@ export function ConciergeChat({
   const [answer, setAnswer] = useState<string | null>(null);
   const [kind, setKind] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const firstSessionThreadRef = useRef<HTMLDivElement>(null);
+
+  const pinFirstSessionMobile = pinStartersAboveScrollOnMobile;
+  const showPinnedFirstSessionThread =
+    pinFirstSessionMobile && asked !== null;
+  const mobileReplyGrid =
+    pinFirstSessionMobile && showPinnedFirstSessionThread;
+
+  useEffect(() => {
+    if (answer === null || !showPinnedFirstSessionThread) {
+      return;
+    }
+    firstSessionThreadRef.current?.scrollIntoView({
+      block: "nearest",
+      inline: "nearest",
+    });
+  }, [answer, showPinnedFirstSessionThread]);
 
   async function submit(nextQuestion: string) {
     setBusy(true);
@@ -61,12 +78,6 @@ export function ConciergeChat({
     }
     setBusy(false);
   }
-
-  const pinFirstSessionMobile = pinStartersAboveScrollOnMobile;
-  const showPinnedFirstSessionThread =
-    pinFirstSessionMobile && asked !== null;
-  const mobileReplyGrid =
-    pinFirstSessionMobile && showPinnedFirstSessionThread;
 
   const compactFirstSessionAnswer =
     "max-md:line-clamp-3 max-md:overflow-hidden max-md:px-3 max-md:py-1 max-md:text-xs max-md:leading-snug";
@@ -147,6 +158,7 @@ export function ConciergeChat({
       ) : null}
       {showPinnedFirstSessionThread ? (
         <div
+          ref={firstSessionThreadRef}
           aria-live="polite"
           data-testid="concierge-first-session-thread"
           className="flex min-h-0 flex-col gap-0 overflow-y-auto overflow-x-hidden py-0.5 max-md:row-start-2 max-md:block md:hidden"

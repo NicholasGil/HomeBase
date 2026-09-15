@@ -9,6 +9,23 @@ const FIRST_SESSION_STARTERS = [
   "What's already on my file?",
 ] as const;
 
+const PROOF_DIR = "proof/coach-first-session";
+
+const PROOF_PATHS = {
+  starters: `${PROOF_DIR}/empty-coach-three-starters-375.png`,
+  scrollEnd: `${PROOF_DIR}/chips-clear-above-ask-375.png`,
+  discoveryFold: `${PROOF_DIR}/empty-discovery-fold-375.png`,
+  starterExpanded: (slug: string) =>
+    `${PROOF_DIR}/starter-${slug}-expanded-375.png`,
+} as const;
+
+const STARTER_SLUGS: Record<(typeof FIRST_SESSION_STARTERS)[number], string> =
+  {
+    "What happens next?": "what-happens-next",
+    "What am I missing for this stage?": "what-am-i-missing-for-this-stage",
+    "What's already on my file?": "whats-already-on-my-file",
+  };
+
 test.use({
   viewport: { width: 375, height: 812 },
   hasTouch: true,
@@ -25,6 +42,18 @@ function conciergeScrollRegion(page: import("@playwright/test").Page) {
   return page
     .locator('[data-testid="concierge"] > div.overflow-y-auto')
     .first();
+}
+
+async function sha256File(path: string) {
+  const bytes = await readFile(path);
+  return createHash("sha256").update(bytes).digest("hex");
+}
+
+async function expectDistinctProofHashes(paths: string[]) {
+  const hashes = await Promise.all(paths.map((path) => sha256File(path)));
+  const unique = new Set(hashes);
+  expect(unique.size).toBe(paths.length);
+  expect(new Set(paths).size).toBe(paths.length);
 }
 
 test("empty Discovery coach shows empty state and three starters @375", async ({
@@ -81,13 +110,32 @@ test("first-session chips clear sticky Ask at scroll end @375", async ({
 test("coach first-session proof screenshots @375", async ({ page }) => {
   await signInAlexDiscoveryEmpty(page);
 
-  const startersPath = "proof/coach-first-session/empty-coach-three-starters-375.png";
-  const scrollEndPath =
-    "proof/coach-first-session/chips-clear-above-ask-375.png";
-
   const scroll = conciergeScrollRegion(page);
   await scroll.evaluate((el) => {
     el.scrollTop = 0;
+  });
+
+  const scope = page.getByTestId("concierge-scope");
+  const empty = page.getByTestId("coach-first-session-empty");
+  await expect(scope).toContainText("Discovery");
+  await expect(page.getByTestId("coach-pricing-link")).toContainText("$10");
+
+  const scopeBox = await scope.boundingBox();
+  const emptyBox = await empty.boundingBox();
+  expect(scopeBox).not.toBeNull();
+  expect(emptyBox).not.toBeNull();
+
+  await page.screenshot({
+    path: PROOF_PATHS.discoveryFold,
+    clip: {
+      x: 0,
+      y: Math.max(0, scopeBox!.y - 4),
+      width: 375,
+      height: Math.min(
+        812 - Math.max(0, scopeBox!.y - 4),
+        emptyBox!.y + emptyBox!.height - scopeBox!.y + 16,
+      ),
+    },
   });
 
   for (const label of FIRST_SESSION_STARTERS) {
@@ -95,7 +143,7 @@ test("coach first-session proof screenshots @375", async ({ page }) => {
   }
 
   await page.screenshot({
-    path: startersPath,
+    path: PROOF_PATHS.starters,
     fullPage: false,
   });
 
@@ -104,16 +152,43 @@ test("coach first-session proof screenshots @375", async ({ page }) => {
   });
   await expect(page.getByTestId("concierge-compose")).toBeVisible();
 
+  const lastChip = page.getByRole("button", {
+    name: FIRST_SESSION_STARTERS[2],
+  });
+  const lastChipBox = await lastChip.boundingBox();
+  const composeBox = await page.getByTestId("concierge-compose").boundingBox();
+  expect(lastChipBox).not.toBeNull();
+  expect(composeBox).not.toBeNull();
+  expect(lastChipBox!.y + lastChipBox!.height).toBeLessThanOrEqual(
+    composeBox!.y + 1,
+  );
+
   await page.screenshot({
-    path: scrollEndPath,
+    path: PROOF_PATHS.scrollEnd,
     fullPage: false,
   });
 
-  const [startersPng, scrollEndPng] = await Promise.all([
-    readFile(startersPath),
-    readFile(scrollEndPath),
-  ]);
-  const startersHash = createHash("sha256").update(startersPng).digest("hex");
-  const scrollEndHash = createHash("sha256").update(scrollEndPng).digest("hex");
+  const expandedPaths: string[] = [];
+  for (const label of FIRST_SESSION_STARTERS) {
+    await signInAlexDiscoveryEmpty(page);
+    await page.getByRole("button", { name: label }).click();
+    await expect(page.getByText("Checking this file…")).toBeHidden({
+      timeout: 15_000,
+    });
+    const path = PROOF_PATHS.starterExpanded(STARTER_SLUGS[label]);
+    expandedPaths.push(path);
+    await page.screenshot({ path, fullPage: false });
+  }
+
+  const allPaths = [
+    PROOF_PATHS.discoveryFold,
+    PROOF_PATHS.starters,
+    PROOF_PATHS.scrollEnd,
+    ...expandedPaths,
+  ];
+  await expectDistinctProofHashes(allPaths);
+
+  const startersHash = await sha256File(PROOF_PATHS.starters);
+  const scrollEndHash = await sha256File(PROOF_PATHS.scrollEnd);
   expect(startersHash).not.toEqual(scrollEndHash);
 });

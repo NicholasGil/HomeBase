@@ -63,6 +63,7 @@ async function expectAnswerBetweenChipsAndAsk(
   );
 
   await expect(answer).toBeInViewport();
+  expect(answerBox!.height).toBeGreaterThan(20);
   expect(answerBox!.y).toBeGreaterThanOrEqual(chipBox!.y - 2);
   expect(answerBox!.y).toBeLessThan(composeBox!.y);
 }
@@ -77,17 +78,15 @@ test.describe("coach first-session starter replies", () => {
       await signInAlexDiscoveryEmpty(page);
       await page.getByRole("button", { name: label }).click();
 
-      const answer = page
-        .getByTestId("concierge-first-session-thread")
-        .getByTestId("concierge-answer");
+      const thread = page.getByTestId("concierge-first-session-thread");
+      const answer = thread.getByTestId("concierge-answer");
+
       await expect(answer).toHaveAttribute("data-kind", "answer", {
         timeout: 15_000,
       });
       await expect(answer).toBeVisible();
       await expect(answer).toContainText(EXPECTED_SNIPPETS[label]);
       await expect(answer).not.toContainText(/should i|waive|offer more/i);
-
-      const thread = page.getByTestId("concierge-first-session-thread");
       await expect(thread).toBeVisible();
 
       await expectAnswerBetweenChipsAndAsk(page, thread, answer);

@@ -35,6 +35,21 @@ describe("askConcierge", () => {
     return askConcierge(input);
   }
 
+  it("returns FORBIDDEN for fixture non-buyer without calling Clerk", async () => {
+    getTestSessionMock.mockResolvedValue({
+      clerkId: "clerk_agent",
+      name: "Agent",
+      role: "agent",
+    });
+
+    const result = await ask({
+      question: COACH_FIRST_SESSION_STARTERS[0]!,
+      discoveryEmpty: true,
+    });
+    expect(result).toEqual({ ok: false, reason: "FORBIDDEN" });
+    expect(clerkBuyerConciergeContextMock).not.toHaveBeenCalled();
+  });
+
   it("returns FORBIDDEN for Clerk non-buyer with discoveryEmpty", async () => {
     getTestSessionMock.mockResolvedValue(null);
     clerkBuyerConciergeContextMock.mockResolvedValue({

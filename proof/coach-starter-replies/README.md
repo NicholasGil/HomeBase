@@ -2,7 +2,21 @@
 
 Fixture path: `/test-login` → **Discovery coach — Alex Rivera (no property)** → `/coach`.
 
-Each PNG is captured after tapping one of the three locked first-session chips. The explain-only reply bubble (`data-kind="answer"`) sits between the starter chips and the sticky Ask row in the 375px viewport (not below the empty-state fold).
+## What each PNG shows
+
+Captured **after** the server action returns and the explain-only reply bubble is in the DOM:
+
+1. Tap a locked first-session chip.
+2. Wait for `[data-testid="concierge-answer"][data-kind="answer"]` inside `concierge-first-session-thread`.
+3. Assert scoped Discovery-empty copy (see `e2e/coach-starter-replies.spec.ts`).
+4. Screenshot the viewport (375×812).
+
+Each image shows **chips + visible answer bubble + Ask** with ≥16px clearance above the tab bar. SHA256 hashes of the three files must differ.
+
+## Auth (Clerk / fixture)
+
+- **Fixture non-buyer** (agent/vendor test cookie): `askConcierge` → `FORBIDDEN` (no facts).
+- **Clerk Path B**: `clerkBuyerConciergeContext()` loads Convex `me.getSession` + buyer dashboard; requires **buyer** role and server-derived discovery-empty scope before discovery-empty facts (`src/lib/concierge-clerk-buyer.ts`, `src/app/actions/concierge.ts`).
 
 | File | Starter |
 | --- | --- |

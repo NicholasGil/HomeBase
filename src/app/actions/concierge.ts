@@ -14,6 +14,10 @@ export async function askConcierge(input: {
   const session = await getTestSession();
   const discoveryEmpty = input.discoveryEmpty === true;
 
+  if (session !== null && session.role !== "buyer") {
+    return { ok: false as const, reason: "FORBIDDEN" as const };
+  }
+
   if (session?.role === "buyer") {
     const facts = conciergeFactsForCoach({ session, discoveryEmpty });
     if (facts === null) {

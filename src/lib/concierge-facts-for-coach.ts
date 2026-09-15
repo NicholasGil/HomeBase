@@ -12,7 +12,7 @@ export function conciergeFactsForCoach(input: {
       emptyCoachFile: input.session.emptyCoachFile === true,
     });
   }
-  if (input.discoveryEmpty) {
+  if (input.discoveryEmpty && input.session === null) {
     return discoveryEmptyConciergeFacts();
   }
   return null;

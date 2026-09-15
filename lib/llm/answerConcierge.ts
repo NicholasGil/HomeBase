@@ -39,6 +39,7 @@ export function answerConcierge(
   const counter = fact(facts, "counteroffer");
   const lender = fact(facts, "lender");
   const showing = fact(facts, "first_showing");
+  const onFile = fact(facts, "on_file");
 
   let answer: ConciergeAnswer | null = null;
 
@@ -108,6 +109,20 @@ export function answerConcierge(
       ? { text: moneyLine(counter), kind: "answer", sources: [counter.source] }
       : {
           text: "No counteroffer is on this file.",
+          kind: "answer",
+          sources: [],
+        };
+  } else if (
+    normalized.includes("file") &&
+    (normalized.includes("already") ||
+      normalized.includes("on my file") ||
+      normalized.includes("what's on") ||
+      normalized.includes("what is on"))
+  ) {
+    answer = onFile
+      ? { text: onFile.text, kind: "answer", sources: [onFile.source] }
+      : {
+          text: "Nothing is on this file yet.",
           kind: "answer",
           sources: [],
         };

@@ -47,6 +47,16 @@ export default function TestLoginPage() {
                 </Button>
               </form>
             ))}
+          <form
+            action={startTestSessionFromForm}
+            data-testid="sign-in-alex-discovery-empty"
+          >
+            <input type="hidden" name="clerkId" value={SEED_CLERK_IDS.buyerA} />
+            <input type="hidden" name="emptyCoachFile" value="1" />
+            <Button type="submit" variant="secondary" className="w-full">
+              Discovery coach — Alex Rivera (no property)
+            </Button>
+          </form>
           <form action={startTestSessionFromForm}>
             <input type="hidden" name="clerkId" value={SEED_PLAN.agent.clerkId} />
             <Button type="submit" className="w-full">

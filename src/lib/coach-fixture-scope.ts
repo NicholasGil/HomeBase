@@ -3,29 +3,24 @@ import {
   COACH_DISCOVERY_EMPTY_ADDRESS,
   COACH_DISCOVERY_STAGE_LABEL,
 } from "@/lib/coach-first-session";
+import { seedDashboardForBuyer } from "@/lib/seed-dashboard";
+import type { TestBuyerSession } from "@/lib/test-session";
 
-type BuyerDashboardLike = {
-  propertyAddress: {
-    line1: string;
-    city: string;
-  } | null;
-  where: { label: string };
-};
-
-export function coachScopeForBuyerDashboard(
-  dashboard: BuyerDashboardLike | null,
+export function coachScopeForFixtureBuyer(
+  session: TestBuyerSession,
 ): ConciergeScope {
-  if (dashboard === null) {
+  if (session.emptyCoachFile) {
     return {
       address: COACH_DISCOVERY_EMPTY_ADDRESS,
       stage: COACH_DISCOVERY_STAGE_LABEL,
     };
   }
-  const address = dashboard.propertyAddress;
+  const view = seedDashboardForBuyer(session.clerkId);
+  const address = view.propertyAddress;
   return {
     address: address
       ? `${address.line1}, ${address.city}`
       : COACH_DISCOVERY_EMPTY_ADDRESS,
-    stage: dashboard.where.label,
+    stage: view.where.label,
   };
 }

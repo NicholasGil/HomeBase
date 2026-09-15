@@ -7,8 +7,14 @@ import {
 import type { ConciergeScope } from "@/components/concierge-sheet";
 import { BUYER_LOCKED_UPSELLS } from "@/lib/buyer-shell";
 import { textLinkClassName } from "@/components/text-link";
+import { EmptyState } from "@/components/empty-state";
+import {
+  COACH_FIRST_SESSION_STARTERS,
+  isCoachDiscoveryEmptyScope,
+} from "@/lib/coach-first-session";
 import { COACH_ENTRY_PRICE_LABEL } from "@/lib/pricing";
 import { cn } from "@/lib/utils";
+import { MessageCircle } from "lucide-react";
 
 export function CoachHome({
   scope,
@@ -19,6 +25,9 @@ export function CoachHome({
   buyerName: string;
   eyebrow?: string;
 }) {
+  const firstSession = isCoachDiscoveryEmptyScope(scope);
+  const firstName = buyerName.split(" ")[0];
+
   return (
     <div
       data-testid="coach-home"
@@ -62,12 +71,51 @@ export function CoachHome({
               {scope.stage}
             </span>
             <span>
-              Hi {buyerName.split(" ")[0]} — I explain this file only. I never
-              advise.
+              {firstSession
+                ? `Hi ${firstName} — your always-on coach for this purchase. I explain; I never advise.`
+                : `Hi ${firstName} — I explain this file only. I never advise.`}
             </span>
           </p>
         </header>
-        <ConciergeChat className="min-h-0 flex-1 px-5 pt-4 pb-5" />
+        <ConciergeChat
+          className="min-h-0 flex-1 px-5 pt-4 pb-5"
+          starters={
+            firstSession ? COACH_FIRST_SESSION_STARTERS : undefined
+          }
+          pinStartersAboveScrollOnMobile={firstSession}
+          scrollIntro={
+            firstSession
+              ? (
+                  <EmptyState
+                    testId="coach-first-session-empty"
+                    icon={MessageCircle}
+                    title="Your personal coach is on"
+                    description={
+                      <>
+                        HomeBase coach is your daily guide through buying — one
+                        place to ask what things mean and what usually comes
+                        next. The {COACH_ENTRY_PRICE_LABEL} entry keeps coach
+                        on while you explore; Search, Pipeline, Tours, and Vault
+                        unlock when your agent adds them to your file. Tap a
+                        starter above or type a question — when you have a
+                        property, answers stay tied to that file only.
+                      </>
+                    }
+                    action={{ href: "/pricing", label: "See what’s included" }}
+                    className="border-solid bg-muted/30 max-md:gap-3 max-md:py-5 max-md:[&_[data-slot=empty-description]]:line-clamp-4"
+                  />
+                )
+              : undefined
+          }
+          idleHint={
+            firstSession
+              ? "Tap a starter to learn how coach works, or ask anything about buying."
+              : undefined
+          }
+          questionPlaceholder={
+            firstSession ? "Ask about buying or a document" : undefined
+          }
+        />
       </section>
 
       <BuyerLockedUpsellRail upsells={BUYER_LOCKED_UPSELLS} />

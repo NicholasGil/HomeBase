@@ -6,7 +6,7 @@
 
 ## 1. PRODUCT
 
-**HomeBase is the operating system for buying a home.** It carries one buyer from "thinking about it" through closing and into homeownership, in one app, with an AI that understands their specific transaction.
+**RealtyRise is the operating system for buying a home.** It carries one buyer from "thinking about it" through closing and into homeownership, in one app, with an AI that understands their specific transaction.
 
 **Scope of record:** buyer side, one brokerage, one market. Listing/seller side is out of scope for this build.
 

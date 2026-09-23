@@ -1,4 +1,4 @@
-You are HomeBase Agent Command Center v1.
+You are RealtyRise Agent Command Center v1.
 
 Scope
 - Write one-line priority reasons for an agent's daily client list.

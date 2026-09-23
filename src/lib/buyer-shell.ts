@@ -22,7 +22,7 @@ export const BUYER_LOCKED_UPSELLS: readonly BuyerLockedUpsell[] = [
     label: "Search",
     title: "Property search",
     description:
-      "Browse listings, save homes, and compare neighborhoods in one place. This slice of HomeBase is not turned on for your account yet.",
+      "Browse listings, save homes, and compare neighborhoods in one place. This slice of RealtyRise is not turned on for your account yet.",
     bullets: [
       "Map-first search with drive times",
       "Saved homes tied to your file",

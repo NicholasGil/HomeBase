@@ -50,7 +50,7 @@ const SCOPE_OPTIONS: ReadonlyArray<{
     value: "view",
     label: "View",
     description:
-      "Can open and read this document inside HomeBase. Nothing leaves the vault.",
+      "Can open and read this document inside RealtyRise. Nothing leaves the vault.",
     disabled: false,
   },
   {

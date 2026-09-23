@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "HomeBase",
+  title: "RealtyRise",
   description:
     "The operating system for buying a home. One buyer, one transaction, from first look through closing.",
 };

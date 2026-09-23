@@ -1,6 +1,6 @@
-# HomeBase
+# RealtyRise
 
-Buyer-side operating system for one brokerage and one market. A buyer should open the app and, within ten seconds, know where they are, what is done, what is next, who they are waiting on, and what they owe today.
+Buyer-side operating system for one brokerage and one market. GitHub repository: [HomeBase](https://github.com/NicholasGil/HomeBase). A buyer should open the app and, within ten seconds, know where they are, what is done, what is next, who they are waiting on, and what they owe today.
 
 `docs/DESIGN.md` is the source of truth.
 

@@ -36,7 +36,7 @@ const EYEBROW_CLASS = "text-eyebrow";
 
 const ESTIMATE_NOTE: Record<MoneyProvenance, string> = {
   ai_estimate:
-    "Modeled by HomeBase from this file. Not issued by a lender or title company.",
+    "Modeled by RealtyRise from this file. Not issued by a lender or title company.",
   user_entered:
     "Entered on this file. Not verified by a lender or title company.",
   lender_issued: "Issued by the lender on this file.",

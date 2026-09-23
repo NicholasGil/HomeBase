@@ -842,7 +842,7 @@ export const SEED_VENDORS = [
     category: "insurance" as const,
     name: "Lookout Binders",
     contact: { email: "binders@example.com", phone: "256-555-0143" },
-    notes: "HO-3 quotes. No payment through HomeBase.",
+    notes: "HO-3 quotes. No payment through RealtyRise.",
     credentials: "Independent agency sample.",
     clerkId: null,
   },

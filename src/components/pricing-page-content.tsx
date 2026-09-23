@@ -92,7 +92,7 @@ export function PricingPageContent({
           <p className="mt-2 text-pretty text-body text-muted-foreground">
             Your concierge entry: scoped to your file, explains what is happening
             in plain language, and never crosses into advice. This is the same
-            coach experience on your HomeBase home — not a lite demo.
+            coach experience on your RealtyRise home — not a lite demo.
           </p>
           <ul className="mt-4 list-disc space-y-1 pl-5 text-body text-muted-foreground">
             <li>Always-on Q&amp;A for your transaction file</li>

@@ -167,7 +167,7 @@ export function HomeownershipHubView({
         <CardHeader>
           <CardTitle>Vendor re-engagement</CardTitle>
           <CardDescription>
-            Reuse the M10 directory. Compensation stays none. HomeBase does
+            Reuse the M10 directory. Compensation stays none. RealtyRise does
             not take payment.
           </CardDescription>
         </CardHeader>

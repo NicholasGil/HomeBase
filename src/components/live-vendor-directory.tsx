@@ -79,7 +79,7 @@ export function LiveVendorDirectory({
       <div>
         <h2 className={tripHeadingClassName}>Vendors for this stage</h2>
         <p className="text-sm text-muted-foreground">
-          Compensation stays none. HomeBase does not take payment.
+          Compensation stays none. RealtyRise does not take payment.
         </p>
       </div>
       {inspectors.length >= 2 ? (

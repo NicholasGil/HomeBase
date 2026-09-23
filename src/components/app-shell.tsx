@@ -51,7 +51,7 @@ export async function AppShell({
             href={wordmarkHrefFor(context.role)}
             className="inline-flex min-h-11 shrink-0 items-center text-body font-semibold tracking-tight"
           >
-            HomeBase
+            RealtyRise
           </Link>
           <div className="ml-auto flex min-w-0 items-center gap-2">
             {nav}

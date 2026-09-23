@@ -25,7 +25,7 @@ export function ShellSkeleton({
       <header className="sticky top-0 z-20 border-b border-sand/80 bg-card/90 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center gap-4 px-5 py-2">
           <p className="inline-flex min-h-11 shrink-0 items-center text-body font-semibold tracking-tight">
-            HomeBase
+            RealtyRise
           </p>
           <Skeleton className="hidden h-9 w-64 rounded-full sm:block" />
           <div className="ml-auto flex items-center gap-3">

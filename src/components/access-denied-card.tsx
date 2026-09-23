@@ -29,7 +29,7 @@ export function homeActionFor(
     case "vendor":
       return { href, label: "Back to the vendor portal" };
     default:
-      return { href, label: "Back to HomeBase" };
+      return { href, label: "Back to RealtyRise" };
   }
 }
 

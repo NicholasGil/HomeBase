@@ -45,7 +45,7 @@ export function VendorDirectoryView({
           {stage === "inspection"
             ? "Inspectors for this file. Compare, then request an appointment."
             : "Vendors that belong on this stage."}{" "}
-          Compensation stays none. HomeBase does not take payment.
+          Compensation stays none. RealtyRise does not take payment.
         </p>
       </div>
 

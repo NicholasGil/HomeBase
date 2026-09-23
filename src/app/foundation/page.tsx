@@ -20,7 +20,7 @@ export default async function FoundationPage() {
     <div className="min-h-full bg-background">
       <header className="border-b">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-          <p className="text-sm font-semibold tracking-tight">HomeBase</p>
+          <p className="text-sm font-semibold tracking-tight">RealtyRise</p>
           <Link href="/" className={cn(buttonVariants({ variant: "ghost" }))}>
             Home
           </Link>

@@ -32,7 +32,7 @@ export default async function HomePage() {
     <div className="min-h-full bg-background">
       <header className="border-b">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-          <p className="text-sm font-semibold tracking-tight">HomeBase</p>
+          <p className="text-sm font-semibold tracking-tight">RealtyRise</p>
           <p className="text-xs text-muted-foreground">
             Buyer side · one brokerage · one market
           </p>
@@ -47,7 +47,7 @@ export default async function HomePage() {
               The operating system for buying a home
             </h1>
             <p className="max-w-xl text-base leading-7 text-muted-foreground">
-              HomeBase carries one buyer from thinking about it through closing
+              RealtyRise carries one buyer from thinking about it through closing
               and into homeownership. Open the app cold. Within ten seconds you
               should know where you are, what is done, what is next, who you
               are waiting on, and what you owe today.
@@ -209,7 +209,7 @@ export default async function HomePage() {
 
       <footer className="border-t">
         <div className="mx-auto flex max-w-5xl flex-col gap-1 px-6 py-6 text-xs text-muted-foreground sm:flex-row sm:justify-between">
-          <p>HomeBase · buyer transaction OS</p>
+          <p>RealtyRise · buyer transaction OS</p>
           <p>Listing and seller side are out of scope for this build.</p>
         </div>
       </footer>

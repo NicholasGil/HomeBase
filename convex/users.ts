@@ -31,7 +31,7 @@ function displayNameFromIdentity(identity: {
   ) {
     return identity.nickname;
   }
-  return "HomeBase buyer";
+  return "RealtyRise buyer";
 }
 
 function emailFromIdentity(identity: {

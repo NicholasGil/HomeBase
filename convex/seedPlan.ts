@@ -20,6 +20,7 @@ export const SEED_CLERK_IDS = {
   buyerH: "clerk_buyer_h",
   agent: "clerk_agent",
   lender: "clerk_lender",
+  onboardingAgent: "clerk_onboarding_agent",
 } as const;
 
 export type SeedCommandCenterException =

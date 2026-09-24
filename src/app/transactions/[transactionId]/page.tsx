@@ -15,6 +15,7 @@ import { StageAdvancePanel } from "@/components/stage-advance-panel";
 import { TextLink } from "@/components/text-link";
 import { assertCanRenderWithoutAuth, isAuthConfigured } from "@/lib/auth-config";
 import { seedBuyerNameForTransaction } from "@/lib/seed-dashboard";
+import { navRoleFromTestSession } from "@/lib/test-session";
 import { SEED_PLAN } from "../../../../convex/seedPlan";
 
 export const dynamic = "force-dynamic";
@@ -45,7 +46,7 @@ async function FixtureTransaction({ transactionId }: { transactionId: string }) 
     return (
       <AccessDeniedCard
         title="You cannot open this transaction."
-        action={homeActionFor(session?.role)}
+        action={homeActionFor(navRoleFromTestSession(session))}
       />
     );
   }

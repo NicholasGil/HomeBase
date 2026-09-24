@@ -13,6 +13,7 @@ import {
 } from "@/lib/auth-config";
 import { wordmarkHrefFor } from "@/lib/app-nav";
 import { fixtureContactForSession } from "@/lib/profile";
+import { navRoleFromTestSession } from "@/lib/test-session";
 
 export const dynamic = "force-dynamic";
 
@@ -41,16 +42,17 @@ export default async function ProfilePage() {
       redirect("/test-login");
     }
     const contact = fixtureContactForSession(session);
+    const navRole = navRoleFromTestSession(session);
     return (
       <AppShell>
         <ProfileSettings
           name={session.name}
-          role={session.role}
+          role={session.role === "onboarding_agent" ? "agent" : session.role}
           email={contact?.email}
           phone={contact?.phone}
           eyebrow="Fixture session · not Clerk"
           fixtureSignOut
-          backHref={wordmarkHrefFor(session.role)}
+          backHref={wordmarkHrefFor(navRole ?? "guest")}
           backLabel="Back"
         />
       </AppShell>

@@ -22,11 +22,15 @@ export function AgentCommandCenterView({
   view,
   agentName,
   eyebrow,
+  orgName,
 }: {
   view: CommandCenterView;
   agentName?: string;
   eyebrow?: string;
+  orgName?: string;
 }) {
+  const isEmpty = view.roster.length === 0;
+
   return (
     <div className="space-y-8" data-testid="command-center">
       <section className="space-y-2">
@@ -38,11 +42,26 @@ export function AgentCommandCenterView({
           Command center
         </h1>
         <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-          Every assigned client and today&apos;s exceptions. Priority is the
-          daily list.
+          {isEmpty
+            ? orgName
+              ? `${orgName} has no assigned clients yet. Invite buyers with your org code when you are ready.`
+              : "Your book is empty until clients are assigned or invited."
+            : "Every assigned client and today's exceptions. Priority is the daily list."}
         </p>
       </section>
 
+      {isEmpty ? (
+        <Card data-testid="command-center-empty">
+          <CardHeader>
+            <CardTitle>No clients yet</CardTitle>
+            <CardDescription>
+              This is expected for a new brokerage. MLS search and map keys stay
+              off in preview — add clients manually when those integrations are
+              enabled.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      ) : (
       <section className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
         <Card data-testid="command-center-priority">
           <CardHeader>
@@ -132,6 +151,7 @@ export function AgentCommandCenterView({
           </CardContent>
         </Card>
       </section>
+      )}
     </div>
   );
 }

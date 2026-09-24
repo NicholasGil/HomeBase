@@ -1,3 +1,4 @@
+import type { TestSession } from "@/lib/test-session";
 import { isGrantActive } from "../../convex/lib/documentAccess";
 import {
   isSeedDocumentId,
@@ -31,6 +32,22 @@ export type FixtureViewer = {
   role: "buyer" | "vendor" | "agent" | "broker" | "admin";
   transactionId?: string;
 };
+
+export function sessionAsDocumentViewer(
+  session: TestSession | null,
+): FixtureViewer | null {
+  if (session === null || session.role === "onboarding_agent") {
+    return null;
+  }
+  if (session.role === "buyer") {
+    return {
+      clerkId: session.clerkId,
+      role: "buyer",
+      transactionId: session.transactionId,
+    };
+  }
+  return { clerkId: session.clerkId, role: session.role };
+}
 
 export function parseFixtureGrants(value: string | undefined): FixtureGrant[] {
   if (value === undefined || value.length === 0) {

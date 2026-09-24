@@ -354,7 +354,7 @@ export function fixtureStopViolatesWindow(stop: FixtureStop) {
 export function sessionAsViewer(
   session: TestSession | null,
 ): FixtureViewer | null {
-  if (session === null) {
+  if (session === null || session.role === "onboarding_agent") {
     return null;
   }
   return { clerkId: session.clerkId, role: session.role };

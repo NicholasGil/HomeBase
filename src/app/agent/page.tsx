@@ -1,3 +1,6 @@
+import { redirect } from "next/navigation";
+
+import { getFixtureBrokerageRecord } from "@/app/actions/brokerage-onboarding";
 import { getTestSession } from "@/app/actions/test-session";
 import { homeActionFor } from "@/components/access-denied-card";
 import {
@@ -13,7 +16,11 @@ import {
   mustFailClosed,
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
-import { loadSeedCommandCenterForViewer } from "@/lib/command-center-access";
+import {
+  loadFixtureCommandCenterForViewer,
+  loadSeedCommandCenterForViewer,
+} from "@/lib/command-center-access";
+import { navRoleFromTestSession } from "@/lib/test-session";
 
 export const dynamic = "force-dynamic";
 
@@ -38,11 +45,39 @@ export default async function AgentPage() {
   }
 
   if (mode === "fixture") {
+    if (session === null) {
+      redirect("/test-login");
+    }
+    if (session.role === "onboarding_agent") {
+      const record = await getFixtureBrokerageRecord();
+      if (record === null || record.clerkId !== session.clerkId) {
+        redirect("/brokerage/onboarding");
+      }
+      if (record.role === "broker") {
+        redirect("/broker");
+      }
+      const empty = loadFixtureCommandCenterForViewer(session, record);
+      if (empty === null) {
+        redirect("/brokerage/onboarding");
+      }
+      return (
+        <AppShell>
+          <AgentCommandCenterView
+            view={empty.view}
+            agentName={session.name}
+            orgName={empty.orgName}
+            eyebrow={`${empty.orgName} · fixture session`}
+          />
+        </AppShell>
+      );
+    }
     const loaded = loadSeedCommandCenterForViewer(session);
     if (!loaded.ok) {
       return (
         <AppShell>
-          <CommandCenterDenied action={homeActionFor(session?.role)} />
+          <CommandCenterDenied
+            action={homeActionFor(navRoleFromTestSession(session))}
+          />
         </AppShell>
       );
     }

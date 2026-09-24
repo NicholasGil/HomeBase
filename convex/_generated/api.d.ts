@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as brokerageOnboarding from "../brokerageOnboarding.js";
 import type * as commandCenter from "../commandCenter.js";
 import type * as concierge from "../concierge.js";
 import type * as dashboard from "../dashboard.js";
@@ -55,6 +56,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  brokerageOnboarding: typeof brokerageOnboarding;
   commandCenter: typeof commandCenter;
   concierge: typeof concierge;
   dashboard: typeof dashboard;

@@ -58,6 +58,21 @@ export default function TestLoginPage() {
             </Button>
           </form>
           <form action={startTestSessionFromForm}>
+            <input
+              type="hidden"
+              name="clerkId"
+              value={SEED_CLERK_IDS.onboardingAgent}
+            />
+            <Button
+              type="submit"
+              variant="secondary"
+              className="w-full"
+              data-testid="sign-in-onboarding-agent"
+            >
+              New agent — Taylor Brooks (brokerage onboarding)
+            </Button>
+          </form>
+          <form action={startTestSessionFromForm}>
             <input type="hidden" name="clerkId" value={SEED_PLAN.agent.clerkId} />
             <Button type="submit" className="w-full">
               Sign in as {SEED_PLAN.agent.name}

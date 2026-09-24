@@ -16,6 +16,7 @@ import {
   mustFailClosed,
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
+import { navRoleFromTestSession } from "@/lib/test-session";
 import { CANONICAL_SEARCH_QUERY } from "../../../../convex/lib/propertySearch";
 
 export const dynamic = "force-dynamic";
@@ -60,7 +61,9 @@ export default async function ListingPage({
     if (!loaded.ok) {
       return (
         <AppShell>
-          <ListingDenied action={homeActionFor(session.role)} />
+          <ListingDenied
+            action={homeActionFor(navRoleFromTestSession(session))}
+          />
         </AppShell>
       );
     }

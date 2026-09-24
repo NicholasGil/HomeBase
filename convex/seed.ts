@@ -65,6 +65,7 @@ export const run = internalMutation({
     const orgId = await ctx.db.insert("orgs", {
       name: SEED_PLAN.org.name,
       state: SEED_PLAN.org.state,
+      inviteCode: "LOOKOUT1",
       settings: { timezone: "America/Chicago" },
       flags: { ...DEFAULT_FEATURE_FLAGS },
     });

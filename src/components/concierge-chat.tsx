@@ -37,6 +37,12 @@ const MOBILE_COMPOSE_DOCK =
 const MOBILE_COMPOSE_GRID =
   "max-md:row-start-3 max-md:-mx-5 max-md:px-5 max-md:pb-[env(safe-area-inset-bottom)]";
 
+export type ConciergePersistedTurn = {
+  asked: string;
+  answer: string;
+  kind: string;
+};
+
 export function ConciergeChat({
   className,
   starters = CONCIERGE_STARTERS,
@@ -48,6 +54,8 @@ export function ConciergeChat({
   /** Keep starters fixed above the scroll area on 375 so the fold shows chips + Ask. */
   pinStartersAboveScrollOnMobile = false,
   showAgentLinkWhenUnavailable = true,
+  initialTurn = null,
+  onTurnComplete,
 }: {
   className?: string;
   starters?: readonly string[];
@@ -57,11 +65,13 @@ export function ConciergeChat({
   scrollIntro?: ReactNode;
   pinStartersAboveScrollOnMobile?: boolean;
   showAgentLinkWhenUnavailable?: boolean;
+  initialTurn?: ConciergePersistedTurn | null;
+  onTurnComplete?: (turn: ConciergePersistedTurn) => void;
 }) {
   const [question, setQuestion] = useState("");
-  const [asked, setAsked] = useState<string | null>(null);
-  const [answer, setAnswer] = useState<string | null>(null);
-  const [kind, setKind] = useState<string | null>(null);
+  const [asked, setAsked] = useState<string | null>(initialTurn?.asked ?? null);
+  const [answer, setAnswer] = useState<string | null>(initialTurn?.answer ?? null);
+  const [kind, setKind] = useState<string | null>(initialTurn?.kind ?? null);
   const [busy, setBusy] = useState(false);
   const firstSessionThreadRef = useRef<HTMLDivElement>(null);
 
@@ -87,10 +97,27 @@ export function ConciergeChat({
     setKind(CONCIERGE_MODEL_UNAVAILABLE_ANSWER.kind);
   }
 
+  function emitTurnComplete(
+    nextAsked: string,
+    nextAnswer: string,
+    nextKind: string,
+  ) {
+    onTurnComplete?.({
+      asked: nextAsked,
+      answer: nextAnswer,
+      kind: nextKind,
+    });
+  }
+
   async function submit(nextQuestion: string) {
     if (coachUnavailable) {
       setAsked(nextQuestion);
       showUnavailableAnswer();
+      emitTurnComplete(
+        nextQuestion,
+        CONCIERGE_MODEL_UNAVAILABLE_ANSWER.text,
+        CONCIERGE_MODEL_UNAVAILABLE_ANSWER.kind,
+      );
       return;
     }
     setBusy(true);
@@ -100,13 +127,21 @@ export function ConciergeChat({
     if (!result.ok) {
       if (result.reason === "MODEL_KEY_NOT_CONFIGURED") {
         showUnavailableAnswer();
+        emitTurnComplete(
+          nextQuestion,
+          CONCIERGE_MODEL_UNAVAILABLE_ANSWER.text,
+          CONCIERGE_MODEL_UNAVAILABLE_ANSWER.kind,
+        );
       } else {
-        setAnswer("You cannot ask the concierge.");
+        const refuseText = "You cannot ask the concierge.";
+        setAnswer(refuseText);
         setKind("refuse");
+        emitTurnComplete(nextQuestion, refuseText, "refuse");
       }
     } else {
       setAnswer(result.answer.text);
       setKind(result.answer.kind);
+      emitTurnComplete(nextQuestion, result.answer.text, result.answer.kind);
     }
     setBusy(false);
   }

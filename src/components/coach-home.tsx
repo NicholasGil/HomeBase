@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { CoachHabitConcierge } from "@/components/coach-habit-concierge";
+import { CoachReturnHeaderHint } from "@/components/coach-return-header-hint";
 import { ConciergeChat } from "@/components/concierge-chat";
 import {
   BuyerLockedUpsellRail,
@@ -28,16 +30,19 @@ export function CoachHome({
   eyebrow,
   availability = "ready",
   dashboardView = null,
+  habitStorageKey,
 }: {
   scope: ConciergeScope;
   buyerName: string;
   eyebrow?: string;
   availability?: ConciergeAvailability;
   dashboardView?: BuyerDashboardView | null;
+  /** Fixture `/test-login` continuity — localStorage thread + daily check-in. */
+  habitStorageKey?: string;
 }) {
   const firstSession = isCoachDiscoveryEmptyScope(scope);
   const coachUnavailable = availability === "model_key_missing";
-  const firstName = buyerName.split(" ")[0];
+  const firstName = buyerName.split(" ")[0] ?? buyerName;
   const showTenSecond = dashboardView !== null && !firstSession;
 
   return (
@@ -119,6 +124,12 @@ export function CoachHome({
                 : `Hi ${firstName} — I explain this file only. I never advise.`}
             </span>
           </p>
+          {habitStorageKey ? (
+            <CoachReturnHeaderHint
+              storageKey={habitStorageKey}
+              firstSession={firstSession}
+            />
+          ) : null}
         </header>
         {showTenSecond ? (
           <div
@@ -134,48 +145,97 @@ export function CoachHome({
             />
           </div>
         ) : null}
-        <ConciergeChat
-          className={cn(
-            "min-h-0 flex-1 px-5 pb-5",
-            firstSession ? "pt-2 max-md:pt-2 md:pt-4" : "pt-4",
-          )}
-          availability={availability}
-          showAgentLinkWhenUnavailable={!firstSession}
-          starters={
-            firstSession ? COACH_FIRST_SESSION_STARTERS : undefined
-          }
-          pinStartersAboveScrollOnMobile={firstSession && !coachUnavailable}
-          scrollIntro={
-            firstSession && !coachUnavailable
-              ? (
-                  <EmptyState
-                    testId="coach-first-session-empty"
-                    icon={MessageCircle}
-                    title="Coach is on"
-                    description={
-                      <>
-                        Tap a starter or ask below. Search, Pipeline, Tours, and
-                        Vault unlock with the full OS —{" "}
-                        <Link href="/pricing" className={textLinkClassName}>
-                          see pricing
-                        </Link>
-                        .
-                      </>
-                    }
-                    className="border-solid bg-muted/25 max-md:gap-2 max-md:py-4 max-md:[&_[data-slot=empty-title]]:text-h3 max-md:[&_[data-slot=empty-description]]:text-small"
-                  />
-                )
-              : undefined
-          }
-          idleHint={
-            firstSession
-              ? "Tap a starter or type a question."
-              : undefined
-          }
-          questionPlaceholder={
-            firstSession ? "Ask about buying" : undefined
-          }
-        />
+        {habitStorageKey ? (
+          <CoachHabitConcierge
+            storageKey={habitStorageKey}
+            firstSession={firstSession}
+            stageLabel={scope.stage}
+            firstName={firstName}
+            className={cn(
+              "min-h-0 flex-1 px-5 pb-5",
+              firstSession ? "pt-2 max-md:pt-2 md:pt-4" : "pt-4",
+            )}
+            availability={availability}
+            showAgentLinkWhenUnavailable={!firstSession}
+            starters={
+              firstSession ? COACH_FIRST_SESSION_STARTERS : undefined
+            }
+            pinStartersAboveScrollOnMobile={firstSession && !coachUnavailable}
+            scrollIntro={
+              firstSession && !coachUnavailable
+                ? (
+                    <EmptyState
+                      testId="coach-first-session-empty"
+                      icon={MessageCircle}
+                      title="Coach is on"
+                      description={
+                        <>
+                          Tap a starter or ask below. Search, Pipeline, Tours, and
+                          Vault unlock with the full OS —{" "}
+                          <Link href="/pricing" className={textLinkClassName}>
+                            see pricing
+                          </Link>
+                          .
+                        </>
+                      }
+                      className="border-solid bg-muted/25 max-md:gap-2 max-md:py-4 max-md:[&_[data-slot=empty-title]]:text-h3 max-md:[&_[data-slot=empty-description]]:text-small"
+                    />
+                  )
+                : undefined
+            }
+            idleHint={
+              firstSession
+                ? "Tap a starter or type a question."
+                : undefined
+            }
+            questionPlaceholder={
+              firstSession ? "Ask about buying" : undefined
+            }
+          />
+        ) : (
+          <ConciergeChat
+            className={cn(
+              "min-h-0 flex-1 px-5 pb-5",
+              firstSession ? "pt-2 max-md:pt-2 md:pt-4" : "pt-4",
+            )}
+            availability={availability}
+            showAgentLinkWhenUnavailable={!firstSession}
+            starters={
+              firstSession ? COACH_FIRST_SESSION_STARTERS : undefined
+            }
+            pinStartersAboveScrollOnMobile={firstSession && !coachUnavailable}
+            scrollIntro={
+              firstSession && !coachUnavailable
+                ? (
+                    <EmptyState
+                      testId="coach-first-session-empty"
+                      icon={MessageCircle}
+                      title="Coach is on"
+                      description={
+                        <>
+                          Tap a starter or ask below. Search, Pipeline, Tours, and
+                          Vault unlock with the full OS —{" "}
+                          <Link href="/pricing" className={textLinkClassName}>
+                            see pricing
+                          </Link>
+                          .
+                        </>
+                      }
+                      className="border-solid bg-muted/25 max-md:gap-2 max-md:py-4 max-md:[&_[data-slot=empty-title]]:text-small"
+                    />
+                  )
+                : undefined
+            }
+            idleHint={
+              firstSession
+                ? "Tap a starter or type a question."
+                : undefined
+            }
+            questionPlaceholder={
+              firstSession ? "Ask about buying" : undefined
+            }
+          />
+        )}
       </section>
 
       <BuyerLockedUpsellRail upsells={BUYER_LOCKED_UPSELLS} />

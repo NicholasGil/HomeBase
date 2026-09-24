@@ -12,6 +12,7 @@ import {
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
 import { coachScopeForFixtureBuyer } from "@/lib/coach-fixture-scope";
+import { coachHabitStorageKeyForFixtureBuyer } from "@/lib/coach-habit-storage";
 import { conciergeAvailability } from "@/lib/concierge-availability";
 import { seedDashboardForClerkId } from "@/lib/seed-dashboard";
 import type { TestBuyerSession } from "@/lib/test-session";
@@ -67,6 +68,7 @@ export default async function CoachPage() {
           eyebrow="Fixture session · not Clerk"
           availability={coachAvailability}
           dashboardView={dashboardView}
+          habitStorageKey={coachHabitStorageKeyForFixtureBuyer(session)}
         />
       </AppShell>
     );

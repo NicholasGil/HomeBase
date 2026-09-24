@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
-import { readCoachHabitFromBrowser } from "@/lib/coach-habit-browser";
 import {
-  hasCoachThread,
-  isCoachRepeatVisit,
-} from "@/lib/coach-habit-storage";
+  coachReturnContinueLabel,
+  subscribeCoachHabitSession,
+} from "@/lib/coach-habit-client-session";
 import { cn } from "@/lib/utils";
 
 export function CoachReturnHeaderHint({
@@ -18,21 +17,11 @@ export function CoachReturnHeaderHint({
   firstSession: boolean;
   className?: string;
 }) {
-  const [continueLabel, setContinueLabel] = useState<string | null>(null);
-
-  useEffect(() => {
-    const prior = readCoachHabitFromBrowser(storageKey);
-    if (!isCoachRepeatVisit(prior)) {
-      return;
-    }
-    if (hasCoachThread(prior) && prior.thread) {
-      setContinueLabel(prior.thread.asked);
-      return;
-    }
-    if (firstSession) {
-      setContinueLabel("");
-    }
-  }, [storageKey, firstSession]);
+  const continueLabel = useSyncExternalStore(
+    subscribeCoachHabitSession,
+    () => coachReturnContinueLabel(storageKey, firstSession),
+    () => null,
+  );
 
   if (continueLabel === null) {
     return null;

@@ -53,6 +53,8 @@ export function ConciergeChat({
   scrollIntro,
   /** Keep starters fixed above the scroll area on 375 so the fold shows chips + Ask. */
   pinStartersAboveScrollOnMobile = false,
+  /** File-session return: pin restored Ask/answer above Ask on 375. */
+  pinRestoredThreadOnMobile = false,
   showAgentLinkWhenUnavailable = true,
   initialTurn = null,
   onTurnComplete,
@@ -64,6 +66,7 @@ export function ConciergeChat({
   availability?: ConciergeAvailability;
   scrollIntro?: ReactNode;
   pinStartersAboveScrollOnMobile?: boolean;
+  pinRestoredThreadOnMobile?: boolean;
   showAgentLinkWhenUnavailable?: boolean;
   initialTurn?: ConciergePersistedTurn | null;
   onTurnComplete?: (turn: ConciergePersistedTurn) => void;
@@ -73,24 +76,34 @@ export function ConciergeChat({
   const [answer, setAnswer] = useState<string | null>(initialTurn?.answer ?? null);
   const [kind, setKind] = useState<string | null>(initialTurn?.kind ?? null);
   const [busy, setBusy] = useState(false);
-  const firstSessionThreadRef = useRef<HTMLDivElement>(null);
+  const pinnedThreadRef = useRef<HTMLDivElement>(null);
 
   const coachUnavailable = availability === "model_key_missing";
   const pinFirstSessionMobile = pinStartersAboveScrollOnMobile;
-  const showPinnedFirstSessionThread =
-    pinFirstSessionMobile && asked !== null && !coachUnavailable;
-  const mobileReplyGrid =
-    pinFirstSessionMobile && showPinnedFirstSessionThread;
+  const pinMobileChips =
+    pinFirstSessionMobile ||
+    (pinRestoredThreadOnMobile && asked !== null && !coachUnavailable);
+  const showPinnedMobileThread =
+    (pinFirstSessionMobile || pinRestoredThreadOnMobile) &&
+    asked !== null &&
+    !coachUnavailable;
+  const mobileReplyGrid = showPinnedMobileThread;
+  const pinnedThreadTestId =
+    showPinnedMobileThread && pinRestoredThreadOnMobile
+      ? "concierge-restored-thread"
+      : showPinnedMobileThread && pinFirstSessionMobile
+        ? "concierge-first-session-thread"
+        : undefined;
 
   useEffect(() => {
-    if (answer === null || !showPinnedFirstSessionThread) {
+    if (answer === null || !showPinnedMobileThread) {
       return;
     }
-    firstSessionThreadRef.current?.scrollIntoView({
+    pinnedThreadRef.current?.scrollIntoView({
       block: "nearest",
       inline: "nearest",
     });
-  }, [answer, showPinnedFirstSessionThread]);
+  }, [answer, showPinnedMobileThread]);
 
   function showUnavailableAnswer() {
     setAnswer(CONCIERGE_MODEL_UNAVAILABLE_ANSWER.text);
@@ -281,22 +294,22 @@ export function ConciergeChat({
         className,
       )}
     >
-      {pinFirstSessionMobile ? (
+      {pinMobileChips ? (
         <div
           className={cn(
             "shrink-0 max-md:block md:hidden",
             mobileReplyGrid && "max-md:row-start-1",
-            showPinnedFirstSessionThread ? "pt-2 pb-0" : "pt-4 pb-1",
+            showPinnedMobileThread ? "pt-2 pb-0" : "pt-4 pb-1",
           )}
         >
           {starterChips}
         </div>
       ) : null}
-      {showPinnedFirstSessionThread ? (
+      {showPinnedMobileThread ? (
         <div
-          ref={firstSessionThreadRef}
+          ref={pinnedThreadRef}
           aria-live="polite"
-          data-testid="concierge-first-session-thread"
+          data-testid={pinnedThreadTestId}
           className="flex min-h-0 flex-col gap-0 overflow-y-auto overflow-x-hidden py-0.5 max-md:row-start-2 max-md:block md:hidden"
         >
           {renderConversation({ omitUserBubble: true })}
@@ -306,23 +319,23 @@ export function ConciergeChat({
         className={cn(
           "flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto py-4",
           "max-md:pb-[var(--coach-compose-inset)]",
-          pinFirstSessionMobile && "max-md:pt-0",
-          showPinnedFirstSessionThread && "max-md:hidden",
+          pinMobileChips && "max-md:pt-0",
+          showPinnedMobileThread && "max-md:hidden",
         )}
       >
-        <div className={cn(pinFirstSessionMobile && "max-md:hidden")}>
+        <div className={cn(pinMobileChips && "max-md:hidden")}>
           {starterChips}
         </div>
 
-        {scrollIntro && !(pinFirstSessionMobile && asked !== null) ? (
+        {scrollIntro && !(pinMobileChips && asked !== null) ? (
           <div className="shrink-0">{scrollIntro}</div>
         ) : null}
 
         <div
-          aria-live={showPinnedFirstSessionThread ? "off" : "polite"}
+          aria-live={showPinnedMobileThread ? "off" : "polite"}
           className="flex min-h-0 flex-1 flex-col gap-3"
         >
-          {showPinnedFirstSessionThread ? (
+          {showPinnedMobileThread ? (
             <div className="hidden min-h-0 flex-1 flex-col gap-3 md:flex">
               {renderConversation()}
             </div>

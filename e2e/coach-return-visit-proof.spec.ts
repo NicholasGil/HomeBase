@@ -75,7 +75,12 @@ test("return visit proof @375 — discovery thread, file thread, daily check-in"
     fileStarter,
   );
   await expect(page.getByTestId("coach-daily-check-in")).toBeVisible();
-  await expect(page.getByTestId("concierge-answer")).toBeVisible();
+  const restoredThread = page.getByTestId("concierge-restored-thread");
+  await expect(restoredThread).toBeVisible();
+  const restoredAnswer = restoredThread.getByTestId("concierge-answer");
+  await expect(restoredAnswer).toBeVisible();
+  await restoredAnswer.scrollIntoViewIfNeeded();
+  await expect(restoredAnswer).toBeInViewport();
   await page.screenshot({
     path: path.join(PROOF_DIR, "coach-file-return-375.png"),
     fullPage: false,

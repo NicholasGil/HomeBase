@@ -1,23 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useSyncExternalStore, type ReactNode } from "react";
 
 import { ConciergeChat } from "@/components/concierge-chat";
 import { CoachDailyCheckIn } from "@/components/coach-daily-check-in";
 import {
-  persistCoachHabitTurn,
-  readCoachHabitFromBrowser,
-  writeCoachHabitToBrowser,
-} from "@/lib/coach-habit-browser";
-import {
-  hasCoachThread,
-  isCoachRepeatVisit,
-  localDayKey,
-  markCoachDailyCheckIn,
-  recordCoachHabitVisit,
-  shouldShowCoachDailyCheckIn,
-  type CoachHabitTurn,
-} from "@/lib/coach-habit-storage";
+  getCoachHabitSessionSnapshot,
+  persistCoachHabitSessionTurn,
+  subscribeCoachHabitSession,
+} from "@/lib/coach-habit-client-session";
+import { hasCoachThread } from "@/lib/coach-habit-storage";
+import type { CoachHabitTurn } from "@/lib/coach-habit-storage";
 import type { ConciergeAvailability } from "@/lib/concierge-availability";
 import { cn } from "@/lib/utils";
 
@@ -48,61 +41,28 @@ export function CoachHabitConcierge({
   idleHint?: string;
   questionPlaceholder?: string;
 }) {
-  const [hydrated, setHydrated] = useState(false);
-  const [repeatVisit, setRepeatVisit] = useState(false);
-  const [initialTurn, setInitialTurn] = useState<CoachHabitTurn | null>(null);
-  const [showDailyCheckIn, setShowDailyCheckIn] = useState(false);
-  const [habitSnapshot, setHabitSnapshot] = useState(() =>
-    readCoachHabitFromBrowser(storageKey),
+  const session = useSyncExternalStore(
+    subscribeCoachHabitSession,
+    () => getCoachHabitSessionSnapshot(storageKey),
+    () => null,
   );
-  const visitRecordedRef = useRef(false);
 
-  useEffect(() => {
-    if (visitRecordedRef.current) {
-      return;
-    }
-    visitRecordedRef.current = true;
-
-    const prior = readCoachHabitFromBrowser(storageKey);
-    const repeat = isCoachRepeatVisit(prior);
-    const { state } = recordCoachHabitVisit(prior);
-    writeCoachHabitToBrowser(storageKey, state);
-
-    if (hasCoachThread(prior)) {
-      setInitialTurn(prior.thread);
-    }
-
-    const day = localDayKey(new Date());
-    if (repeat && shouldShowCoachDailyCheckIn(state, day)) {
-      setShowDailyCheckIn(true);
-      const marked = markCoachDailyCheckIn(state, day);
-      writeCoachHabitToBrowser(storageKey, marked);
-      setHabitSnapshot(marked);
-    } else {
-      setHabitSnapshot(state);
-    }
-
-    setRepeatVisit(repeat);
-    setHydrated(true);
-  }, [storageKey]);
-
-  const returnWithThread = repeatVisit && hasCoachThread(habitSnapshot);
-  const hideColdOpenEmpty =
-    firstSession && returnWithThread && initialTurn !== null;
-
-  function handleTurnComplete(turn: CoachHabitTurn) {
-    const next = persistCoachHabitTurn(storageKey, habitSnapshot, turn);
-    setHabitSnapshot(next);
-    setInitialTurn(turn);
-  }
-
-  if (!hydrated) {
+  if (session === null) {
     return (
       <div
         className={cn("min-h-[12rem] animate-pulse rounded-lg bg-muted/30", className)}
         aria-hidden
       />
     );
+  }
+
+  const { repeatVisit, habitSnapshot, initialTurn, showDailyCheckIn } = session;
+  const returnWithThread = repeatVisit && hasCoachThread(habitSnapshot);
+  const hideColdOpenEmpty =
+    firstSession && returnWithThread && initialTurn !== null;
+
+  function handleTurnComplete(turn: CoachHabitTurn) {
+    persistCoachHabitSessionTurn(storageKey, turn);
   }
 
   return (
@@ -120,6 +80,9 @@ export function CoachHabitConcierge({
         showAgentLinkWhenUnavailable={showAgentLinkWhenUnavailable}
         starters={starters}
         pinStartersAboveScrollOnMobile={pinStartersAboveScrollOnMobile}
+        pinRestoredThreadOnMobile={
+          !firstSession && repeatVisit && initialTurn !== null
+        }
         scrollIntro={hideColdOpenEmpty ? undefined : scrollIntro}
         idleHint={
           returnWithThread && firstSession

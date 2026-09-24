@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { CoachHabitConcierge } from "@/components/coach-habit-concierge";
 import { CoachReturnHeaderHint } from "@/components/coach-return-header-hint";
+import { CoachTenSecondReturnGate } from "@/components/coach-ten-second-return-gate";
 import { ConciergeChat } from "@/components/concierge-chat";
 import {
   BuyerLockedUpsellRail,
@@ -132,18 +133,34 @@ export function CoachHome({
           ) : null}
         </header>
         {showTenSecond ? (
-          <div
-            data-testid="coach-ten-second"
-            className="shrink-0 border-b border-border/70 px-5 py-4"
-          >
-            <TenSecondHeroGrid
-              view={dashboardView}
-              buyerName={buyerName}
-              journeyOrientation="horizontal"
-              detailHref={transactionHref(dashboardView.transactionId)}
-              variant="coach"
-            />
-          </div>
+          habitStorageKey ? (
+            <CoachTenSecondReturnGate
+              storageKey={habitStorageKey}
+              firstSession={firstSession}
+              className="shrink-0 border-b border-border/70 px-5 py-4"
+            >
+              <TenSecondHeroGrid
+                view={dashboardView}
+                buyerName={buyerName}
+                journeyOrientation="horizontal"
+                detailHref={transactionHref(dashboardView!.transactionId)}
+                variant="coach"
+              />
+            </CoachTenSecondReturnGate>
+          ) : (
+            <div
+              data-testid="coach-ten-second"
+              className="shrink-0 border-b border-border/70 px-5 py-4"
+            >
+              <TenSecondHeroGrid
+                view={dashboardView}
+                buyerName={buyerName}
+                journeyOrientation="horizontal"
+                detailHref={transactionHref(dashboardView.transactionId)}
+                variant="coach"
+              />
+            </div>
+          )
         ) : null}
         {habitStorageKey ? (
           <CoachHabitConcierge

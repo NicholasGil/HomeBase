@@ -34,6 +34,8 @@ describe("BuyerDashboardViewPanel ten-second answers", () => {
     expect(html).toContain('data-testid="journey-stage-inspection"');
     expect(html).toContain('data-testid="journey-tracker"');
     expect(html).toContain("814 Maple Ave");
+    expect(html).not.toContain("Transaction seed:buyer");
+    expect(html).not.toContain("Opened by id");
     expect(html.indexOf("h-40")).toBeLessThan(html.indexOf("Inspection"));
   });
 
@@ -184,7 +186,8 @@ describe("BuyerDashboardViewPanel owedToday", () => {
 
     expect(issuedHtml).toContain("$450.00");
     expect(issuedHtml).toContain(ISSUED_AMOUNT_CLASS_NAME);
-    expect(issuedHtml).toContain("title_issued");
+    expect(issuedHtml).toContain("Title company");
+    expect(issuedHtml).toContain('data-provenance="title_issued"');
     expect(issuedHtml).not.toContain(ESTIMATE_LABEL);
     expect(issuedHtml).not.toContain(ESTIMATE_AMOUNT_CLASS_NAME);
 

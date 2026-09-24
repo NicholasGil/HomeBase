@@ -70,8 +70,10 @@ test.describe("coach home concierge", () => {
     await expect(page.getByTestId("concierge")).toBeVisible();
 
     const scope = page.getByTestId("concierge-scope");
-    await expect(scope).toContainText("814 Maple Ave");
-    await expect(scope).toContainText("Inspection");
+    await expect(page.getByTestId("coach-ten-second")).toContainText(
+      "814 Maple Ave",
+    );
+    await expect(page.getByTestId("ten-second-where")).toHaveText("Inspection");
     await expect(scope).toContainText("Personal coach");
 
     const chips = page.getByLabel("Suggested questions").getByRole("button");

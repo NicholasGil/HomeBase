@@ -13,6 +13,7 @@ import {
 } from "@/lib/auth-config";
 import { coachScopeForFixtureBuyer } from "@/lib/coach-fixture-scope";
 import { conciergeAvailability } from "@/lib/concierge-availability";
+import { seedDashboardForClerkId } from "@/lib/seed-dashboard";
 import type { TestBuyerSession } from "@/lib/test-session";
 
 export const dynamic = "force-dynamic";
@@ -55,6 +56,9 @@ export default async function CoachPage() {
     if (session.role !== "buyer") {
       throw new Error("fixture mode requires a buyer session");
     }
+    const dashboardView = session.emptyCoachFile
+      ? null
+      : seedDashboardForClerkId(session.clerkId);
     return (
       <AppShell>
         <CoachHome
@@ -62,6 +66,7 @@ export default async function CoachPage() {
           buyerName={session.name}
           eyebrow="Fixture session · not Clerk"
           availability={coachAvailability}
+          dashboardView={dashboardView}
         />
       </AppShell>
     );

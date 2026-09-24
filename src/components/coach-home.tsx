@@ -5,6 +5,8 @@ import {
   BuyerLockedUpsellRail,
 } from "@/components/buyer-locked-upsell";
 import type { ConciergeScope } from "@/components/concierge-sheet";
+import { TenSecondHeroGrid } from "@/components/ten-second-hero";
+import { transactionHref } from "@/components/buyer-dashboard-view";
 import { BUYER_LOCKED_UPSELLS } from "@/lib/buyer-shell";
 import { textLinkClassName } from "@/components/text-link";
 import { EmptyState } from "@/components/empty-state";
@@ -18,21 +20,25 @@ import { COACH_ENTRY_PRICE_LABEL } from "@/lib/pricing";
 import type { ConciergeAvailability } from "@/lib/concierge-availability";
 import { cn } from "@/lib/utils";
 import { MessageCircle } from "lucide-react";
+import type { BuyerDashboardView } from "../../convex/lib/dashboardView";
 
 export function CoachHome({
   scope,
   buyerName,
   eyebrow,
   availability = "ready",
+  dashboardView = null,
 }: {
   scope: ConciergeScope;
   buyerName: string;
   eyebrow?: string;
   availability?: ConciergeAvailability;
+  dashboardView?: BuyerDashboardView | null;
 }) {
   const firstSession = isCoachDiscoveryEmptyScope(scope);
   const coachUnavailable = availability === "model_key_missing";
   const firstName = buyerName.split(" ")[0];
+  const showTenSecond = dashboardView !== null && !firstSession;
 
   return (
     <div
@@ -78,31 +84,35 @@ export function CoachHome({
             <p
               className={cn(
                 "mt-1 text-small text-muted-foreground",
-                firstSession && "max-md:hidden",
+                (firstSession || showTenSecond) && "max-md:hidden",
               )}
             >
               {eyebrow}
             </p>
           ) : null}
-          <h1
-            className={cn(
-              "mt-0.5 font-semibold tracking-tight text-balance",
-              firstSession
-                ? "max-md:text-h3 md:truncate md:text-h2"
-                : "truncate text-h2",
-            )}
-          >
-            {firstSession ? COACH_DISCOVERY_STAGE_LABEL : scope.address}
-          </h1>
+          {!showTenSecond ? (
+            <h1
+              className={cn(
+                "mt-0.5 font-semibold tracking-tight text-balance",
+                firstSession
+                  ? "max-md:text-h3 md:truncate md:text-h2"
+                  : "truncate text-h2",
+              )}
+            >
+              {firstSession ? COACH_DISCOVERY_STAGE_LABEL : scope.address}
+            </h1>
+          ) : null}
           {firstSession ? (
             <p className="mt-0.5 text-small text-muted-foreground md:sr-only">
               {COACH_DISCOVERY_EMPTY_ADDRESS}
             </p>
           ) : null}
           <p className="mt-1.5 flex flex-wrap items-center gap-x-2 text-body text-muted-foreground max-md:text-small">
-            <span className="inline-flex h-6 shrink-0 items-center rounded-full bg-sage px-2.5 text-eyebrow font-medium text-sage-foreground">
-              {scope.stage}
-            </span>
+            {!showTenSecond ? (
+              <span className="inline-flex h-6 shrink-0 items-center rounded-full bg-sage px-2.5 text-eyebrow font-medium text-sage-foreground">
+                {scope.stage}
+              </span>
+            ) : null}
             <span>
               {firstSession
                 ? `Hi ${firstName} — your coach for this purchase.`
@@ -110,6 +120,20 @@ export function CoachHome({
             </span>
           </p>
         </header>
+        {showTenSecond ? (
+          <div
+            data-testid="coach-ten-second"
+            className="shrink-0 border-b border-border/70 px-5 py-4"
+          >
+            <TenSecondHeroGrid
+              view={dashboardView}
+              buyerName={buyerName}
+              journeyOrientation="horizontal"
+              detailHref={transactionHref(dashboardView.transactionId)}
+              variant="coach"
+            />
+          </div>
+        ) : null}
         <ConciergeChat
           className={cn(
             "min-h-0 flex-1 px-5 pb-5",

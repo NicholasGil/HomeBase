@@ -7,9 +7,10 @@ test("buyer login lands on coach and denies another transaction by URL", async (
   await page.getByRole("button", { name: "Sign in as Alex Rivera" }).click();
   await expect(page).toHaveURL(/\/coach$/);
   await expect(page.getByTestId("coach-home")).toBeVisible();
+  await expect(page.getByTestId("coach-ten-second")).toContainText("814 Maple Ave");
+  await expect(page.getByTestId("ten-second-where")).toHaveText("Inspection");
   await expect(page.getByTestId("concierge")).toBeVisible();
-  await expect(page.getByTestId("concierge-scope")).toContainText("814 Maple Ave");
-  await expect(page.getByTestId("concierge-scope")).toContainText("Inspection");
+  await expect(page.getByTestId("concierge-scope")).toContainText("Personal coach");
   await expect(page.getByTestId("locked-upsell-search")).toBeVisible();
   await expect(page.getByTestId("locked-upsell-tours")).toBeVisible();
   await expect(page.getByTestId("locked-upsell-pipeline")).toBeVisible();

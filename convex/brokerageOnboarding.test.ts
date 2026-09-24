@@ -111,6 +111,21 @@ describe("brokerageOnboarding", () => {
       ).rejects.toThrow();
     }
 
+    const membershipsBeforeValidJoin = await t.run(async (ctx) => {
+      const user = await ctx.db
+        .query("users")
+        .withIndex("by_clerkId", (q) => q.eq("clerkId", "clerk_invite_escalation"))
+        .unique();
+      if (user === null) {
+        return [];
+      }
+      return await ctx.db
+        .query("memberships")
+        .withIndex("by_user", (q) => q.eq("userId", user._id))
+        .collect();
+    });
+    expect(membershipsBeforeValidJoin).toHaveLength(0);
+
     const joined = await asAttacker.mutation(
       api.brokerageOnboarding.joinWithInviteCode,
       { inviteCode: SEED_ORG_INVITE_CODE },

@@ -62,6 +62,7 @@ export default async function BrokerageOnboardingPage({ searchParams }: PageProp
       return (
         <AppShell>
           <FixtureBrokerageOnboarding
+            key={initialTab}
             viewerName={session.name}
             joinError={joinError}
             initialTab={initialTab}
@@ -75,6 +76,7 @@ export default async function BrokerageOnboardingPage({ searchParams }: PageProp
     return (
       <AppShell>
         <FixtureBrokerageOnboarding
+          key={initialTab}
           viewerName={session?.name}
           joinError={joinError}
           initialTab={initialTab}
@@ -86,7 +88,7 @@ export default async function BrokerageOnboardingPage({ searchParams }: PageProp
   return (
     <AppShell>
       <QueryErrorBoundary message="Brokerage onboarding did not load.">
-        <LiveBrokerageOnboarding initialTab={initialTab} />
+        <LiveBrokerageOnboarding key={initialTab} initialTab={initialTab} />
       </QueryErrorBoundary>
     </AppShell>
   );

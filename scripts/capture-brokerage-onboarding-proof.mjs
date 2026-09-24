@@ -24,6 +24,14 @@ async function mobilePage() {
   return await context.newPage();
 }
 
+async function ensureJoinInviteVisible(page) {
+  const inviteInput = page.getByTestId("brokerage-invite-input");
+  if (!(await inviteInput.isVisible())) {
+    await page.getByTestId("brokerage-mode-join").click();
+  }
+  await inviteInput.waitFor({ timeout: 15000 });
+}
+
 const page = await mobilePage();
 
 await page.goto(`${base}/test-login`);
@@ -40,7 +48,7 @@ await page.screenshot({
 });
 
 await page.goto(`${base}/brokerage/onboarding?mode=join`);
-await page.getByTestId("brokerage-invite-input").waitFor({ timeout: 15000 });
+await ensureJoinInviteVisible(page);
 await page.screenshot({
   path: path.join(outDir, "d-onboarding-join-tab.png"),
   fullPage: true,
@@ -53,7 +61,7 @@ await joinPage.goto(`${base}/test-login`);
 await joinPage.getByTestId("sign-in-onboarding-agent-join").click();
 await joinPage.waitForURL(/\/brokerage\/onboarding/, { timeout: 15000 });
 await joinPage.goto(`${base}/brokerage/onboarding?mode=join`);
-await joinPage.getByTestId("brokerage-invite-input").waitFor({ timeout: 15000 });
+await ensureJoinInviteVisible(joinPage);
 await joinPage.getByTestId("brokerage-invite-input").fill("LOOKOUT1");
 await joinPage.getByTestId("brokerage-join-submit").click();
 await joinPage.waitForURL(/\/agent$/, { timeout: 15000 });

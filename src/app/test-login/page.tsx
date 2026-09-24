@@ -57,6 +57,16 @@ export default function TestLoginPage() {
               Discovery coach — Alex Rivera (no property)
             </Button>
           </form>
+          <form
+            action={startTestSessionFromForm}
+            data-testid="sign-in-alex-coach-unavailable"
+          >
+            <input type="hidden" name="clerkId" value={SEED_CLERK_IDS.buyerA} />
+            <input type="hidden" name="simulateModelKeyMissing" value="1" />
+            <Button type="submit" variant="outline" className="w-full">
+              Alex Rivera — coach unavailable (no model key)
+            </Button>
+          </form>
           <form action={startTestSessionFromForm}>
             <input
               type="hidden"

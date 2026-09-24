@@ -4,6 +4,7 @@ import { MessageCircleQuestionMark, XIcon } from "lucide-react";
 import { useState, useSyncExternalStore } from "react";
 
 import { ConciergeChat } from "@/components/concierge-chat";
+import type { ConciergeAvailability } from "@/lib/concierge-availability";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -49,7 +50,13 @@ function readSidePanel() {
  * past a sheet edge as a second, dead concierge button. The sheet's own close
  * control and the backdrop are the ways out; the FAB returns as it closes.
  */
-export function ConciergeSheet({ scope }: { scope: ConciergeScope }) {
+export function ConciergeSheet({
+  scope,
+  availability = "ready",
+}: {
+  scope: ConciergeScope;
+  availability?: ConciergeAvailability;
+}) {
   const [open, setOpen] = useState(false);
   const sidePanel = useSyncExternalStore(
     subscribeToSidePanel,
@@ -108,7 +115,10 @@ export function ConciergeSheet({ scope }: { scope: ConciergeScope }) {
             <XIcon className="size-5" aria-hidden />
           </SheetClose>
         </header>
-        <ConciergeChat className="min-h-0 flex-1 px-5 pt-4 pb-3" />
+        <ConciergeChat
+          className="min-h-0 flex-1 px-5 pt-4 pb-3"
+          availability={availability}
+        />
       </SheetContent>
     </Sheet>
   );

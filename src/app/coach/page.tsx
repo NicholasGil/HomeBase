@@ -12,6 +12,7 @@ import {
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
 import { coachScopeForFixtureBuyer } from "@/lib/coach-fixture-scope";
+import { conciergeAvailability } from "@/lib/concierge-availability";
 import type { TestBuyerSession } from "@/lib/test-session";
 
 export const dynamic = "force-dynamic";
@@ -26,6 +27,7 @@ export default async function CoachPage() {
   }
 
   const session = await getTestSession();
+  const coachAvailability = conciergeAvailability(session, process.env);
   const mode = dashboardRenderMode(process.env, session);
 
   if (mode === "unavailable") {
@@ -59,6 +61,7 @@ export default async function CoachPage() {
           scope={conciergeScopeFor(session)}
           buyerName={session.name}
           eyebrow="Fixture session · not Clerk"
+          availability={coachAvailability}
         />
       </AppShell>
     );
@@ -67,7 +70,7 @@ export default async function CoachPage() {
   return (
     <AppShell>
       <QueryErrorBoundary message="Your coach did not load.">
-        <LiveCoachHome />
+        <LiveCoachHome availability={coachAvailability} />
       </QueryErrorBoundary>
     </AppShell>
   );

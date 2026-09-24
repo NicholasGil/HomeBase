@@ -1,5 +1,9 @@
 import { v } from "convex/values";
 
+import {
+  CONCIERGE_MODEL_KEY_ENV,
+  conciergeModelKeyPresent,
+} from "../lib/llm/modelConfig";
 import type { Id } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
@@ -44,6 +48,15 @@ async function readInspectionFindings(
     via: access.via,
   };
 }
+
+/** Convex-side mirror of lib/llm model-key detection for live concierge. */
+export const modelKeyStatus = query({
+  args: {},
+  handler: async () => ({
+    configured: conciergeModelKeyPresent(),
+    env: CONCIERGE_MODEL_KEY_ENV,
+  }),
+});
 
 export const gatherContext = query({
   args: { transactionId: v.id("transactions") },

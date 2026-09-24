@@ -73,6 +73,10 @@ export function isConciergeRefusal(kind: string | null): boolean {
   return kind === "refuse" || kind === "ask_agent";
 }
 
+export function isConciergeUnavailable(kind: string | null): boolean {
+  return kind === "unavailable";
+}
+
 export function ConciergeAnswerView({
   text,
   kind,
@@ -82,6 +86,22 @@ export function ConciergeAnswerView({
   kind: string | null;
   className?: string;
 }) {
+  if (isConciergeUnavailable(kind)) {
+    return (
+      <div
+        data-testid="concierge-answer"
+        data-kind={kind ?? undefined}
+        className={cn(
+          REPLY_BUBBLE,
+          "space-y-2 bg-muted/40 text-foreground ring-1 ring-border/80",
+          className,
+        )}
+      >
+        <p className="font-medium">{text}</p>
+      </div>
+    );
+  }
+
   if (isConciergeRefusal(kind)) {
     return (
       <div

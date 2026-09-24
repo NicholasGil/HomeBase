@@ -26,9 +26,12 @@ export type TestBuyerSession = {
   transactionId: (typeof SEED_TRANSACTION_IDS)[TestBuyerClerkId];
   /** Fixture-only: Path B–style coach with no property on file yet. */
   emptyCoachFile?: boolean;
+  /** Fixture-only: exercise live-path fail-closed when no model key is set. */
+  simulateModelKeyMissing?: boolean;
 };
 
 const EMPTY_COACH_FILE_MARKER = "empty";
+const SIMULATE_NO_MODEL_MARKER = "nomodel";
 
 export type TestVendorSession = {
   clerkId: typeof SEED_CLERK_IDS.lender;
@@ -93,17 +96,39 @@ export function isTestOnboardingAgentJoinClerkId(
   return value === SEED_CLERK_IDS.onboardingAgentJoin;
 }
 
+function buyerSessionMarkers(session: TestBuyerSession): string[] {
+  const markers: string[] = [];
+  if (session.emptyCoachFile) {
+    markers.push(EMPTY_COACH_FILE_MARKER);
+  }
+  if (session.simulateModelKeyMissing) {
+    markers.push(SIMULATE_NO_MODEL_MARKER);
+  }
+  return markers;
+}
+
 export function encodeTestSessionCookie(session: TestSession): string {
-  if (session.role === "buyer" && session.emptyCoachFile) {
-    return `${session.clerkId}~${EMPTY_COACH_FILE_MARKER}`;
+  if (session.role === "buyer") {
+    const markers = buyerSessionMarkers(session);
+    if (markers.length > 0) {
+      return `${session.clerkId}~${markers.join(",")}`;
+    }
   }
   return session.clerkId;
+}
+
+function parseBuyerSessionMarkers(marker: string | undefined) {
+  const parts = marker?.split(",") ?? [];
+  return {
+    emptyCoachFile: parts.includes(EMPTY_COACH_FILE_MARKER),
+    simulateModelKeyMissing: parts.includes(SIMULATE_NO_MODEL_MARKER),
+  };
 }
 
 export function startTestSessionDecision(
   clerkId: string,
   env: AuthEnv = process.env,
-  options?: { emptyCoachFile?: boolean },
+  options?: { emptyCoachFile?: boolean; simulateModelKeyMissing?: boolean },
 ): { ok: true; session: TestSession } | { ok: false; reason: "FORBIDDEN" } {
   if (isProductionDeploy(env)) {
     return { ok: false, reason: "FORBIDDEN" };
@@ -163,6 +188,7 @@ export function startTestSessionDecision(
       role: "buyer",
       transactionId: SEED_TRANSACTION_IDS[clerkId],
       emptyCoachFile: options?.emptyCoachFile === true,
+      simulateModelKeyMissing: options?.simulateModelKeyMissing === true,
     },
   };
 }
@@ -180,8 +206,12 @@ export function parseTestSessionCookie(
   if (clerkId === undefined || clerkId.length === 0) {
     return null;
   }
-  const emptyCoachFile = marker === EMPTY_COACH_FILE_MARKER;
-  const started = startTestSessionDecision(clerkId, env, { emptyCoachFile });
+  const { emptyCoachFile, simulateModelKeyMissing } =
+    parseBuyerSessionMarkers(marker);
+  const started = startTestSessionDecision(clerkId, env, {
+    emptyCoachFile,
+    simulateModelKeyMissing,
+  });
   return started.ok ? started.session : null;
 }
 

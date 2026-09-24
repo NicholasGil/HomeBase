@@ -248,16 +248,12 @@ export const createBrokerage = mutation({
   },
 });
 
-/** Staff invite join — always `agent`. Client `role` is ignored (use `joinAsBuyer`). */
+/** Staff invite join — always `agent`. Buyers must use `joinAsBuyer`. */
 export const joinWithInviteCode = mutation({
   args: {
     inviteCode: v.string(),
-    role: v.optional(
-      v.union(v.literal("agent"), v.literal("broker"), v.literal("buyer")),
-    ),
   },
   handler: async (ctx, args) => {
-    void args.role;
     const normalizedCode = args.inviteCode.trim().toUpperCase();
     if (normalizedCode.length < 4) {
       throw new Error("INVALID_INVITE");

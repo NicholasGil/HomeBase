@@ -97,37 +97,40 @@ describe("brokerageOnboarding", () => {
     ).rejects.toThrow("ALREADY_MEMBER");
   });
 
-  it("ignores client-supplied broker or buyer role on joinWithInviteCode", async () => {
+  it("rejects client-supplied role on joinWithInviteCode (no broker/buyer escalation)", async () => {
     const t = convexTest(schema, modules);
     await t.mutation(internal.seed.run, {});
 
-    for (const [clerkId, forgedRole] of [
-      ["clerk_invite_escalation_broker", "broker"],
-      ["clerk_invite_escalation_buyer", "buyer"],
-    ] as const) {
-      const asAttacker = t.withIdentity({ subject: clerkId });
-      const joined = await asAttacker.mutation(
-        api.brokerageOnboarding.joinWithInviteCode,
-        { inviteCode: SEED_ORG_INVITE_CODE, role: forgedRole },
-      );
-      expect(joined.role).toBe("agent");
-
-      const storedRole = await t.run(async (ctx) => {
-        const user = await ctx.db
-          .query("users")
-          .withIndex("by_clerkId", (q) => q.eq("clerkId", clerkId))
-          .unique();
-        if (user === null) {
-          return null;
-        }
-        const membership = await ctx.db
-          .query("memberships")
-          .withIndex("by_user", (q) => q.eq("userId", user._id))
-          .unique();
-        return membership?.role ?? null;
-      });
-      expect(storedRole).toBe("agent");
+    const asAttacker = t.withIdentity({ subject: "clerk_invite_escalation" });
+    for (const forgedRole of ["broker", "buyer"] as const) {
+      await expect(
+        asAttacker.mutation(api.brokerageOnboarding.joinWithInviteCode, {
+          inviteCode: SEED_ORG_INVITE_CODE,
+          role: forgedRole,
+        } as { inviteCode: string }),
+      ).rejects.toThrow();
     }
+
+    const joined = await asAttacker.mutation(
+      api.brokerageOnboarding.joinWithInviteCode,
+      { inviteCode: SEED_ORG_INVITE_CODE },
+    );
+    expect(joined.role).toBe("agent");
+    const storedRole = await t.run(async (ctx) => {
+      const user = await ctx.db
+        .query("users")
+        .withIndex("by_clerkId", (q) => q.eq("clerkId", "clerk_invite_escalation"))
+        .unique();
+      if (user === null) {
+        return null;
+      }
+      const membership = await ctx.db
+        .query("memberships")
+        .withIndex("by_user", (q) => q.eq("userId", user._id))
+        .unique();
+      return membership?.role ?? null;
+    });
+    expect(storedRole).toBe("agent");
   });
 
   it("always assigns agent via joinWithInviteCode (buyers use joinAsBuyer)", async () => {

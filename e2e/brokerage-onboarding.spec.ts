@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+test.describe.configure({ mode: "serial" });
+
 test.use({
   viewport: { width: 375, height: 812 },
   hasTouch: true,
@@ -24,9 +26,12 @@ test("fixture onboarding agent creates empty brokerage book", async ({ page }) =
 
 test("joining Lookout via invite shows org client roster", async ({ page }) => {
   await page.goto("/test-login");
-  await page.getByTestId("sign-in-onboarding-agent").click();
+  await page.getByTestId("sign-in-onboarding-agent-join").click();
+  await expect(page).toHaveURL(/\/brokerage\/onboarding$/);
   await page.goto("/brokerage/onboarding?mode=join");
-  await expect(page.getByTestId("brokerage-invite-input")).toBeVisible();
+  await expect(page.getByTestId("brokerage-invite-input")).toBeVisible({
+    timeout: 15_000,
+  });
   await page.getByTestId("brokerage-invite-input").fill("LOOKOUT1");
   await page.getByTestId("brokerage-join-submit").click();
   await expect(page).toHaveURL(/\/agent$/);

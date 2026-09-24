@@ -50,7 +50,7 @@ await page.close();
 
 const joinPage = await mobilePage();
 await joinPage.goto(`${base}/test-login`);
-await joinPage.getByTestId("sign-in-onboarding-agent").click();
+await joinPage.getByTestId("sign-in-onboarding-agent-join").click();
 await joinPage.waitForURL(/\/brokerage\/onboarding/, { timeout: 15000 });
 await joinPage.goto(`${base}/brokerage/onboarding?mode=join`);
 await joinPage.getByTestId("brokerage-invite-input").waitFor({ timeout: 15000 });

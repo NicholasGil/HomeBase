@@ -42,8 +42,12 @@ export type TestAgentSession = {
   role: "agent";
 };
 
+export type TestOnboardingAgentClerkId =
+  | typeof SEED_CLERK_IDS.onboardingAgent
+  | typeof SEED_CLERK_IDS.onboardingAgentJoin;
+
 export type TestOnboardingAgentSession = {
-  clerkId: typeof SEED_CLERK_IDS.onboardingAgent;
+  clerkId: TestOnboardingAgentClerkId;
   name: string;
   role: "onboarding_agent";
 };
@@ -76,8 +80,17 @@ export function isTestAgentClerkId(
 
 export function isTestOnboardingAgentClerkId(
   value: string,
-): value is typeof SEED_CLERK_IDS.onboardingAgent {
-  return value === SEED_CLERK_IDS.onboardingAgent;
+): value is TestOnboardingAgentClerkId {
+  return (
+    value === SEED_CLERK_IDS.onboardingAgent ||
+    value === SEED_CLERK_IDS.onboardingAgentJoin
+  );
+}
+
+export function isTestOnboardingAgentJoinClerkId(
+  value: string,
+): value is typeof SEED_CLERK_IDS.onboardingAgentJoin {
+  return value === SEED_CLERK_IDS.onboardingAgentJoin;
 }
 
 export function encodeTestSessionCookie(session: TestSession): string {
@@ -115,11 +128,21 @@ export function startTestSessionDecision(
       },
     };
   }
-  if (isTestOnboardingAgentClerkId(clerkId)) {
+  if (isTestOnboardingAgentJoinClerkId(clerkId)) {
     return {
       ok: true,
       session: {
         clerkId,
+        name: "Morgan Vale",
+        role: "onboarding_agent",
+      },
+    };
+  }
+  if (isTestOnboardingAgentClerkId(clerkId)) {
+    return {
+      ok: true,
+      session: {
+        clerkId: SEED_CLERK_IDS.onboardingAgent,
         name: "Taylor Brooks",
         role: "onboarding_agent",
       },

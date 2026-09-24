@@ -17,7 +17,10 @@ export type FixtureBrokerageRecord = {
 };
 
 export function isOnboardingAgentClerkId(value: string) {
-  return value === SEED_CLERK_IDS.onboardingAgent;
+  return (
+    value === SEED_CLERK_IDS.onboardingAgent ||
+    value === SEED_CLERK_IDS.onboardingAgentJoin
+  );
 }
 
 export function parseFixtureBrokerageCookie(

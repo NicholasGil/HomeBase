@@ -15,6 +15,7 @@ import {
 } from "@/lib/app-nav";
 import { isAuthConfigured } from "@/lib/auth-config";
 import { coachScopeForFixtureBuyer } from "@/lib/coach-fixture-scope";
+import { conciergeAvailability } from "@/lib/concierge-availability";
 import type { TestBuyerSession } from "@/lib/test-session";
 
 /*
@@ -42,6 +43,7 @@ export async function AppShell({
     session !== null && session.role === "buyer"
       ? conciergeScopeFor(session)
       : null;
+  const conciergeAvailabilityState = conciergeAvailability(session, process.env);
 
   return (
     <div className="min-h-full bg-background">
@@ -68,7 +70,10 @@ export async function AppShell({
           </div>
         </div>
       </header>
-      <CoachAwareMain conciergeScope={conciergeScope}>
+      <CoachAwareMain
+        conciergeScope={conciergeScope}
+        conciergeAvailability={conciergeAvailabilityState}
+      >
         {children}
       </CoachAwareMain>
       {liveNav ? (

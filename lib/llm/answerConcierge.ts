@@ -1,7 +1,12 @@
 import { answerCoachFirstSessionStarter } from "./coachFirstSession";
 import { isDiscoveryEmptyConciergeFacts } from "./discoveryEmptyFacts";
 import { applyGuardrails, formatUsd, looksLikeAdvice } from "./guardrails";
-import type { ConciergeAnswer, ConciergeFact } from "./types";
+import { conciergeModelKeyPresent } from "./modelConfig";
+import {
+  CONCIERGE_MODEL_UNAVAILABLE_ANSWER,
+  type ConciergeAnswer,
+  type ConciergeFact,
+} from "./types";
 
 function fact(facts: readonly ConciergeFact[], key: string) {
   return facts.find((row) => row.key === key) ?? null;
@@ -22,7 +27,12 @@ function moneyLine(row: ConciergeFact) {
 export function answerConcierge(
   question: string,
   facts: readonly ConciergeFact[],
+  options?: { requireModelKey?: boolean },
 ): ConciergeAnswer {
+  if (options?.requireModelKey && !conciergeModelKeyPresent()) {
+    return CONCIERGE_MODEL_UNAVAILABLE_ANSWER;
+  }
+
   const normalized = question.trim().toLowerCase();
 
   if (looksLikeAdvice(question)) {

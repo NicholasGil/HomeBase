@@ -259,4 +259,17 @@ describe("concierge scope", () => {
     await expectDeniedOnThreadAndTurn(t, alexId, "UNAUTHENTICATED");
     await expectDeniedOnThreadAndTurn(t, blairId, "UNAUTHENTICATED");
   });
+
+  it("reports model key status for live concierge wiring", async () => {
+    const t = await seeded();
+    const status = await t.query(api.concierge.modelKeyStatus, {});
+    expect(status.configured).toBe(
+      Boolean(
+        process.env.REALTYRISE_MODEL_API_KEY ||
+          process.env.OPENAI_API_KEY ||
+          process.env.AI_GATEWAY_API_KEY,
+      ),
+    );
+    expect(status.env).toBe("REALTYRISE_MODEL_API_KEY");
+  });
 });

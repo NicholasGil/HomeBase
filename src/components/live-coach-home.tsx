@@ -5,9 +5,14 @@ import { useQuery } from "convex/react";
 import { CoachHome } from "@/components/coach-home";
 import { useEnsureBuyerProvisioning } from "@/hooks/use-ensure-buyer-provisioning";
 import { coachScopeForBuyerDashboard } from "@/lib/coach-scope";
+import type { ConciergeAvailability } from "@/lib/concierge-availability";
 import { api } from "../../convex/_generated/api";
 
-export function LiveCoachHome() {
+export function LiveCoachHome({
+  availability = "ready",
+}: {
+  availability?: ConciergeAvailability;
+}) {
   const provisioned = useEnsureBuyerProvisioning();
   const session = useQuery(api.me.getSession, provisioned ? {} : "skip");
   const dashboard = useQuery(
@@ -33,5 +38,11 @@ export function LiveCoachHome() {
 
   const scope = coachScopeForBuyerDashboard(dashboard);
 
-  return <CoachHome scope={scope} buyerName={session.name} />;
+  return (
+    <CoachHome
+      scope={scope}
+      buyerName={session.name}
+      availability={availability}
+    />
+  );
 }

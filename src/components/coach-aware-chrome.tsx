@@ -6,6 +6,7 @@ import {
   ConciergeSheet,
   type ConciergeScope,
 } from "@/components/concierge-sheet";
+import type { ConciergeAvailability } from "@/lib/concierge-availability";
 import { MobileTabBar } from "@/components/mobile-tab-bar";
 import { BUYER_COACH_HOME } from "@/lib/buyer-shell";
 import type { AppNavLink } from "@/lib/app-nav";
@@ -14,9 +15,11 @@ import { cn } from "@/lib/utils";
 export function CoachAwareMain({
   children,
   conciergeScope,
+  conciergeAvailability = "ready",
 }: {
   children: React.ReactNode;
   conciergeScope: ConciergeScope | null;
+  conciergeAvailability?: ConciergeAvailability;
 }) {
   const pathname = usePathname();
   const coachHome =
@@ -36,7 +39,12 @@ export function CoachAwareMain({
       >
         {children}
       </main>
-      {fabScope ? <ConciergeSheet scope={fabScope} /> : null}
+      {fabScope ? (
+        <ConciergeSheet
+          scope={fabScope}
+          availability={conciergeAvailability}
+        />
+      ) : null}
     </>
   );
 }

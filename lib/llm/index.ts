@@ -18,7 +18,16 @@ export {
 export { prioritizeCommandCenterReason } from "./prioritizeCommandCenter";
 export { redactPii } from "./redact";
 export type { ConciergeAnswer, ConciergeFact } from "./types";
-export { CANONICAL_QUESTIONS } from "./types";
+export {
+  CANONICAL_QUESTIONS,
+  CONCIERGE_MODEL_UNAVAILABLE_ANSWER,
+} from "./types";
+export {
+  CONCIERGE_MODEL_KEY_ENV,
+  CONCIERGE_MODEL_KEY_ENVS,
+  conciergeModelKeyLabel,
+  conciergeModelKeyPresent,
+} from "./modelConfig";
 
 const PROMPT_FILES = {
   "concierge.v1": "prompts/concierge.v1.txt",
@@ -39,6 +48,7 @@ export function completeConcierge(input: {
   question: string;
   facts: readonly ConciergeFact[];
   otherClientNames?: readonly string[];
+  requireModelKey?: boolean;
 }): ConciergeAnswer {
   const question = redactPii(input.question);
   const facts = input.facts.map((fact) => ({
@@ -60,7 +70,9 @@ export function completeConcierge(input: {
   }
 
   void loadPrompt("concierge.v1");
-  return answerConcierge(question, facts);
+  return answerConcierge(question, facts, {
+    requireModelKey: input.requireModelKey,
+  });
 }
 
 export function completeExplainer() {

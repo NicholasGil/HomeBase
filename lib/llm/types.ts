@@ -17,8 +17,15 @@ export type ConciergeFact = {
 
 export type ConciergeAnswer = {
   text: string;
-  kind: "answer" | "refuse" | "ask_agent";
+  kind: "answer" | "refuse" | "ask_agent" | "unavailable";
   sources: string[];
+};
+
+export const CONCIERGE_MODEL_UNAVAILABLE_ANSWER: ConciergeAnswer = {
+  kind: "unavailable",
+  text:
+    "AI coach unavailable — model key not configured. You can still read your journey and documents on this file. Contact your agent if one is on file, or try again later.",
+  sources: [],
 };
 
 export const CANONICAL_QUESTIONS = [

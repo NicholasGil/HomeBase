@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { COACH_FIRST_SESSION_STARTERS } from "@/lib/coach-first-session";
 import { SEED_CLERK_IDS } from "../../../convex/seedPlan";
@@ -26,6 +26,11 @@ describe("askConcierge", () => {
   beforeEach(() => {
     getTestSessionMock.mockReset();
     clerkBuyerConciergeFactsMock.mockReset();
+    process.env.OPENAI_API_KEY = "sk-test-fixture";
+  });
+
+  afterEach(() => {
+    delete process.env.OPENAI_API_KEY;
   });
 
   async function ask(question: string) {
@@ -56,6 +61,19 @@ describe("askConcierge", () => {
     expect(result).toEqual({ ok: false, reason: "FORBIDDEN" });
   });
 
+  it("returns MODEL_KEY_NOT_CONFIGURED when fixture simulates missing key", async () => {
+    getTestSessionMock.mockResolvedValue({
+      clerkId: SEED_CLERK_IDS.buyerA,
+      name: "Alex",
+      role: "buyer",
+      transactionId: "seed:buyer-a",
+      simulateModelKeyMissing: true,
+    });
+
+    const result = await ask(COACH_FIRST_SESSION_STARTERS[0]!);
+    expect(result).toEqual({ ok: false, reason: "MODEL_KEY_NOT_CONFIGURED" });
+  });
+
   it("answers for fixture buyer with discovery-empty file", async () => {
     getTestSessionMock.mockResolvedValue({
       clerkId: SEED_CLERK_IDS.buyerA,
@@ -72,6 +90,24 @@ describe("askConcierge", () => {
       expect(result.answer.text).toContain("No property is on this file yet");
     }
     expect(clerkBuyerConciergeFactsMock).not.toHaveBeenCalled();
+  });
+
+  it("returns MODEL_KEY_NOT_CONFIGURED for Clerk buyer when no model key", async () => {
+    delete process.env.OPENAI_API_KEY;
+    getTestSessionMock.mockResolvedValue(null);
+    clerkBuyerConciergeFactsMock.mockResolvedValue({
+      ok: true,
+      facts: [
+        {
+          key: "next",
+          text: "Next is Schedule inspection, assigned to agent.",
+          source: "tasks",
+        },
+      ],
+    });
+
+    const result = await ask(COACH_FIRST_SESSION_STARTERS[0]!);
+    expect(result).toEqual({ ok: false, reason: "MODEL_KEY_NOT_CONFIGURED" });
   });
 
   it("answers for Clerk buyer in server-derived discovery-empty scope", async () => {

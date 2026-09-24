@@ -6,7 +6,10 @@ import { cn } from "@/lib/utils";
 
 import { askConcierge } from "@/app/actions/concierge";
 import { ConciergeAnswerView } from "@/components/concierge-answer";
+import { ConciergeUnavailableState } from "@/components/concierge-unavailable";
 import { Button } from "@/components/ui/button";
+import type { ConciergeAvailability } from "@/lib/concierge-availability";
+import { CONCIERGE_MODEL_UNAVAILABLE_ANSWER } from "../../lib/llm/types";
 
 /**
  * The eight canonical questions from DESIGN.md §M3, phrased the way a buyer
@@ -24,22 +27,29 @@ export const CONCIERGE_STARTERS = [
   "When do I leave for my first showing?",
 ] as const;
 
+const CHIP_DISABLED_REASON =
+  "AI coach unavailable — model key not configured on this deployment.";
+
 export function ConciergeChat({
   className,
   starters = CONCIERGE_STARTERS,
   idleHint = "Pick a question above or ask about this transaction. I explain what is on this file; I do not advise.",
   questionPlaceholder = "Ask about this transaction",
+  availability = "ready",
   /** Renders inside the scroll region (e.g. first-session empty state). */
   scrollIntro,
   /** Keep starters fixed above the scroll area on 375 so the fold shows chips + Ask. */
   pinStartersAboveScrollOnMobile = false,
+  showAgentLinkWhenUnavailable = true,
 }: {
   className?: string;
   starters?: readonly string[];
   idleHint?: string;
   questionPlaceholder?: string;
+  availability?: ConciergeAvailability;
   scrollIntro?: ReactNode;
   pinStartersAboveScrollOnMobile?: boolean;
+  showAgentLinkWhenUnavailable?: boolean;
 }) {
   const [question, setQuestion] = useState("");
   const [asked, setAsked] = useState<string | null>(null);
@@ -48,9 +58,10 @@ export function ConciergeChat({
   const [busy, setBusy] = useState(false);
   const firstSessionThreadRef = useRef<HTMLDivElement>(null);
 
+  const coachUnavailable = availability === "model_key_missing";
   const pinFirstSessionMobile = pinStartersAboveScrollOnMobile;
   const showPinnedFirstSessionThread =
-    pinFirstSessionMobile && asked !== null;
+    pinFirstSessionMobile && asked !== null && !coachUnavailable;
   const mobileReplyGrid =
     pinFirstSessionMobile && showPinnedFirstSessionThread;
 
@@ -64,14 +75,28 @@ export function ConciergeChat({
     });
   }, [answer, showPinnedFirstSessionThread]);
 
+  function showUnavailableAnswer() {
+    setAnswer(CONCIERGE_MODEL_UNAVAILABLE_ANSWER.text);
+    setKind(CONCIERGE_MODEL_UNAVAILABLE_ANSWER.kind);
+  }
+
   async function submit(nextQuestion: string) {
+    if (coachUnavailable) {
+      setAsked(nextQuestion);
+      showUnavailableAnswer();
+      return;
+    }
     setBusy(true);
     setAsked(nextQuestion);
     setAnswer(null);
     const result = await askConcierge({ question: nextQuestion });
     if (!result.ok) {
-      setAnswer("You cannot ask the concierge.");
-      setKind("refuse");
+      if (result.reason === "MODEL_KEY_NOT_CONFIGURED") {
+        showUnavailableAnswer();
+      } else {
+        setAnswer("You cannot ask the concierge.");
+        setKind("refuse");
+      }
     } else {
       setAnswer(result.answer.text);
       setKind(result.answer.kind);
@@ -86,15 +111,22 @@ export function ConciergeChat({
     const omitUserBubble = options?.omitUserBubble === true;
     return (
       <>
-        {asked === null ? (
+        {coachUnavailable && asked === null ? (
+          <ConciergeUnavailableState
+            showAgentLink={showAgentLinkWhenUnavailable}
+            className="my-auto"
+          />
+        ) : null}
+        {!coachUnavailable && asked === null ? (
           <p className="my-auto text-center text-sm text-muted-foreground">
             {idleHint}
           </p>
-        ) : omitUserBubble ? null : (
+        ) : null}
+        {asked !== null && !omitUserBubble ? (
           <p className="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-primary px-4 py-2.5 text-sm text-primary-foreground">
             {asked}
           </p>
-        )}
+        ) : null}
         {busy ? (
           <p className="text-sm text-muted-foreground">Checking this file…</p>
         ) : null}
@@ -108,6 +140,58 @@ export function ConciergeChat({
           />
         ) : null}
       </>
+    );
+  }
+
+  const unavailableCompose = (
+    <div
+      className={cn(
+        "shrink-0 md:static",
+        "max-md:sticky max-md:z-10 max-md:-mx-5 max-md:bottom-[var(--coach-compose-clearance)] max-md:px-5 max-md:pb-[env(safe-area-inset-bottom)]",
+      )}
+      data-testid="concierge-compose"
+    >
+      <div
+        className="flex gap-2 border-t border-border/70 bg-card/95 pt-3 shadow-[0_-8px_24px_-12px_rgba(15,23,42,0.14)] backdrop-blur md:bg-card md:shadow-none md:backdrop-blur-none"
+        aria-hidden
+      >
+        <div
+          className="min-h-11 min-w-0 flex-1 rounded-full border border-dashed border-border/80 bg-muted/40 px-4 text-sm text-muted-foreground"
+        />
+        <Button
+          type="button"
+          data-testid="concierge-ask"
+          className="h-11 rounded-full px-5"
+          disabled
+          title={CHIP_DISABLED_REASON}
+        >
+          Ask
+        </Button>
+      </div>
+    </div>
+  );
+
+  if (coachUnavailable) {
+    return (
+      <section
+        data-testid="concierge"
+        data-concierge-availability={availability}
+        aria-label="Transaction concierge"
+        className={cn("flex min-h-0 flex-col", className)}
+      >
+        <div
+          className={cn(
+            "flex min-h-0 flex-1 flex-col overflow-y-auto py-3 max-md:py-2",
+            "max-md:pb-[var(--coach-compose-inset)]",
+          )}
+        >
+          <ConciergeUnavailableState
+            showAgentLink={showAgentLinkWhenUnavailable}
+            className="my-0 max-md:gap-3 max-md:py-5 max-md:[&_[data-slot=empty-title]]:text-base max-md:[&_[data-slot=empty-title]]:leading-snug max-md:[&_[data-slot=empty-description]]:text-small"
+          />
+        </div>
+        {unavailableCompose}
+      </section>
     );
   }
 
@@ -126,7 +210,8 @@ export function ConciergeChat({
             pinFirstSessionMobile &&
               "max-md:min-h-11 max-md:px-3 max-md:py-1.5 max-md:text-xs max-md:leading-snug",
           )}
-          disabled={busy}
+          disabled={busy || coachUnavailable}
+          title={coachUnavailable ? CHIP_DISABLED_REASON : undefined}
           onClick={() => {
             setQuestion(starter);
             void submit(starter);
@@ -141,6 +226,7 @@ export function ConciergeChat({
   return (
     <section
       data-testid="concierge"
+      data-concierge-availability={availability}
       aria-label="Transaction concierge"
       className={cn(
         "flex min-h-0 flex-col",
@@ -216,21 +302,33 @@ export function ConciergeChat({
           )}
           onSubmit={(event) => {
             event.preventDefault();
+            if (coachUnavailable) {
+              return;
+            }
             void submit(question);
           }}
         >
           <input
             data-testid="concierge-question"
-            className="min-h-11 min-w-0 flex-1 rounded-full border bg-background px-4 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 max-md:text-[0.8125rem]"
+            className="min-h-11 min-w-0 flex-1 rounded-full border bg-background px-4 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 max-md:text-[0.8125rem] disabled:cursor-not-allowed disabled:opacity-60"
             value={question}
             onChange={(event) => setQuestion(event.target.value)}
-            placeholder={questionPlaceholder}
+            placeholder={
+              coachUnavailable
+                ? "AI coach unavailable on this deployment"
+                : questionPlaceholder
+            }
+            disabled={coachUnavailable}
+            aria-disabled={coachUnavailable}
           />
           <Button
             type="submit"
             data-testid="concierge-ask"
             className="h-11 rounded-full px-5"
-            disabled={busy || question.trim().length === 0}
+            disabled={
+              coachUnavailable || busy || question.trim().length === 0
+            }
+            title={coachUnavailable ? CHIP_DISABLED_REASON : undefined}
           >
             Ask
           </Button>

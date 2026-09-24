@@ -15,6 +15,7 @@ import {
   isCoachDiscoveryEmptyScope,
 } from "@/lib/coach-first-session";
 import { COACH_ENTRY_PRICE_LABEL } from "@/lib/pricing";
+import type { ConciergeAvailability } from "@/lib/concierge-availability";
 import { cn } from "@/lib/utils";
 import { MessageCircle } from "lucide-react";
 
@@ -22,12 +23,15 @@ export function CoachHome({
   scope,
   buyerName,
   eyebrow,
+  availability = "ready",
 }: {
   scope: ConciergeScope;
   buyerName: string;
   eyebrow?: string;
+  availability?: ConciergeAvailability;
 }) {
   const firstSession = isCoachDiscoveryEmptyScope(scope);
+  const coachUnavailable = availability === "model_key_missing";
   const firstName = buyerName.split(" ")[0];
 
   return (
@@ -111,12 +115,14 @@ export function CoachHome({
             "min-h-0 flex-1 px-5 pb-5",
             firstSession ? "pt-2 max-md:pt-2 md:pt-4" : "pt-4",
           )}
+          availability={availability}
+          showAgentLinkWhenUnavailable={!firstSession}
           starters={
             firstSession ? COACH_FIRST_SESSION_STARTERS : undefined
           }
-          pinStartersAboveScrollOnMobile={firstSession}
+          pinStartersAboveScrollOnMobile={firstSession && !coachUnavailable}
           scrollIntro={
-            firstSession
+            firstSession && !coachUnavailable
               ? (
                   <EmptyState
                     testId="coach-first-session-empty"

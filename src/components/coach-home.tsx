@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { ConciergeChat } from "@/components/concierge-chat";
+import { CoachConciergeSession } from "@/components/coach-concierge-session";
 import {
   BuyerLockedUpsellRail,
 } from "@/components/buyer-locked-upsell";
@@ -25,12 +25,14 @@ import type { BuyerDashboardView } from "../../convex/lib/dashboardView";
 export function CoachHome({
   scope,
   buyerName,
+  sessionIdentity,
   eyebrow,
   availability = "ready",
   dashboardView = null,
 }: {
   scope: ConciergeScope;
   buyerName: string;
+  sessionIdentity: string;
   eyebrow?: string;
   availability?: ConciergeAvailability;
   dashboardView?: BuyerDashboardView | null;
@@ -134,18 +136,19 @@ export function CoachHome({
             />
           </div>
         ) : null}
-        <ConciergeChat
+        <CoachConciergeSession
+          identity={sessionIdentity}
+          scope={scope}
+          dashboardView={dashboardView}
           className={cn(
             "min-h-0 flex-1 px-5 pb-5",
             firstSession ? "pt-2 max-md:pt-2 md:pt-4" : "pt-4",
           )}
           availability={availability}
           showAgentLinkWhenUnavailable={!firstSession}
-          starters={
-            firstSession ? COACH_FIRST_SESSION_STARTERS : undefined
-          }
+          firstSessionStarters={COACH_FIRST_SESSION_STARTERS}
           pinStartersAboveScrollOnMobile={firstSession && !coachUnavailable}
-          scrollIntro={
+          firstSessionScrollIntro={
             firstSession && !coachUnavailable
               ? (
                   <EmptyState
@@ -167,12 +170,10 @@ export function CoachHome({
                 )
               : undefined
           }
-          idleHint={
-            firstSession
-              ? "Tap a starter or type a question."
-              : undefined
+          firstSessionIdleHint={
+            firstSession ? "Tap a starter or type a question." : undefined
           }
-          questionPlaceholder={
+          firstSessionQuestionPlaceholder={
             firstSession ? "Ask about buying" : undefined
           }
         />

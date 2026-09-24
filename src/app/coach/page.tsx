@@ -64,6 +64,7 @@ export default async function CoachPage() {
         <CoachHome
           scope={conciergeScopeFor(session)}
           buyerName={session.name}
+          sessionIdentity={session.clerkId}
           eyebrow="Fixture session · not Clerk"
           availability={coachAvailability}
           dashboardView={dashboardView}

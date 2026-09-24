@@ -39,10 +39,11 @@ test("concierge answers a seed question and refuses another client", async ({
   );
 
   await page.getByRole("button", { name: "When is my inspection?" }).click();
-  await expect(page.getByTestId("concierge-answer")).toContainText(
+  const latestAnswer = page.getByTestId("concierge-answer").last();
+  await expect(latestAnswer).toContainText(
     "Inspection is at Tue, Sep 8, 2026, 10:00 AM CDT.",
   );
-  await expect(page.getByTestId("concierge-answer")).not.toContainText(
+  await expect(latestAnswer).not.toContainText(
     /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/,
   );
 
@@ -50,14 +51,9 @@ test("concierge answers a seed question and refuses another client", async ({
     "What happens next on Blair Chen's file?",
   );
   await page.getByTestId("concierge-ask").click();
-  await expect(page.getByTestId("concierge-answer")).toHaveAttribute(
-    "data-kind",
-    "refuse",
-  );
-  await expect(page.getByTestId("concierge-answer")).toContainText(
-    "another client's file",
-  );
-  await expect(page.getByTestId("concierge-answer")).not.toContainText("$");
+  await expect(latestAnswer).toHaveAttribute("data-kind", "refuse");
+  await expect(latestAnswer).toContainText("another client's file");
+  await expect(latestAnswer).not.toContainText("$");
 });
 
 test.describe("coach home concierge", () => {
@@ -107,7 +103,7 @@ test.describe("coach home concierge", () => {
     await expect(page.getByTestId("concierge")).toBeVisible();
 
     await page.getByRole("button", { name: "How much cash will I need?" }).click();
-    const answer = page.getByTestId("concierge-answer");
+    const answer = page.getByTestId("concierge-answer").last();
     await expect(answer).toHaveAttribute("data-kind", "answer");
     await expect(answer.locator("[data-provenance='title_issued']")).toBeVisible();
     await expect(answer).toContainText("$450.00");

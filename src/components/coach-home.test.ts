@@ -15,6 +15,7 @@ describe("CoachHome ten-second on file session", () => {
           stage: "Inspection",
         },
         buyerName: "Alex Rivera",
+        sessionIdentity: "clerk_buyer_a",
         dashboardView: view,
       }),
     );
@@ -22,9 +23,9 @@ describe("CoachHome ten-second on file session", () => {
     expect(html).toContain('data-testid="coach-ten-second"');
     expect(html).toContain('data-testid="ten-second-where"');
     expect(html).toContain('data-testid="ten-second-done"');
-    expect(html).toContain('data-testid="concierge"');
+    expect(html).toContain('data-testid="coach-concierge-session"');
     expect(html.indexOf('data-testid="coach-ten-second"')).toBeLessThan(
-      html.indexOf('data-testid="concierge"'),
+      html.indexOf('data-testid="coach-concierge-session"'),
     );
   });
 });

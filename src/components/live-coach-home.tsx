@@ -42,6 +42,7 @@ export function LiveCoachHome({
     <CoachHome
       scope={scope}
       buyerName={session.name}
+      sessionIdentity={session.userId}
       availability={availability}
       dashboardView={dashboard}
     />

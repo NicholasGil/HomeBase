@@ -9,6 +9,7 @@ import { ConciergeAnswerView } from "@/components/concierge-answer";
 import { ConciergeUnavailableState } from "@/components/concierge-unavailable";
 import { Button } from "@/components/ui/button";
 import type { ConciergeAvailability } from "@/lib/concierge-availability";
+import type { CoachConciergeTurn } from "@/lib/coach-session-storage";
 import { CONCIERGE_MODEL_UNAVAILABLE_ANSWER } from "../../lib/llm/types";
 
 /**
@@ -48,6 +49,10 @@ export function ConciergeChat({
   /** Keep starters fixed above the scroll area on 375 so the fold shows chips + Ask. */
   pinStartersAboveScrollOnMobile = false,
   showAgentLinkWhenUnavailable = true,
+  initialThread = [],
+  onThreadChange,
+  queuedQuestion = null,
+  onQueuedQuestionConsumed,
 }: {
   className?: string;
   starters?: readonly string[];
@@ -57,57 +62,100 @@ export function ConciergeChat({
   scrollIntro?: ReactNode;
   pinStartersAboveScrollOnMobile?: boolean;
   showAgentLinkWhenUnavailable?: boolean;
+  initialThread?: CoachConciergeTurn[];
+  onThreadChange?: (turns: CoachConciergeTurn[]) => void;
+  queuedQuestion?: string | null;
+  onQueuedQuestionConsumed?: () => void;
 }) {
   const [question, setQuestion] = useState("");
-  const [asked, setAsked] = useState<string | null>(null);
-  const [answer, setAnswer] = useState<string | null>(null);
-  const [kind, setKind] = useState<string | null>(null);
+  const [turns, setTurns] = useState<CoachConciergeTurn[]>(() => [
+    ...initialThread,
+  ]);
+  const [inFlightQuestion, setInFlightQuestion] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const firstSessionThreadRef = useRef<HTMLDivElement>(null);
 
   const coachUnavailable = availability === "model_key_missing";
   const pinFirstSessionMobile = pinStartersAboveScrollOnMobile;
+  const hasConversation = turns.length > 0 || inFlightQuestion !== null;
   const showPinnedFirstSessionThread =
-    pinFirstSessionMobile && asked !== null && !coachUnavailable;
+    pinFirstSessionMobile && hasConversation && !coachUnavailable;
   const mobileReplyGrid =
     pinFirstSessionMobile && showPinnedFirstSessionThread;
 
   useEffect(() => {
-    if (answer === null || !showPinnedFirstSessionThread) {
+    if (queuedQuestion === null || queuedQuestion.trim().length === 0) {
+      return;
+    }
+    const next = queuedQuestion;
+    onQueuedQuestionConsumed?.();
+    void submit(next);
+    // submit is intentionally omitted — one-shot external ask per queuedQuestion change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queuedQuestion, onQueuedQuestionConsumed]);
+
+  useEffect(() => {
+    if (!showPinnedFirstSessionThread || turns.length === 0) {
       return;
     }
     firstSessionThreadRef.current?.scrollIntoView({
       block: "nearest",
       inline: "nearest",
     });
-  }, [answer, showPinnedFirstSessionThread]);
+  }, [turns.length, showPinnedFirstSessionThread]);
 
-  function showUnavailableAnswer() {
-    setAnswer(CONCIERGE_MODEL_UNAVAILABLE_ANSWER.text);
-    setKind(CONCIERGE_MODEL_UNAVAILABLE_ANSWER.kind);
+  function unavailableTurn(question: string): CoachConciergeTurn {
+    return {
+      question,
+      answer: CONCIERGE_MODEL_UNAVAILABLE_ANSWER.text,
+      kind: CONCIERGE_MODEL_UNAVAILABLE_ANSWER.kind,
+    };
   }
 
   async function submit(nextQuestion: string) {
+    const trimmed = nextQuestion.trim();
+    if (trimmed.length === 0) {
+      return;
+    }
     if (coachUnavailable) {
-      setAsked(nextQuestion);
-      showUnavailableAnswer();
+      setInFlightQuestion(trimmed);
+      setTurns((prev) => {
+        const next = [...prev, unavailableTurn(trimmed)];
+        onThreadChange?.(next);
+        return next;
+      });
+      setInFlightQuestion(null);
+      setQuestion("");
       return;
     }
     setBusy(true);
-    setAsked(nextQuestion);
-    setAnswer(null);
-    const result = await askConcierge({ question: nextQuestion });
+    setInFlightQuestion(trimmed);
+    setQuestion("");
+    const result = await askConcierge({ question: trimmed });
+    let completed: CoachConciergeTurn;
     if (!result.ok) {
       if (result.reason === "MODEL_KEY_NOT_CONFIGURED") {
-        showUnavailableAnswer();
+        completed = unavailableTurn(trimmed);
       } else {
-        setAnswer("You cannot ask the concierge.");
-        setKind("refuse");
+        completed = {
+          question: trimmed,
+          answer: "You cannot ask the concierge.",
+          kind: "refuse",
+        };
       }
     } else {
-      setAnswer(result.answer.text);
-      setKind(result.answer.kind);
+      completed = {
+        question: trimmed,
+        answer: result.answer.text,
+        kind: result.answer.kind,
+      };
     }
+    setTurns((prev) => {
+      const next = [...prev, completed];
+      onThreadChange?.(next);
+      return next;
+    });
+    setInFlightQuestion(null);
     setBusy(false);
   }
 
@@ -116,35 +164,53 @@ export function ConciergeChat({
 
   function renderConversation(options?: { omitUserBubble?: boolean }) {
     const omitUserBubble = options?.omitUserBubble === true;
+    const lastIndex = turns.length - 1;
     return (
       <>
-        {coachUnavailable && asked === null ? (
+        {coachUnavailable && !hasConversation ? (
           <ConciergeUnavailableState
             showAgentLink={showAgentLinkWhenUnavailable}
             className="my-auto"
           />
         ) : null}
-        {!coachUnavailable && asked === null ? (
+        {!coachUnavailable && !hasConversation ? (
           <p className="my-auto text-center text-sm text-muted-foreground">
             {idleHint}
           </p>
         ) : null}
-        {asked !== null && !omitUserBubble ? (
-          <p className="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-primary px-4 py-2.5 text-sm text-primary-foreground">
-            {asked}
-          </p>
-        ) : null}
-        {busy ? (
-          <p className="text-sm text-muted-foreground">Checking this file…</p>
-        ) : null}
-        {answer !== null ? (
-          <ConciergeAnswerView
-            text={answer}
-            kind={kind}
-            className={
-              omitUserBubble ? compactFirstSessionAnswer : undefined
-            }
-          />
+        {turns.map((turn, index) => {
+          const hideUser =
+            omitUserBubble && index === lastIndex && inFlightQuestion === null;
+          return (
+            <div
+              key={`${turn.question}-${index}`}
+              className="flex flex-col gap-3"
+              data-testid={
+                index === lastIndex ? "concierge-thread-turn" : undefined
+              }
+            >
+              {!hideUser ? (
+                <p className="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-primary px-4 py-2.5 text-sm text-primary-foreground">
+                  {turn.question}
+                </p>
+              ) : null}
+              <ConciergeAnswerView
+                text={turn.answer}
+                kind={turn.kind}
+                className={
+                  hideUser ? compactFirstSessionAnswer : undefined
+                }
+              />
+            </div>
+          );
+        })}
+        {inFlightQuestion !== null && busy ? (
+          <>
+            <p className="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-primary px-4 py-2.5 text-sm text-primary-foreground">
+              {inFlightQuestion}
+            </p>
+            <p className="text-sm text-muted-foreground">Checking this file…</p>
+          </>
         ) : null}
       </>
     );
@@ -279,7 +345,7 @@ export function ConciergeChat({
           {starterChips}
         </div>
 
-        {scrollIntro && !(pinFirstSessionMobile && asked !== null) ? (
+        {scrollIntro && !(pinFirstSessionMobile && hasConversation) ? (
           <div className="shrink-0">{scrollIntro}</div>
         ) : null}
 

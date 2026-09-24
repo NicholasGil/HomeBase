@@ -175,8 +175,20 @@ test("coach first-session proof screenshots @375", async ({ page }) => {
 
   const expandedPaths: string[] = [];
   for (const label of FIRST_SESSION_STARTERS) {
-    await signInAlexDiscoveryEmpty(page);
-    await page.getByRole("button", { name: label }).click();
+    await page.goto("/test-login");
+    await page.evaluate(() => {
+      window.localStorage.clear();
+      window.sessionStorage.clear();
+    });
+    await page
+      .getByTestId("sign-in-alex-discovery-empty")
+      .getByRole("button")
+      .click();
+    await expect(page).toHaveURL(/\/coach$/);
+    await page
+      .getByTestId("concierge")
+      .getByRole("button", { name: label })
+      .click();
     await expect(
       page
         .getByTestId("concierge-first-session-thread")

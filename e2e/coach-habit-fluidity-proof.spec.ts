@@ -156,9 +156,11 @@ test("coach habit fluidity — chip center hits + scroll-end clearance @375", as
     .first()
     .getByRole("button", { name: fileReturnStarter })
     .click();
-  await expect(
-    page.getByTestId("concierge-scroll-region").getByTestId("concierge-answer"),
-  ).toHaveAttribute("data-kind", "answer", { timeout: 15_000 });
+  await expect(page.getByTestId("concierge-answer")).toHaveAttribute(
+    "data-kind",
+    "answer",
+    { timeout: 15_000 },
+  );
 
   await page.goto("/pricing");
   await page.getByTestId("pricing-continue-coach").click();

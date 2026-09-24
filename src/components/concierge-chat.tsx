@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -36,6 +42,26 @@ const MOBILE_COMPOSE_DOCK =
 
 const MOBILE_COMPOSE_GRID =
   "max-md:row-start-3 max-md:-mx-5 max-md:px-5 max-md:pb-[env(safe-area-inset-bottom)]";
+
+const COACH_MOBILE_MQ = "(max-width: 767px)";
+
+function subscribeCoachMobileMq(onChange: () => void) {
+  const mq = window.matchMedia(COACH_MOBILE_MQ);
+  mq.addEventListener("change", onChange);
+  return () => mq.removeEventListener("change", onChange);
+}
+
+function getCoachMobileMqSnapshot() {
+  return window.matchMedia(COACH_MOBILE_MQ).matches;
+}
+
+function useCoachMaxMdViewport() {
+  return useSyncExternalStore(
+    subscribeCoachMobileMq,
+    getCoachMobileMqSnapshot,
+    () => false,
+  );
+}
 
 export type ConciergePersistedTurn = {
   asked: string;
@@ -100,6 +126,11 @@ export function ConciergeChat({
       : showPinnedMobileThread && pinFirstSessionMobile
         ? "concierge-first-session-thread"
         : undefined;
+  const coachMaxMd = useCoachMaxMdViewport();
+  const renderPinnedMobileThread =
+    showPinnedMobileThread && coachMaxMd;
+  const renderScrollPinnedThread =
+    showPinnedMobileThread && !coachMaxMd;
 
   useEffect(() => {
     if (answer === null || !showPinnedMobileThread) {
@@ -311,12 +342,12 @@ export function ConciergeChat({
           {starterChips}
         </div>
       ) : null}
-      {showPinnedMobileThread ? (
+      {renderPinnedMobileThread ? (
         <div
           ref={pinnedThreadRef}
           aria-live="polite"
           data-testid={pinnedThreadTestId}
-          className="flex min-h-0 flex-col gap-0 overflow-y-auto overflow-x-hidden py-0.5 max-md:row-start-2 max-md:block md:hidden"
+          className="flex min-h-0 flex-col gap-0 overflow-y-auto overflow-x-hidden py-0.5 max-md:row-start-2"
         >
           {renderConversation({ omitUserBubble: true })}
         </div>
@@ -327,7 +358,7 @@ export function ConciergeChat({
           "flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto py-4",
           "max-md:pb-[var(--coach-compose-inset)]",
           pinMobileChips && "max-md:pt-0",
-          showPinnedMobileThread && "max-md:hidden",
+          renderPinnedMobileThread && "max-md:hidden",
         )}
       >
         <div className={cn(pinMobileChips && "max-md:hidden")}>
@@ -342,11 +373,9 @@ export function ConciergeChat({
           aria-live={showPinnedMobileThread ? "off" : "polite"}
           className="flex min-h-0 flex-1 flex-col gap-3"
         >
-          {showPinnedMobileThread ? (
-            <div className="hidden min-h-0 flex-1 flex-col gap-3 md:flex">
-              {renderConversation()}
-            </div>
-          ) : (
+          {renderScrollPinnedThread ? (
+            renderConversation()
+          ) : renderPinnedMobileThread ? null : (
             renderConversation()
           )}
         </div>

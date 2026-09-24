@@ -2,6 +2,12 @@ import Link from "next/link";
 
 import { buttonVariants } from "@/components/ui/button";
 import {
+  BUYER_AUTH_PREVIEW_CREATE_ACCOUNT_LABEL,
+  BUYER_AUTH_PREVIEW_ENV_TAIL,
+  BUYER_AUTH_PREVIEW_SIGN_IN_LEAD,
+  BUYER_AUTH_PREVIEW_SIGN_UP_LEAD,
+} from "@/lib/buyer-auth-guest-copy";
+import {
   BUYER_PREVIEW_FIXTURE_LOGIN,
   BUYER_SOLD_SIGN_IN,
   BUYER_SOLD_SIGN_UP,
@@ -23,23 +29,31 @@ export function BuyerAuthPreviewFallback({ mode }: BuyerAuthPreviewFallbackProps
       <h1 className="text-h1 font-semibold tracking-tight">
         {isSignIn ? "Sign in" : "Create your account"}
       </h1>
-      <p
-        data-testid="buyer-auth-env-notice"
-        className="max-w-xl text-body text-muted-foreground"
-      >
-        {isSignIn
-          ? "Buyers sign in with Clerk and land on your personal coach at "
-          : "Buyers create an account with Clerk and start on your personal coach at "}
-        <Link className="underline" href="/coach">/coach</Link>. Full Clerk
-        sign-in is not available in this preview yet—use the options below to
-        continue in demo or when your deployment is live.
-      </p>
+      <div className="space-y-3">
+        <p
+          data-testid="buyer-auth-env-notice"
+          className="max-w-xl text-pretty text-body text-muted-foreground"
+        >
+          {isSignIn ? BUYER_AUTH_PREVIEW_SIGN_IN_LEAD : BUYER_AUTH_PREVIEW_SIGN_UP_LEAD}{" "}
+          {BUYER_AUTH_PREVIEW_ENV_TAIL}
+        </p>
+        <Link
+          href="/coach"
+          data-testid="buyer-auth-coach-link"
+          className={cn(
+            buttonVariants({ variant: "outline", size: "lg" }),
+            "h-11 min-h-11 w-full max-w-full rounded-full px-4",
+          )}
+        >
+          Open personal coach
+        </Link>
+      </div>
       <div className="flex flex-col gap-3">
         {isSignIn ? (
           <Link
             href={BUYER_SOLD_SIGN_UP}
             data-testid="sign-in-sold-path-cta"
-            className={cn(buttonVariants({ size: "lg" }), "w-full rounded-full")}
+            className={cn(buttonVariants({ size: "lg" }), "h-11 min-h-11 w-full rounded-full")}
           >
             New buyer? Create account
           </Link>
@@ -47,11 +61,11 @@ export function BuyerAuthPreviewFallback({ mode }: BuyerAuthPreviewFallbackProps
           <p
             className={cn(
               buttonVariants({ size: "lg" }),
-              "pointer-events-none w-full rounded-full opacity-60",
+              "pointer-events-none h-11 min-h-11 w-full rounded-full opacity-60",
             )}
             aria-disabled="true"
           >
-            Create account with Clerk
+            {BUYER_AUTH_PREVIEW_CREATE_ACCOUNT_LABEL}
           </p>
         )}
         {!isSignIn ? (
@@ -60,7 +74,7 @@ export function BuyerAuthPreviewFallback({ mode }: BuyerAuthPreviewFallbackProps
             data-testid="sign-up-sold-path-secondary"
             className={cn(
               buttonVariants({ variant: "outline", size: "lg" }),
-              "w-full rounded-full",
+              "h-11 min-h-11 w-full rounded-full",
             )}
           >
             Already have an account? Sign in
@@ -77,7 +91,7 @@ export function BuyerAuthPreviewFallback({ mode }: BuyerAuthPreviewFallbackProps
         }
         className={cn(
           buttonVariants({ variant: "ghost", size: "lg" }),
-          "w-full rounded-full border border-border/80",
+          "h-11 min-h-11 w-full rounded-full border border-border/80",
         )}
       >
         Fixture sign in (preview)

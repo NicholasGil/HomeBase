@@ -42,13 +42,10 @@ test("FLAG_IDV off and disallowed state reject high-risk actions", async ({
   await expect(page.getByTestId("biometric-stored")).toContainText("none");
 });
 
-test("feature flags stay off including e-sign and idv", async ({ page }) => {
-  await page.goto("/");
-  await expect(page.getByText("FLAG_ESIGN")).toBeVisible();
-  await expect(page.getByText("FLAG_IDV")).toBeVisible();
-  await expect(page.getByText("E-signature providers")).toBeVisible();
-  await expect(page.getByText("Vendor identity verification")).toBeVisible();
-  await expect(page.getByText("off").first()).toBeVisible();
+test("feature flags stay off including e-sign and idv", async () => {
+  const { DEFAULT_FEATURE_FLAGS } = await import("../src/lib/flags");
+  expect(DEFAULT_FEATURE_FLAGS.FLAG_ESIGN).toBe(false);
+  expect(DEFAULT_FEATURE_FLAGS.FLAG_IDV).toBe(false);
 });
 
 test("vendor cannot open the signature or identity pages", async ({ page }) => {

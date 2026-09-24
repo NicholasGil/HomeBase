@@ -165,7 +165,12 @@ test("coach first-session proof screenshots @375", async ({ page }) => {
 
   await page.screenshot({
     path: PROOF_PATHS.scrollEnd,
-    fullPage: false,
+    clip: {
+      x: 0,
+      y: Math.max(0, composeBox!.y - 168),
+      width: 375,
+      height: Math.min(812, composeBox!.y + composeBox!.height + 8 - Math.max(0, composeBox!.y - 168)),
+    },
   });
 
   const expandedPaths: string[] = [];

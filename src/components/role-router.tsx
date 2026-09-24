@@ -17,15 +17,24 @@ const ROLE_HOME = {
 
 export function RoleRouter() {
   const provisioned = useEnsureBuyerProvisioning();
-  const session = useQuery(api.me.getSession, provisioned ? {} : "skip");
+  const account = useQuery(
+    api.brokerageOnboarding.getStatus,
+    provisioned ? {} : "skip",
+  );
   const router = useRouter();
 
   useEffect(() => {
-    if (!provisioned || session === undefined) {
+    if (!provisioned || account === undefined) {
       return;
     }
-    router.replace(ROLE_HOME[session.role]);
-  }, [provisioned, router, session]);
+    if (account.status === "needs_onboarding") {
+      router.replace("/brokerage/onboarding");
+      return;
+    }
+    if (account.status === "ready" && account.role in ROLE_HOME) {
+      router.replace(ROLE_HOME[account.role as keyof typeof ROLE_HOME]);
+    }
+  }, [account, provisioned, router]);
 
   return <p className="text-sm text-muted-foreground">Routing by role…</p>;
 }

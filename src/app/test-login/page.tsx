@@ -58,6 +58,36 @@ export default function TestLoginPage() {
             </Button>
           </form>
           <form action={startTestSessionFromForm}>
+            <input
+              type="hidden"
+              name="clerkId"
+              value={SEED_CLERK_IDS.onboardingAgent}
+            />
+            <Button
+              type="submit"
+              variant="secondary"
+              className="h-auto min-h-11 w-full whitespace-normal py-3 leading-snug"
+              data-testid="sign-in-onboarding-agent"
+            >
+              Taylor Brooks — new agent (brokerage onboarding)
+            </Button>
+          </form>
+          <form action={startTestSessionFromForm}>
+            <input
+              type="hidden"
+              name="clerkId"
+              value={SEED_CLERK_IDS.onboardingAgentJoin}
+            />
+            <Button
+              type="submit"
+              variant="outline"
+              className="h-auto min-h-11 w-full whitespace-normal py-3 leading-snug"
+              data-testid="sign-in-onboarding-agent-join"
+            >
+              Morgan Vale — join brokerage via invite (fixture)
+            </Button>
+          </form>
+          <form action={startTestSessionFromForm}>
             <input type="hidden" name="clerkId" value={SEED_PLAN.agent.clerkId} />
             <Button type="submit" className="w-full">
               Sign in as {SEED_PLAN.agent.name}

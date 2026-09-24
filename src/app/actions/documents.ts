@@ -14,6 +14,7 @@ import {
   parseFixtureGrants,
   resolveFixtureDocument,
   revokeFixtureGrant,
+  sessionAsDocumentViewer,
   type FixtureAuditEntry,
   type FixtureGrant,
 } from "@/lib/document-access";
@@ -70,7 +71,7 @@ export async function openSeedDocument(input: { documentId: string }) {
   const session = await getTestSession();
   const grants = await readGrants();
   const resolved = resolveFixtureDocument({
-    viewer: session,
+    viewer: sessionAsDocumentViewer(session),
     documentId: input.documentId,
     grants,
   });
@@ -98,7 +99,7 @@ export async function grantSeedDocumentFromForm(formData: FormData) {
   const session = await getTestSession();
   const grants = await readGrants();
   const result = grantFixtureDocument({
-    viewer: session,
+    viewer: sessionAsDocumentViewer(session),
     documentId,
     granteeClerkId: SEED_CLERK_IDS.lender,
     grants,
@@ -124,7 +125,7 @@ export async function revokeSeedGrantFromForm(formData: FormData) {
   const session = await getTestSession();
   const grants = await readGrants();
   const result = revokeFixtureGrant({
-    viewer: session,
+    viewer: sessionAsDocumentViewer(session),
     grantId,
     grants,
   });

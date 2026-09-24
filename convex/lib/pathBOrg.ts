@@ -1,7 +1,7 @@
 import type { MutationCtx } from "../_generated/server";
 import { DEFAULT_FEATURE_FLAGS } from "./validators";
 
-/** Self-serve Path B buyers land in this org until brokerage onboarding exists. */
+/** Self-serve Path B buyers land here until they join a brokerage via invite. */
 export const PATH_B_PREVIEW_ORG_NAME = "RealtyRise Path B Preview";
 
 export async function findOrCreatePathBPreviewOrg(ctx: MutationCtx) {

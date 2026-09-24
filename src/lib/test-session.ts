@@ -1,6 +1,7 @@
 import { SEED_CLERK_IDS, SEED_PLAN } from "../../convex/seedPlan";
 import type { BuyerDashboardView } from "../../convex/lib/dashboardView";
 import { isProductionDeploy, type AuthEnv } from "@/lib/auth-config";
+import type { AppNavRole } from "@/lib/app-nav";
 import {
   clerkIdForSeedTransaction,
   seedDashboardForBuyer,
@@ -41,10 +42,21 @@ export type TestAgentSession = {
   role: "agent";
 };
 
+export type TestOnboardingAgentClerkId =
+  | typeof SEED_CLERK_IDS.onboardingAgent
+  | typeof SEED_CLERK_IDS.onboardingAgentJoin;
+
+export type TestOnboardingAgentSession = {
+  clerkId: TestOnboardingAgentClerkId;
+  name: string;
+  role: "onboarding_agent";
+};
+
 export type TestSession =
   | TestBuyerSession
   | TestVendorSession
-  | TestAgentSession;
+  | TestAgentSession
+  | TestOnboardingAgentSession;
 
 export function isTestBuyerClerkId(value: string): value is TestBuyerClerkId {
   return (
@@ -64,6 +76,21 @@ export function isTestAgentClerkId(
   value: string,
 ): value is typeof SEED_CLERK_IDS.agent {
   return value === SEED_CLERK_IDS.agent;
+}
+
+export function isTestOnboardingAgentClerkId(
+  value: string,
+): value is TestOnboardingAgentClerkId {
+  return (
+    value === SEED_CLERK_IDS.onboardingAgent ||
+    value === SEED_CLERK_IDS.onboardingAgentJoin
+  );
+}
+
+export function isTestOnboardingAgentJoinClerkId(
+  value: string,
+): value is typeof SEED_CLERK_IDS.onboardingAgentJoin {
+  return value === SEED_CLERK_IDS.onboardingAgentJoin;
 }
 
 export function encodeTestSessionCookie(session: TestSession): string {
@@ -98,6 +125,26 @@ export function startTestSessionDecision(
         clerkId,
         name: SEED_PLAN.agent.name,
         role: "agent",
+      },
+    };
+  }
+  if (isTestOnboardingAgentJoinClerkId(clerkId)) {
+    return {
+      ok: true,
+      session: {
+        clerkId,
+        name: "Morgan Vale",
+        role: "onboarding_agent",
+      },
+    };
+  }
+  if (isTestOnboardingAgentClerkId(clerkId)) {
+    return {
+      ok: true,
+      session: {
+        clerkId: SEED_CLERK_IDS.onboardingAgent,
+        name: "Taylor Brooks",
+        role: "onboarding_agent",
       },
     };
   }
@@ -160,9 +207,24 @@ export function loadSeedTransactionForViewer(
   return { ok: true, view: seedDashboardForBuyer(session.clerkId) };
 }
 
+export function navRoleFromTestSession(
+  session: TestSession | null | undefined,
+): AppNavRole | undefined {
+  if (session === null || session === undefined) {
+    return undefined;
+  }
+  if (session.role === "onboarding_agent") {
+    return undefined;
+  }
+  return session.role;
+}
+
 export function fixtureHomePath(session: TestSession) {
   if (session.role === "vendor") {
     return "/vendor";
+  }
+  if (session.role === "onboarding_agent") {
+    return "/brokerage/onboarding";
   }
   if (session.role === "agent") {
     return "/agent";

@@ -20,6 +20,9 @@ export const SEED_CLERK_IDS = {
   buyerH: "clerk_buyer_h",
   agent: "clerk_agent",
   lender: "clerk_lender",
+  onboardingAgent: "clerk_onboarding_agent",
+  /** E2E / demos: separate fixture identity so create + join tests do not share state. */
+  onboardingAgentJoin: "clerk_onboarding_agent_join",
 } as const;
 
 export type SeedCommandCenterException =
@@ -93,6 +96,9 @@ const STAGE_DEFAULT_TASKS: Record<string, SeedDefaultTask[]> = {
     },
   ],
 };
+
+/** Fixture + seed org invite used for join demos (Lookout Realty). */
+export const SEED_ORG_INVITE_CODE = "LOOKOUT1";
 
 export const SEED_PLAN = {
   org: {

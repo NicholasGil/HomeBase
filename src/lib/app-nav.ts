@@ -98,6 +98,9 @@ export function navContextFromFixtureSession(
       name: session.name,
     };
   }
+  if (session.role === "onboarding_agent") {
+    return { role: "guest", buyerClosed: false, name: session.name };
+  }
   return {
     role: session.role,
     buyerClosed: false,

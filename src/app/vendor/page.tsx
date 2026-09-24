@@ -14,6 +14,7 @@ import {
   mustFailClosed,
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
+import { navRoleFromTestSession } from "@/lib/test-session";
 import { loadSeedPortalForViewer } from "@/lib/vendor-access";
 
 export const dynamic = "force-dynamic";
@@ -51,7 +52,9 @@ export default async function VendorPage({
     if (!loaded.ok) {
       return (
         <AppShell>
-          <VendorPortalDenied action={homeActionFor(session?.role)} />
+          <VendorPortalDenied
+            action={homeActionFor(navRoleFromTestSession(session))}
+          />
         </AppShell>
       );
     }

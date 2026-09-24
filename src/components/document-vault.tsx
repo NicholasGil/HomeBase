@@ -24,18 +24,21 @@ import { ActionNotice } from "@/components/action-notice";
 import { TextLink } from "@/components/text-link";
 import {
   listFixtureDocuments,
+  sessionAsDocumentViewer,
   vaultAuditForViewer,
   vaultGrantsForViewer,
 } from "@/lib/document-access";
+import { navRoleFromTestSession } from "@/lib/test-session";
 import { seedDocumentTitle } from "@/lib/seed-documents";
 import { tripHeadingClassName } from "@/lib/trip-ui";
 
 export async function FixtureVault({ notice }: { notice?: string }) {
   const { session, grants, audit } = await loadFixtureVault();
-  const documents = listFixtureDocuments({ viewer: session, grants });
-  const visibleGrants = vaultGrantsForViewer({ viewer: session, grants });
+  const viewer = sessionAsDocumentViewer(session);
+  const documents = listFixtureDocuments({ viewer, grants });
+  const visibleGrants = vaultGrantsForViewer({ viewer, grants });
   const visibleAudit = vaultAuditForViewer({
-    viewer: session,
+    viewer,
     grants,
     audit,
   });
@@ -66,7 +69,7 @@ export async function FixtureVault({ notice }: { notice?: string }) {
             icon={FolderLock}
             title="No documents are open to you."
             description="Documents show up here once they are added to the file or granted to you."
-            action={homeActionFor(session?.role)}
+            action={homeActionFor(navRoleFromTestSession(session))}
           />
         ) : (
           documents.map((document) => {

@@ -154,4 +154,32 @@ describe("agent command center", () => {
       otherView.roster.some((row) => row.name === "Alex Rivera"),
     ).toBe(false);
   });
+
+  it("shows org roster for a newly joined agent with no assignments", async () => {
+    const t = await seeded();
+    await t.run(async (ctx) => {
+      const org = await ctx.db.query("orgs").first();
+      if (org === null) {
+        throw new Error("missing org");
+      }
+      const userId = await ctx.db.insert("users", {
+        clerkId: "clerk_joined_agent",
+        email: "joined@example.com",
+        name: "Joined Agent",
+      });
+      await ctx.db.insert("memberships", {
+        userId,
+        orgId: org._id,
+        role: "agent",
+      });
+    });
+
+    const book = await t
+      .withIdentity({ subject: "clerk_joined_agent" })
+      .query(api.commandCenter.getBook, {});
+    expect(book.scope).toBe("org");
+    expect(book.orgCount).toBe(COMMAND_CENTER_CLIENT_COUNT);
+    expect(book.view.roster).toHaveLength(COMMAND_CENTER_CLIENT_COUNT);
+    expect(book.assignedCount).toBe(0);
+  });
 });

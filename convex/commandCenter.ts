@@ -6,37 +6,115 @@ import {
   buildCommandCenter,
   FINANCING_DOCUMENT_TYPES,
   type CommandCenterClientInput,
+  type CommandCenterView,
 } from "./lib/commandCenter";
+
+export type CommandCenterBookScope = "assigned" | "org";
+
+export type CommandCenterBook = {
+  view: CommandCenterView;
+  scope: CommandCenterBookScope;
+  assignedCount: number;
+  orgCount: number;
+};
+
+async function loadBookTransactions(
+  ctx: QueryCtx,
+  user: Doc<"users">,
+  membership: Doc<"memberships">,
+) {
+  const assigned = await ctx.db
+    .query("transactions")
+    .withIndex("by_agent", (q) => q.eq("agentId", user._id))
+    .collect();
+
+  if (membership.role === "broker" || membership.role === "admin") {
+    const orgTransactions = await ctx.db
+      .query("transactions")
+      .withIndex("by_org", (q) => q.eq("orgId", membership.orgId))
+      .collect();
+    return {
+      transactions: orgTransactions,
+      scope: "org" as const,
+      assignedCount: assigned.length,
+      orgCount: orgTransactions.length,
+    };
+  }
+
+  if (assigned.length > 0) {
+    const orgTransactions = await ctx.db
+      .query("transactions")
+      .withIndex("by_org", (q) => q.eq("orgId", membership.orgId))
+      .collect();
+    return {
+      transactions: assigned,
+      scope: "assigned" as const,
+      assignedCount: assigned.length,
+      orgCount: orgTransactions.length,
+    };
+  }
+
+  const orgTransactions = await ctx.db
+    .query("transactions")
+    .withIndex("by_org", (q) => q.eq("orgId", membership.orgId))
+    .collect();
+  return {
+    transactions: orgTransactions,
+    scope: orgTransactions.length > 0 ? ("org" as const) : ("assigned" as const),
+    assignedCount: 0,
+    orgCount: orgTransactions.length,
+  };
+}
+
+async function buildBook(
+  ctx: QueryCtx,
+  user: Doc<"users">,
+  membership: Doc<"memberships">,
+): Promise<CommandCenterBook> {
+  const { transactions, scope, assignedCount, orgCount } =
+    await loadBookTransactions(ctx, user, membership);
+  const stages = await ctx.db
+    .query("journeyStages")
+    .withIndex("by_org", (q) => q.eq("orgId", membership.orgId))
+    .collect();
+  const financingStage = stages.find((stage) => stage.key === "financing");
+  const financingRequired =
+    financingStage?.requiredDocuments ?? FINANCING_DOCUMENT_TYPES;
+
+  const inputs: CommandCenterClientInput[] = [];
+  for (const transaction of transactions) {
+    inputs.push(
+      await toClientInput(ctx, {
+        transaction,
+        stages,
+        financingRequired,
+      }),
+    );
+  }
+  return {
+    view: buildCommandCenter(inputs, Date.now()),
+    scope,
+    assignedCount,
+    orgCount,
+  };
+}
+
+export const getBook = query({
+  args: {},
+  handler: async (ctx) => {
+    const { user, membership } = await requireMembership(ctx);
+    assertRole(membership, ["agent", "broker", "admin"]);
+    return await buildBook(ctx, user, membership);
+  },
+});
 
 export const getMine = query({
   args: {},
   handler: async (ctx) => {
     const { user, membership } = await requireMembership(ctx);
     assertRole(membership, ["agent"]);
-
-    const transactions = await ctx.db
-      .query("transactions")
-      .withIndex("by_agent", (q) => q.eq("agentId", user._id))
-      .collect();
-    const stages = await ctx.db
-      .query("journeyStages")
-      .withIndex("by_org", (q) => q.eq("orgId", membership.orgId))
-      .collect();
-    const financingStage = stages.find((stage) => stage.key === "financing");
-    const financingRequired =
-      financingStage?.requiredDocuments ?? FINANCING_DOCUMENT_TYPES;
-
-    const inputs: CommandCenterClientInput[] = [];
-    for (const transaction of transactions) {
-      inputs.push(
-        await toClientInput(ctx, {
-          transaction,
-          stages,
-          financingRequired,
-        }),
-      );
-    }
-    return buildCommandCenter(inputs, Date.now());
+    const book = await buildBook(ctx, user, membership);
+    return book.view;
   },
 });
 

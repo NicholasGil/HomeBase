@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { OrgInviteCta } from "@/components/org-invite-cta";
 import type { CommandCenterView } from "../../convex/lib/commandCenter";
 
 function clientKey(name: string) {
@@ -22,15 +23,30 @@ export function AgentCommandCenterView({
   view,
   agentName,
   eyebrow,
+  orgName,
+  inviteCode,
+  bookScope = "assigned",
 }: {
   view: CommandCenterView;
   agentName?: string;
   eyebrow?: string;
+  orgName?: string;
+  inviteCode?: string | null;
+  bookScope?: "assigned" | "org";
 }) {
+  const isEmpty = view.roster.length === 0;
+  const orgRosterEyebrow =
+    bookScope === "org" && !isEmpty
+      ? "Brokerage roster · not assigned to you yet"
+      : undefined;
+
   return (
     <div className="space-y-8" data-testid="command-center">
       <section className="space-y-2">
         {eyebrow ? <Badge variant="sage">{eyebrow}</Badge> : null}
+        {orgRosterEyebrow ? (
+          <Badge variant="outline">{orgRosterEyebrow}</Badge>
+        ) : null}
         <p className="text-sm text-muted-foreground">
           {agentName ?? "Assigned clients"}
         </p>
@@ -38,11 +54,32 @@ export function AgentCommandCenterView({
           Command center
         </h1>
         <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-          Every assigned client and today&apos;s exceptions. Priority is the
-          daily list.
+          {isEmpty
+            ? orgName
+              ? `${orgName} has no assigned clients yet. Invite buyers with your org code when you are ready.`
+              : "Your book is empty until clients are assigned or invited."
+            : bookScope === "org"
+              ? "Your brokerage already has active clients. Priority shows org-wide exceptions until files are assigned to you."
+              : "Every assigned client and today's exceptions. Priority is the daily list."}
         </p>
       </section>
 
+      {isEmpty ? (
+        <Card data-testid="command-center-empty">
+          <CardHeader>
+            <CardTitle>No clients yet</CardTitle>
+            <CardDescription>
+              This is expected for a new brokerage. MLS search and map keys stay
+              off in preview — invite people with your org code when you are ready.
+            </CardDescription>
+          </CardHeader>
+          {inviteCode ? (
+            <CardContent>
+              <OrgInviteCta inviteCode={inviteCode} />
+            </CardContent>
+          ) : null}
+        </Card>
+      ) : (
       <section className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
         <Card data-testid="command-center-priority">
           <CardHeader>
@@ -132,6 +169,7 @@ export function AgentCommandCenterView({
           </CardContent>
         </Card>
       </section>
+      )}
     </div>
   );
 }

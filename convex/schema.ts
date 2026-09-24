@@ -46,11 +46,14 @@ export default defineSchema({
   orgs: defineTable({
     name: v.string(),
     state: v.string(),
+    inviteCode: v.optional(v.string()),
     settings: v.object({
       timezone: v.optional(v.string()),
     }),
     flags: featureFlagsValidator,
-  }).index("by_name", ["name"]),
+  })
+    .index("by_name", ["name"])
+    .index("by_inviteCode", ["inviteCode"]),
 
   users: defineTable({
     clerkId: v.string(),

@@ -222,3 +222,7 @@ export function buildCommandCenter(
     priority: [...clients].sort(compareCommandCenterClients),
   };
 }
+
+export function emptyCommandCenterView(): CommandCenterView {
+  return { roster: [], priority: [] };
+}

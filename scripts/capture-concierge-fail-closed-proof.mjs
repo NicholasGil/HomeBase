@@ -21,17 +21,19 @@ async function main() {
   const page = await context.newPage();
 
   await signInCoachUnavailable(page);
-  await page.screenshot({
+  const coachCard = page.getByRole("region", { name: "Personal coach" });
+  await page.getByTestId("concierge-unavailable").waitFor();
+  await coachCard.screenshot({
     path: path.join(OUT, "a-coach-unavailable-375.png"),
-    fullPage: true,
   });
 
   await page.goto(`${BASE}/vault`);
   await page.getByTestId("concierge-fab").click();
-  await page.getByTestId("concierge-sheet").waitFor();
-  await page.screenshot({
+  const sheet = page.getByTestId("concierge-sheet");
+  await sheet.waitFor();
+  await sheet.getByTestId("concierge-unavailable").waitFor();
+  await sheet.screenshot({
     path: path.join(OUT, "b-sheet-unavailable-375.png"),
-    fullPage: false,
   });
 
   await browser.close();

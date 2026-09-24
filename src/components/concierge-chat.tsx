@@ -143,6 +143,58 @@ export function ConciergeChat({
     );
   }
 
+  const unavailableCompose = (
+    <div
+      className={cn(
+        "shrink-0 md:static",
+        "max-md:sticky max-md:z-10 max-md:-mx-5 max-md:bottom-[var(--coach-compose-clearance)] max-md:px-5 max-md:pb-[env(safe-area-inset-bottom)]",
+      )}
+      data-testid="concierge-compose"
+    >
+      <div
+        className="flex gap-2 border-t border-border/70 bg-card/95 pt-3 shadow-[0_-8px_24px_-12px_rgba(15,23,42,0.14)] backdrop-blur md:bg-card md:shadow-none md:backdrop-blur-none"
+        aria-hidden
+      >
+        <div
+          className="min-h-11 min-w-0 flex-1 rounded-full border border-dashed border-border/80 bg-muted/40 px-4 text-sm text-muted-foreground"
+        />
+        <Button
+          type="button"
+          data-testid="concierge-ask"
+          className="h-11 rounded-full px-5"
+          disabled
+          title={CHIP_DISABLED_REASON}
+        >
+          Ask
+        </Button>
+      </div>
+    </div>
+  );
+
+  if (coachUnavailable) {
+    return (
+      <section
+        data-testid="concierge"
+        data-concierge-availability={availability}
+        aria-label="Transaction concierge"
+        className={cn("flex min-h-0 flex-col", className)}
+      >
+        <div
+          className={cn(
+            "flex min-h-0 flex-1 flex-col overflow-y-auto py-3 max-md:py-2",
+            "max-md:pb-[var(--coach-compose-inset)]",
+          )}
+        >
+          <ConciergeUnavailableState
+            showAgentLink={showAgentLinkWhenUnavailable}
+            className="my-0 max-md:gap-3 max-md:py-5 max-md:[&_[data-slot=empty-title]]:text-base max-md:[&_[data-slot=empty-title]]:leading-snug max-md:[&_[data-slot=empty-description]]:text-small"
+          />
+        </div>
+        {unavailableCompose}
+      </section>
+    );
+  }
+
   const starterChips = (
     <div
       aria-label="Suggested questions"

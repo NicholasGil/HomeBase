@@ -21,14 +21,14 @@ test.describe("concierge fail-closed @375", () => {
       "data-concierge-availability",
       "model_key_missing",
     );
-    await expect(page.getByTestId("concierge-unavailable")).toContainText(
-      UNAVAILABLE_TITLE,
-    );
+    const unavailable = page.getByTestId("concierge-unavailable");
+    await expect(unavailable).toBeVisible();
+    await expect(unavailable).toContainText(UNAVAILABLE_TITLE);
+    await expect(
+      page.getByLabel("Suggested questions"),
+    ).toHaveCount(0);
     await expect(page.getByTestId("concierge-ask")).toBeDisabled();
-    await expect(page.getByTestId("concierge-question")).toBeDisabled();
-
-    const chip = page.getByRole("button", { name: "What happens next?" });
-    await expect(chip).toBeDisabled();
+    await expect(page.getByTestId("concierge-question")).toHaveCount(0);
   });
 
   test("sheet chat shows the same unavailable state on vault", async ({
@@ -37,11 +37,13 @@ test.describe("concierge fail-closed @375", () => {
     await signInCoachUnavailable(page);
     await page.goto("/vault");
     await page.getByTestId("concierge-fab").click();
-    await expect(page.getByTestId("concierge-sheet")).toBeVisible();
-    await expect(page.getByTestId("concierge-unavailable")).toContainText(
-      UNAVAILABLE_TITLE,
-    );
-    await expect(page.getByTestId("concierge-ask")).toBeDisabled();
+    const sheet = page.getByTestId("concierge-sheet");
+    await expect(sheet).toBeVisible();
+    const unavailable = sheet.getByTestId("concierge-unavailable");
+    await expect(unavailable).toBeVisible();
+    await expect(unavailable).toContainText(UNAVAILABLE_TITLE);
+    await expect(sheet.getByLabel("Suggested questions")).toHaveCount(0);
+    await expect(sheet.getByTestId("concierge-ask")).toBeDisabled();
   });
 });
 

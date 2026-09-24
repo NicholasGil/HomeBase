@@ -41,7 +41,7 @@ export function ConciergeUnavailableState({
         </>
       }
       className={cn(
-        "border-solid bg-muted/30 text-left max-md:gap-2 max-md:py-4",
+        "border-solid bg-muted/30 text-left text-balance max-md:gap-2 max-md:py-4",
         className,
       )}
     />

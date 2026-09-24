@@ -17,8 +17,8 @@ export function LiveAgentCommandCenter({ agentName }: { agentName?: string }) {
     api.orgs.getMine,
     status?.status === "ready" ? {} : "skip",
   );
-  const view = useQuery(
-    api.commandCenter.getMine,
+  const book = useQuery(
+    api.commandCenter.getBook,
     status?.status === "ready" && status.role === "agent" ? {} : "skip",
   );
 
@@ -45,20 +45,19 @@ export function LiveAgentCommandCenter({ agentName }: { agentName?: string }) {
     return <CommandCenterDenied />;
   }
 
-  if (view === undefined) {
+  if (book === undefined) {
     return <p className="text-sm text-muted-foreground">Loading the book…</p>;
-  }
-
-  if (view === null) {
-    return <CommandCenterDenied />;
   }
 
   return (
     <AgentCommandCenterView
-      view={view}
+      view={book.view}
       agentName={agentName ?? status.name}
       orgName={org?.name}
-      inviteCode={status.inviteCode}
+      bookScope={book.scope}
+      inviteCode={
+        book.view.roster.length === 0 ? status.inviteCode : null
+      }
     />
   );
 }

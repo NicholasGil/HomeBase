@@ -12,6 +12,7 @@ import {
   type FixtureBrokerageRecord,
 } from "@/lib/brokerage-onboarding-fixture";
 import { isProductionDeploy } from "@/lib/auth-config";
+import { SEED_ORG_INVITE_CODE, SEED_PLAN } from "../../../convex/seedPlan";
 
 export async function getFixtureBrokerageRecord(): Promise<FixtureBrokerageRecord | null> {
   const store = await cookies();
@@ -80,11 +81,11 @@ export async function joinFixtureBrokerageFromForm(formData: FormData) {
     redirect("/brokerage/onboarding");
   }
   const normalized = inviteCode.trim().toUpperCase();
-  if (normalized === "LOOKOUT1") {
+  if (normalized === SEED_ORG_INVITE_CODE) {
     const record: FixtureBrokerageRecord = {
       clerkId: session.clerkId,
-      orgName: "Lookout Realty",
-      orgState: "AL",
+      orgName: SEED_PLAN.org.name,
+      orgState: SEED_PLAN.org.state,
       role: "agent",
       inviteCode: normalized,
     };

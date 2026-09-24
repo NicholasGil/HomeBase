@@ -1,22 +1,23 @@
-import { emptyFixtureCommandCenter } from "@/lib/brokerage-onboarding-fixture";
+import {
+  emptyFixtureCommandCenter,
+  isFixtureSeededOrgRecord,
+  type FixtureBrokerageRecord,
+} from "@/lib/brokerage-onboarding-fixture";
 import { seedCommandCenter } from "@/lib/seed-command-center";
 import type { TestSession } from "@/lib/test-session";
 
 export function loadFixtureCommandCenterForViewer(
   session: TestSession,
-  record: {
-    clerkId: string;
-    orgName: string;
-    orgState: string;
-    role: "agent" | "broker";
-  } | null,
+  record: FixtureBrokerageRecord | null,
 ) {
   if (record !== null && session.clerkId === record.clerkId) {
+    const seededOrg = isFixtureSeededOrgRecord(record);
     return {
       ok: true as const,
-      view: emptyFixtureCommandCenter(),
+      view: seededOrg ? seedCommandCenter() : emptyFixtureCommandCenter(),
       orgName: record.orgName,
       role: record.role,
+      bookScope: seededOrg ? ("org" as const) : ("assigned" as const),
     };
   }
   return null;

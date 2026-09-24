@@ -95,6 +95,9 @@ const STAGE_DEFAULT_TASKS: Record<string, SeedDefaultTask[]> = {
   ],
 };
 
+/** Fixture + seed org invite used for join demos (Lookout Realty). */
+export const SEED_ORG_INVITE_CODE = "LOOKOUT1";
+
 export const SEED_PLAN = {
   org: {
     name: "Lookout Realty",

@@ -20,8 +20,12 @@ import { homePathForBrokerageRole } from "@/lib/brokerage-onboarding-fixture";
 export const dynamic = "force-dynamic";
 
 type PageProps = {
-  searchParams: Promise<{ join?: string }>;
+  searchParams: Promise<{ join?: string; mode?: string }>;
 };
+
+function onboardingTabFromParam(value: string | undefined): "create" | "join" {
+  return value === "join" ? "join" : "create";
+}
 
 export default async function BrokerageOnboardingPage({ searchParams }: PageProps) {
   if (mustFailClosed()) {
@@ -30,6 +34,7 @@ export default async function BrokerageOnboardingPage({ searchParams }: PageProp
 
   const params = await searchParams;
   const joinError = params.join === "invalid";
+  const initialTab = onboardingTabFromParam(params.mode);
   const session = await getTestSession();
   const mode = dashboardRenderMode(process.env, session);
 
@@ -59,6 +64,7 @@ export default async function BrokerageOnboardingPage({ searchParams }: PageProp
           <FixtureBrokerageOnboarding
             viewerName={session.name}
             joinError={joinError}
+            initialTab={initialTab}
           />
         </AppShell>
       );
@@ -68,7 +74,11 @@ export default async function BrokerageOnboardingPage({ searchParams }: PageProp
     }
     return (
       <AppShell>
-        <FixtureBrokerageOnboarding viewerName={session?.name} joinError={joinError} />
+        <FixtureBrokerageOnboarding
+          viewerName={session?.name}
+          joinError={joinError}
+          initialTab={initialTab}
+        />
       </AppShell>
     );
   }
@@ -76,7 +86,7 @@ export default async function BrokerageOnboardingPage({ searchParams }: PageProp
   return (
     <AppShell>
       <QueryErrorBoundary message="Brokerage onboarding did not load.">
-        <LiveBrokerageOnboarding />
+        <LiveBrokerageOnboarding initialTab={initialTab} />
       </QueryErrorBoundary>
     </AppShell>
   );

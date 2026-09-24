@@ -1,4 +1,8 @@
-import { SEED_CLERK_IDS } from "../../convex/seedPlan";
+import {
+  SEED_CLERK_IDS,
+  SEED_ORG_INVITE_CODE,
+  SEED_PLAN,
+} from "../../convex/seedPlan";
 import { emptyCommandCenterView } from "../../convex/lib/commandCenter";
 import type { CommandCenterView } from "../../convex/lib/commandCenter";
 
@@ -57,4 +61,11 @@ export function emptyFixtureCommandCenter(): CommandCenterView {
 
 export function homePathForBrokerageRole(role: "agent" | "broker") {
   return role === "broker" ? "/broker" : "/agent";
+}
+
+export function isFixtureSeededOrgRecord(record: FixtureBrokerageRecord) {
+  return (
+    record.inviteCode === SEED_ORG_INVITE_CODE ||
+    record.orgName === SEED_PLAN.org.name
+  );
 }

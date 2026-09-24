@@ -14,6 +14,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { api } from "../../convex/_generated/api";
 
 const fieldClassName =
@@ -78,15 +80,17 @@ function homeForRole(role: "agent" | "broker") {
 
 export function LiveBrokerageOnboarding({
   viewerName,
+  initialTab = "create",
 }: {
   viewerName?: string;
+  initialTab?: "create" | "join";
 }) {
   const router = useRouter();
   const createBrokerage = useMutation(api.brokerageOnboarding.createBrokerage);
   const joinWithInviteCode = useMutation(
     api.brokerageOnboarding.joinWithInviteCode,
   );
-  const [mode, setMode] = useState<"create" | "join">("create");
+  const [mode, setMode] = useState<"create" | "join">(initialTab);
   const [name, setName] = useState("");
   const [state, setState] = useState("AL");
   const [role, setRole] = useState<"agent" | "broker">("agent");
@@ -238,11 +242,13 @@ export function LiveBrokerageOnboarding({
 export function FixtureBrokerageOnboarding({
   viewerName,
   joinError,
+  initialTab = "create",
 }: {
   viewerName?: string;
   joinError?: boolean;
+  initialTab?: "create" | "join";
 }) {
-  const [mode, setMode] = useState<"create" | "join">("create");
+  const [mode, setMode] = useState<"create" | "join">(initialTab);
 
   return (
     <BrokerageOnboardingLayout
@@ -370,25 +376,37 @@ function BrokerageOnboardingLayout({
         </p>
       </header>
 
-      <div className="flex gap-2">
-        <Button
+      <div className="flex gap-2" role="tablist" aria-label="Onboarding mode">
+        <button
           type="button"
-          variant={mode === "create" ? "default" : "outline"}
-          className="flex-1"
+          role="tab"
+          aria-selected={mode === "create"}
+          className={cn(
+            buttonVariants({
+              variant: mode === "create" ? "default" : "outline",
+            }),
+            "min-h-11 flex-1",
+          )}
           onClick={() => onModeChange("create")}
           data-testid="brokerage-mode-create"
         >
           Create
-        </Button>
-        <Button
+        </button>
+        <button
           type="button"
-          variant={mode === "join" ? "default" : "outline"}
-          className="flex-1"
+          role="tab"
+          aria-selected={mode === "join"}
+          className={cn(
+            buttonVariants({
+              variant: mode === "join" ? "default" : "outline",
+            }),
+            "min-h-11 flex-1",
+          )}
           onClick={() => onModeChange("join")}
           data-testid="brokerage-mode-join"
         >
           Join
-        </Button>
+        </button>
       </div>
 
       <Card>

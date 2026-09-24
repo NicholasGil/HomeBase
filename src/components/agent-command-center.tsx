@@ -25,19 +25,28 @@ export function AgentCommandCenterView({
   eyebrow,
   orgName,
   inviteCode,
+  bookScope = "assigned",
 }: {
   view: CommandCenterView;
   agentName?: string;
   eyebrow?: string;
   orgName?: string;
   inviteCode?: string | null;
+  bookScope?: "assigned" | "org";
 }) {
   const isEmpty = view.roster.length === 0;
+  const orgRosterEyebrow =
+    bookScope === "org" && !isEmpty
+      ? "Brokerage roster · not assigned to you yet"
+      : undefined;
 
   return (
     <div className="space-y-8" data-testid="command-center">
       <section className="space-y-2">
         {eyebrow ? <Badge variant="sage">{eyebrow}</Badge> : null}
+        {orgRosterEyebrow ? (
+          <Badge variant="outline">{orgRosterEyebrow}</Badge>
+        ) : null}
         <p className="text-sm text-muted-foreground">
           {agentName ?? "Assigned clients"}
         </p>
@@ -49,7 +58,9 @@ export function AgentCommandCenterView({
             ? orgName
               ? `${orgName} has no assigned clients yet. Invite buyers with your org code when you are ready.`
               : "Your book is empty until clients are assigned or invited."
-            : "Every assigned client and today's exceptions. Priority is the daily list."}
+            : bookScope === "org"
+              ? "Your brokerage already has active clients. Priority shows org-wide exceptions until files are assigned to you."
+              : "Every assigned client and today's exceptions. Priority is the daily list."}
         </p>
       </section>
 

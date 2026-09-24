@@ -7,6 +7,7 @@ import {
   SEED_HOMEOWNERSHIP,
   SEED_OFFER_AS_OF,
   SEED_OFFER_MARKET,
+  SEED_ORG_INVITE_CODE,
   SEED_PLAN,
   SEED_SEARCH,
   SEED_TOUR,
@@ -65,7 +66,7 @@ export const run = internalMutation({
     const orgId = await ctx.db.insert("orgs", {
       name: SEED_PLAN.org.name,
       state: SEED_PLAN.org.state,
-      inviteCode: "LOOKOUT1",
+      inviteCode: SEED_ORG_INVITE_CODE,
       settings: { timezone: "America/Chicago" },
       flags: { ...DEFAULT_FEATURE_FLAGS },
     });

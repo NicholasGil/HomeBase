@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { api, internal } from "./_generated/api";
 import { PATH_B_PREVIEW_ORG_NAME } from "./lib/pathBOrg";
+import { SEED_ORG_INVITE_CODE } from "./seedPlan";
 import schema from "./schema";
 import { modules } from "./test.setup";
 
@@ -67,7 +68,7 @@ describe("brokerageOnboarding", () => {
     const joined = await asJoiner.mutation(
       api.brokerageOnboarding.joinWithInviteCode,
       {
-        inviteCode: "LOOKOUT1",
+        inviteCode: SEED_ORG_INVITE_CODE,
         role: "agent",
       },
     );
@@ -118,7 +119,7 @@ describe("brokerageOnboarding", () => {
     expect(pathBOrg).not.toBeNull();
 
     await asBuyer.mutation(api.brokerageOnboarding.joinAsBuyer, {
-      inviteCode: "LOOKOUT1",
+      inviteCode: SEED_ORG_INVITE_CODE,
     });
 
     const memberships = await t.run(async (ctx) => {

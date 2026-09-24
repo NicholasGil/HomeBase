@@ -2,6 +2,12 @@
 
 Regenerate: `npm run test:e2e -- e2e/coach-habit-fluidity-proof.spec.ts`
 
+| File | What it proves |
+| --- | --- |
+| `discovery-empty-chips-clear-375.png` | Discovery cold open: chip center hits + scroll-end Ask clearance |
+| `file-session-chips-clear-375.png` | File session: pinned chips clear docked Ask |
+| `file-return-chips-clear-375.png` | File return (pricing→coach): restored thread + all 8 chip center hits + Ask center hit |
+
 | File | Path | What it proves |
 | --- | --- | --- |
 | `discovery-empty-chips-clear-375.png` | Discovery Alex (no property), scroll end | Three cold-open starters stay center-tappable above the docked Ask row. |

@@ -3,6 +3,8 @@ import path from "node:path";
 
 import { expect, test } from "@playwright/test";
 
+import { CONCIERGE_STARTERS } from "../src/components/concierge-chat";
+
 const PROOF_DIR = path.join("proof", "coach-habit-fluidity");
 const MIN_CHIP_HEIGHT = 44;
 
@@ -30,9 +32,7 @@ async function signInAlexWithFile(page: import("@playwright/test").Page) {
 }
 
 function conciergeScrollRegion(page: import("@playwright/test").Page) {
-  return page
-    .locator('[data-testid="concierge"] > div.overflow-y-auto')
-    .first();
+  return page.getByTestId("concierge-scroll-region");
 }
 
 async function scrollConciergeToEnd(page: import("@playwright/test").Page) {
@@ -42,11 +42,26 @@ async function scrollConciergeToEnd(page: import("@playwright/test").Page) {
   });
 }
 
+async function assertAskCenterHitsButton(page: import("@playwright/test").Page) {
+  const ask = page.getByTestId("concierge-compose").getByTestId("concierge-ask");
+  await expect(ask).toBeVisible();
+  const hit = await ask.evaluate((button) => {
+    const box = button.getBoundingClientRect();
+    const cx = box.left + box.width / 2;
+    const cy = box.top + box.height / 2;
+    const el = document.elementFromPoint(cx, cy);
+    return el !== null && button.contains(el);
+  });
+  expect(hit).toBe(true);
+}
+
 async function assertChipCenterHitsButton(
   page: import("@playwright/test").Page,
   label: string,
 ) {
-  const chip = page.getByRole("button", { name: label });
+  const chip = page
+    .getByLabel("Suggested questions")
+    .getByRole("button", { name: label });
   await chip.scrollIntoViewIfNeeded();
   await chip.evaluate((el) => {
     el.scrollIntoView({ block: "nearest", inline: "center" });
@@ -74,7 +89,9 @@ async function assertChipClearsComposeAtScrollEnd(
   page: import("@playwright/test").Page,
   label: string,
 ) {
-  const chip = page.getByRole("button", { name: label });
+  const chip = page
+    .getByLabel("Suggested questions")
+    .getByRole("button", { name: label });
   const compose = page.getByTestId("concierge-compose");
   const chipBox = await chip.boundingBox();
   const composeBox = await compose.boundingBox();
@@ -101,6 +118,7 @@ test("coach habit fluidity — chip center hits + scroll-end clearance @375", as
   for (const label of discoveryStarters) {
     await assertChipCenterHitsButton(page, label);
   }
+  await assertAskCenterHitsButton(page);
   await scrollConciergeToEnd(page);
   for (const label of discoveryStarters) {
     await assertChipCenterHitsButton(page, label);
@@ -121,6 +139,7 @@ test("coach habit fluidity — chip center hits + scroll-end clearance @375", as
   for (const label of fileStarters) {
     await assertChipCenterHitsButton(page, label);
   }
+  await assertAskCenterHitsButton(page);
   await scrollConciergeToEnd(page);
   for (const label of fileStarters) {
     await assertChipCenterHitsButton(page, label);
@@ -128,6 +147,41 @@ test("coach habit fluidity — chip center hits + scroll-end clearance @375", as
   }
   await page.screenshot({
     path: path.join(PROOF_DIR, "file-session-chips-clear-375.png"),
+    fullPage: false,
+  });
+
+  const fileReturnStarter = CONCIERGE_STARTERS[0];
+  await page
+    .getByLabel("Suggested questions")
+    .first()
+    .getByRole("button", { name: fileReturnStarter })
+    .click();
+  await expect(page.getByTestId("concierge-answer")).toHaveAttribute(
+    "data-kind",
+    "answer",
+    { timeout: 15_000 },
+  );
+
+  await page.goto("/pricing");
+  await page.getByTestId("pricing-continue-coach").click();
+  await expect(page).toHaveURL(/\/coach$/);
+  await expect(page.getByTestId("concierge")).toBeVisible();
+
+  await expect(page.getByTestId("coach-return-continue")).toContainText(
+    fileReturnStarter,
+  );
+  const restoredThread = page.getByTestId("concierge-restored-thread");
+  await expect(restoredThread).toBeVisible();
+  const restoredAnswer = restoredThread.getByTestId("concierge-answer");
+  await expect(restoredAnswer).toBeInViewport();
+
+  for (const label of CONCIERGE_STARTERS) {
+    await assertChipCenterHitsButton(page, label);
+  }
+  await assertAskCenterHitsButton(page);
+
+  await page.screenshot({
+    path: path.join(PROOF_DIR, "file-return-chips-clear-375.png"),
     fullPage: false,
   });
 });

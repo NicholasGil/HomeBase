@@ -30,6 +30,13 @@ export const CONCIERGE_STARTERS = [
 const CHIP_DISABLED_REASON =
   "AI coach unavailable — model key not configured on this deployment.";
 
+/** Mobile coach card: Ask docked to the concierge footer; pass hits through the shell. */
+const MOBILE_COMPOSE_DOCK =
+  "max-md:absolute max-md:inset-x-0 max-md:bottom-2 max-md:z-10 max-md:-mx-5 max-md:px-5 max-md:pb-[env(safe-area-inset-bottom)] max-md:pointer-events-none [&_input]:pointer-events-auto [&_button]:pointer-events-auto";
+
+const MOBILE_COMPOSE_GRID =
+  "max-md:row-start-3 max-md:-mx-5 max-md:px-5 max-md:pb-[env(safe-area-inset-bottom)]";
+
 export function ConciergeChat({
   className,
   starters = CONCIERGE_STARTERS,
@@ -145,23 +152,20 @@ export function ConciergeChat({
 
   const unavailableCompose = (
     <div
-      className={cn(
-        "shrink-0 md:static",
-        "max-md:sticky max-md:z-10 max-md:-mx-5 max-md:bottom-[var(--coach-compose-clearance)] max-md:px-5 max-md:pb-[env(safe-area-inset-bottom)]",
-      )}
+      className={cn("shrink-0 md:static", MOBILE_COMPOSE_DOCK)}
       data-testid="concierge-compose"
     >
       <div
-        className="flex gap-2 border-t border-border/70 bg-card/95 pt-3 shadow-[0_-8px_24px_-12px_rgba(15,23,42,0.14)] backdrop-blur md:bg-card md:shadow-none md:backdrop-blur-none"
+        className="flex gap-2 border-t border-border/70 bg-card/95 pt-3 shadow-[0_-8px_24px_-12px_rgba(15,23,42,0.14)] backdrop-blur pointer-events-none md:bg-card md:shadow-none md:backdrop-blur-none md:pointer-events-auto [&_button]:pointer-events-auto"
         aria-hidden
       >
         <div
-          className="min-h-11 min-w-0 flex-1 rounded-full border border-dashed border-border/80 bg-muted/40 px-4 text-sm text-muted-foreground"
+          className="min-h-11 min-w-0 flex-1 rounded-full border border-dashed border-border/80 bg-muted/40 px-4 text-sm text-muted-foreground pointer-events-none"
         />
         <Button
           type="button"
           data-testid="concierge-ask"
-          className="h-11 rounded-full px-5"
+          className="pointer-events-auto h-11 rounded-full px-5"
           disabled
           title={CHIP_DISABLED_REASON}
         >
@@ -177,7 +181,7 @@ export function ConciergeChat({
         data-testid="concierge"
         data-concierge-availability={availability}
         aria-label="Transaction concierge"
-        className={cn("flex min-h-0 flex-col", className)}
+        className={cn("flex min-h-0 flex-col", "max-md:relative max-md:overflow-hidden", className)}
       >
         <div
           className={cn(
@@ -198,7 +202,12 @@ export function ConciergeChat({
   const starterChips = (
     <div
       aria-label="Suggested questions"
-      className="-mx-5 flex flex-wrap gap-2 px-5 pb-1 md:mx-0"
+      className={cn(
+        "-mx-5 flex gap-2 px-5 pb-1 md:mx-0",
+        pinFirstSessionMobile
+          ? "flex-wrap"
+          : "max-md:flex-nowrap max-md:overflow-x-auto max-md:overflow-y-hidden max-md:overscroll-x-contain max-md:[scrollbar-width:none] max-md:[&::-webkit-scrollbar]:hidden",
+      )}
     >
       {starters.map((starter) => (
         <Button
@@ -207,8 +216,9 @@ export function ConciergeChat({
           variant="secondary"
           className={cn(
             "h-auto min-h-11 w-max max-w-[min(17.5rem,calc(100vw-3rem))] shrink-0 rounded-full bg-sage px-4 py-2 text-left text-sm whitespace-normal text-sage-foreground hover:bg-sage/80",
+            "max-md:max-h-11 max-md:min-h-11 max-md:overflow-hidden max-md:text-ellipsis max-md:leading-none max-md:whitespace-nowrap",
             pinFirstSessionMobile &&
-              "max-md:min-h-11 max-md:px-3 max-md:py-1.5 max-md:text-xs max-md:leading-snug",
+              "max-md:px-3 max-md:py-1.5 max-md:text-xs max-md:leading-snug max-md:whitespace-normal",
           )}
           disabled={busy || coachUnavailable}
           title={coachUnavailable ? CHIP_DISABLED_REASON : undefined}
@@ -230,6 +240,7 @@ export function ConciergeChat({
       aria-label="Transaction concierge"
       className={cn(
         "flex min-h-0 flex-col",
+        "max-md:relative max-md:overflow-hidden",
         mobileReplyGrid &&
           "max-md:grid max-md:min-h-0 max-md:flex-1 max-md:grid-rows-[auto_minmax(0,1fr)_auto] max-md:gap-4",
         className,
@@ -289,15 +300,13 @@ export function ConciergeChat({
       <div
         className={cn(
           "shrink-0 md:static",
-          mobileReplyGrid
-            ? "max-md:row-start-3 max-md:-mx-5 max-md:px-5 max-md:pb-[env(safe-area-inset-bottom)]"
-            : "max-md:sticky max-md:z-10 max-md:-mx-5 max-md:bottom-[var(--coach-compose-clearance)] max-md:px-5 max-md:pb-[env(safe-area-inset-bottom)]",
+          mobileReplyGrid ? MOBILE_COMPOSE_GRID : MOBILE_COMPOSE_DOCK,
         )}
         data-testid="concierge-compose"
       >
         <form
           className={cn(
-            "flex gap-2 border-t border-border/70 bg-card/95 shadow-[0_-8px_24px_-12px_rgba(15,23,42,0.14)] backdrop-blur md:bg-card md:shadow-none md:backdrop-blur-none",
+            "pointer-events-none flex gap-2 border-t border-border/70 bg-card/95 shadow-[0_-8px_24px_-12px_rgba(15,23,42,0.14)] backdrop-blur md:pointer-events-auto md:bg-card md:shadow-none md:backdrop-blur-none",
             mobileReplyGrid ? "pt-2" : "pt-3",
           )}
           onSubmit={(event) => {
@@ -310,7 +319,7 @@ export function ConciergeChat({
         >
           <input
             data-testid="concierge-question"
-            className="min-h-11 min-w-0 flex-1 rounded-full border bg-background px-4 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 max-md:text-[0.8125rem] disabled:cursor-not-allowed disabled:opacity-60"
+            className="pointer-events-auto min-h-11 min-w-0 flex-1 rounded-full border bg-background px-4 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 max-md:text-[0.8125rem] disabled:cursor-not-allowed disabled:opacity-60"
             value={question}
             onChange={(event) => setQuestion(event.target.value)}
             placeholder={
@@ -324,7 +333,7 @@ export function ConciergeChat({
           <Button
             type="submit"
             data-testid="concierge-ask"
-            className="h-11 rounded-full px-5"
+            className="pointer-events-auto h-11 rounded-full px-5"
             disabled={
               coachUnavailable || busy || question.trim().length === 0
             }

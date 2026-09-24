@@ -69,8 +69,8 @@ export function AgentCommandCenterView({
           <CardHeader>
             <CardTitle>No clients yet</CardTitle>
             <CardDescription>
-              This is expected for a new brokerage. MLS search and map keys stay
-              off in preview — invite people with your org code when you are ready.
+              Invite buyers with your org code when you are ready. Search and
+              tours turn on as your brokerage enables them.
             </CardDescription>
           </CardHeader>
           {inviteCode ? (

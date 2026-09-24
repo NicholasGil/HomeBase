@@ -61,7 +61,6 @@ async function FixtureTransaction({ transactionId }: { transactionId: string }) 
         <BuyerDashboardViewPanel
           view={loaded.view}
           buyerName={seedBuyerNameForTransaction(transactionId) ?? undefined}
-          eyebrow="Opened by id"
           journeyOrientation="responsive"
           detailHref={null}
           contacts={reachableSeedContacts(loaded.view.contacts)}

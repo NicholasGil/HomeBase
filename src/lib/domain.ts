@@ -17,6 +17,14 @@ export const MONEY_PROVENANCE = [
 
 export type MoneyProvenance = (typeof MONEY_PROVENANCE)[number];
 
+/** Short labels for buyer-facing money chips (not raw enum tokens). */
+export const MONEY_PROVENANCE_LABEL: Record<MoneyProvenance, string> = {
+  ai_estimate: "AI estimate",
+  lender_issued: "Lender issued",
+  title_issued: "Title company",
+  user_entered: "You entered",
+};
+
 export type MoneyFigure = {
   amountCents: number;
   currency: "USD";

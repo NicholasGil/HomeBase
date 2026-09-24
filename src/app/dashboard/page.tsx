@@ -17,10 +17,9 @@ import { buyerLockedUpsell } from "@/lib/buyer-shell";
 export const dynamic = "force-dynamic";
 
 /*
-  Buyer pipeline (ten-second dashboard, journey, vendor directory) is a locked
-  upsell in the coach-first shell. Buyers land on /coach; this route shows
-  honest locked copy until the full OS is enabled. Agents and other roles
-  still redirect to their own homes when they hit /dashboard in fixture mode.
+  Buyer pipeline (journey map, task rail, vendor directory) is a locked
+  upsell in the coach-first shell. Ten-second status for an active file lives
+  on /coach; this route shows locked copy until the full OS is enabled.
 */
 
 export default async function DashboardPage() {

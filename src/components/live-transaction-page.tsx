@@ -54,7 +54,6 @@ export function LiveTransactionPage({
     <div className="space-y-10">
       <BuyerDashboardViewPanel
         view={view}
-        eyebrow="Opened by id"
         journeyOrientation="responsive"
         detailHref={null}
       />

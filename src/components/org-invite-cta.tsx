@@ -37,8 +37,7 @@ export function OrgInviteCta({ inviteCode }: { inviteCode: string }) {
         {copied ? "Copied" : revealed ? "Copy again" : "Show & copy invite code"}
       </Button>
       <p className="text-xs text-muted-foreground">
-        Share this code with agents and buyers to join {inviteCode.length > 0 ? "your org" : "the brokerage"}.
-        No MLS or map setup required in preview.
+        Share this code with agents and buyers to join your org.
       </p>
     </div>
   );

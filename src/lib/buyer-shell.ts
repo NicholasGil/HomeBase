@@ -48,7 +48,7 @@ export const BUYER_LOCKED_UPSELLS: readonly BuyerLockedUpsell[] = [
     label: "Pipeline",
     title: "Transaction pipeline",
     description:
-      "The ten-second dashboard, journey stages, and task rail live here. You stay on your personal coach until your brokerage unlocks the full OS.",
+      "The full journey map, task rail, and vendor directory live here. Status for your file stays on your personal coach until your brokerage unlocks the rest of the OS.",
     bullets: [
       "Where you are in the journey",
       "What is done and what is next",

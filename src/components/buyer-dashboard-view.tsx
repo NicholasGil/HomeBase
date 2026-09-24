@@ -1,21 +1,20 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
 
 import {
   ContactReach,
   type ContactReachDetails,
 } from "@/components/contact-links";
-import { DoneList } from "@/components/done-list";
 import { PhotoTile } from "@/components/listing-card";
-import { MoneyFigureView } from "@/components/money-figure-view";
 import { seedPropertyPhoto } from "@/components/property-photo";
 import { StageTaskRows } from "@/components/stage-task-rows";
 import { taskAnchorId } from "@/components/task-anchor";
 import { Badge } from "@/components/ui/badge";
 import {
-  JourneyTracker,
-  type JourneyOrientation,
-} from "@/components/journey-tracker";
+  HERO_GRID_CLASS,
+  OwedTodayFigure,
+  TenSecondHeroGrid,
+} from "@/components/ten-second-hero";
+import type { JourneyOrientation } from "@/components/journey-tracker";
 import type {
   BuyerDashboardView,
   DashboardContact,
@@ -23,73 +22,11 @@ import type {
 import { heroPhotoWashClassName } from "@/lib/trip-ui";
 import { cn } from "@/lib/utils";
 
-/*
-  lg placement of the five hero nodes. `horizontal` (dashboard): two columns,
-  rail beside the Next card. `responsive` (transaction page): the rail turns
-  vertical and takes a 15rem column for all four rows, the rest stack left.
-*/
-export const HERO_GRID_CLASS: Record<
-  JourneyOrientation,
-  {
-    grid: string;
-    where: string;
-    rail: string;
-    next: string;
-    owe: string;
-    doneWaiting: string;
-  }
-> = {
-  horizontal: {
-    grid: "lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:grid-rows-[auto_auto_1fr]",
-    where: "lg:col-start-1 lg:row-start-1",
-    rail: "lg:col-start-2 lg:row-start-2 lg:self-start",
-    next: "lg:col-start-1 lg:row-start-2",
-    owe: "lg:col-start-2 lg:row-start-1",
-    doneWaiting: "lg:col-start-1 lg:row-start-3",
-  },
-  responsive: {
-    grid: "lg:grid-cols-[minmax(0,1fr)_15rem] lg:grid-rows-[auto_auto_auto_1fr]",
-    where: "lg:col-start-1 lg:row-start-1",
-    rail: "lg:col-start-2 lg:row-start-1 lg:row-span-4 lg:self-start",
-    next: "lg:col-start-1 lg:row-start-2",
-    owe: "lg:col-start-1 lg:row-start-3",
-    doneWaiting: "lg:col-start-1 lg:row-start-4",
-  },
-};
-
-export function OwedTodayFigure({
-  owed,
-}: {
-  owed: BuyerDashboardView["owedToday"];
-}) {
-  return (
-    <MoneyFigureView figure={owed} size="display" showLabel={false} />
-  );
-}
+export { HERO_GRID_CLASS, OwedTodayFigure } from "@/components/ten-second-hero";
 
 /** Same shape the agent command center links with; the route decodes it. */
 export function transactionHref(transactionId: string) {
   return `/transactions/${transactionId}`;
-}
-
-/** A hero card body: a link into the transaction, or static copy without one. */
-function DrillLink({
-  href,
-  className,
-  children,
-}: {
-  href: string | undefined;
-  className: string;
-  children: ReactNode;
-}) {
-  if (href === undefined) {
-    return <div className={className}>{children}</div>;
-  }
-  return (
-    <Link href={href} className={className}>
-      {children}
-    </Link>
-  );
 }
 
 /**
@@ -166,11 +103,9 @@ export function BuyerDashboardViewPanel({
    */
   contacts?: ReachableContact[];
 }) {
-  const owed = view.owedToday;
   const place = view.propertyAddress
     ? `${view.propertyAddress.city}, ${view.propertyAddress.state}`
     : null;
-  const at = HERO_GRID_CLASS[journeyOrientation];
   const drill = detailHref ?? undefined;
 
   return (
@@ -201,130 +136,13 @@ export function BuyerDashboardViewPanel({
           ) : null}
         </PhotoTile>
 
-        {/*
-          DOM order is the 375px reading order: where, rail, next, owe,
-          done/waiting. At lg the same nodes are placed into two columns
-          (see HERO_GRID_CLASS) so the Playwright specs see one DOM
-          regardless of viewport.
-        */}
-        <div
-          className={cn(
-            "grid gap-2.5 px-5 pt-2.5 pb-5 lg:gap-x-8 lg:gap-y-6 lg:px-6 lg:py-6",
-            at.grid,
-          )}
-        >
-          <div
-            className={cn(
-              "min-w-0 space-y-1 lg:flex lg:flex-col lg:justify-end",
-              at.where,
-            )}
-          >
-            <p className="text-sm text-muted-foreground">
-              {buyerName ?? "Your transaction"}
-              {place ? ` · ${place}` : null}
-            </p>
-            <h1
-              data-testid="ten-second-where"
-              className="text-display font-semibold tracking-tight text-balance lg:text-5xl"
-            >
-              {view.where.label}
-            </h1>
-            <p className="text-xs text-muted-foreground lg:text-sm">
-              Status {view.where.status}. Transaction {view.transactionId}.
-            </p>
-          </div>
-
-          <JourneyTracker
-            stages={view.stages}
-            href={drill}
-            orientation={journeyOrientation}
-            className={at.rail}
-          />
-
-          <section
-            data-testid="ten-second-next"
-            className={cn(
-              "rounded-xl bg-sand px-4 py-3 lg:px-5 lg:py-6",
-              at.next,
-            )}
-          >
-            {view.next === null ? (
-              <>
-                <p className="text-eyebrow font-medium uppercase tracking-[0.2em] text-next">
-                  Next
-                </p>
-                <p className="mt-2 text-sm text-muted-foreground lg:mt-3">
-                  No open task right now.
-                </p>
-              </>
-            ) : (
-              <DrillLink href={drill} className="block">
-                {/* Assignee shares the eyebrow row so the card is two lines tall. */}
-                <span className="flex items-center justify-between gap-3">
-                  <span className="text-eyebrow font-medium uppercase tracking-[0.2em] text-next">
-                    Next
-                  </span>
-                  <Badge variant="sage">{view.next.assigneeRole}</Badge>
-                </span>
-                <span className="mt-1.5 block text-h2 font-semibold tracking-tight text-balance lg:mt-3 lg:text-h1">
-                  {view.next.title}
-                </span>
-              </DrillLink>
-            )}
-          </section>
-
-          <section
-            data-testid="ten-second-owe"
-            className={cn(
-              "rounded-xl bg-sky px-4 py-3 lg:px-5 lg:py-6",
-              at.owe,
-            )}
-          >
-            {/*
-              The figure sits outside the link so the estimate's Assumptions
-              disclosure is never interactive content nested in an anchor.
-              Below lg the eyebrow and label share one line so Done/Waiting
-              stays on the 375 fold; from lg the label drops under it.
-            */}
-            <DrillLink
-              href={drill}
-              className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 lg:block"
-            >
-              <p className="text-eyebrow font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                Due today
-              </p>
-              <p className="min-w-0 text-small text-muted-foreground lg:mt-1 lg:text-body">
-                {owed?.label ?? "No sourced figure on this file"}
-              </p>
-            </DrillLink>
-            <div className="mt-2 lg:mt-4">
-              <OwedTodayFigure owed={owed} />
-            </div>
-          </section>
-
-          <div
-            className={cn(
-              "grid grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] gap-3 lg:grid-cols-2 lg:gap-6",
-              at.doneWaiting,
-            )}
-          >
-            <section data-testid="ten-second-done" className="min-w-0">
-              <p className="text-eyebrow font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                Done
-              </p>
-              <DoneList items={view.done} />
-            </section>
-
-            <section data-testid="ten-second-waiting" className="min-w-0">
-              <p className="text-eyebrow font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                Waiting on
-              </p>
-              <p className="mt-2 text-h3 font-medium">
-                {view.waitingOn ?? "Nobody"}
-              </p>
-            </section>
-          </div>
-        </div>
+        <TenSecondHeroGrid
+          view={view}
+          buyerName={buyerName}
+          journeyOrientation={journeyOrientation}
+          detailHref={drill}
+          variant="page"
+        />
       </section>
 
       {detail === "summary" ? (

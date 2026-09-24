@@ -10,6 +10,7 @@ import {
 } from "@/lib/owed-today-display";
 import { cn } from "@/lib/utils";
 import type { MoneyFigure, MoneyProvenance } from "../../convex/lib/offerModel";
+import { MONEY_PROVENANCE_LABEL } from "@/lib/domain";
 
 export type MoneyFigureSize = "sm" | "md" | "display";
 
@@ -108,6 +109,7 @@ export function MoneyFigureView({
   assumptionsHref,
   assumptions,
   className,
+  buyerFacing = false,
 }: {
   figure: MoneyFigure | null | undefined;
   testId?: string;
@@ -120,6 +122,8 @@ export function MoneyFigureView({
   /** Extra assumption lines specific to the surface (estimates only). */
   assumptions?: readonly string[];
   className?: string;
+  /** When true, provenance chips use plain-language labels instead of enum tokens. */
+  buyerFacing?: boolean;
 }) {
   const display = owedTodayDisplay(figure);
 
@@ -195,7 +199,9 @@ export function MoneyFigureView({
           className="text-eyebrow tracking-wide text-muted-foreground"
           data-slot="money-provenance"
         >
-          {figure.provenance}
+          {buyerFacing
+            ? MONEY_PROVENANCE_LABEL[figure.provenance]
+            : figure.provenance}
         </span>
         {isEstimate ? (
           <AssumptionsDisclosure

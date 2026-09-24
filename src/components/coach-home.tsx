@@ -177,7 +177,7 @@ export function CoachHome({
             starters={
               firstSession ? COACH_FIRST_SESSION_STARTERS : undefined
             }
-            pinStartersAboveScrollOnMobile={firstSession && !coachUnavailable}
+            pinStartersAboveScrollOnMobile={!coachUnavailable}
             scrollIntro={
               firstSession && !coachUnavailable
                 ? (
@@ -220,7 +220,7 @@ export function CoachHome({
             starters={
               firstSession ? COACH_FIRST_SESSION_STARTERS : undefined
             }
-            pinStartersAboveScrollOnMobile={firstSession && !coachUnavailable}
+            pinStartersAboveScrollOnMobile={!coachUnavailable}
             scrollIntro={
               firstSession && !coachUnavailable
                 ? (

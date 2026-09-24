@@ -26,6 +26,7 @@ export type CoachHabitSessionView = {
 
 const sessionViews = new Map<string, CoachHabitSessionView>();
 const listeners = new Set<() => void>();
+let habitStorageReady = false;
 
 function visitSessionFlag(storageKey: string) {
   return `coach-habit-visit:${storageKey}`;
@@ -39,6 +40,12 @@ function notifyCoachHabitListeners() {
 
 export function subscribeCoachHabitSession(listener: () => void) {
   listeners.add(listener);
+  if (typeof window !== "undefined") {
+    habitStorageReady = true;
+    queueMicrotask(() => {
+      notifyCoachHabitListeners();
+    });
+  }
   return () => {
     listeners.delete(listener);
   };
@@ -80,9 +87,13 @@ function ensureCoachHabitSession(storageKey: string): CoachHabitSessionView {
 
 export function getCoachHabitSessionSnapshot(
   storageKey: string,
-): CoachHabitSessionView | null {
-  if (typeof window === "undefined") {
-    return null;
+): CoachHabitSessionView {
+  if (typeof window === "undefined" || !habitStorageReady) {
+    return emptyCoachHabitSessionView();
+  }
+  const cached = sessionViews.get(storageKey);
+  if (cached !== undefined) {
+    return cached;
   }
   return ensureCoachHabitSession(storageKey);
 }
@@ -110,7 +121,7 @@ export function coachReturnContinueLabel(
   storageKey: string,
   firstSession: boolean,
 ): string | null {
-  if (typeof window === "undefined") {
+  if (typeof window === "undefined" || !habitStorageReady) {
     return null;
   }
   const prior = readCoachHabitFromBrowser(storageKey);
@@ -126,11 +137,17 @@ export function coachReturnContinueLabel(
   return null;
 }
 
+const EMPTY_COACH_HABIT_SESSION_VIEW: CoachHabitSessionView = {
+  repeatVisit: false,
+  habitSnapshot: emptyCoachHabitState(),
+  initialTurn: null,
+  showDailyCheckIn: false,
+};
+
 export function emptyCoachHabitSessionView(): CoachHabitSessionView {
-  return {
-    repeatVisit: false,
-    habitSnapshot: emptyCoachHabitState(),
-    initialTurn: null,
-    showDailyCheckIn: false,
-  };
+  return EMPTY_COACH_HABIT_SESSION_VIEW;
+}
+
+export function getCoachHabitSessionServerSnapshot(): CoachHabitSessionView {
+  return EMPTY_COACH_HABIT_SESSION_VIEW;
 }

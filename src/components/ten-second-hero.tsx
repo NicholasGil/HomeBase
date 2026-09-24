@@ -153,6 +153,7 @@ export function TenSecondHeroGrid({
         data-testid="ten-second-next"
         className={cn(
           "rounded-xl bg-sand px-4 py-3 lg:px-5 lg:py-6",
+          compact && "max-md:px-3 max-md:py-2",
           at.next,
         )}
       >
@@ -189,6 +190,7 @@ export function TenSecondHeroGrid({
         data-testid="ten-second-owe"
         className={cn(
           "rounded-xl bg-sky px-4 py-3 lg:px-5 lg:py-6",
+          compact && "max-md:hidden",
           at.owe,
         )}
       >
@@ -211,6 +213,7 @@ export function TenSecondHeroGrid({
       <div
         className={cn(
           "grid grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] gap-3 lg:grid-cols-2 lg:gap-6",
+          compact && "max-md:gap-2",
           at.doneWaiting,
         )}
       >

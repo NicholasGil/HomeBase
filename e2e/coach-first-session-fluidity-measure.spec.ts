@@ -29,9 +29,7 @@ async function signInAlexDiscoveryEmpty(page: import("@playwright/test").Page) {
 }
 
 function conciergeScrollRegion(page: import("@playwright/test").Page) {
-  return page
-    .locator('[data-testid="concierge"] > div.overflow-y-auto')
-    .first();
+  return page.getByTestId("concierge-scroll-region");
 }
 
 test("fluidity measure @375 — write report", async ({ page }) => {

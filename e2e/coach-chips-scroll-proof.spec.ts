@@ -9,15 +9,16 @@ test("last suggestion chip clears sticky Ask at scroll end @375", async ({
   await page.getByRole("button", { name: "Sign in as Alex Rivera" }).click();
   await expect(page).toHaveURL(/\/coach$/);
 
-  const scroll = page.locator('[data-testid="concierge"] > div').first();
+  const scroll = page.getByTestId("concierge-scroll-region");
   await scroll.evaluate((el) => {
     el.scrollTop = el.scrollHeight;
   });
 
-  const lastChip = page.getByRole("button", {
+  const starters = page.getByLabel("Suggested questions").first();
+  const lastChip = starters.getByRole("button", {
     name: "When do I leave for my first showing?",
   });
-  const lenderChip = page.getByRole("button", { name: "Who is my lender?" });
+  const lenderChip = starters.getByRole("button", { name: "Who is my lender?" });
   const compose = page.getByTestId("concierge-compose");
   const tabBar = page.getByTestId("app-tab-bar");
 

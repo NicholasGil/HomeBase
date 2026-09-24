@@ -3,6 +3,7 @@
 import { useSyncExternalStore, type ReactNode } from "react";
 
 import {
+  getCoachHabitSessionServerSnapshot,
   getCoachHabitSessionSnapshot,
   subscribeCoachHabitSession,
 } from "@/lib/coach-habit-client-session";
@@ -26,12 +27,11 @@ export function CoachTenSecondReturnGate({
   const session = useSyncExternalStore(
     subscribeCoachHabitSession,
     () => getCoachHabitSessionSnapshot(storageKey),
-    () => null,
+    getCoachHabitSessionServerSnapshot,
   );
 
   const compactMobileReturn =
     !firstSession &&
-    session !== null &&
     session.repeatVisit &&
     session.initialTurn !== null;
 

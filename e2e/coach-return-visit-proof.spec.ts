@@ -64,9 +64,12 @@ test("return visit proof @375 — discovery thread, file thread, daily check-in"
 
   await signInAlexWithFile(page);
   const fileStarter = "What happens next?";
-  await page.getByRole("button", { name: fileStarter }).click();
+  await page
+    .getByLabel("Suggested questions")
+    .getByRole("button", { name: fileStarter })
+    .click();
   await expect(
-    page.getByTestId("concierge-answer"),
+    page.getByTestId("concierge-scroll-region").getByTestId("concierge-answer"),
   ).toHaveAttribute("data-kind", "answer", { timeout: 15_000 });
 
   await page.goto("/dashboard");

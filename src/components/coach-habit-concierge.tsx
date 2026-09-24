@@ -5,6 +5,7 @@ import { useSyncExternalStore, type ReactNode } from "react";
 import { ConciergeChat } from "@/components/concierge-chat";
 import { CoachDailyCheckIn } from "@/components/coach-daily-check-in";
 import {
+  getCoachHabitSessionServerSnapshot,
   getCoachHabitSessionSnapshot,
   persistCoachHabitSessionTurn,
   subscribeCoachHabitSession,
@@ -44,17 +45,8 @@ export function CoachHabitConcierge({
   const session = useSyncExternalStore(
     subscribeCoachHabitSession,
     () => getCoachHabitSessionSnapshot(storageKey),
-    () => null,
+    getCoachHabitSessionServerSnapshot,
   );
-
-  if (session === null) {
-    return (
-      <div
-        className={cn("min-h-[12rem] animate-pulse rounded-lg bg-muted/30", className)}
-        aria-hidden
-      />
-    );
-  }
 
   const { repeatVisit, habitSnapshot, initialTurn, showDailyCheckIn } = session;
   const returnWithThread = repeatVisit && hasCoachThread(habitSnapshot);
@@ -75,6 +67,7 @@ export function CoachHabitConcierge({
         />
       ) : null}
       <ConciergeChat
+        key={initialTurn?.asked ?? "idle"}
         className="min-h-0 flex-1 px-0 pb-0 pt-0"
         availability={availability}
         showAgentLinkWhenUnavailable={showAgentLinkWhenUnavailable}

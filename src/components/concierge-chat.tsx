@@ -291,7 +291,7 @@ export function ConciergeChat({
         "-mx-5 flex gap-2 px-5 pb-1 md:mx-0",
         wrapMobileStarters && "flex-wrap",
         horizontalScrollChips &&
-          "max-md:flex-nowrap max-md:overflow-x-auto max-md:overflow-y-hidden max-md:overscroll-x-contain max-md:[scrollbar-width:none] max-md:[&::-webkit-scrollbar]:hidden",
+          "max-md:min-w-0 max-md:w-full max-md:max-w-full max-md:flex-nowrap max-md:overflow-x-auto max-md:overflow-y-hidden max-md:overscroll-x-contain max-md:[scrollbar-width:none] max-md:[&::-webkit-scrollbar]:hidden",
       )}
     >
       {starters.map((starter) => (
@@ -327,7 +327,7 @@ export function ConciergeChat({
         "flex min-h-0 flex-col",
         "max-md:relative max-md:overflow-hidden",
         mobileReplyGrid &&
-          "max-md:grid max-md:min-h-0 max-md:flex-1 max-md:grid-rows-[auto_minmax(0,1fr)_auto] max-md:gap-4",
+          "max-md:grid max-md:min-h-0 max-md:flex-1 max-md:min-w-0 max-md:w-full max-md:max-w-full max-md:grid-rows-[minmax(0,auto)_minmax(0,1fr)_minmax(0,auto)] max-md:gap-4 max-md:overflow-x-hidden",
         className,
       )}
     >
@@ -335,7 +335,8 @@ export function ConciergeChat({
         <div
           className={cn(
             "shrink-0 max-md:block md:hidden",
-            mobileReplyGrid && "max-md:row-start-1",
+            mobileReplyGrid &&
+              "max-md:row-start-1 max-md:min-w-0 max-md:max-w-full max-md:overflow-hidden",
             showPinnedMobileThread ? "pt-2 pb-0" : "pt-4 pb-1",
           )}
         >
@@ -347,7 +348,7 @@ export function ConciergeChat({
           ref={pinnedThreadRef}
           aria-live="polite"
           data-testid={pinnedThreadTestId}
-          className="flex min-h-0 flex-col gap-0 overflow-y-auto overflow-x-hidden py-0.5 max-md:row-start-2"
+          className="flex min-h-0 min-w-0 flex-col gap-0 overflow-y-auto overflow-x-hidden py-0.5 max-md:row-start-2 max-md:max-w-full"
         >
           {renderConversation({ omitUserBubble: true })}
         </div>
@@ -385,12 +386,14 @@ export function ConciergeChat({
         className={cn(
           "shrink-0 md:static",
           mobileReplyGrid ? MOBILE_COMPOSE_GRID : MOBILE_COMPOSE_DOCK,
+          mobileReplyGrid &&
+            "max-md:min-w-0 max-md:w-full max-md:max-w-full max-md:overflow-hidden",
         )}
         data-testid="concierge-compose"
       >
         <form
           className={cn(
-            "flex gap-2 border-t border-border/70 bg-card/95 shadow-[0_-8px_24px_-12px_rgba(15,23,42,0.14)] backdrop-blur md:bg-card md:shadow-none md:backdrop-blur-none",
+            "flex w-full min-w-0 gap-2 border-t border-border/70 bg-card/95 shadow-[0_-8px_24px_-12px_rgba(15,23,42,0.14)] backdrop-blur md:bg-card md:shadow-none md:backdrop-blur-none",
             mobileReplyGrid ? "pt-2" : "pt-3",
           )}
           onSubmit={(event) => {

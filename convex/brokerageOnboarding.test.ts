@@ -97,17 +97,69 @@ describe("brokerageOnboarding", () => {
     ).rejects.toThrow("ALREADY_MEMBER");
   });
 
-  it("does not expose org invite codes to buyers in getStatus", async () => {
+  it("rejects a client-supplied role on joinWithInviteCode", async () => {
     const t = convexTest(schema, modules);
     await t.mutation(internal.seed.run, {});
 
-    const asBuyer = t.withIdentity({ subject: "clerk_buyer_a" });
-    const status = await asBuyer.query(api.brokerageOnboarding.getStatus, {});
-    expect(status.status).toBe("ready");
-    if (status.status === "ready") {
-      expect(status.role).toBe("buyer");
-      expect(status.inviteCode).toBeNull();
-    }
+    const asAttacker = t.withIdentity({ subject: "clerk_invite_escalation" });
+    const brokerEscalationAttempt = {
+      inviteCode: SEED_ORG_INVITE_CODE,
+      role: "broker",
+    };
+    await expect(
+      asAttacker.mutation(
+        api.brokerageOnboarding.joinWithInviteCode,
+        brokerEscalationAttempt as { inviteCode: string },
+      ),
+    ).rejects.toThrow();
+  });
+
+  it("always assigns agent via joinWithInviteCode (buyers use joinAsBuyer)", async () => {
+    const t = convexTest(schema, modules);
+    await t.mutation(internal.seed.run, {});
+
+    const asStaffJoiner = t.withIdentity({
+      subject: "clerk_staff_via_invite",
+      name: "Staff Joiner",
+    });
+    const staffJoin = await asStaffJoiner.mutation(
+      api.brokerageOnboarding.joinWithInviteCode,
+      { inviteCode: SEED_ORG_INVITE_CODE },
+    );
+    expect(staffJoin.role).toBe("agent");
+
+    const asBuyerJoiner = t.withIdentity({
+      subject: "clerk_buyer_via_invite",
+      name: "Buyer Joiner",
+    });
+    const buyerJoin = await asBuyerJoiner.mutation(
+      api.brokerageOnboarding.joinAsBuyer,
+      { inviteCode: SEED_ORG_INVITE_CODE },
+    );
+    expect(buyerJoin.role).toBe("buyer");
+
+    const roles = await t.run(async (ctx) => {
+      const rows = [];
+      for (const clerkId of ["clerk_staff_via_invite", "clerk_buyer_via_invite"]) {
+        const user = await ctx.db
+          .query("users")
+          .withIndex("by_clerkId", (q) => q.eq("clerkId", clerkId))
+          .unique();
+        if (user === null) {
+          continue;
+        }
+        const membership = await ctx.db
+          .query("memberships")
+          .withIndex("by_user", (q) => q.eq("userId", user._id))
+          .unique();
+        rows.push({ clerkId, role: membership?.role ?? null });
+      }
+      return rows;
+    });
+    expect(roles).toEqual([
+      { clerkId: "clerk_staff_via_invite", role: "agent" },
+      { clerkId: "clerk_buyer_via_invite", role: "buyer" },
+    ]);
   });
 
   it("moves Path B buyers onto a brokerage when invited", async () => {

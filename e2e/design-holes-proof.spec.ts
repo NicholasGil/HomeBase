@@ -95,6 +95,7 @@ test("design holes proof @375 — screenshots + clearance", async ({ page }) => 
   const notice = page.getByTestId("buyer-auth-env-notice");
   await expect(notice).not.toContainText(/needs-human/i);
   await expect(notice).not.toContainText(/Clerk keys are not set/i);
+  await expect(notice).not.toContainText(/clerk/i);
   await page.screenshot({
     path: path.join(PROOF_DIR, "sign-in-sold-path-copy-375.png"),
     fullPage: false,

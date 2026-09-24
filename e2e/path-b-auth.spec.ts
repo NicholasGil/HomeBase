@@ -17,6 +17,17 @@ test("sign-in product fallback prefers sign-up sold path @375", async ({ page })
   await expect(page).toHaveURL(/\/sign-up$/);
 });
 
+test("marketing landing exposes guest CTAs @375", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByTestId("marketing-cta-sign-up")).toBeVisible();
+  const pricing = page.getByTestId("marketing-cta-pricing");
+  const box = await pricing.boundingBox();
+  expect(box).not.toBeNull();
+  expect(box!.height).toBeGreaterThanOrEqual(44);
+  await pricing.click();
+  await expect(page).toHaveURL(/\/pricing$/);
+});
+
 test("sign-in preview fixture reaches test-login", async ({ page }) => {
   await page.goto("/sign-in");
   await page.getByTestId("sign-in-preview-fixture-cta").click();

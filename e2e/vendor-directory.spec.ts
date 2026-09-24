@@ -55,11 +55,9 @@ test("vendor portal is one assigned file and expires", async ({ page }) => {
   await expect(page.getByTestId("vendor-assignment")).toHaveCount(0);
 });
 
-test("feature flags stay off", async ({ page }) => {
-  await page.goto("/");
-  await expect(page.getByText("FLAG_VENDOR_COMP")).toBeVisible();
-  await expect(page.getByText("Vendor compensation", { exact: true })).toBeVisible();
-  await expect(page.getByText("off").first()).toBeVisible();
+test("feature flags stay off", async () => {
+  const { DEFAULT_FEATURE_FLAGS } = await import("../src/lib/flags");
+  expect(DEFAULT_FEATURE_FLAGS.FLAG_VENDOR_COMP).toBe(false);
 });
 
 test("buyer cannot open the vendor portal", async ({ page }) => {

@@ -83,9 +83,7 @@ test("unauthenticated listing url does not render the house", async ({
   await expect(page.getByText("88 Legacy Dr")).toHaveCount(0);
 });
 
-test("feature flags stay off including MLS", async ({ page }) => {
-  await page.goto("/");
-  await expect(page.getByText("FLAG_MLS")).toBeVisible();
-  await expect(page.getByText("Live MLS / IDX inventory")).toBeVisible();
-  await expect(page.getByText("off").first()).toBeVisible();
+test("feature flags stay off including MLS", async () => {
+  const { DEFAULT_FEATURE_FLAGS } = await import("../src/lib/flags");
+  expect(DEFAULT_FEATURE_FLAGS.FLAG_MLS).toBe(false);
 });

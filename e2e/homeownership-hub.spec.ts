@@ -126,10 +126,9 @@ test("vendor re-engage stays none and flags stay off", async ({ page }) => {
   await expect(page.getByText("Compensation: none")).toBeVisible();
   await expect(page.getByRole("button", { name: "Pay" })).toHaveCount(0);
 
-  await page.goto("/");
-  await expect(page.getByText("FLAG_MLS")).toBeVisible();
-  await expect(page.getByText("FLAG_VENDOR_COMP")).toBeVisible();
-  await expect(page.getByText("FLAG_ESIGN")).toBeVisible();
-  await expect(page.getByText("FLAG_IDV")).toBeVisible();
-  await expect(page.getByText("off").first()).toBeVisible();
+  const { DEFAULT_FEATURE_FLAGS } = await import("../src/lib/flags");
+  expect(DEFAULT_FEATURE_FLAGS.FLAG_MLS).toBe(false);
+  expect(DEFAULT_FEATURE_FLAGS.FLAG_VENDOR_COMP).toBe(false);
+  expect(DEFAULT_FEATURE_FLAGS.FLAG_ESIGN).toBe(false);
+  expect(DEFAULT_FEATURE_FLAGS.FLAG_IDV).toBe(false);
 });

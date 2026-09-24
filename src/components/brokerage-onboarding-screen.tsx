@@ -119,11 +119,8 @@ export function LiveBrokerageOnboarding({
     setPending(true);
     setError(null);
     try {
-      const result = await joinWithInviteCode({
-        inviteCode,
-        role: "agent",
-      });
-      router.replace(homeForRole(result.role === "broker" ? "broker" : "agent"));
+      await joinWithInviteCode({ inviteCode });
+      router.replace("/agent");
     } catch (caught) {
       const message =
         caught instanceof Error ? caught.message : "Invite code not recognized";

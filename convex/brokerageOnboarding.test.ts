@@ -67,13 +67,26 @@ describe("brokerageOnboarding", () => {
     });
     const joined = await asJoiner.mutation(
       api.brokerageOnboarding.joinWithInviteCode,
-      {
-        inviteCode: SEED_ORG_INVITE_CODE,
-        role: "agent",
-      },
+      { inviteCode: SEED_ORG_INVITE_CODE },
     );
     expect(joined.orgName).toBe("Lookout Realty");
     expect(joined.role).toBe("agent");
+
+    const membershipRole = await t.run(async (ctx) => {
+      const user = await ctx.db
+        .query("users")
+        .withIndex("by_clerkId", (q) => q.eq("clerkId", "clerk_joining_agent"))
+        .unique();
+      if (user === null) {
+        return null;
+      }
+      const membership = await ctx.db
+        .query("memberships")
+        .withIndex("by_user", (q) => q.eq("userId", user._id))
+        .unique();
+      return membership?.role ?? null;
+    });
+    expect(membershipRole).toBe("agent");
 
     await expect(
       asJoiner.mutation(api.brokerageOnboarding.createBrokerage, {
@@ -82,6 +95,19 @@ describe("brokerageOnboarding", () => {
         role: "agent",
       }),
     ).rejects.toThrow("ALREADY_MEMBER");
+  });
+
+  it("does not expose org invite codes to buyers in getStatus", async () => {
+    const t = convexTest(schema, modules);
+    await t.mutation(internal.seed.run, {});
+
+    const asBuyer = t.withIdentity({ subject: "clerk_buyer_a" });
+    const status = await asBuyer.query(api.brokerageOnboarding.getStatus, {});
+    expect(status.status).toBe("ready");
+    if (status.status === "ready") {
+      expect(status.role).toBe("buyer");
+      expect(status.inviteCode).toBeNull();
+    }
   });
 
   it("moves Path B buyers onto a brokerage when invited", async () => {

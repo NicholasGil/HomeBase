@@ -10,11 +10,8 @@ import { PATH_B_PREVIEW_ORG_NAME } from "./lib/pathBOrg";
 import { DEFAULT_FEATURE_FLAGS } from "./lib/validators";
 
 const staffRoleValidator = v.union(v.literal("agent"), v.literal("broker"));
-const joinRoleValidator = v.union(
-  v.literal("agent"),
-  v.literal("broker"),
-  v.literal("buyer"),
-);
+
+const STAFF_INVITE_VIEW_ROLES = new Set(["agent", "broker", "admin"]);
 
 type DbCtx = QueryCtx | MutationCtx;
 
@@ -199,7 +196,9 @@ export const getStatus = query({
       orgId: membership.orgId,
       orgName: org.name,
       orgState: org.state,
-      inviteCode: org.inviteCode ?? null,
+      inviteCode: STAFF_INVITE_VIEW_ROLES.has(membership.role)
+        ? org.inviteCode ?? null
+        : null,
     };
   },
 });
@@ -252,7 +251,6 @@ export const createBrokerage = mutation({
 export const joinWithInviteCode = mutation({
   args: {
     inviteCode: v.string(),
-    role: v.optional(joinRoleValidator),
   },
   handler: async (ctx, args) => {
     const normalizedCode = args.inviteCode.trim().toUpperCase();
@@ -272,16 +270,12 @@ export const joinWithInviteCode = mutation({
     await assertCanOnboard(ctx, user._id);
     await clearPathBMembershipIfPresent(ctx, user._id);
 
-    const role = args.role ?? "agent";
+    const role = "agent" as const;
     await ctx.db.insert("memberships", {
       userId: user._id,
       orgId: org._id,
       role,
     });
-
-    if (role === "buyer") {
-      await ensureBuyerClientRow(ctx, user._id, org._id);
-    }
 
     return {
       orgId: org._id,

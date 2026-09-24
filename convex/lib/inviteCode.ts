@@ -3,9 +3,11 @@ import type { MutationCtx } from "../_generated/server";
 const INVITE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 export function randomInviteCode(length = 8) {
+  const bytes = new Uint8Array(length);
+  crypto.getRandomValues(bytes);
   let code = "";
-  for (let index = 0; index < length; index += 1) {
-    code += INVITE_ALPHABET[Math.floor(Math.random() * INVITE_ALPHABET.length)];
+  for (const byte of bytes) {
+    code += INVITE_ALPHABET[byte % INVITE_ALPHABET.length];
   }
   return code;
 }

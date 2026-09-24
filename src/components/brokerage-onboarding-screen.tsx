@@ -17,7 +17,7 @@ import {
 import { api } from "../../convex/_generated/api";
 
 const fieldClassName =
-  "flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm";
+  "flex min-h-11 w-full rounded-md border bg-background px-3 py-2.5 text-sm";
 
 const US_STATES = [
   "AL",

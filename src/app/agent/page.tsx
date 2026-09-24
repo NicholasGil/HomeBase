@@ -66,6 +66,7 @@ export default async function AgentPage() {
             view={empty.view}
             agentName={session.name}
             orgName={empty.orgName}
+            inviteCode={record.inviteCode}
             eyebrow={`${empty.orgName} · fixture session`}
           />
         </AppShell>

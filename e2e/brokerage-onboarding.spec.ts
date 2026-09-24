@@ -15,6 +15,7 @@ test("fixture onboarding agent creates empty brokerage book", async ({ page }) =
   await page.getByTestId("brokerage-create-submit").click();
   await expect(page).toHaveURL(/\/agent$/);
   await expect(page.getByTestId("command-center-empty")).toBeVisible();
+  await expect(page.getByTestId("command-center-copy-invite")).toBeVisible();
 });
 
 test("Alex discovery-empty coach still loads", async ({ page }) => {

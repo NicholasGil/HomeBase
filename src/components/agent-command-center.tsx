@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { OrgInviteCta } from "@/components/org-invite-cta";
 import type { CommandCenterView } from "../../convex/lib/commandCenter";
 
 function clientKey(name: string) {
@@ -23,11 +24,13 @@ export function AgentCommandCenterView({
   agentName,
   eyebrow,
   orgName,
+  inviteCode,
 }: {
   view: CommandCenterView;
   agentName?: string;
   eyebrow?: string;
   orgName?: string;
+  inviteCode?: string | null;
 }) {
   const isEmpty = view.roster.length === 0;
 
@@ -56,10 +59,14 @@ export function AgentCommandCenterView({
             <CardTitle>No clients yet</CardTitle>
             <CardDescription>
               This is expected for a new brokerage. MLS search and map keys stay
-              off in preview — add clients manually when those integrations are
-              enabled.
+              off in preview — invite people with your org code when you are ready.
             </CardDescription>
           </CardHeader>
+          {inviteCode ? (
+            <CardContent>
+              <OrgInviteCta inviteCode={inviteCode} />
+            </CardContent>
+          ) : null}
         </Card>
       ) : (
       <section className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">

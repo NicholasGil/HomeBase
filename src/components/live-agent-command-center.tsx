@@ -58,6 +58,7 @@ export function LiveAgentCommandCenter({ agentName }: { agentName?: string }) {
       view={view}
       agentName={agentName ?? status.name}
       orgName={org?.name}
+      inviteCode={status.inviteCode}
     />
   );
 }

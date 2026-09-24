@@ -23,22 +23,30 @@ const page = await context.newPage();
 
 await page.goto(`${base}/test-login`);
 await page.screenshot({
-  path: path.join(outDir, "c-test-login-onboarding-agent.png"),
+  path: path.join(outDir, "c-test-login-taylor-brooks.png"),
   fullPage: true,
 });
 
 await page.getByTestId("sign-in-onboarding-agent").click();
 await page.waitForURL(/\/brokerage\/onboarding/, { timeout: 15000 });
 await page.screenshot({
-  path: path.join(outDir, "a-onboarding-create-brokerage.png"),
+  path: path.join(outDir, "a-onboarding-create-form.png"),
   fullPage: true,
 });
 
+await page.getByTestId("brokerage-mode-join").click();
+await page.screenshot({
+  path: path.join(outDir, "d-onboarding-join-tab.png"),
+  fullPage: true,
+});
+
+await page.getByTestId("brokerage-mode-create").click();
 await page.getByTestId("brokerage-name-input").fill("Harborline Realty");
 await page.getByTestId("brokerage-create-submit").click();
 await page.waitForURL(/\/agent$/, { timeout: 15000 });
+await page.getByTestId("command-center-copy-invite").click();
 await page.screenshot({
-  path: path.join(outDir, "b-empty-agent-command-center.png"),
+  path: path.join(outDir, "b-empty-agent-invite-cta.png"),
   fullPage: true,
 });
 

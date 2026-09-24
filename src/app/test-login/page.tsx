@@ -66,10 +66,10 @@ export default function TestLoginPage() {
             <Button
               type="submit"
               variant="secondary"
-              className="w-full"
+              className="h-auto min-h-11 w-full whitespace-normal py-3 leading-snug"
               data-testid="sign-in-onboarding-agent"
             >
-              New agent — Taylor Brooks (brokerage onboarding)
+              Taylor Brooks — new agent (brokerage onboarding)
             </Button>
           </form>
           <form action={startTestSessionFromForm}>

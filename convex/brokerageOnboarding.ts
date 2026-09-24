@@ -11,6 +11,9 @@ import { DEFAULT_FEATURE_FLAGS } from "./lib/validators";
 
 const staffRoleValidator = v.union(v.literal("agent"), v.literal("broker"));
 
+/** Invite-code staff join is always agent; never read a client role (use joinAsBuyer). */
+const INVITE_JOIN_MEMBERSHIP_ROLE = "agent" as const;
+
 const STAFF_INVITE_VIEW_ROLES = new Set(["agent", "broker", "admin"]);
 
 type DbCtx = QueryCtx | MutationCtx;
@@ -271,18 +274,17 @@ export const joinWithInviteCode = mutation({
     await assertCanOnboard(ctx, user._id);
     await clearPathBMembershipIfPresent(ctx, user._id);
 
-    const role = "agent" as const;
     await ctx.db.insert("memberships", {
       userId: user._id,
       orgId: org._id,
-      role,
+      role: INVITE_JOIN_MEMBERSHIP_ROLE,
     });
 
     return {
       orgId: org._id,
       orgName: org.name,
       orgState: org.state,
-      role,
+      role: INVITE_JOIN_MEMBERSHIP_ROLE,
       inviteCode: org.inviteCode ?? normalizedCode,
     };
   },

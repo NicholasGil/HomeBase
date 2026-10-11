@@ -11,7 +11,8 @@ import {
   homePathForBrokerageRole,
   type FixtureBrokerageRecord,
 } from "@/lib/brokerage-onboarding-fixture";
-import { isProductionDeploy } from "@/lib/auth-config";
+import { fixtureAllowed } from "@/lib/auth-config";
+import { fixtureEntryPath } from "@/lib/demo-copy";
 import { SEED_ORG_INVITE_CODE, SEED_PLAN } from "../../../convex/seedPlan";
 
 export async function getFixtureBrokerageRecord(): Promise<FixtureBrokerageRecord | null> {
@@ -28,12 +29,12 @@ export async function getFixtureBrokerageRecord(): Promise<FixtureBrokerageRecor
 }
 
 export async function createFixtureBrokerageFromForm(formData: FormData) {
-  if (isProductionDeploy()) {
-    redirect("/test-login");
+  if (!fixtureAllowed()) {
+    redirect(fixtureEntryPath());
   }
   const session = await getTestSession();
   if (session === null || session.role !== "onboarding_agent") {
-    redirect("/test-login");
+    redirect(fixtureEntryPath());
   }
 
   const name = formData.get("name");
@@ -68,12 +69,12 @@ export async function createFixtureBrokerageFromForm(formData: FormData) {
 }
 
 export async function joinFixtureBrokerageFromForm(formData: FormData) {
-  if (isProductionDeploy()) {
-    redirect("/test-login");
+  if (!fixtureAllowed()) {
+    redirect(fixtureEntryPath());
   }
   const session = await getTestSession();
   if (session === null || session.role !== "onboarding_agent") {
-    redirect("/test-login");
+    redirect(fixtureEntryPath());
   }
 
   const inviteCode = formData.get("inviteCode");

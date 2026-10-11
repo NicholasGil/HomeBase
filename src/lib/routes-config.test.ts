@@ -16,6 +16,18 @@ describe("routes config fail-closed", () => {
     expect(() =>
       assertCanUseFixtureDriveTimes({ VERCEL_ENV: "production" }),
     ).toThrow(ProductionRoutesMisconfiguredError);
+    expect(
+      driveTimeSource({
+        VERCEL_ENV: "production",
+        REALTYRISE_DEMO_MODE: "1",
+      }),
+    ).toBe("fixture");
+    expect(
+      mustFailClosedRoutes({
+        VERCEL_ENV: "production",
+        REALTYRISE_DEMO_MODE: "1",
+      }),
+    ).toBe(false);
     expect(() => assertCanUseFixtureDriveTimes({})).not.toThrow();
   });
 

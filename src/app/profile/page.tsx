@@ -12,6 +12,7 @@ import {
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
 import { wordmarkHrefFor } from "@/lib/app-nav";
+import { fixtureEntryPath, sessionEyebrowLabel } from "@/lib/demo-copy";
 import { fixtureContactForSession } from "@/lib/profile";
 import { navRoleFromTestSession } from "@/lib/test-session";
 
@@ -39,7 +40,7 @@ export default async function ProfilePage() {
 
   if (mode === "fixture") {
     if (session === null) {
-      redirect("/test-login");
+      redirect(fixtureEntryPath());
     }
     const contact = fixtureContactForSession(session);
     const navRole = navRoleFromTestSession(session);
@@ -50,7 +51,7 @@ export default async function ProfilePage() {
           role={session.role === "onboarding_agent" ? "agent" : session.role}
           email={contact?.email}
           phone={contact?.phone}
-          eyebrow="Fixture session · not Clerk"
+          eyebrow={sessionEyebrowLabel()}
           fixtureSignOut
           backHref={wordmarkHrefFor(navRole ?? "guest")}
           backLabel="Back"

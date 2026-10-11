@@ -14,6 +14,7 @@ import {
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
 import { buyerLockedUpsell } from "@/lib/buyer-shell";
+import { fixtureEntryPath } from "@/lib/demo-copy";
 import { LiveBuyerLockedRoute } from "@/components/live-buyer-locked-route";
 
 export const dynamic = "force-dynamic";
@@ -44,7 +45,7 @@ export default async function VaultPage({
 
   if (mode === "fixture") {
     if (session === null) {
-      redirect("/test-login");
+      redirect(fixtureEntryPath());
     }
     if (session.role === "buyer") {
       return (

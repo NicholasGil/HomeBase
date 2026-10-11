@@ -15,10 +15,17 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteDescription =
+  "The operating system for buying a home. One buyer, one transaction, from first look through closing.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL("https://realtyrise.app"),
   title: "RealtyRise",
-  description:
-    "The operating system for buying a home. One buyer, one transaction, from first look through closing.",
+  description: siteDescription,
+  openGraph: {
+    title: "RealtyRise",
+    description: siteDescription,
+  },
 };
 
 export const viewport: Viewport = {

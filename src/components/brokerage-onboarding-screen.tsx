@@ -239,10 +239,12 @@ export function LiveBrokerageOnboarding({
 export function FixtureBrokerageOnboarding({
   viewerName,
   joinError,
+  joinErrorMessage = "Invite code not recognized in this fixture.",
   initialTab = "create",
 }: {
   viewerName?: string;
   joinError?: boolean;
+  joinErrorMessage?: string;
   initialTab?: "create" | "join";
 }) {
   const [mode, setMode] = useState<"create" | "join">(initialTab);
@@ -252,7 +254,7 @@ export function FixtureBrokerageOnboarding({
       viewerName={viewerName}
       mode={mode}
       onModeChange={setMode}
-      error={joinError ? "Invite code not recognized in this fixture." : null}
+      error={joinError ? joinErrorMessage : null}
     >
       {mode === "create" ? (
         <form action={submitFixtureBrokerageOnboarding} className="space-y-4">

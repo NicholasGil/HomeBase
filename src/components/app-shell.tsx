@@ -13,6 +13,7 @@ import {
   navLinksFor,
   wordmarkHrefFor,
 } from "@/lib/app-nav";
+import { DemoShellBadge } from "@/components/demo-shell-badge";
 import { isAuthConfigured } from "@/lib/auth-config";
 import { coachScopeForFixtureBuyer } from "@/lib/coach-fixture-scope";
 import { conciergeAvailability } from "@/lib/concierge-availability";
@@ -56,6 +57,7 @@ export async function AppShell({
             RealtyRise
           </Link>
           <div className="ml-auto flex min-w-0 items-center gap-2">
+            <DemoShellBadge />
             {nav}
             {liveNav ? (
               <LiveAppNav />

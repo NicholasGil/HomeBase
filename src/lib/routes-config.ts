@@ -6,7 +6,7 @@ import {
   routesApiKeyPresent,
   type EnvMap,
 } from "../../convex/lib/driveTimes";
-import { isProductionDeploy, type AuthEnv } from "@/lib/auth-config";
+import { isDemoMode, isProductionDeploy, type AuthEnv } from "@/lib/auth-config";
 
 export {
   driveTimeSource,
@@ -28,6 +28,6 @@ export function routesNoteForNeedsHuman() {
     blocked: "GOOGLE_MAPS_ROUTES_API_KEY",
     detail:
       "M4 uses the named fixture drive-time path locally and in CI. Production without a human-issued Routes API key fail-closes. Do not stub the key.",
-    production: isProductionDeploy(),
+    production: isProductionDeploy() && !isDemoMode(),
   };
 }

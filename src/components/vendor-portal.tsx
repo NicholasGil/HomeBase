@@ -48,17 +48,19 @@ export function VendorPortalView({
   state,
   expired,
   notice,
+  sessionBadge = "Fixture session · not Clerk",
 }: {
   vendorName: string;
   assignments: SeedAssignment[];
   state: FixtureVendorPortalState;
   expired: boolean;
   notice?: string;
+  sessionBadge?: string;
 }) {
   return (
     <div className="space-y-8" data-testid="vendor-portal">
       <section className="space-y-2">
-        <Badge variant="sage">Fixture session · not Clerk</Badge>
+        <Badge variant="sage">{sessionBadge}</Badge>
         <h1 className="text-h1 font-semibold tracking-tight">Vendor portal</h1>
         <p className="text-sm text-muted-foreground">
           Signed in as {vendorName}.

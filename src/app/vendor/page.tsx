@@ -14,6 +14,7 @@ import {
   mustFailClosed,
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
+import { sessionEyebrowLabel } from "@/lib/demo-copy";
 import { navRoleFromTestSession } from "@/lib/test-session";
 import { loadSeedPortalForViewer } from "@/lib/vendor-access";
 
@@ -67,6 +68,7 @@ export default async function VendorPage({
           state={loaded.state}
           expired={loaded.expired}
           notice={params.notice}
+          sessionBadge={sessionEyebrowLabel()}
         />
       </AppShell>
     );

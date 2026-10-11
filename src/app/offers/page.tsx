@@ -16,6 +16,7 @@ import {
   mustFailClosed,
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
+import { fixtureEntryPath } from "@/lib/demo-copy";
 
 export const dynamic = "force-dynamic";
 
@@ -68,7 +69,7 @@ export default async function OffersPage({
 
   if (mode === "fixture") {
     if (session === null) {
-      redirect("/test-login");
+      redirect(fixtureEntryPath());
     }
     return (
       <AppShell>

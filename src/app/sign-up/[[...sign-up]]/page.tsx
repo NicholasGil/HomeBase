@@ -1,11 +1,17 @@
 import { SignUp } from "@clerk/nextjs";
+import { redirect } from "next/navigation";
 
 import { AppShell } from "@/components/app-shell";
 import { BuyerAuthPreviewFallback } from "@/components/buyer-auth-preview-fallback";
 import { clerkSignUpRedirectProps } from "@/lib/buyer-auth-funnel";
-import { isClerkConfigured } from "@/lib/auth-config";
+import { isClerkConfigured, isDemoMode } from "@/lib/auth-config";
+import { DEMO_CHOOSER_PATH } from "@/lib/demo-copy";
 
 export default function SignUpPage() {
+  if (isDemoMode()) {
+    redirect(DEMO_CHOOSER_PATH);
+  }
+
   if (!isClerkConfigured()) {
     return (
       <AppShell>

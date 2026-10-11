@@ -15,16 +15,23 @@ import {
   BUYER_SOLD_SIGN_IN,
   BUYER_SOLD_SIGN_UP,
 } from "@/lib/buyer-auth-entry";
+import { isDemoMode } from "@/lib/auth-config";
+import { DEMO_CHOOSER_PATH } from "@/lib/demo-copy";
 import { cn } from "@/lib/utils";
 
 export function MarketingLanding() {
+  const demo = isDemoMode();
+  const signInHref = demo ? DEMO_CHOOSER_PATH : BUYER_SOLD_SIGN_IN;
+  const primaryCtaHref = demo ? DEMO_CHOOSER_PATH : BUYER_SOLD_SIGN_UP;
+  const primaryCtaLabel = demo ? "Try the live demo" : "Create your account";
+
   return (
     <div className="min-h-full bg-background" data-testid="marketing-landing">
       <header className="border-b border-border/80">
         <div className="mx-auto flex max-w-lg items-center justify-between gap-3 px-5 py-4">
           <p className="text-sm font-semibold tracking-tight">RealtyRise</p>
           <Link
-            href={BUYER_SOLD_SIGN_IN}
+            href={signInHref}
             data-testid="marketing-header-sign-in"
             className={cn(
               buttonVariants({ variant: "ghost", size: "lg" }),
@@ -59,14 +66,14 @@ export function MarketingLanding() {
           </div>
           <div className="flex flex-col gap-3">
             <Link
-              href={BUYER_SOLD_SIGN_UP}
+              href={primaryCtaHref}
               data-testid="marketing-cta-sign-up"
               className={cn(
                 buttonVariants({ size: "lg" }),
                 "h-11 min-h-11 w-full rounded-full shadow-[0_8px_20px_rgba(15,23,42,0.12)]",
               )}
             >
-              Create your account
+              {primaryCtaLabel}
             </Link>
             <Link
               href="/pricing"
@@ -79,7 +86,7 @@ export function MarketingLanding() {
               See pricing
             </Link>
             <Link
-              href={BUYER_SOLD_SIGN_IN}
+              href={signInHref}
               data-testid="marketing-cta-sign-in"
               className={cn(
                 buttonVariants({ variant: "ghost", size: "lg" }),

@@ -16,6 +16,7 @@ import {
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
 import { homePathForBrokerageRole } from "@/lib/brokerage-onboarding-fixture";
+import { fixtureEntryPath, inviteCodeFixtureError } from "@/lib/demo-copy";
 
 export const dynamic = "force-dynamic";
 
@@ -52,7 +53,7 @@ export default async function BrokerageOnboardingPage({ searchParams }: PageProp
 
   if (mode === "fixture") {
     if (session === null) {
-      redirect("/test-login");
+      redirect(fixtureEntryPath());
     }
     if (session.role === "onboarding_agent") {
       const record = await getFixtureBrokerageRecord();
@@ -65,6 +66,7 @@ export default async function BrokerageOnboardingPage({ searchParams }: PageProp
             key={initialTab}
             viewerName={session.name}
             joinError={joinError}
+            joinErrorMessage={inviteCodeFixtureError()}
             initialTab={initialTab}
           />
         </AppShell>
@@ -79,6 +81,7 @@ export default async function BrokerageOnboardingPage({ searchParams }: PageProp
           key={initialTab}
           viewerName={session?.name}
           joinError={joinError}
+          joinErrorMessage={inviteCodeFixtureError()}
           initialTab={initialTab}
         />
       </AppShell>

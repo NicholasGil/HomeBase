@@ -16,6 +16,7 @@ import {
   mustFailClosed,
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
+import { fixtureEntryPath } from "@/lib/demo-copy";
 import { navRoleFromTestSession } from "@/lib/test-session";
 import { CANONICAL_SEARCH_QUERY } from "../../../../convex/lib/propertySearch";
 
@@ -55,7 +56,7 @@ export default async function ListingPage({
 
   if (mode === "fixture") {
     if (session === null) {
-      redirect("/test-login");
+      redirect(fixtureEntryPath());
     }
     const loaded = await loadFixtureListingForViewer(listingId);
     if (!loaded.ok) {

@@ -27,6 +27,18 @@ describe("fixture drive times", () => {
     expect(
       driveTimeSource({
         VERCEL_ENV: "production",
+        REALTYRISE_DEMO_MODE: "1",
+      }),
+    ).toBe("fixture");
+    expect(
+      mustFailClosedRoutes({
+        VERCEL_ENV: "production",
+        REALTYRISE_DEMO_MODE: "1",
+      }),
+    ).toBe(false);
+    expect(
+      driveTimeSource({
+        VERCEL_ENV: "production",
         GOOGLE_MAPS_ROUTES_API_KEY: "real-key-from-human",
       }),
     ).toBe("routes_api");

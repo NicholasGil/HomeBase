@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+
 import { startTestSessionFromForm } from "@/app/actions/test-session";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
@@ -9,27 +11,33 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  isProductionDeploy,
+  fixtureAllowed,
+  isDemoMode,
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
+import {
+  fixtureSignInDescription,
+  fixtureSignInTitle,
+} from "@/lib/demo-copy";
 import { SEED_CLERK_IDS, SEED_PLAN } from "../../../convex/seedPlan";
 
 export const dynamic = "force-dynamic";
 
 export default function TestLoginPage() {
-  if (isProductionDeploy()) {
+  if (!fixtureAllowed()) {
     throw new ProductionAuthMisconfiguredError();
+  }
+
+  if (isDemoMode()) {
+    redirect("/demo");
   }
 
   return (
     <AppShell>
       <Card className="mx-auto max-w-md">
         <CardHeader>
-          <CardTitle>Fixture sign in</CardTitle>
-          <CardDescription>
-            Test-mode login for local, CI, and preview. It is not Clerk. It is
-            disabled when VERCEL_ENV is production.
-          </CardDescription>
+          <CardTitle>{fixtureSignInTitle()}</CardTitle>
+          <CardDescription>{fixtureSignInDescription()}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           {SEED_PLAN.buyers

@@ -3,6 +3,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { fixtureEntryPath } from "@/lib/demo-copy";
 import {
   encodeTestSessionCookie,
   fixtureHomePath,
@@ -45,7 +46,7 @@ export async function startTestSession(input: {
 export async function startTestSessionFromForm(formData: FormData) {
   const clerkId = formData.get("clerkId");
   if (typeof clerkId !== "string") {
-    redirect("/test-login");
+    redirect(fixtureEntryPath());
   }
   const emptyCoachFile = formData.get("emptyCoachFile") === "1";
   const simulateModelKeyMissing =
@@ -56,7 +57,7 @@ export async function startTestSessionFromForm(formData: FormData) {
     simulateModelKeyMissing,
   });
   if (!started.ok) {
-    redirect("/test-login");
+    redirect(fixtureEntryPath());
   }
   redirect(fixtureHomePath(started.session));
 }
@@ -64,5 +65,5 @@ export async function startTestSessionFromForm(formData: FormData) {
 export async function endTestSessionFromForm() {
   const store = await cookies();
   store.delete(TEST_SESSION_COOKIE);
-  redirect("/test-login");
+  redirect(fixtureEntryPath());
 }

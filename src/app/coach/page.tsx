@@ -11,6 +11,7 @@ import {
   mustFailClosed,
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
+import { fixtureEntryPath, sessionEyebrowLabel } from "@/lib/demo-copy";
 import { coachScopeForFixtureBuyer } from "@/lib/coach-fixture-scope";
 import { coachHabitStorageKeyForFixtureBuyer } from "@/lib/coach-habit-storage";
 import { conciergeAvailability } from "@/lib/concierge-availability";
@@ -46,7 +47,7 @@ export default async function CoachPage() {
 
   if (mode === "fixture") {
     if (session === null) {
-      redirect("/test-login");
+      redirect(fixtureEntryPath());
     }
     if (session.role === "vendor") {
       redirect("/vendor");
@@ -65,7 +66,7 @@ export default async function CoachPage() {
         <CoachHome
           scope={conciergeScopeFor(session)}
           buyerName={session.name}
-          eyebrow="Fixture session · not Clerk"
+          eyebrow={sessionEyebrowLabel()}
           availability={coachAvailability}
           dashboardView={dashboardView}
           habitStorageKey={coachHabitStorageKeyForFixtureBuyer(session)}

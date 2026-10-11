@@ -1,6 +1,6 @@
 import { SEED_CLERK_IDS, SEED_PLAN } from "../../convex/seedPlan";
 import type { BuyerDashboardView } from "../../convex/lib/dashboardView";
-import { isProductionDeploy, type AuthEnv } from "@/lib/auth-config";
+import { fixtureAllowed, type AuthEnv } from "@/lib/auth-config";
 import type { AppNavRole } from "@/lib/app-nav";
 import {
   clerkIdForSeedTransaction,
@@ -130,7 +130,7 @@ export function startTestSessionDecision(
   env: AuthEnv = process.env,
   options?: { emptyCoachFile?: boolean; simulateModelKeyMissing?: boolean },
 ): { ok: true; session: TestSession } | { ok: false; reason: "FORBIDDEN" } {
-  if (isProductionDeploy(env)) {
+  if (!fixtureAllowed(env)) {
     return { ok: false, reason: "FORBIDDEN" };
   }
   if (isTestLenderClerkId(clerkId)) {

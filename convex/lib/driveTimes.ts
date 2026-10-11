@@ -22,6 +22,23 @@ export function isProductionDeploy(env: EnvMap = process.env) {
   return env.VERCEL_ENV === "production";
 }
 
+function clerkKeysPresent(env: EnvMap = process.env) {
+  return Boolean(
+    env.CLERK_SECRET_KEY &&
+      env.CLERK_SECRET_KEY.length > 0 &&
+      env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY &&
+      env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.length > 0,
+  );
+}
+
+export function isDemoMode(env: EnvMap = process.env) {
+  return env.REALTYRISE_DEMO_MODE === "1" && !clerkKeysPresent(env);
+}
+
+export function fixtureAllowed(env: EnvMap = process.env) {
+  return !isProductionDeploy(env) || isDemoMode(env);
+}
+
 export function routesApiKeyPresent(env: EnvMap = process.env) {
   const key = env[ROUTES_API_KEY_ENV];
   return Boolean(key && key.length > 0);
@@ -33,14 +50,14 @@ export function driveTimeSource(
   if (routesApiKeyPresent(env)) {
     return "routes_api";
   }
-  if (isProductionDeploy(env)) {
+  if (!fixtureAllowed(env)) {
     return "unavailable";
   }
   return "fixture";
 }
 
 export function mustFailClosedRoutes(env: EnvMap = process.env) {
-  return isProductionDeploy(env) && !routesApiKeyPresent(env);
+  return !fixtureAllowed(env) && !routesApiKeyPresent(env);
 }
 
 export class ProductionRoutesMisconfiguredError extends Error {

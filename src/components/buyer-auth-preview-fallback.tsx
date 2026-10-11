@@ -12,6 +12,14 @@ import {
   BUYER_SOLD_SIGN_IN,
   BUYER_SOLD_SIGN_UP,
 } from "@/lib/buyer-auth-entry";
+import { isDemoMode } from "@/lib/auth-config";
+import {
+  BUYER_AUTH_DEMO_ENV_TAIL,
+  BUYER_AUTH_DEMO_SIGN_IN_LEAD,
+  BUYER_AUTH_DEMO_SIGN_UP_LEAD,
+  DEMO_CHOOSER_PATH,
+  fixtureSignInLinkLabel,
+} from "@/lib/demo-copy";
 import { cn } from "@/lib/utils";
 
 type BuyerAuthPreviewFallbackProps = {
@@ -20,6 +28,16 @@ type BuyerAuthPreviewFallbackProps = {
 
 export function BuyerAuthPreviewFallback({ mode }: BuyerAuthPreviewFallbackProps) {
   const isSignIn = mode === "sign-in";
+  const demo = isDemoMode();
+  const fixtureHref = demo ? DEMO_CHOOSER_PATH : BUYER_PREVIEW_FIXTURE_LOGIN;
+  const lead = demo
+    ? isSignIn
+      ? BUYER_AUTH_DEMO_SIGN_IN_LEAD
+      : BUYER_AUTH_DEMO_SIGN_UP_LEAD
+    : isSignIn
+      ? BUYER_AUTH_PREVIEW_SIGN_IN_LEAD
+      : BUYER_AUTH_PREVIEW_SIGN_UP_LEAD;
+  const envTail = demo ? BUYER_AUTH_DEMO_ENV_TAIL : BUYER_AUTH_PREVIEW_ENV_TAIL;
 
   return (
     <div
@@ -34,8 +52,7 @@ export function BuyerAuthPreviewFallback({ mode }: BuyerAuthPreviewFallbackProps
           data-testid="buyer-auth-env-notice"
           className="max-w-xl text-pretty text-body text-muted-foreground"
         >
-          {isSignIn ? BUYER_AUTH_PREVIEW_SIGN_IN_LEAD : BUYER_AUTH_PREVIEW_SIGN_UP_LEAD}{" "}
-          {BUYER_AUTH_PREVIEW_ENV_TAIL}
+          {lead} {envTail}
         </p>
         <Link
           href="/coach"
@@ -51,7 +68,7 @@ export function BuyerAuthPreviewFallback({ mode }: BuyerAuthPreviewFallbackProps
       <div className="flex flex-col gap-3">
         {isSignIn ? (
           <Link
-            href={BUYER_SOLD_SIGN_UP}
+            href={demo ? DEMO_CHOOSER_PATH : BUYER_SOLD_SIGN_UP}
             data-testid="sign-in-sold-path-cta"
             className={cn(buttonVariants({ size: "lg" }), "h-11 min-h-11 w-full rounded-full")}
           >
@@ -70,7 +87,7 @@ export function BuyerAuthPreviewFallback({ mode }: BuyerAuthPreviewFallbackProps
         )}
         {!isSignIn ? (
           <Link
-            href={BUYER_SOLD_SIGN_IN}
+            href={demo ? DEMO_CHOOSER_PATH : BUYER_SOLD_SIGN_IN}
             data-testid="sign-up-sold-path-secondary"
             className={cn(
               buttonVariants({ variant: "outline", size: "lg" }),
@@ -81,11 +98,13 @@ export function BuyerAuthPreviewFallback({ mode }: BuyerAuthPreviewFallbackProps
           </Link>
         ) : null}
       </div>
-      <p className="text-small text-muted-foreground">
-        Preview, CI, and agents only — not the buyer product path:
-      </p>
+      {!demo ? (
+        <p className="text-small text-muted-foreground">
+          Preview, CI, and agents only — not the buyer product path:
+        </p>
+      ) : null}
       <Link
-        href={BUYER_PREVIEW_FIXTURE_LOGIN}
+        href={fixtureHref}
         data-testid={
           isSignIn ? "sign-in-preview-fixture-cta" : "sign-up-preview-fixture-cta"
         }
@@ -94,7 +113,7 @@ export function BuyerAuthPreviewFallback({ mode }: BuyerAuthPreviewFallbackProps
           "h-11 min-h-11 w-full rounded-full border border-border/80",
         )}
       >
-        Fixture sign in (preview)
+        {fixtureSignInLinkLabel()}
       </Link>
     </div>
   );

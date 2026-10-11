@@ -4,6 +4,8 @@ import {
   assertCanRenderWithoutAuth,
   clerkKeysPresent,
   dashboardRenderMode,
+  fixtureAllowed,
+  isDemoMode,
   isProductionDeploy,
   isProtectedPath,
   mustFailClosed,
@@ -14,6 +16,7 @@ import {
 const local = {};
 const preview = { VERCEL_ENV: "preview" };
 const production = { VERCEL_ENV: "production" };
+const demoProduction = { VERCEL_ENV: "production", REALTYRISE_DEMO_MODE: "1" };
 const keys = {
   CLERK_SECRET_KEY: "sk_test_x",
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_x",
@@ -70,6 +73,28 @@ describe("production fail-closed", () => {
       ProductionAuthMisconfiguredError,
     );
     expect(() => assertCanRenderWithoutAuth(local)).not.toThrow();
+  });
+
+  it("enables public demo mode only without Clerk keys", () => {
+    expect(isDemoMode(demoProduction)).toBe(true);
+    expect(isDemoMode({ ...demoProduction, ...keys })).toBe(false);
+    expect(fixtureAllowed(demoProduction)).toBe(true);
+    expect(fixtureAllowed(production)).toBe(false);
+    expect(mustFailClosed(demoProduction)).toBe(false);
+    expect(unauthenticatedAuthAction(demoProduction)).toBe("skip");
+    expect(dashboardRenderMode(demoProduction)).toBe("login");
+    expect(
+      dashboardRenderMode(demoProduction, { clerkId: "clerk_buyer_a" }),
+    ).toBe("fixture");
+    expect(dashboardRenderMode(demoProduction)).not.toBe("unavailable");
+    expect(() => assertCanRenderWithoutAuth(demoProduction)).not.toThrow();
+  });
+
+  it("keeps production fail-closed when demo flag is unset", () => {
+    expect(isDemoMode(production)).toBe(false);
+    expect(mustFailClosed(production)).toBe(true);
+    expect(unauthenticatedAuthAction(production)).toBe("unavailable");
+    expect(dashboardRenderMode(production)).toBe("unavailable");
   });
 
   it("marks dashboard and role homes as protected paths", () => {

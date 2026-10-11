@@ -15,6 +15,7 @@ import {
   mustFailClosed,
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
+import { fixtureEntryPath } from "@/lib/demo-copy";
 import { buyerLockedUpsell } from "@/lib/buyer-shell";
 
 export const dynamic = "force-dynamic";
@@ -59,7 +60,7 @@ export default async function ToursPage({
 
   if (mode === "fixture") {
     if (session === null) {
-      redirect("/test-login");
+      redirect(fixtureEntryPath());
     }
     if (session.role === "buyer") {
       return (

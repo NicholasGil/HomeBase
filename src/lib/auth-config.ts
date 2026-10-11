@@ -49,6 +49,19 @@ export function isAuthConfigured(env: AuthEnv = process.env) {
   return clerkKeysPresent(env) && isConvexConfigured(env);
 }
 
+/**
+ * Public investor demo on production (realtyrise.app) without Clerk.
+ * Ignored when Clerk keys are present so live auth stays authoritative.
+ */
+export function isDemoMode(env: AuthEnv = process.env) {
+  return env.REALTYRISE_DEMO_MODE === "1" && !clerkKeysPresent(env);
+}
+
+/** Fixture / seed preview allowed outside production, or in explicit demo mode. */
+export function fixtureAllowed(env: AuthEnv = process.env) {
+  return !isProductionDeploy(env) || isDemoMode(env);
+}
+
 export function isProtectedPath(pathname: string) {
   return PROTECTED_PATH_PREFIXES.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
@@ -59,16 +72,16 @@ export function isProtectedPath(pathname: string) {
  * Vercel production with no Clerk keys. Preview, local, and CI stay open
  * so the labeled seed preview still works. NODE_ENV is ignored on purpose:
  * `next build` and unit tests can be production-mode without being a deploy.
+ * Demo mode (REALTYRISE_DEMO_MODE=1) does not fail closed.
  */
 export function mustFailClosed(env: AuthEnv = process.env) {
-  return isProductionDeploy(env) && !clerkKeysPresent(env);
+  return isProductionDeploy(env) && !clerkKeysPresent(env) && !isDemoMode(env);
 }
 
 export type UnauthenticatedAuthAction = "unavailable" | "skip" | "clerk";
 
 /**
- * Production without Clerk keys is always 503. That path never returns
- * "skip", so middleware cannot fall through past auth.protect().
+ * Production without Clerk keys is always 503 unless demo mode is on.
  * Local, CI, and Vercel preview may skip Clerk and use the seed preview.
  */
 export function unauthenticatedAuthAction(
@@ -90,6 +103,12 @@ export function dashboardRenderMode(
   if (isAuthConfigured(env)) {
     return "live";
   }
+  if (isDemoMode(env)) {
+    if (session !== null) {
+      return "fixture";
+    }
+    return "login";
+  }
   if (isProductionDeploy(env)) {
     return "unavailable";
   }
@@ -109,7 +128,11 @@ export class ProductionAuthMisconfiguredError extends Error {
 }
 
 export function assertCanRenderWithoutAuth(env: AuthEnv = process.env) {
-  if (isProductionDeploy(env) && !isAuthConfigured(env)) {
+  if (
+    isProductionDeploy(env) &&
+    !isAuthConfigured(env) &&
+    !isDemoMode(env)
+  ) {
     throw new ProductionAuthMisconfiguredError();
   }
 }

@@ -16,6 +16,7 @@ import {
   mustFailClosed,
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
+import { fixtureEntryPath } from "@/lib/demo-copy";
 import {
   loadFixtureCommandCenterForViewer,
   loadSeedCommandCenterForViewer,
@@ -46,7 +47,7 @@ export default async function AgentPage() {
 
   if (mode === "fixture") {
     if (session === null) {
-      redirect("/test-login");
+      redirect(fixtureEntryPath());
     }
     if (session.role === "onboarding_agent") {
       const record = await getFixtureBrokerageRecord();

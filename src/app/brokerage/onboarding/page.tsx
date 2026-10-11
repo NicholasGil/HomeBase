@@ -12,6 +12,7 @@ import { QueryErrorBoundary } from "@/components/query-error-boundary";
 import {
   dashboardRenderMode,
   isAuthConfigured,
+  isDemoMode,
   mustFailClosed,
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
@@ -68,6 +69,7 @@ export default async function BrokerageOnboardingPage({ searchParams }: PageProp
             joinError={joinError}
             joinErrorMessage={inviteCodeFixtureError()}
             initialTab={initialTab}
+            demoMode={isDemoMode()}
           />
         </AppShell>
       );
@@ -83,6 +85,7 @@ export default async function BrokerageOnboardingPage({ searchParams }: PageProp
           joinError={joinError}
           joinErrorMessage={inviteCodeFixtureError()}
           initialTab={initialTab}
+          demoMode={isDemoMode()}
         />
       </AppShell>
     );

@@ -4,9 +4,12 @@ import { CoachHabitConcierge } from "@/components/coach-habit-concierge";
 import { CoachReturnHeaderHint } from "@/components/coach-return-header-hint";
 import { CoachTenSecondReturnGate } from "@/components/coach-ten-second-return-gate";
 import { ConciergeChat } from "@/components/concierge-chat";
+import { BuyerFullOsTeaser } from "@/components/buyer-full-os-teaser";
 import {
   BuyerLockedUpsellRail,
 } from "@/components/buyer-locked-upsell";
+import { buyerFixtureOsUnlocked } from "@/lib/demo-buyer-os";
+import { isDemoMode } from "@/lib/auth-config";
 import type { ConciergeScope } from "@/components/concierge-sheet";
 import { TenSecondHeroGrid } from "@/components/ten-second-hero";
 import { transactionHref } from "@/components/buyer-dashboard-view";
@@ -45,6 +48,8 @@ export function CoachHome({
   const coachUnavailable = availability === "model_key_missing";
   const firstName = buyerName.split(" ")[0] ?? buyerName;
   const showTenSecond = dashboardView !== null && !firstSession;
+  const demoOsOpen = buyerFixtureOsUnlocked();
+  const wrapCoachChips = isDemoMode() || demoOsOpen;
 
   return (
     <div
@@ -96,6 +101,11 @@ export function CoachHome({
               {eyebrow}
             </p>
           ) : null}
+          {showTenSecond ? (
+            <h1 className="mt-1 text-h3 font-semibold tracking-tight text-foreground md:text-h2">
+              Your coach
+            </h1>
+          ) : null}
           {!showTenSecond ? (
             <h1
               className={cn(
@@ -142,7 +152,7 @@ export function CoachHome({
               <TenSecondHeroGrid
                 view={dashboardView}
                 buyerName={buyerName}
-                journeyOrientation="horizontal"
+                journeyOrientation="responsive"
                 detailHref={transactionHref(dashboardView!.transactionId)}
                 variant="coach"
               />
@@ -155,7 +165,7 @@ export function CoachHome({
               <TenSecondHeroGrid
                 view={dashboardView}
                 buyerName={buyerName}
-                journeyOrientation="horizontal"
+                journeyOrientation="responsive"
                 detailHref={transactionHref(dashboardView.transactionId)}
                 variant="coach"
               />
@@ -178,6 +188,7 @@ export function CoachHome({
               firstSession ? COACH_FIRST_SESSION_STARTERS : undefined
             }
             pinStartersAboveScrollOnMobile={!coachUnavailable}
+            wrapMobileQuestionStarters={wrapCoachChips}
             scrollIntro={
               firstSession && !coachUnavailable
                 ? (
@@ -221,6 +232,7 @@ export function CoachHome({
               firstSession ? COACH_FIRST_SESSION_STARTERS : undefined
             }
             pinStartersAboveScrollOnMobile={!coachUnavailable}
+            wrapMobileQuestionStarters={wrapCoachChips}
             scrollIntro={
               firstSession && !coachUnavailable
                 ? (
@@ -255,7 +267,11 @@ export function CoachHome({
         )}
       </section>
 
-      <BuyerLockedUpsellRail upsells={BUYER_LOCKED_UPSELLS} />
+      {demoOsOpen ? (
+        <BuyerFullOsTeaser />
+      ) : (
+        <BuyerLockedUpsellRail upsells={BUYER_LOCKED_UPSELLS} />
+      )}
     </div>
   );
 }

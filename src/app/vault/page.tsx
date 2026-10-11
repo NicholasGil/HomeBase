@@ -14,6 +14,7 @@ import {
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
 import { buyerLockedUpsell } from "@/lib/buyer-shell";
+import { buyerFixtureOsUnlocked } from "@/lib/demo-buyer-os";
 import { fixtureEntryPath } from "@/lib/demo-copy";
 import { LiveBuyerLockedRoute } from "@/components/live-buyer-locked-route";
 
@@ -47,7 +48,7 @@ export default async function VaultPage({
     if (session === null) {
       redirect(fixtureEntryPath());
     }
-    if (session.role === "buyer") {
+    if (session.role === "buyer" && !buyerFixtureOsUnlocked()) {
       return (
         <AppShell>
           <RouteHeader
@@ -55,6 +56,17 @@ export default async function VaultPage({
             caption={`Signed in as ${session.name} · buyer`}
           />
           <BuyerLockedRouteGate upsell={buyerLockedUpsell("vault")} />
+        </AppShell>
+      );
+    }
+    if (session.role === "buyer") {
+      const params = await searchParams;
+      return (
+        <AppShell>
+          <RouteHeader title="Document vault" caption="Sample documents · demo data" />
+          <QueryErrorBoundary message="The document vault did not load.">
+            <FixtureVault notice={params.notice} />
+          </QueryErrorBoundary>
         </AppShell>
       );
     }

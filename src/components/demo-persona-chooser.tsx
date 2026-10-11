@@ -18,18 +18,18 @@ type PersonaCardProps = {
   title: string;
   description: string;
   clerkId: string;
+  actionLabel: string;
   emptyCoachFile?: boolean;
   testId?: string;
-  variant?: "default" | "secondary" | "outline";
 };
 
 function PersonaCard({
   title,
   description,
   clerkId,
+  actionLabel,
   emptyCoachFile,
   testId,
-  variant = "default",
 }: PersonaCardProps) {
   return (
     <Card size="sm" className="overflow-hidden">
@@ -43,8 +43,8 @@ function PersonaCard({
           {emptyCoachFile ? (
             <input type="hidden" name="emptyCoachFile" value="1" />
           ) : null}
-          <Button type="submit" variant={variant} className="w-full">
-            Continue
+          <Button type="submit" variant="default" className="min-h-11 w-full">
+            {actionLabel}
           </Button>
         </form>
       </CardContent>
@@ -80,6 +80,7 @@ export function DemoPersonaChooser() {
           title="Buyer coach"
           description={`Personal coach for ${alex?.name ?? "Alex Rivera"} with an active purchase on file.`}
           clerkId={SEED_CLERK_IDS.buyerA}
+          actionLabel="Open Alex's coach"
           testId="demo-persona-buyer-coach"
         />
         <PersonaCard
@@ -87,27 +88,28 @@ export function DemoPersonaChooser() {
           description={`${alex?.name ?? "Alex Rivera"} without a property yet—see discovery coach flow.`}
           clerkId={SEED_CLERK_IDS.buyerA}
           emptyCoachFile
-          variant="secondary"
+          actionLabel="Try Alex's first session"
           testId="demo-persona-buyer-discovery"
         />
         <PersonaCard
           title="Agent command center"
           description={`${SEED_PLAN.agent.name} at ${SEED_PLAN.org.name}—pipeline, roster, and exceptions.`}
           clerkId={SEED_PLAN.agent.clerkId}
+          actionLabel="Open Casey's command center"
           testId="demo-persona-agent"
         />
         <PersonaCard
           title="Lender / vendor portal"
           description={`${SEED_PLAN.lender.name}—vendor tasks and document handoffs on active files.`}
           clerkId={SEED_PLAN.lender.clerkId}
-          variant="outline"
+          actionLabel="Open Jordan's vendor portal"
           testId="demo-persona-vendor"
         />
         <PersonaCard
           title="New agent — brokerage onboarding"
           description="Taylor Brooks starting a new brokerage workspace from invite through first roster."
           clerkId={SEED_CLERK_IDS.onboardingAgent}
-          variant="secondary"
+          actionLabel="Start Taylor's onboarding"
           testId="demo-persona-onboarding"
         />
       </div>

@@ -15,6 +15,7 @@ import {
   mustFailClosed,
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
+import { buyerFixtureOsUnlocked } from "@/lib/demo-buyer-os";
 import { fixtureEntryPath } from "@/lib/demo-copy";
 import { buyerLockedUpsell } from "@/lib/buyer-shell";
 
@@ -62,7 +63,7 @@ export default async function ToursPage({
     if (session === null) {
       redirect(fixtureEntryPath());
     }
-    if (session.role === "buyer") {
+    if (session.role === "buyer" && !buyerFixtureOsUnlocked()) {
       return (
         <AppShell>
           <RouteHeader
@@ -70,6 +71,17 @@ export default async function ToursPage({
             caption={`Signed in as ${session.name} · buyer`}
           />
           <BuyerLockedRouteGate upsell={buyerLockedUpsell("tours")} />
+        </AppShell>
+      );
+    }
+    if (session.role === "buyer") {
+      const params = await searchParams;
+      return (
+        <AppShell>
+          <RouteHeader title="Tours" caption="Sample tour builder · demo data" />
+          <QueryErrorBoundary message="Tours did not load.">
+            <FixtureTours notice={params.notice} />
+          </QueryErrorBoundary>
         </AppShell>
       );
     }

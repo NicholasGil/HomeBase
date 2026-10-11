@@ -21,6 +21,13 @@ import {
 } from "@/components/ui/card";
 import type { SeedAssignment } from "@/lib/seed-vendors";
 import { ActionNotice } from "@/components/action-notice";
+import { isDemoMode } from "@/lib/auth-config";
+import {
+  fixtureVendorFileLabel,
+  fixtureVendorStageLabel,
+  fixtureVendorTaskLabel,
+  formatFixtureVendorExpiry,
+} from "@/lib/demo-vendor-display";
 import type { FixtureVendorPortalState } from "@/lib/vendor-access";
 
 export function VendorPortalDenied({ action }: { action?: AccessDeniedAction }) {
@@ -63,9 +70,18 @@ export function VendorPortalView({
         <Badge variant="sage">{sessionBadge}</Badge>
         <h1 className="text-h1 font-semibold tracking-tight">Vendor portal</h1>
         <p className="text-sm text-muted-foreground">
-          Signed in as {vendorName}.
-          {expired || assignments.length === 0 ? "" : " One assigned file."}{" "}
-          Compensation is none.
+          {isDemoMode() ? (
+            <>
+              {vendorName} · lender portal
+              {expired || assignments.length === 0 ? "" : " · One sample file."}
+            </>
+          ) : (
+            <>
+              Signed in as {vendorName}.
+              {expired || assignments.length === 0 ? "" : " One assigned file."}{" "}
+              Compensation is none.
+            </>
+          )}
         </p>
       </section>
 
@@ -99,20 +115,29 @@ function AssignmentPanel({
         <CardHeader>
           <CardTitle>Assigned transaction</CardTitle>
           <CardDescription>
-            {assignment.transaction.propertyCity},{" "}
-            {assignment.transaction.propertyState} · {assignment.scope}
+            {fixtureVendorFileLabel(assignment)} ·{" "}
+            {fixtureVendorTaskLabel(
+              assignment.scope,
+              assignment.transaction.stage,
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
           <p data-testid="vendor-assignment-stage">
-            Stage {assignment.transaction.stage}
+            Stage {fixtureVendorStageLabel(assignment.transaction.stage)}
           </p>
           <p data-testid="vendor-assignment-file">
-            File {assignment.transaction.transactionId}
+            {fixtureVendorFileLabel(assignment)}
           </p>
-          <Badge variant="sage">Compensation: none</Badge>
+          {!isDemoMode() ? (
+            <Badge variant="sage">Compensation: none</Badge>
+          ) : (
+            <p className="text-small text-muted-foreground">
+              Sample assignment · no live compensation in this demo.
+            </p>
+          )}
           <p className="text-muted-foreground">
-            Expires {new Date(assignment.expiresAt).toISOString().slice(0, 10)}
+            Expires {formatFixtureVendorExpiry(assignment.expiresAt)}
           </p>
         </CardContent>
       </Card>
@@ -185,9 +210,19 @@ function AssignmentPanel({
                 name="assignmentId"
                 value={assignment.assignmentId}
               />
-              <input type="hidden" name="documentType" value="preapproval" />
-              <Button type="submit" variant="outline">
-                Request preapproval
+              <input
+                type="hidden"
+                name="documentType"
+                value={
+                  assignment.scope === "inspection_report"
+                    ? "inspection_report"
+                    : "preapproval"
+                }
+              />
+              <Button type="submit" variant="outline" className="min-h-11">
+                {assignment.scope === "inspection_report"
+                  ? "Request inspection report"
+                  : "Request preapproval"}
               </Button>
             </form>
           </CardContent>

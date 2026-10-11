@@ -16,6 +16,7 @@ import {
   mustFailClosed,
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
+import { buyerFixtureOsUnlocked } from "@/lib/demo-buyer-os";
 import { fixtureEntryPath } from "@/lib/demo-copy";
 
 export const dynamic = "force-dynamic";
@@ -77,7 +78,7 @@ export default async function SearchPage({
     if (session === null) {
       redirect(fixtureEntryPath());
     }
-    if (session.role === "buyer") {
+    if (session.role === "buyer" && !buyerFixtureOsUnlocked()) {
       return (
         <AppShell>
           <RouteHeader
@@ -85,6 +86,21 @@ export default async function SearchPage({
             caption={`Signed in as ${session.name} · buyer`}
           />
           <BuyerLockedRouteGate upsell={buyerLockedUpsell("search")} />
+        </AppShell>
+      );
+    }
+    if (session.role === "buyer") {
+      return (
+        <AppShell>
+          <RouteHeader title="Search" caption="Sample listings · demo data" />
+          <QueryErrorBoundary message="Property search did not load.">
+            <FixtureSearch
+              query={params.q}
+              savedOnly={params.saved === "1"}
+              notice={params.notice}
+              noticePropertyId={params.propertyId}
+            />
+          </QueryErrorBoundary>
         </AppShell>
       );
     }

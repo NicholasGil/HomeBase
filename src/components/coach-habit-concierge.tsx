@@ -25,6 +25,7 @@ export function CoachHabitConcierge({
   showAgentLinkWhenUnavailable,
   starters,
   pinStartersAboveScrollOnMobile,
+  wrapMobileQuestionStarters,
   scrollIntro,
   idleHint,
   questionPlaceholder,
@@ -38,6 +39,7 @@ export function CoachHabitConcierge({
   showAgentLinkWhenUnavailable?: boolean;
   starters?: readonly string[];
   pinStartersAboveScrollOnMobile?: boolean;
+  wrapMobileQuestionStarters?: boolean;
   scrollIntro?: ReactNode;
   idleHint?: string;
   questionPlaceholder?: string;
@@ -73,6 +75,7 @@ export function CoachHabitConcierge({
         showAgentLinkWhenUnavailable={showAgentLinkWhenUnavailable}
         starters={starters}
         pinStartersAboveScrollOnMobile={pinStartersAboveScrollOnMobile}
+        wrapMobileQuestionStarters={wrapMobileQuestionStarters}
         pinRestoredThreadOnMobile={
           !firstSession && repeatVisit && initialTurn !== null
         }

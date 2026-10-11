@@ -51,7 +51,7 @@ export function seedLenderAssignment() {
     vendorId: SEED_VENDOR_IDS.lender,
     vendorName: SEED_PLAN.lender.name,
     category: "lenders" as const,
-    scope: "preapproval",
+    scope: "inspection_report",
     status: "active" as const,
     expiresAt: Date.UTC(2026, 9, 30),
     compensationModel: "none" as const,
@@ -61,6 +61,7 @@ export function seedLenderAssignment() {
       status: "active",
       propertyCity: "Huntsville",
       propertyState: "AL",
+      propertyLine1: "814 Maple Ave",
     },
   };
 }

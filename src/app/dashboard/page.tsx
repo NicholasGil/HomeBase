@@ -12,7 +12,12 @@ import {
   mustFailClosed,
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
+import { BuyerDashboardViewPanel } from "@/components/buyer-dashboard-view";
+import { RouteHeader } from "@/components/route-header";
 import { buyerLockedUpsell } from "@/lib/buyer-shell";
+import { buyerFixtureOsUnlocked } from "@/lib/demo-buyer-os";
+import { seedDashboardForBuyer } from "@/lib/seed-dashboard";
+import { SEED_CLERK_IDS } from "../../../convex/seedPlan";
 
 export const dynamic = "force-dynamic";
 
@@ -49,15 +54,29 @@ export default async function DashboardPage() {
     if (session.role === "vendor") {
       redirect("/vendor");
     }
-    if (session.role === "agent") {
+    if (session.role === "agent" && !buyerFixtureOsUnlocked()) {
       redirect("/agent");
     }
-    if (session.role !== "buyer") {
-      throw new Error("fixture mode requires a buyer session");
+    if (session.role !== "buyer" && session.role !== "agent") {
+      throw new Error("fixture mode requires a buyer or agent session");
     }
+    if (!buyerFixtureOsUnlocked()) {
+      return (
+        <AppShell>
+          <BuyerLockedRouteGate upsell={buyerLockedUpsell("pipeline")} />
+        </AppShell>
+      );
+    }
+    const view =
+      session.role === "buyer"
+        ? seedDashboardForBuyer(session.clerkId)
+        : seedDashboardForBuyer(SEED_CLERK_IDS.buyerA);
+    const buyerLabel =
+      session.role === "buyer" ? session.name : "Alex Rivera (sample file)";
     return (
       <AppShell>
-        <BuyerLockedRouteGate upsell={buyerLockedUpsell("pipeline")} />
+        <RouteHeader title="Pipeline" caption="Sample transaction pipeline · demo data" />
+        <BuyerDashboardViewPanel view={view} buyerName={buyerLabel} />
       </AppShell>
     );
   }

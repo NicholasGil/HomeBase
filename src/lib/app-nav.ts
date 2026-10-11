@@ -2,6 +2,7 @@ import {
   BUYER_COACH_HOME,
   BUYER_LOCKED_UPSELLS,
 } from "@/lib/buyer-shell";
+import { buyerFixtureOsUnlocked } from "@/lib/demo-buyer-os";
 import { buyerHubPath, fixtureBuyerIsClosed } from "@/lib/homeownership-access";
 import type { Role } from "@/lib/domain";
 import type { TestSession } from "@/lib/test-session";
@@ -30,12 +31,13 @@ export function navLinksFor(input: {
     case "guest":
       return [];
     case "buyer": {
+      const osUnlocked = buyerFixtureOsUnlocked();
       const links: AppNavLink[] = [
         { href: BUYER_COACH_HOME, label: "Coach" },
         ...BUYER_LOCKED_UPSELLS.map((upsell) => ({
           href: upsell.href,
           label: upsell.label,
-          locked: true as const,
+          locked: osUnlocked ? undefined : true,
         })),
       ];
       if (input.buyerClosed === true && input.hubHref) {
@@ -45,13 +47,16 @@ export function navLinksFor(input: {
     }
     case "agent":
     case "broker":
-    case "admin":
-      return [
+    case "admin": {
+      const links: AppNavLink[] = [
         { href: "/agent", label: "Command center" },
         { href: "/search", label: "Search" },
         { href: "/tours", label: "Tours" },
+        { href: "/dashboard", label: "Pipeline" },
         { href: "/vault", label: "Vault" },
       ];
+      return links;
+    }
     case "vendor":
       return [
         { href: "/vendor", label: "Vendor portal" },

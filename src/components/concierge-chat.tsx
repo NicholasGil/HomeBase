@@ -79,6 +79,8 @@ export function ConciergeChat({
   scrollIntro,
   /** Keep starters fixed above the scroll area on 375 so the fold shows chips + Ask. */
   pinStartersAboveScrollOnMobile = false,
+  /** Demo / long starter sets: wrap chips on 375 instead of clipping. */
+  wrapMobileQuestionStarters = false,
   /** File-session return: pin restored Ask/answer above Ask on 375. */
   pinRestoredThreadOnMobile = false,
   showAgentLinkWhenUnavailable = true,
@@ -92,6 +94,7 @@ export function ConciergeChat({
   availability?: ConciergeAvailability;
   scrollIntro?: ReactNode;
   pinStartersAboveScrollOnMobile?: boolean;
+  wrapMobileQuestionStarters?: boolean;
   pinRestoredThreadOnMobile?: boolean;
   showAgentLinkWhenUnavailable?: boolean;
   initialTurn?: ConciergePersistedTurn | null;
@@ -111,7 +114,8 @@ export function ConciergeChat({
     (pinRestoredThreadOnMobile && asked !== null && !coachUnavailable);
   const starterCount = starters.length;
   const wrapMobileStarters =
-    pinFirstSessionMobile && starterCount <= 3;
+    wrapMobileQuestionStarters ||
+    (pinFirstSessionMobile && starterCount <= 3);
   const horizontalScrollChips =
     !wrapMobileStarters &&
     (pinMobileChips || !pinFirstSessionMobile);
@@ -301,9 +305,10 @@ export function ConciergeChat({
           variant="secondary"
           className={cn(
             "h-auto min-h-11 w-max max-w-[min(17.5rem,calc(100vw-3rem))] shrink-0 rounded-full bg-sage px-4 py-2 text-left text-sm whitespace-normal text-sage-foreground hover:bg-sage/80",
-            "max-md:max-h-11 max-md:min-h-11 max-md:overflow-hidden max-md:text-ellipsis max-md:leading-none max-md:whitespace-nowrap",
+            !wrapMobileStarters &&
+              "max-md:max-h-11 max-md:min-h-11 max-md:overflow-hidden max-md:text-ellipsis max-md:leading-none max-md:whitespace-nowrap",
             (wrapMobileStarters || pinRestoredThreadOnMobile) &&
-              "max-md:px-3 max-md:py-1.5 max-md:text-xs max-md:leading-snug max-md:whitespace-normal",
+              "max-md:px-3 max-md:py-2 max-md:text-xs max-md:leading-snug max-md:whitespace-normal",
           )}
           disabled={busy || coachUnavailable}
           title={coachUnavailable ? CHIP_DISABLED_REASON : undefined}

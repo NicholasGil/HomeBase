@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { OrgInviteCta } from "@/components/org-invite-cta";
+import { isDemoMode } from "@/lib/auth-config";
 import type { CommandCenterView } from "../../convex/lib/commandCenter";
 
 function clientKey(name: string) {
@@ -35,6 +36,12 @@ export function AgentCommandCenterView({
   bookScope?: "assigned" | "org";
 }) {
   const isEmpty = view.roster.length === 0;
+  const demo = isDemoMode();
+  const priorityWithExceptions = view.priority.filter(
+    (client) => client.exceptions.length > 0,
+  );
+  const calmPriorityCount = view.priority.length - priorityWithExceptions.length;
+  const priorityRows = demo ? priorityWithExceptions : view.priority;
   const orgRosterEyebrow =
     bookScope === "org" && !isEmpty
       ? "Brokerage roster · not assigned to you yet"
@@ -90,13 +97,13 @@ export function AgentCommandCenterView({
           </CardHeader>
           <CardContent>
             <ol className="space-y-3">
-              {view.priority.map((client, index) => (
+              {priorityRows.map((client, index) => (
                 <li
                   key={client.clientId}
                   data-testid={`priority-${index + 1}`}
                   data-client-name={client.name}
                   data-stage={client.stage}
-                  className="rounded-lg border px-3 py-3"
+                  className="min-h-11 rounded-lg border px-3 py-3"
                 >
                   <Link
                     href={`/transactions/${client.transactionId}`}
@@ -120,7 +127,7 @@ export function AgentCommandCenterView({
                     {client.exceptions.length > 0 ? (
                       <div className="mt-2 flex flex-wrap gap-2">
                         {client.exceptions.map((exception) => (
-                          <Badge key={exception.kind} variant="secondary">
+                          <Badge key={exception.kind} variant="destructive">
                             {exception.label}
                           </Badge>
                         ))}
@@ -129,6 +136,16 @@ export function AgentCommandCenterView({
                   </Link>
                 </li>
               ))}
+              {demo && calmPriorityCount > 0 ? (
+                <li
+                  className="rounded-lg border border-dashed px-3 py-3 text-sm text-muted-foreground"
+                  data-testid="priority-calm-summary"
+                >
+                  {calmPriorityCount} other assigned{" "}
+                  {calmPriorityCount === 1 ? "file" : "files"} with no
+                  exceptions today.
+                </li>
+              ) : null}
             </ol>
           </CardContent>
         </Card>
@@ -146,11 +163,11 @@ export function AgentCommandCenterView({
                   data-testid={`client-${clientKey(client.name)}`}
                   data-client-name={client.name}
                   data-stage={client.stage}
-                  className="rounded-lg border px-3 py-2"
+                  className="min-h-11 rounded-lg border px-3 py-2"
                 >
                   <Link
                     href={`/transactions/${client.transactionId}`}
-                    className="flex items-center justify-between gap-3"
+                    className="flex min-h-11 items-center justify-between gap-3 py-1"
                   >
                     <div>
                       <p className="text-sm font-medium">{client.name}</p>

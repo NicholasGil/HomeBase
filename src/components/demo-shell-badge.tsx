@@ -8,14 +8,14 @@ export function DemoShellBadge() {
 
   return (
     <div
-      className="flex shrink-0 items-center gap-2 rounded-full border border-sand/80 bg-sand/30 px-2.5 py-1 text-xs font-medium text-foreground"
+      className="flex min-h-11 shrink-0 items-center gap-2 rounded-full border border-sand/80 bg-sand/30 px-3 py-2 text-xs font-medium text-foreground"
       data-testid="demo-shell-badge"
     >
-      <span>Demo · sample data</span>
+      <span className="whitespace-nowrap">Demo · sample data</span>
       <form action={endTestSessionFromForm}>
         <button
           type="submit"
-          className="underline decoration-muted-foreground/60 underline-offset-2 hover:text-foreground"
+          className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full px-2 underline decoration-muted-foreground/60 underline-offset-2 hover:text-foreground"
           data-testid="demo-exit-link"
         >
           Exit demo

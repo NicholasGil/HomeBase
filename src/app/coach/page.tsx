@@ -8,10 +8,11 @@ import { LiveCoachHome } from "@/components/live-coach-home";
 import { QueryErrorBoundary } from "@/components/query-error-boundary";
 import {
   dashboardRenderMode,
+  isDemoMode,
   mustFailClosed,
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
-import { fixtureEntryPath, sessionEyebrowLabel } from "@/lib/demo-copy";
+import { DEMO_CHOOSER_PATH, fixtureEntryPath, sessionEyebrowLabel } from "@/lib/demo-copy";
 import { coachScopeForFixtureBuyer } from "@/lib/coach-fixture-scope";
 import { coachHabitStorageKeyForFixtureBuyer } from "@/lib/coach-habit-storage";
 import { conciergeAvailability } from "@/lib/concierge-availability";
@@ -38,6 +39,9 @@ export default async function CoachPage() {
   }
 
   if (mode === "login") {
+    if (isDemoMode()) {
+      redirect(DEMO_CHOOSER_PATH);
+    }
     return (
       <AppShell>
         <FixtureLoginPrompt />

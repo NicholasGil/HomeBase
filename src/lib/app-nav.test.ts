@@ -50,7 +50,7 @@ describe("navLinksFor", () => {
   });
 
   it("keeps agent and vendor entries on their own chrome", () => {
-    expect(labels("agent")[0]).toBe("Command center");
+    expect(labels("agent")[0]).toBe("Command");
     expect(labels("vendor")).toEqual(["Vendor portal", "Vault"]);
     expect(labels("guest")).toEqual([]);
   });

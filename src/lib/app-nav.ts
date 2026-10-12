@@ -49,7 +49,7 @@ export function navLinksFor(input: {
     case "broker":
     case "admin": {
       const links: AppNavLink[] = [
-        { href: "/agent", label: "Command center" },
+        { href: "/agent", label: "Command" },
         { href: "/search", label: "Search" },
         { href: "/tours", label: "Tours" },
         { href: "/dashboard", label: "Pipeline" },

@@ -2,6 +2,7 @@
 
 import {
   Briefcase,
+  Folder,
   FolderLock,
   KeyRound,
   LayoutDashboard,
@@ -29,7 +30,13 @@ const TAB_ICONS: ReadonlyArray<readonly [prefix: string, icon: LucideIcon]> = [
   ["/homeownership", KeyRound],
 ];
 
-function iconFor(href: string): LucideIcon {
+function iconFor(href: string, locked: boolean): LucideIcon {
+  if (
+    (href === "/vault" || href.startsWith("/vault/")) &&
+    !locked
+  ) {
+    return Folder;
+  }
   const match = TAB_ICONS.find(
     ([prefix]) => href === prefix || href.startsWith(`${prefix}/`),
   );
@@ -65,9 +72,9 @@ export function MobileTabBar({ links }: { links: AppNavLink[] }) {
       >
         <ul className="mx-auto flex h-(--tab-bar-height) max-w-5xl items-stretch px-1">
           {links.map((link) => {
-            const Icon = iconFor(link.href);
             const active = isActive(pathname, link.href);
             const locked = link.locked === true;
+            const Icon = iconFor(link.href, locked);
             return (
               <li key={`${link.href}-${link.label}`} className="min-w-0 flex-1">
                 <Link

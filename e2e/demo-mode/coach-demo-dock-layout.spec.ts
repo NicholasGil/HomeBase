@@ -53,6 +53,14 @@ test("demo discovery @375 — dock chips fit; More sheet starters are tappable",
     await expect(chip).toBeVisible();
     await assertChipCenterHits(page, chip);
   }
+
+  const moreStarter = COACH_FIRST_SESSION_STARTERS[0];
+  await sheet.getByRole("button", { name: moreStarter }).click();
+  await expect(page.getByTestId("concierge-answer")).toHaveAttribute(
+    "data-kind",
+    "answer",
+    { timeout: 20_000 },
+  );
 });
 
 test("demo file session @375 — dock chips fit; all canonical starters reachable", async ({
@@ -75,4 +83,12 @@ test("demo file session @375 — dock chips fit; all canonical starters reachabl
     await expect(chip).toBeVisible();
     await assertChipCenterHits(page, chip);
   }
+
+  const moreStarter = CONCIERGE_STARTERS[0];
+  await sheet.getByRole("button", { name: moreStarter }).click();
+  await expect(page.getByTestId("concierge-answer")).toHaveAttribute(
+    "data-kind",
+    "answer",
+    { timeout: 20_000 },
+  );
 });

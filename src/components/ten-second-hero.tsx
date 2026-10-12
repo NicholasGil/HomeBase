@@ -73,7 +73,7 @@ function DrillLink({
     return <div className={className}>{children}</div>;
   }
   return (
-    <Link href={href} scroll={false} className={className}>
+    <Link href={href} className={className}>
       {children}
     </Link>
   );

@@ -219,9 +219,6 @@ export function CoachHome({
                   )
                 : undefined
             }
-            idleHint={
-              firstSession ? "Tap a starter or ask below." : undefined
-            }
             questionPlaceholder={
               firstSession ? "Ask about buying" : "Ask about your file"
             }
@@ -283,11 +280,6 @@ export function CoachHome({
                   )
                 : undefined
             }
-            idleHint={
-              firstSession
-                ? "Tap a starter or ask below."
-                : undefined
-            }
             questionPlaceholder={
               firstSession ? "Ask about buying" : "Ask about your file"
             }
@@ -329,11 +321,6 @@ export function CoachHome({
                       className="border-solid bg-muted/25 max-md:gap-2 max-md:py-4 max-md:[&_[data-slot=empty-title]]:text-small"
                     />
                   )
-                : undefined
-            }
-            idleHint={
-              firstSession
-                ? "Tap a starter or ask below."
                 : undefined
             }
             questionPlaceholder={

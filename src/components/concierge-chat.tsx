@@ -86,6 +86,20 @@ function useCoachMaxMdViewport() {
   );
 }
 
+function scrollAnswerClearOfMobileDock(answerEl: HTMLElement) {
+  const dock = document.querySelector('[data-testid="concierge-mobile-dock"]');
+  if (!(dock instanceof HTMLElement)) {
+    return;
+  }
+  answerEl.scrollIntoView({ block: "end", behavior: "auto" });
+  const dockTop = dock.getBoundingClientRect().top;
+  const answerRect = answerEl.getBoundingClientRect();
+  const overlap = answerRect.bottom - dockTop;
+  if (overlap > 0) {
+    window.scrollBy({ top: overlap + 8, behavior: "auto" });
+  }
+}
+
 export type ConciergePersistedTurn = {
   asked: string;
   answer: string;
@@ -229,7 +243,10 @@ export function ConciergeChat({
     ) {
       return;
     }
-    answerRef.current?.scrollIntoView({ block: "end", behavior: "auto" });
+    const answerEl = answerRef.current;
+    if (answerEl !== null) {
+      scrollAnswerClearOfMobileDock(answerEl);
+    }
   }, [
     answer,
     mobileStickyDock,

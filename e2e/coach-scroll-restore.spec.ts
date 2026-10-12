@@ -89,3 +89,14 @@ test("coach file session @375 — tab return avoids a zero scroll frame", async 
   expect(samples.filter((y) => y === 0)).toHaveLength(0);
   expect(samples.at(-1)).toBeGreaterThanOrEqual(300);
 });
+
+test("coach — leaving /coach resets history.scrollRestoration to auto", async ({
+  page,
+}) => {
+  await signInAlexWithFile(page);
+  await page.goto("/search");
+  await page.waitForURL(/\/search/);
+  await expect
+    .poll(() => page.evaluate(() => history.scrollRestoration))
+    .toBe("auto");
+});

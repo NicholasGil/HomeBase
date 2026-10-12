@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { SAFE_REDIRECT_FALLBACK } from "@/lib/safe-redirect-path";
 import { redirectToPathFromRequestUrl } from "@/lib/same-origin-redirect";
 
 describe("redirectToPathFromRequestUrl", () => {
@@ -20,5 +21,20 @@ describe("redirectToPathFromRequestUrl", () => {
     expect(response.headers.get("location")).toBe(
       "/coach?simulateConciergeServerError=1",
     );
+  });
+
+  it("rejects open redirects", () => {
+    for (const malicious of [
+      "//evil.com",
+      "/\\evil.com",
+      "https://evil.com",
+      "javascript:alert(1)",
+    ]) {
+      const response = redirectToPathFromRequestUrl(
+        malicious,
+        new Request("https://realtyrise.app/demo/enter/buyer-coach"),
+      );
+      expect(response.headers.get("location")).toBe(SAFE_REDIRECT_FALLBACK);
+    }
   });
 });

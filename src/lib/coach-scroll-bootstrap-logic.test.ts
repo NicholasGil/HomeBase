@@ -19,13 +19,17 @@ describe("coach scroll bootstrap logic", () => {
     expect(isCoachScrollPath("/pricing")).toBe(false);
   });
 
-  it("reads stored scroll offsets keyed by pathname", () => {
-    const coachKey = coachScrollStorageKey("/coach");
+  it("reads stored scroll offsets keyed by persona and pathname", () => {
+    const coachKey = coachScrollStorageKey("/coach", "buyer-a:tx-1");
     const storage = {
       getItem: (key: string) => (key === coachKey ? "240" : null),
     };
-    expect(readCoachScrollYFromStorage(storage, "/coach")).toBe(240);
-    expect(readCoachScrollYFromStorage({ getItem: () => "nope" }, "/coach")).toBeNull();
+    expect(
+      readCoachScrollYFromStorage(storage, "/coach", "buyer-a:tx-1"),
+    ).toBe(240);
+    expect(
+      readCoachScrollYFromStorage({ getItem: () => "nope" }, "/coach", "guest"),
+    ).toBeNull();
   });
 
   it("clamps scroll targets to the document", () => {
@@ -70,5 +74,7 @@ describe("coachScrollBootstrapScript", () => {
     expect(script).toContain("pointerdown");
     expect(script).toContain("pagehide");
     expect(script).toContain("scrollTo");
+    expect(script).toContain("personaKey");
+    expect(script).toContain("resetScrollRestoration");
   });
 });

@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
 
+import { sanitizeRedirectPath } from "@/lib/safe-redirect-path";
+
 /** Redirect with a root-relative Location so host/proto follow the incoming request. */
 export function redirectToPath(
   path: string,
   request: Request,
   init?: ResponseInit,
 ): NextResponse {
-  const normalized =
-    path.startsWith("/") ? path : `/${path.replace(/^\//, "")}`;
+  const normalized = sanitizeRedirectPath(path);
   const response = new NextResponse(null, {
     ...init,
     status: init?.status ?? 307,
@@ -25,9 +26,10 @@ export function redirectToPathFromRequestUrl(
   init?: ResponseInit,
 ): NextResponse {
   const requestUrl = new URL(request.url);
-  const target = new URL(destinationPath, requestUrl);
+  const safeDestination = sanitizeRedirectPath(destinationPath);
+  const target = new URL(safeDestination, requestUrl);
   if (target.origin !== requestUrl.origin) {
-    return redirectToPath(destinationPath, request, init);
+    return redirectToPath(safeDestination, request, init);
   }
   return redirectToPath(
     `${target.pathname}${target.search}${target.hash}`,

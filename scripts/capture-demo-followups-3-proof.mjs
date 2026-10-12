@@ -5,7 +5,16 @@ import path from "node:path";
 const OUT = path.join(process.cwd(), "proof/demo-followups-3");
 const BASE = process.env.PROOF_BASE_URL ?? "http://127.0.0.1:3000";
 const VIEWPORT = { width: 375, height: 812 };
-const SCROLL_KEY = "realtyrise.coach.scrollY.v1:/coach";
+const SCROLL_KEY_PREFIX = "realtyrise.coach.scrollY.v1";
+
+async function coachScrollStorageKey(page) {
+  return page.evaluate((prefix) => {
+    const persona =
+      document.documentElement.getAttribute("data-coach-scroll-persona") ??
+      "guest";
+    return `${prefix}:${persona}:/coach`;
+  }, SCROLL_KEY_PREFIX);
+}
 
 async function signInDemoBuyerCoach(page) {
   await page.goto(`${BASE}/demo/enter/buyer-coach`);
@@ -25,6 +34,7 @@ async function main() {
     viewport: VIEWPORT,
   });
   const page = await context.newPage();
+  let moreSheetStarterLabel = null;
 
   await signInDemoBuyerDiscovery(page);
   await page.getByTestId("concierge-mobile-dock").waitFor();
@@ -56,13 +66,24 @@ async function main() {
   });
 
   await page.getByTestId("concierge-more-starters").click();
-  await page.getByTestId("concierge-more-starters-sheet").waitFor();
+  const moreSheet = page.getByTestId("concierge-more-starters-sheet");
+  await moreSheet.waitFor();
+  await page.waitForTimeout(450);
   await page.screenshot({
     path: path.join(OUT, "more-sheet-open-375.png"),
     fullPage: false,
   });
+  const moreStarter = await moreSheet.getByRole("button").first();
+  moreSheetStarterLabel = (await moreStarter.innerText()).trim();
+  await moreStarter.click();
+  await page.getByTestId("concierge-answer").waitFor({ timeout: 20_000 });
+  await page.waitForTimeout(350);
+  await page.screenshot({
+    path: path.join(OUT, "more-sheet-starter-answer-375.png"),
+    fullPage: false,
+  });
   await page.keyboard.press("Escape");
-  await page.getByTestId("concierge-more-starters-sheet").waitFor({ state: "hidden" });
+  await moreSheet.waitFor({ state: "hidden" });
 
   await page
     .getByTestId("concierge-mobile-dock")
@@ -88,11 +109,12 @@ async function main() {
     return link?.getAttribute("href") ?? null;
   });
   if (txHref) {
+    const scrollKey = await coachScrollStorageKey(page);
     await page.evaluate(
       ({ key, y }) => {
         sessionStorage.setItem(key, String(y));
       },
-      { key: SCROLL_KEY, y: scrollBefore },
+      { key: scrollKey, y: scrollBefore },
     );
     await page.goto(`${BASE}${txHref}`);
     await page.waitForURL(/\/transactions\//);
@@ -116,6 +138,7 @@ async function main() {
       REALTYRISE_DEMO_MODE: "1",
     },
     backScrollRestored,
+    moreSheetStarterLabel,
     proofDir: "proof/demo-followups-3",
   };
 

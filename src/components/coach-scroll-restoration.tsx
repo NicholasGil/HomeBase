@@ -9,6 +9,10 @@ import {
   isCoachScrollPath,
 } from "@/lib/coach-scroll-bootstrap-logic";
 import { readCoachScrollY, writeCoachScrollY } from "@/lib/coach-scroll-storage";
+import {
+  recordCoachScrollRestorationOriginal,
+  resetCoachScrollRestorationToAuto,
+} from "@/lib/coach-scroll-restoration-window";
 
 function coachPath(pathname: string) {
   return (
@@ -50,17 +54,25 @@ export function CoachScrollRestoration() {
   const restoringRef = useRef(false);
   const pathnameRef = useRef(pathname);
   const lastScrollYRef = useRef(0);
+  const userScrolledRef = useRef(false);
 
   useEffect(() => {
     pathnameRef.current = pathname;
   }, [pathname]);
+
+  useEffect(() => {
+    if (onCoach) {
+      return;
+    }
+    resetCoachScrollRestorationToAuto();
+  }, [onCoach]);
 
   useLayoutEffect(() => {
     if (!onCoach) {
       return;
     }
 
-    const previousRestoration = history.scrollRestoration;
+    recordCoachScrollRestorationOriginal();
     try {
       history.scrollRestoration = "manual";
     } catch {
@@ -88,13 +100,15 @@ export function CoachScrollRestoration() {
     };
     window.addEventListener("popstate", onPopState);
 
+    const onPageHide = () => {
+      resetCoachScrollRestorationToAuto();
+    };
+    window.addEventListener("pagehide", onPageHide);
+
     return () => {
       window.removeEventListener("popstate", onPopState);
-      try {
-        history.scrollRestoration = previousRestoration;
-      } catch {
-        // ignore
-      }
+      window.removeEventListener("pagehide", onPageHide);
+      resetCoachScrollRestorationToAuto();
     };
   }, [pathname, onCoach]);
 
@@ -109,8 +123,27 @@ export function CoachScrollRestoration() {
 
     let resizeListener: (() => void) | null = null;
     const timeoutIds: number[] = [];
+    let cancelled = false;
+
+    const cancelDeferredRestore = () => {
+      if (cancelled) {
+        return;
+      }
+      cancelled = true;
+      if (resizeListener !== null) {
+        window.removeEventListener("resize", resizeListener);
+        resizeListener = null;
+      }
+      for (const id of timeoutIds) {
+        window.clearTimeout(id);
+      }
+      timeoutIds.length = 0;
+    };
 
     const restore = () => {
+      if (cancelled) {
+        return;
+      }
       applyStoredCoachScroll(pathname, storedY);
     };
 
@@ -119,13 +152,29 @@ export function CoachScrollRestoration() {
     window.addEventListener("resize", resizeListener);
     timeoutIds.push(window.setTimeout(restore, 0), window.setTimeout(restore, 80));
 
+    const onUserScrollIntent = () => {
+      cancelDeferredRestore();
+    };
+    window.addEventListener("touchstart", onUserScrollIntent, {
+      passive: true,
+      once: true,
+    });
+    window.addEventListener("wheel", onUserScrollIntent, {
+      passive: true,
+      once: true,
+    });
+    window.addEventListener("keydown", onUserScrollIntent, { once: true });
+    window.addEventListener("scroll", onUserScrollIntent, {
+      passive: true,
+      once: true,
+    });
+
     return () => {
-      if (resizeListener !== null) {
-        window.removeEventListener("resize", resizeListener);
-      }
-      for (const id of timeoutIds) {
-        window.clearTimeout(id);
-      }
+      cancelDeferredRestore();
+      window.removeEventListener("touchstart", onUserScrollIntent);
+      window.removeEventListener("wheel", onUserScrollIntent);
+      window.removeEventListener("keydown", onUserScrollIntent);
+      window.removeEventListener("scroll", onUserScrollIntent);
     };
   }, [pathname, onCoach]);
 
@@ -133,6 +182,12 @@ export function CoachScrollRestoration() {
     if (!onCoach) {
       return;
     }
+    const markUserScroll = () => {
+      userScrolledRef.current = true;
+    };
+    window.addEventListener("wheel", markUserScroll, { passive: true });
+    window.addEventListener("touchmove", markUserScroll, { passive: true });
+    window.addEventListener("keydown", markUserScroll);
     let frame = 0;
     const onScroll = () => {
       if (document.visibilityState === "hidden") {
@@ -143,11 +198,20 @@ export function CoachScrollRestoration() {
         if (window.scrollY > 0) {
           lastScrollYRef.current = window.scrollY;
           writeCoachScrollY(window.scrollY, pathname);
+          return;
+        }
+        if (userScrolledRef.current && lastScrollYRef.current > 0) {
+          userScrolledRef.current = false;
+          lastScrollYRef.current = 0;
+          writeCoachScrollY(0, pathname);
         }
       });
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
+      window.removeEventListener("wheel", markUserScroll);
+      window.removeEventListener("touchmove", markUserScroll);
+      window.removeEventListener("keydown", markUserScroll);
       window.removeEventListener("scroll", onScroll);
       window.cancelAnimationFrame(frame);
     };
@@ -158,7 +222,10 @@ export function CoachScrollRestoration() {
       return;
     }
     const saveScroll = () => {
-      const y = Math.max(window.scrollY, lastScrollYRef.current);
+      const y =
+        window.scrollY > 0
+          ? Math.max(window.scrollY, lastScrollYRef.current)
+          : lastScrollYRef.current;
       writeCoachScrollY(y, pathname);
     };
     const onLeavingPointer = (event: Event) => {

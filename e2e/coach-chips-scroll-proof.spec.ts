@@ -14,16 +14,14 @@ test("last suggestion chip clears sticky Ask at scroll end @375", async ({
   await scrollCoachConciergeToEnd(page);
 
   const starters = page.getByLabel("Suggested questions").first();
-  const chipsToCheck = [
-    "What happens next?",
-    "When's my inspection?",
-    "What am I missing?",
-  ];
+  const lastChip = starters.getByRole("button", {
+    name: "When do I leave for my first showing?",
+  });
+  const lenderChip = starters.getByRole("button", { name: "Who is my lender?" });
   const compose = page.getByTestId("concierge-compose");
   const tabBar = page.getByTestId("app-tab-bar");
 
-  for (const label of chipsToCheck) {
-    const chip = starters.getByRole("button", { name: label });
+  for (const chip of [lenderChip, lastChip]) {
     const chipBox = await chip.boundingBox();
     const composeBox = await compose.boundingBox();
     expect(chipBox).not.toBeNull();

@@ -9,6 +9,11 @@ import {
   fixtureInspectionDeadlineAt,
   fixtureOwedTodayAsOf,
 } from "@/lib/demo-fixture-dates";
+import {
+  demoBookedInspectionTasks,
+  isDemoBuyerAClerk,
+} from "@/lib/demo-file-session-view";
+import { isDemoMode } from "@/lib/auth-config";
 
 export type TestBuyerClerkId =
   | (typeof SEED_CLERK_IDS)["buyerA"]
@@ -57,6 +62,13 @@ export function seedDashboardForClerkId(clerkId: string): BuyerDashboardView {
 
   const owedAsOf = fixtureOwedTodayAsOf();
   const inspectionDueAt = fixtureInspectionDeadlineAt();
+  const baseTasks = buyer.tasks.map((task) => ({ ...task }));
+  const tasks =
+    isDemoMode() &&
+    isDemoBuyerAClerk(clerkId) &&
+    buyer.stage === "inspection"
+      ? demoBookedInspectionTasks(baseTasks)
+      : baseTasks;
 
   return summarizeBuyerDashboard({
     transactionId,
@@ -71,7 +83,7 @@ export function seedDashboardForClerkId(clerkId: string): BuyerDashboardView {
       label: buyer.owedToday.label,
     },
     propertyAddress: buyer.property,
-    tasks: buyer.tasks.map((task) => ({ ...task })),
+    tasks,
     stages: SEED_PLAN.stages,
     deadlines:
       buyer.stage === "inspection" && inspectionDueAt > 0

@@ -127,22 +127,21 @@ test("coach habit fluidity — chip center hits + scroll-end clearance @375", as
     fullPage: false,
   });
 
-  const fileStarters = [
+  const fileDockStarters = [
     "What happens next?",
-    "When's my inspection?",
-    "What am I missing?",
+    "When do I leave for my first showing?",
   ] as const;
 
   await signInAlexWithFile(page);
   await expect(page.getByTestId("coach-ten-second")).toBeVisible();
   await page.evaluate(() => window.scrollTo(0, 0));
   await assertNextCardClearsDock(page);
-  for (const label of fileStarters) {
+  for (const label of fileDockStarters) {
     await assertChipCenterHitsButton(page, label);
   }
   await assertAskCenterHitsButton(page);
   await scrollCoachConciergeToEnd(page);
-  for (const label of fileStarters) {
+  for (const label of fileDockStarters) {
     await assertChipCenterHitsButton(page, label);
     await assertChipClearsComposeAtScrollEnd(page, label);
   }
@@ -171,11 +170,12 @@ test("coach habit fluidity — chip center hits + scroll-end clearance @375", as
   await expect(page.getByTestId("coach-return-continue")).toContainText(
     fileReturnStarter,
   );
-  const restoredAnswer = page.getByTestId("concierge-answer");
-  await expect(restoredAnswer).toBeVisible();
+  const restoredThread = page.getByTestId("concierge-restored-thread");
+  await expect(restoredThread).toBeVisible();
+  const restoredAnswer = restoredThread.getByTestId("concierge-answer");
   await expect(restoredAnswer).toBeInViewport();
 
-  for (const label of fileStarters) {
+  for (const label of CONCIERGE_STARTERS) {
     await assertChipCenterHitsButton(page, label);
   }
   await assertAskCenterHitsButton(page);

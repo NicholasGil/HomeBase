@@ -4,7 +4,11 @@ import { CoachFileSessionShell } from "@/components/coach-file-session-shell";
 import { CoachHabitConcierge } from "@/components/coach-habit-concierge";
 import { CoachReturnHeaderHint } from "@/components/coach-return-header-hint";
 import { ConciergeChat } from "@/components/concierge-chat";
-import { FILE_SESSION_CONCIERGE_STARTERS } from "@/lib/concierge-starters";
+import {
+  CONCIERGE_STARTERS,
+  FILE_SESSION_CONCIERGE_STARTERS,
+} from "@/lib/concierge-starters";
+import { isDemoMode } from "@/lib/auth-config";
 import { BuyerFullOsTeaser } from "@/components/buyer-full-os-teaser";
 import {
   BuyerLockedUpsellRail,
@@ -51,7 +55,9 @@ export function CoachHome({
   const demoOsOpen = buyerFixtureOsUnlocked();
   const conciergeStarters = firstSession
     ? COACH_FIRST_SESSION_STARTERS
-    : FILE_SESSION_CONCIERGE_STARTERS;
+    : isDemoMode()
+      ? FILE_SESSION_CONCIERGE_STARTERS
+      : CONCIERGE_STARTERS;
 
   return (
     <div

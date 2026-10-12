@@ -17,6 +17,7 @@ test("coach file session @375 — NEXT clears dock and compose clears tab bar", 
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Alex Rivera" }).click();
   await expect(page).toHaveURL(/\/coach$/);
+  await expect(page.getByTestId("coach-ten-second")).toBeVisible();
   await expect(page.getByTestId("concierge-mobile-dock")).toBeVisible();
   await page.evaluate(() => window.scrollTo(0, 0));
   await assertNextCardClearsDock(page);

@@ -485,9 +485,17 @@ export function ConciergeChat({
           {scrollIntro && asked === null ? (
             <div className="shrink-0">{scrollIntro}</div>
           ) : null}
-          <div aria-live="polite" className="flex flex-col gap-3">
+          <div
+            aria-live="polite"
+            className="flex flex-col gap-3"
+            data-testid={
+              pinRestoredThreadOnMobile && asked !== null
+                ? "concierge-restored-thread"
+                : undefined
+            }
+          >
             {renderConversation({
-              omitUserBubble: pinRestoredThreadOnMobile && asked !== null,
+              omitUserBubble: false,
             })}
           </div>
         </div>

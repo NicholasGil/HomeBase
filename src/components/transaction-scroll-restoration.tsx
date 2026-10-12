@@ -10,7 +10,13 @@ import {
   writeTransactionScrollY,
 } from "@/lib/transaction-scroll-storage";
 import { recordCoachScrollRestorationOriginal } from "@/lib/coach-scroll-restoration-window";
+import {
+  consumeTransactionScrollPopNavigation,
+  ensureTransactionScrollPopstateListener,
+} from "@/lib/transaction-scroll-pop-navigation";
 import { transactionScrollRestoreOnPageShow } from "@/lib/transaction-scroll-pageshow";
+
+ensureTransactionScrollPopstateListener();
 
 function shouldSaveScrollForLink(anchor: HTMLAnchorElement): boolean {
   const href = anchor.getAttribute("href") ?? "";
@@ -138,9 +144,17 @@ export function TransactionScrollRestoration() {
     };
 
     const onPopState = () => {
+      pathnameRef.current = window.location.pathname;
+      if (!isTransactionScrollPath(pathnameRef.current)) {
+        return;
+      }
       restoreFromStorage();
     };
     window.addEventListener("popstate", onPopState);
+
+    if (consumeTransactionScrollPopNavigation(pathname)) {
+      restoreFromStorage();
+    }
     const onPageShow = (event: PageTransitionEvent) => {
       if (
         !transactionScrollRestoreOnPageShow(

@@ -15,10 +15,10 @@ export function DemoShellBadge() {
         <span className="hidden min-[400px]:inline">Demo · </span>
         sample data
       </span>
-      <form action={endTestSessionFromForm} className="relative shrink-0">
+      <form action={endTestSessionFromForm} className="shrink-0">
         <button
           type="submit"
-          className="relative inline-flex items-center px-1 py-0 underline decoration-muted-foreground/60 underline-offset-2 hover:text-foreground before:absolute before:-inset-x-2.5 before:-inset-y-3.5 before:min-h-11 before:min-w-11 before:content-['']"
+          className="inline-flex min-h-11 min-w-11 items-center justify-center px-1.5 text-[11px] underline decoration-muted-foreground/60 underline-offset-2 hover:text-foreground"
           data-testid="demo-exit-link"
         >
           Exit demo

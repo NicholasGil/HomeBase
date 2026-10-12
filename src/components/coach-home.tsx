@@ -4,12 +4,12 @@ import { CoachHabitConcierge } from "@/components/coach-habit-concierge";
 import { CoachReturnHeaderHint } from "@/components/coach-return-header-hint";
 import { CoachTenSecondReturnGate } from "@/components/coach-ten-second-return-gate";
 import { ConciergeChat } from "@/components/concierge-chat";
+import { FILE_SESSION_CONCIERGE_STARTERS } from "@/lib/concierge-starters";
 import { BuyerFullOsTeaser } from "@/components/buyer-full-os-teaser";
 import {
   BuyerLockedUpsellRail,
 } from "@/components/buyer-locked-upsell";
 import { buyerFixtureOsUnlocked } from "@/lib/demo-buyer-os";
-import { isDemoMode } from "@/lib/auth-config";
 import type { ConciergeScope } from "@/components/concierge-sheet";
 import { TenSecondHeroGrid } from "@/components/ten-second-hero";
 import { transactionHref } from "@/components/buyer-dashboard-view";
@@ -49,7 +49,9 @@ export function CoachHome({
   const firstName = buyerName.split(" ")[0] ?? buyerName;
   const showTenSecond = dashboardView !== null && !firstSession;
   const demoOsOpen = buyerFixtureOsUnlocked();
-  const wrapCoachChips = isDemoMode() || demoOsOpen;
+  const conciergeStarters = firstSession
+    ? COACH_FIRST_SESSION_STARTERS
+    : FILE_SESSION_CONCIERGE_STARTERS;
 
   return (
     <div
@@ -59,8 +61,8 @@ export function CoachHome({
       <section
         aria-label="Personal coach"
         className={cn(
-          "flex min-h-0 flex-col overflow-x-hidden rounded-2xl border border-border/80 bg-card shadow-sm max-md:overflow-y-hidden",
-          "max-md:max-h-[calc(100dvh-var(--coach-mobile-chrome)-var(--coach-compose-clearance))]",
+          "flex min-h-0 flex-col overflow-x-hidden rounded-2xl border border-border/80 bg-card shadow-sm",
+          "max-md:max-h-[calc(100dvh-var(--coach-mobile-chrome)-var(--tab-bar-height)-env(safe-area-inset-bottom))] max-md:overflow-y-auto max-md:overscroll-contain",
           "md:min-h-[min(70vh,640px)]",
         )}
       >
@@ -147,7 +149,7 @@ export function CoachHome({
             <CoachTenSecondReturnGate
               storageKey={habitStorageKey}
               firstSession={firstSession}
-              className="shrink-0 border-b border-border/70 px-5 py-4"
+              className="relative z-0 shrink-0 border-b border-border/70 px-5 py-4"
             >
               <TenSecondHeroGrid
                 view={dashboardView}
@@ -160,7 +162,7 @@ export function CoachHome({
           ) : (
             <div
               data-testid="coach-ten-second"
-              className="shrink-0 border-b border-border/70 px-5 py-4"
+              className="relative z-0 shrink-0 border-b border-border/70 px-5 py-4"
             >
               <TenSecondHeroGrid
                 view={dashboardView}
@@ -179,16 +181,16 @@ export function CoachHome({
             stageLabel={scope.stage}
             firstName={firstName}
             className={cn(
-              "min-h-0 flex-1 px-5 pb-5",
-              firstSession ? "pt-2 max-md:pt-2 md:pt-4" : "pt-4",
+              "relative z-10 px-5 pb-5",
+              firstSession
+                ? "min-h-0 flex-1 pt-2 max-md:pt-2 md:pt-4"
+                : "max-md:flex-none max-md:shrink-0 md:min-h-0 md:flex-1 pt-4",
             )}
             availability={availability}
             showAgentLinkWhenUnavailable={!firstSession}
-            starters={
-              firstSession ? COACH_FIRST_SESSION_STARTERS : undefined
-            }
+            starters={conciergeStarters}
             pinStartersAboveScrollOnMobile={!coachUnavailable}
-            wrapMobileQuestionStarters={wrapCoachChips}
+            wrapMobileQuestionStarters={firstSession}
             scrollIntro={
               firstSession && !coachUnavailable
                 ? (
@@ -223,16 +225,16 @@ export function CoachHome({
         ) : (
           <ConciergeChat
             className={cn(
-              "min-h-0 flex-1 px-5 pb-5",
-              firstSession ? "pt-2 max-md:pt-2 md:pt-4" : "pt-4",
+              "relative z-10 px-5 pb-5",
+              firstSession
+                ? "min-h-0 flex-1 pt-2 max-md:pt-2 md:pt-4"
+                : "max-md:flex-none max-md:shrink-0 md:min-h-0 md:flex-1 pt-4",
             )}
             availability={availability}
             showAgentLinkWhenUnavailable={!firstSession}
-            starters={
-              firstSession ? COACH_FIRST_SESSION_STARTERS : undefined
-            }
+            starters={conciergeStarters}
             pinStartersAboveScrollOnMobile={!coachUnavailable}
-            wrapMobileQuestionStarters={wrapCoachChips}
+            wrapMobileQuestionStarters={firstSession}
             scrollIntro={
               firstSession && !coachUnavailable
                 ? (

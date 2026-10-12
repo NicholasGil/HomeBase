@@ -60,7 +60,15 @@ export function CoachHabitConcierge({
   }
 
   return (
-    <div className={cn("flex min-h-0 flex-1 flex-col gap-3", className)}>
+    <div
+      className={cn(
+        "flex flex-col gap-3",
+        firstSession
+          ? "min-h-0 flex-1"
+          : "max-md:flex-none max-md:shrink-0 md:min-h-0 md:flex-1",
+        className,
+      )}
+    >
       {showDailyCheckIn ? (
         <CoachDailyCheckIn
           stageLabel={stageLabel}

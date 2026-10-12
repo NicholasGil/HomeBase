@@ -114,7 +114,7 @@ export function PricingPageContent({
           data-testid="pricing-not-included-heading"
           className="text-eyebrow font-medium tracking-[0.12em] text-muted-foreground/90 uppercase"
         >
-          Not included — full OS upsells
+          {demoMode ? "Full OS — open in this demo" : "Not included — full OS upsells"}
         </h2>
         <p className="text-small text-muted-foreground">
           {demoMode
@@ -125,7 +125,11 @@ export function PricingPageContent({
           {BUYER_LOCKED_UPSELLS.map((upsell) => (
             <BuyerLockedUpsellCard
               key={upsell.area}
-              upsell={upsell}
+              upsell={
+                demoMode
+                  ? { ...upsell, title: upsell.label }
+                  : upsell
+              }
               bulletsOnly
             />
           ))}

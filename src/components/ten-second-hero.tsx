@@ -200,12 +200,15 @@ export function TenSecondHeroGrid({
         data-testid="ten-second-owe"
         className={cn(
           "rounded-xl bg-sky px-4 py-3 lg:px-5 lg:py-6",
+          compact && "min-h-11",
           at.owe,
         )}
       >
         <DrillLink
           href={drill}
-          className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 lg:block"
+          className={cn(
+            "flex min-h-11 flex-wrap items-center gap-x-2 gap-y-0.5 lg:block lg:min-h-0",
+          )}
         >
           <p className="text-eyebrow font-medium uppercase tracking-[0.2em] text-muted-foreground">
             Due today

@@ -15,23 +15,10 @@ import { ConciergeAnswerView } from "@/components/concierge-answer";
 import { ConciergeUnavailableState } from "@/components/concierge-unavailable";
 import { Button } from "@/components/ui/button";
 import type { ConciergeAvailability } from "@/lib/concierge-availability";
+import { CONCIERGE_STARTERS } from "@/lib/concierge-starters";
 import { CONCIERGE_MODEL_UNAVAILABLE_ANSWER } from "../../lib/llm/types";
 
-/**
- * The eight canonical questions from DESIGN.md §M3, phrased the way a buyer
- * would tap them. lib/llm matches on the lowercase fragments, so the copy here
- * can carry punctuation and casing without touching the matcher.
- */
-export const CONCIERGE_STARTERS = [
-  "What happens next?",
-  "When is my inspection?",
-  "What am I missing?",
-  "How much cash will I need?",
-  "What did the inspection find?",
-  "What changed in the counteroffer?",
-  "Who is my lender?",
-  "When do I leave for my first showing?",
-] as const;
+export { CONCIERGE_STARTERS };
 
 const CHIP_DISABLED_REASON =
   "AI coach unavailable — model key not configured on this deployment.";
@@ -112,10 +99,7 @@ export function ConciergeChat({
   const pinMobileChips =
     pinFirstSessionMobile ||
     (pinRestoredThreadOnMobile && asked !== null && !coachUnavailable);
-  const starterCount = starters.length;
-  const wrapMobileStarters =
-    wrapMobileQuestionStarters ||
-    (pinFirstSessionMobile && starterCount <= 3);
+  const wrapMobileStarters = wrapMobileQuestionStarters;
   const horizontalScrollChips =
     !wrapMobileStarters &&
     (pinMobileChips || !pinFirstSessionMobile);
@@ -123,14 +107,16 @@ export function ConciergeChat({
     (pinFirstSessionMobile || pinRestoredThreadOnMobile) &&
     asked !== null &&
     !coachUnavailable;
+  const coachMaxMd = useCoachMaxMdViewport();
   const mobileReplyGrid = showPinnedMobileThread;
+  const mobilePinnedLayout =
+    mobileReplyGrid || (pinMobileChips && coachMaxMd);
   const pinnedThreadTestId =
     showPinnedMobileThread && pinRestoredThreadOnMobile
       ? "concierge-restored-thread"
       : showPinnedMobileThread && pinFirstSessionMobile
         ? "concierge-first-session-thread"
         : undefined;
-  const coachMaxMd = useCoachMaxMdViewport();
   const renderPinnedMobileThread =
     showPinnedMobileThread && coachMaxMd;
   const renderScrollPinnedThread =
@@ -295,7 +281,7 @@ export function ConciergeChat({
         "-mx-5 flex gap-2 px-5 pb-1 md:mx-0",
         wrapMobileStarters && "flex-wrap",
         horizontalScrollChips &&
-          "max-md:min-w-0 max-md:w-full max-md:max-w-full max-md:flex-nowrap max-md:overflow-x-auto max-md:overflow-y-hidden max-md:overscroll-x-contain max-md:[scrollbar-width:none] max-md:[&::-webkit-scrollbar]:hidden",
+          "max-md:min-w-0 max-md:w-full max-md:max-w-full max-md:flex-nowrap max-md:overflow-x-auto max-md:overflow-y-hidden max-md:overscroll-x-contain max-md:[scrollbar-width:none] max-md:[mask-image:linear-gradient(to_right,transparent,black_1.5rem,black_calc(100%-1.5rem),transparent)] max-md:[&::-webkit-scrollbar]:hidden",
       )}
     >
       {starters.map((starter) => (
@@ -330,9 +316,9 @@ export function ConciergeChat({
       aria-label="Transaction concierge"
       className={cn(
         "flex min-h-0 flex-col",
-        "max-md:relative max-md:overflow-hidden",
-        mobileReplyGrid &&
-          "max-md:grid max-md:min-h-0 max-md:flex-1 max-md:min-w-0 max-md:w-full max-md:max-w-full max-md:grid-rows-[minmax(0,auto)_minmax(0,1fr)_minmax(0,auto)] max-md:gap-4 max-md:overflow-x-hidden",
+        "max-md:relative max-md:min-h-0 max-md:overflow-x-hidden max-md:overflow-y-visible",
+        mobilePinnedLayout &&
+          "max-md:grid max-md:min-h-0 max-md:flex-1 max-md:min-w-0 max-md:w-full max-md:max-w-full max-md:grid-rows-[minmax(0,auto)_minmax(0,1fr)_minmax(0,auto)] max-md:gap-3 max-md:overflow-x-hidden",
         className,
       )}
     >
@@ -340,7 +326,7 @@ export function ConciergeChat({
         <div
           className={cn(
             "shrink-0 max-md:block md:hidden",
-            mobileReplyGrid &&
+            mobilePinnedLayout &&
               "max-md:row-start-1 max-md:min-w-0 max-md:max-w-full max-md:overflow-hidden",
             showPinnedMobileThread ? "pt-2 pb-0" : "pt-4 pb-1",
           )}
@@ -362,8 +348,9 @@ export function ConciergeChat({
         data-testid="concierge-scroll-region"
         className={cn(
           "flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto py-4",
-          "max-md:pb-[var(--coach-compose-inset)]",
+          !mobilePinnedLayout && "max-md:pb-[var(--coach-compose-inset)]",
           pinMobileChips && "max-md:pt-0",
+          mobilePinnedLayout && "max-md:row-start-2 max-md:min-h-0 max-md:pb-0",
           renderPinnedMobileThread && "max-md:hidden",
         )}
       >
@@ -390,16 +377,16 @@ export function ConciergeChat({
       <div
         className={cn(
           "shrink-0 md:static",
-          mobileReplyGrid ? MOBILE_COMPOSE_GRID : MOBILE_COMPOSE_DOCK,
-          mobileReplyGrid &&
-            "max-md:min-w-0 max-md:w-full max-md:max-w-full max-md:overflow-hidden",
+          mobilePinnedLayout ? MOBILE_COMPOSE_GRID : MOBILE_COMPOSE_DOCK,
+          mobilePinnedLayout &&
+            "max-md:z-30 max-md:row-start-3 max-md:min-w-0 max-md:w-full max-md:max-w-full max-md:overflow-visible",
         )}
         data-testid="concierge-compose"
       >
         <form
           className={cn(
             "flex w-full min-w-0 gap-2 border-t border-border/70 bg-card/95 shadow-[0_-8px_24px_-12px_rgba(15,23,42,0.14)] backdrop-blur md:bg-card md:shadow-none md:backdrop-blur-none",
-            mobileReplyGrid ? "pt-2" : "pt-3",
+            mobilePinnedLayout ? "pt-2" : "pt-3",
           )}
           onSubmit={(event) => {
             event.preventDefault();

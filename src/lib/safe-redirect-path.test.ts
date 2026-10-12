@@ -41,6 +41,9 @@ describe("sanitizeRedirectPath", () => {
       SAFE_REDIRECT_FALLBACK,
     );
     expect(sanitizeRedirectPath("/coach?next=\r\n")).toBe(SAFE_REDIRECT_FALLBACK);
+    expect(sanitizeRedirectPath("/coach?q=a%0d%0aSet-Cookie:x")).toBe(
+      SAFE_REDIRECT_FALLBACK,
+    );
     expect(sanitizeRedirectPath("/coach?q=a%20b")).toBe("/coach?q=a%20b");
   });
 });

@@ -45,4 +45,13 @@ describe("coach scroll storage", () => {
       store.get(coachScrollStorageKeyForEpoch("/coach", "1")),
     ).toBe("280");
   });
+
+  it("persists zero when leaving coach from the top", () => {
+    writeCoachScrollY(365, "/coach");
+    writeCoachScrollY(0, "/coach");
+    expect(readCoachScrollY("/coach")).toBe(0);
+    expect(
+      store.get(coachScrollStorageKeyForEpoch("/coach", "1")),
+    ).toBe("0");
+  });
 });

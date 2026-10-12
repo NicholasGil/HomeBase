@@ -36,5 +36,6 @@
   "txnProof": {
     "redrillTopPin": "/workspace/proof/coach-scroll-restore/txn-redrill-top-pin-375.png",
     "historyBackDepth": "/workspace/proof/coach-scroll-restore/txn-history-back-depth-375.png"
-  }
+  },
+  "gitSha": "f37faa85ea5ffe38f8e203469a769c9a2b96196f"
 }

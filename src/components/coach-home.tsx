@@ -58,7 +58,8 @@ export function CoachHome({
       data-testid="coach-home"
       className={cn(
         "grid gap-8 lg:grid-cols-[minmax(0,1fr)_min(100%,18rem)] lg:items-start",
-        !firstSession && "max-md:pb-[var(--coach-mobile-page-clearance)]",
+        !coachUnavailable &&
+          "max-md:pb-[var(--coach-mobile-page-clearance)]",
       )}
     >
       <section
@@ -236,7 +237,7 @@ export function CoachHome({
             starters={conciergeStarters}
             pinStartersAboveScrollOnMobile={!coachUnavailable}
             wrapMobileQuestionStarters={firstSession}
-            mobileStickyDockAboveTabBar={!firstSession}
+            mobileStickyDockAboveTabBar={!coachUnavailable}
             scrollIntro={
               firstSession && !coachUnavailable
                 ? (
@@ -282,7 +283,7 @@ export function CoachHome({
             starters={conciergeStarters}
             pinStartersAboveScrollOnMobile={!coachUnavailable}
             wrapMobileQuestionStarters={firstSession}
-            mobileStickyDockAboveTabBar={!firstSession}
+            mobileStickyDockAboveTabBar={!coachUnavailable}
             scrollIntro={
               firstSession && !coachUnavailable
                 ? (

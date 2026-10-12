@@ -15,7 +15,7 @@ test("agent sees eight clients with exceptions first", async ({ page }) => {
     "agent",
   );
   await expect(
-    page.getByTestId("app-nav").getByRole("link", { name: "Command center" }),
+    page.getByTestId("app-nav").getByRole("link", { name: "Command" }),
   ).toBeVisible();
   await expect(page.getByTestId("command-center")).toBeVisible();
   await expect(page.getByTestId("command-center-roster")).toBeVisible();

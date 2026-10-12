@@ -3,7 +3,10 @@ import path from "node:path";
 
 import { expect, test } from "@playwright/test";
 
-import { CONCIERGE_STARTERS } from "../src/components/concierge-chat";
+import {
+  CONCIERGE_STARTERS,
+  FILE_SESSION_CONCIERGE_STARTERS,
+} from "../src/lib/concierge-starters";
 
 const PROOF_DIR = path.join("proof", "coach-habit-fluidity");
 const MIN_CHIP_HEIGHT = 44;
@@ -129,10 +132,7 @@ test("coach habit fluidity — chip center hits + scroll-end clearance @375", as
     fullPage: false,
   });
 
-  const fileStarters = [
-    "What happens next?",
-    "When do I leave for my first showing?",
-  ] as const;
+  const fileStarters = FILE_SESSION_CONCIERGE_STARTERS;
 
   await signInAlexWithFile(page);
   await expect(page.getByTestId("coach-ten-second")).toBeVisible();
@@ -175,7 +175,7 @@ test("coach habit fluidity — chip center hits + scroll-end clearance @375", as
   const restoredAnswer = restoredThread.getByTestId("concierge-answer");
   await expect(restoredAnswer).toBeInViewport();
 
-  for (const label of CONCIERGE_STARTERS) {
+  for (const label of FILE_SESSION_CONCIERGE_STARTERS) {
     await assertChipCenterHitsButton(page, label);
   }
   await assertAskCenterHitsButton(page);

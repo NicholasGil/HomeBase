@@ -1,9 +1,12 @@
 import { expect, type Locator, type Page, test } from "@playwright/test";
 
+import { FILE_SESSION_CONCIERGE_STARTERS } from "../src/lib/concierge-starters";
+
 const MOBILE = { width: 375, height: 812 };
 const DESKTOP = { width: 1280, height: 800 };
 const FAB_SIZE = 56;
-const SUGGESTION_CHIPS = 8;
+
+const SUGGESTION_CHIPS = FILE_SESSION_CONCIERGE_STARTERS.length;
 
 async function signInAs(page: Page, name: string) {
   await page.goto("/test-login");
@@ -45,7 +48,9 @@ test("concierge answers a seed question and refuses another client", async ({
   await page.getByRole("button", { name: "What happens next?" }).click();
   await expect(answer).toContainText("Schedule inspection");
 
-  await page.getByRole("button", { name: "When is my inspection?" }).click();
+  await page
+    .getByRole("button", { name: FILE_SESSION_CONCIERGE_STARTERS[1] })
+    .click();
   await expect(answer).toContainText(
     "Inspection is at Tue, Sep 8, 2026, 10:00 AM CDT.",
   );
@@ -106,7 +111,8 @@ test.describe("coach home concierge", () => {
     await signInAs(page, "Alex Rivera");
     await expect(page.getByTestId("concierge")).toBeVisible();
 
-    await page.getByRole("button", { name: "How much cash will I need?" }).click();
+    await page.getByTestId("concierge-question").fill("How much cash will I need?");
+    await page.getByTestId("concierge-ask").click();
     const answer = conciergeAnswerInScroll(page);
     await expect(answer).toHaveAttribute("data-kind", "answer");
     await expect(answer.locator("[data-provenance='title_issued']")).toBeVisible();

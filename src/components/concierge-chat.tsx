@@ -33,7 +33,7 @@ const MOBILE_COMPOSE_GRID =
 
 /** File-session mobile: chips + Ask fixed above the tab bar; page scrolls. */
 const MOBILE_STICKY_DOCK =
-  "max-md:fixed max-md:inset-x-0 max-md:z-40 max-md:bottom-[calc(var(--tab-bar-height)+env(safe-area-inset-bottom))] max-md:border-t max-md:border-border/70 max-md:bg-card max-md:px-5 max-md:pt-2 max-md:pb-2 max-md:shadow-[0_-8px_24px_-12px_rgba(15,23,42,0.14)]";
+  "max-md:fixed max-md:inset-x-0 max-md:z-40 max-md:bottom-[calc(var(--tab-bar-height)+env(safe-area-inset-bottom)+1rem)] max-md:border-t max-md:border-border/70 max-md:bg-card max-md:px-5 max-md:pt-2 max-md:pb-2 max-md:shadow-[0_-8px_24px_-12px_rgba(15,23,42,0.14)]";
 
 const CONCIERGE_SERVER_ERROR_MESSAGE =
   "Coach could not load an answer.";
@@ -472,7 +472,7 @@ export function ConciergeChat({
       >
         <div
           data-testid="concierge-scroll-region"
-          className="flex flex-col gap-3 py-4 max-md:overflow-visible max-md:py-3"
+          className="flex flex-col gap-3 py-4 max-md:overflow-visible max-md:py-3 max-md:pb-5"
         >
           {fileSummaryAboveThread ? (
             <div className="shrink-0 max-md:block md:hidden">
@@ -483,9 +483,25 @@ export function ConciergeChat({
             <div className="shrink-0">{scrollIntro}</div>
           ) : null}
           <div aria-live="polite" className="flex flex-col gap-3">
-            {renderConversation({
-              omitUserBubble: pinRestoredThreadOnMobile && asked !== null,
-            })}
+            {pinRestoredThreadOnMobile && asked !== null ? (
+              <div
+                data-testid="concierge-restored-thread"
+                className="flex flex-col gap-3"
+              >
+                {renderConversation({ omitUserBubble: true })}
+              </div>
+            ) : pinFirstSessionMobile && asked !== null ? (
+              <div
+                data-testid="concierge-first-session-thread"
+                className="flex flex-col gap-3"
+              >
+                {renderConversation({ omitUserBubble: true })}
+              </div>
+            ) : (
+              renderConversation({
+                omitUserBubble: pinRestoredThreadOnMobile && asked !== null,
+              })
+            )}
           </div>
         </div>
         <div

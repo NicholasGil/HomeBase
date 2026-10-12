@@ -8,6 +8,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from "react";
+import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 
@@ -86,7 +87,13 @@ function useCoachMaxMdViewport() {
   );
 }
 
-function scrollAnswerClearOfMobileDock(answerEl: HTMLElement) {
+function scrollAnswerClearOfMobileDock(
+  answerEl: HTMLElement,
+  pathname: string,
+) {
+  if (!/^\/coach(\/|$)/.test(pathname)) {
+    return;
+  }
   const dock = document.querySelector('[data-testid="concierge-mobile-dock"]');
   if (!(dock instanceof HTMLElement)) {
     return;
@@ -165,6 +172,7 @@ export function ConciergeChat({
   const answerRef = useRef<HTMLDivElement>(null);
   const chipsScrollRef = useRef<HTMLDivElement>(null);
   const [moreStartersOpen, setMoreStartersOpen] = useState(false);
+  const pathname = usePathname();
 
   const coachUnavailable = availability === "model_key_missing";
   const pinFirstSessionMobile = pinStartersAboveScrollOnMobile;
@@ -246,7 +254,7 @@ export function ConciergeChat({
     const clearAnswerAboveDock = () => {
       const answerEl = answerRef.current;
       if (answerEl !== null) {
-        scrollAnswerClearOfMobileDock(answerEl);
+        scrollAnswerClearOfMobileDock(answerEl, pathname);
       }
     };
     clearAnswerAboveDock();
@@ -257,6 +265,7 @@ export function ConciergeChat({
     pinRestoredThreadOnMobile,
     initialTurn,
     threadHeader,
+    pathname,
   ]);
 
   useEffect(() => {

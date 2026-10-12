@@ -9,12 +9,10 @@ const VIEWPORT = { width: 375, height: 812 };
 const SCROLL_KEY_PREFIX = "realtyrise.coach.scrollY.v1";
 
 async function coachScrollStorageKey(page) {
-  return page.evaluate((prefix) => {
-    const persona =
-      document.documentElement.getAttribute("data-coach-scroll-persona") ??
-      "guest";
-    return `${prefix}:${persona}:/coach`;
-  }, SCROLL_KEY_PREFIX);
+  return page.evaluate(
+    (prefix) => `${prefix}:/coach`,
+    SCROLL_KEY_PREFIX,
+  );
 }
 
 async function signInDemoBuyerCoach(page) {

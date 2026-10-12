@@ -38,30 +38,11 @@ function shouldSaveScrollForLink(anchor: HTMLAnchorElement): boolean {
   return false;
 }
 
-function applyStoredCoachScroll(
-  y: number,
-  programmaticScrollRef: { current: boolean },
-) {
-  const target = clampCoachScrollTarget(
-    y,
-    document.documentElement.scrollHeight,
-    window.innerHeight,
-  );
-  programmaticScrollRef.current = true;
-  window.scrollTo(0, target);
-  requestAnimationFrame(() => {
-    programmaticScrollRef.current = false;
-  });
-  return target;
-}
-
 export function CoachScrollRestoration() {
   const pathname = usePathname();
   const onCoach = coachPath(pathname);
-  const restoringRef = useRef(false);
   const pathnameRef = useRef(pathname);
   const lastScrollYRef = useRef(0);
-  const userScrolledRef = useRef(false);
   const programmaticScrollRef = useRef(false);
 
   useEffect(() => {
@@ -74,6 +55,20 @@ export function CoachScrollRestoration() {
     }
     resetCoachScrollRestorationToAuto();
   }, [onCoach]);
+
+  const applyStoredCoachScroll = (y: number) => {
+    const target = clampCoachScrollTarget(
+      y,
+      document.documentElement.scrollHeight,
+      window.innerHeight,
+    );
+    programmaticScrollRef.current = true;
+    window.scrollTo(0, target);
+    requestAnimationFrame(() => {
+      programmaticScrollRef.current = false;
+    });
+    return target;
+  };
 
   useLayoutEffect(() => {
     if (!onCoach) {
@@ -92,9 +87,7 @@ export function CoachScrollRestoration() {
       if (storedY === null || storedY <= 0) {
         return;
       }
-      restoringRef.current = true;
-      applyStoredCoachScroll(storedY, programmaticScrollRef);
-      restoringRef.current = false;
+      applyStoredCoachScroll(storedY);
     };
 
     restoreFromStorage();
@@ -152,7 +145,7 @@ export function CoachScrollRestoration() {
       if (cancelled) {
         return;
       }
-      applyStoredCoachScroll(storedY, programmaticScrollRef);
+      applyStoredCoachScroll(storedY);
     };
 
     restore();
@@ -193,12 +186,6 @@ export function CoachScrollRestoration() {
     if (!onCoach) {
       return;
     }
-    const markUserScroll = () => {
-      userScrolledRef.current = true;
-    };
-    window.addEventListener("wheel", markUserScroll, { passive: true });
-    window.addEventListener("touchmove", markUserScroll, { passive: true });
-    window.addEventListener("keydown", markUserScroll);
     let frame = 0;
     const onScroll = () => {
       if (document.visibilityState === "hidden") {
@@ -209,20 +196,11 @@ export function CoachScrollRestoration() {
         if (window.scrollY > 0) {
           lastScrollYRef.current = window.scrollY;
           writeCoachScrollY(window.scrollY, pathname);
-          return;
-        }
-        if (userScrolledRef.current && lastScrollYRef.current > 0) {
-          userScrolledRef.current = false;
-          lastScrollYRef.current = 0;
-          writeCoachScrollY(0, pathname);
         }
       });
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
-      window.removeEventListener("wheel", markUserScroll);
-      window.removeEventListener("touchmove", markUserScroll);
-      window.removeEventListener("keydown", markUserScroll);
       window.removeEventListener("scroll", onScroll);
       window.cancelAnimationFrame(frame);
     };
@@ -233,10 +211,7 @@ export function CoachScrollRestoration() {
       return;
     }
     const saveScroll = () => {
-      const y =
-        window.scrollY > 0
-          ? Math.max(window.scrollY, lastScrollYRef.current)
-          : lastScrollYRef.current;
+      const y = Math.max(window.scrollY, lastScrollYRef.current);
       writeCoachScrollY(y, pathname);
     };
     const onLeavingPointer = (event: Event) => {

@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 import {
   SAFE_REDIRECT_FALLBACK,
   isSafeRedirectPathname,
-  redirectPathContainsUnsafeCharacters,
   sanitizeRedirectPath,
 } from "@/lib/safe-redirect-path";
 
@@ -47,14 +46,11 @@ export function redirectToPathFromRequestUrl(
     return redirectToPath(SAFE_REDIRECT_FALLBACK, request, init);
   }
 
-  const relative = `${target.pathname}${target.search}${target.hash}`;
-  if (
-    !isSafeRedirectPathname(target.pathname) ||
-    redirectPathContainsUnsafeCharacters(relative)
-  ) {
+  if (!isSafeRedirectPathname(target.pathname)) {
     return redirectToPath(SAFE_REDIRECT_FALLBACK, request, init);
   }
 
+  const relative = `${target.pathname}${target.search}${target.hash}`;
   const normalized = sanitizeRedirectPath(relative);
   return redirectToPath(normalized, request, init);
 }

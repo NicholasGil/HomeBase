@@ -17,6 +17,7 @@ import {
 } from "@/lib/buyer-auth-entry";
 import { isDemoMode } from "@/lib/auth-config";
 import { DEMO_CHOOSER_PATH } from "@/lib/demo-copy";
+import { MarketingCoachPreview } from "@/components/marketing-coach-preview";
 import { cn } from "@/lib/utils";
 
 export function MarketingLanding() {
@@ -97,6 +98,12 @@ export function MarketingLanding() {
             </Link>
           </div>
         </section>
+
+        {demo ? (
+          <div className="hidden lg:block">
+            <MarketingCoachPreview />
+          </div>
+        ) : null}
 
         <section id="clarity" className="space-y-4">
           <div className="space-y-2">

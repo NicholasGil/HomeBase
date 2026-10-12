@@ -9,6 +9,13 @@ const OTHER_CLIENT =
 const DOLLAR = /\$[\d,]+(?:\.\d{2})?/g;
 
 export function looksLikeAdvice(question: string) {
+  const normalized = question.trim().toLowerCase();
+  if (
+    /\bwhat (?:should i|to) bring\b/.test(normalized) ||
+    /\bwhat do i bring\b/.test(normalized)
+  ) {
+    return false;
+  }
   return ADVICE.test(question);
 }
 

@@ -236,16 +236,35 @@ export function LiveBrokerageOnboarding({
   );
 }
 
+function PersonaAvatar({ name }: { name: string }) {
+  const initials = name
+    .split(/\s+/)
+    .map((part) => part[0] ?? "")
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+  return (
+    <span
+      className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-sage text-sm font-semibold text-sage-foreground"
+      aria-hidden
+    >
+      {initials}
+    </span>
+  );
+}
+
 export function FixtureBrokerageOnboarding({
   viewerName,
   joinError,
   joinErrorMessage = "Invite code not recognized in this fixture.",
   initialTab = "create",
+  demoMode = false,
 }: {
   viewerName?: string;
   joinError?: boolean;
   joinErrorMessage?: string;
   initialTab?: "create" | "join";
+  demoMode?: boolean;
 }) {
   const [mode, setMode] = useState<"create" | "join">(initialTab);
 
@@ -255,6 +274,7 @@ export function FixtureBrokerageOnboarding({
       mode={mode}
       onModeChange={setMode}
       error={joinError ? joinErrorMessage : null}
+      demoMode={demoMode}
     >
       {mode === "create" ? (
         <form action={submitFixtureBrokerageOnboarding} className="space-y-4">
@@ -268,6 +288,7 @@ export function FixtureBrokerageOnboarding({
               name="name"
               className={fieldClassName}
               placeholder="Summit Realty Group"
+              defaultValue={demoMode ? "Summit Realty Group" : undefined}
               required
               minLength={2}
               data-testid="brokerage-name-input"
@@ -308,7 +329,8 @@ export function FixtureBrokerageOnboarding({
           </div>
           <Button
             type="submit"
-            className="w-full"
+            variant="default"
+            className="w-full min-h-11"
             data-testid="brokerage-create-submit"
           >
             Create brokerage
@@ -329,10 +351,16 @@ export function FixtureBrokerageOnboarding({
               required
               data-testid="brokerage-invite-input"
             />
-            <p className="text-xs text-muted-foreground">
-              Fixture demo: use LOOKOUT1 to join the seeded Lookout org, or
-              create a fresh brokerage for an empty book.
-            </p>
+            {!demoMode ? (
+              <p className="text-xs text-muted-foreground">
+                Fixture demo: use LOOKOUT1 to join the seeded Lookout org, or
+                create a fresh brokerage for an empty book.
+              </p>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                Sample invite code for Lookout Realty: LOOKOUT1.
+              </p>
+            )}
           </div>
           <Button
             type="submit"
@@ -352,40 +380,62 @@ function BrokerageOnboardingLayout({
   mode,
   onModeChange,
   error,
+  demoMode = false,
   children,
 }: {
   viewerName?: string;
   mode: "create" | "join";
   onModeChange: (mode: "create" | "join") => void;
   error: string | null;
+  demoMode?: boolean;
   children: ReactNode;
 }) {
+  const tabClass = (selected: boolean) =>
+    cn(
+      "min-h-11 flex-1 rounded-full text-sm font-medium transition-colors",
+      demoMode
+        ? selected
+          ? "bg-background text-foreground shadow-sm ring-1 ring-border"
+          : "bg-transparent text-muted-foreground hover:text-foreground"
+        : buttonVariants({
+            variant: selected ? "default" : "outline",
+          }),
+    );
+
   return (
     <div className="mx-auto max-w-md space-y-6" data-testid="brokerage-onboarding">
       <header className="space-y-2">
-        <p className="text-sm text-muted-foreground">
-          {viewerName ? `Welcome, ${viewerName}` : "Brokerage onboarding"}
-        </p>
-        <h1 className="text-h1 font-semibold tracking-tight">
-          Set up your RealtyRise workspace
-        </h1>
+        <div className="flex items-center gap-3">
+          {viewerName ? <PersonaAvatar name={viewerName} /> : null}
+          <div className="min-w-0">
+            <p className="text-sm text-muted-foreground">
+              {viewerName ? `Welcome, ${viewerName}` : "Brokerage onboarding"}
+            </p>
+            <h1 className="text-h1 font-semibold tracking-tight">
+              Set up your RealtyRise workspace
+            </h1>
+          </div>
+        </div>
         <p className="text-sm leading-6 text-muted-foreground">
-          Create a brokerage or join with an invite code. No MLS or paid map keys
-          are required for this preview.
+          {demoMode
+            ? "Create a sample brokerage or join with an invite code. Everything here uses demo data only."
+            : "Create a brokerage or join with an invite code. No MLS or paid map keys are required for this preview."}
         </p>
       </header>
 
-      <div className="flex gap-2" role="tablist" aria-label="Onboarding mode">
+      <div
+        className={cn(
+          "flex gap-1 rounded-full p-1",
+          demoMode ? "bg-muted/60" : "gap-2",
+        )}
+        role="tablist"
+        aria-label="Onboarding mode"
+      >
         <button
           type="button"
           role="tab"
           aria-selected={mode === "create"}
-          className={cn(
-            buttonVariants({
-              variant: mode === "create" ? "default" : "outline",
-            }),
-            "min-h-11 flex-1",
-          )}
+          className={tabClass(mode === "create")}
           onClick={() => onModeChange("create")}
           data-testid="brokerage-mode-create"
         >
@@ -395,12 +445,7 @@ function BrokerageOnboardingLayout({
           type="button"
           role="tab"
           aria-selected={mode === "join"}
-          className={cn(
-            buttonVariants({
-              variant: mode === "join" ? "default" : "outline",
-            }),
-            "min-h-11 flex-1",
-          )}
+          className={tabClass(mode === "join")}
           onClick={() => onModeChange("join")}
           data-testid="brokerage-mode-join"
         >

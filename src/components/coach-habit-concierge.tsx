@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useSyncExternalStore, type ReactNode } from "react";
 
 import { ConciergeChat } from "@/components/concierge-chat";
 import { CoachDailyCheckIn } from "@/components/coach-daily-check-in";
@@ -25,6 +25,10 @@ export function CoachHabitConcierge({
   showAgentLinkWhenUnavailable,
   starters,
   pinStartersAboveScrollOnMobile,
+  wrapMobileQuestionStarters,
+  mobileStickyDockAboveTabBar,
+  fileSummaryAboveThread,
+  onThreadActiveChange,
   scrollIntro,
   idleHint,
   questionPlaceholder,
@@ -38,6 +42,10 @@ export function CoachHabitConcierge({
   showAgentLinkWhenUnavailable?: boolean;
   starters?: readonly string[];
   pinStartersAboveScrollOnMobile?: boolean;
+  wrapMobileQuestionStarters?: boolean;
+  mobileStickyDockAboveTabBar?: boolean;
+  fileSummaryAboveThread?: ReactNode | null;
+  onThreadActiveChange?: (active: boolean) => void;
   scrollIntro?: ReactNode;
   idleHint?: string;
   questionPlaceholder?: string;
@@ -57,8 +65,22 @@ export function CoachHabitConcierge({
     persistCoachHabitSessionTurn(storageKey, turn);
   }
 
+  useEffect(() => {
+    if (initialTurn !== null) {
+      onThreadActiveChange?.(true);
+    }
+  }, [initialTurn, onThreadActiveChange]);
+
   return (
-    <div className={cn("flex min-h-0 flex-1 flex-col gap-3", className)}>
+    <div
+      className={cn(
+        "flex flex-col gap-3",
+        firstSession
+          ? "min-h-0 flex-1"
+          : "max-md:flex-none max-md:shrink-0 md:min-h-0 md:flex-1",
+        className,
+      )}
+    >
       {showDailyCheckIn ? (
         <CoachDailyCheckIn
           stageLabel={stageLabel}
@@ -73,6 +95,10 @@ export function CoachHabitConcierge({
         showAgentLinkWhenUnavailable={showAgentLinkWhenUnavailable}
         starters={starters}
         pinStartersAboveScrollOnMobile={pinStartersAboveScrollOnMobile}
+        wrapMobileQuestionStarters={wrapMobileQuestionStarters}
+        mobileStickyDockAboveTabBar={mobileStickyDockAboveTabBar}
+        fileSummaryAboveThread={fileSummaryAboveThread}
+        onThreadActiveChange={onThreadActiveChange}
         pinRestoredThreadOnMobile={
           !firstSession && repeatVisit && initialTurn !== null
         }

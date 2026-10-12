@@ -133,8 +133,9 @@ const RAIL_CLASS = {
 */
 const CAP_CLASS = {
   horizontal:
-    "absolute -top-0.5 z-10 flex size-11 items-center justify-center rounded-full outline-none transition-opacity duration-200 focus-visible:ring-2 focus-visible:ring-ring/60 disabled:pointer-events-none disabled:opacity-0",
-  responsive: "lg:hidden",
+    "absolute -top-0.5 z-10 flex min-h-11 min-w-11 size-11 items-center justify-center rounded-full outline-none transition-opacity duration-200 focus-visible:ring-2 focus-visible:ring-ring/60 disabled:pointer-events-none disabled:opacity-0",
+  responsive:
+    "max-lg:min-h-11 max-lg:min-w-11 lg:hidden",
 } as const;
 
 /* Lifted well clear of the track so a node passing under it reads as behind. */

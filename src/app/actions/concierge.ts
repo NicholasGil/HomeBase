@@ -9,12 +9,15 @@ import {
   conciergeAvailability,
   type ConciergeAvailability,
 } from "@/lib/concierge-availability";
+import { enrichDemoFileSessionAnswer } from "@/lib/demo-concierge-answers";
+import { isDemoMode } from "@/lib/auth-config";
 import { OTHER_CLIENT_NAMES } from "@/lib/seed-concierge";
 
 export type ConciergeAskFailureReason =
   | "FORBIDDEN"
   | "UNAUTHENTICATED"
-  | "MODEL_KEY_NOT_CONFIGURED";
+  | "MODEL_KEY_NOT_CONFIGURED"
+  | "SERVER_ERROR";
 
 export async function getConciergeAvailability(): Promise<ConciergeAvailability> {
   const session = await getTestSession();
@@ -38,13 +41,31 @@ export async function askConcierge(input: { question: string }) {
   }
 
   if (session?.role === "buyer") {
-    const facts = conciergeFactsForCoach(session);
-    const answer = completeConcierge({
-      question: input.question,
-      facts,
-      otherClientNames: OTHER_CLIENT_NAMES,
-    });
-    return { ok: true as const, answer };
+    if (session.simulateConciergeServerError) {
+      return { ok: false as const, reason: "SERVER_ERROR" as const };
+    }
+    try {
+      const facts = conciergeFactsForCoach(session);
+      let answer = completeConcierge({
+        question: input.question,
+        facts,
+        otherClientNames: OTHER_CLIENT_NAMES,
+      });
+      if (
+        isDemoMode(process.env) &&
+        !session.emptyCoachFile &&
+        answer.kind === "answer"
+      ) {
+        answer = enrichDemoFileSessionAnswer(
+          input.question,
+          answer,
+          facts,
+        );
+      }
+      return { ok: true as const, answer };
+    } catch {
+      return { ok: false as const, reason: "SERVER_ERROR" as const };
+    }
   }
 
   if (isClerkConfigured()) {

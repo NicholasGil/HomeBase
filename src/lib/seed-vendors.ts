@@ -6,6 +6,7 @@ import {
   SEED_VENDORS,
 } from "../../convex/seedPlan";
 import { categoriesForStage } from "../../convex/lib/vendors";
+import { isDemoMode, type AuthEnv } from "@/lib/auth-config";
 import { SEED_TRANSACTION_IDS } from "@/lib/test-session";
 
 export type SeedVendor = (typeof SEED_VENDORS)[number];
@@ -45,13 +46,14 @@ export function seedLenderVendor() {
   return seedVendorById(SEED_VENDOR_IDS.lender);
 }
 
-export function seedLenderAssignment() {
+export function seedLenderAssignment(env: AuthEnv = process.env) {
+  const demo = isDemoMode(env);
   return {
     assignmentId: SEED_ASSIGNMENT_IDS.lenderAlex,
     vendorId: SEED_VENDOR_IDS.lender,
     vendorName: SEED_PLAN.lender.name,
     category: "lenders" as const,
-    scope: "preapproval",
+    scope: demo ? ("loan_commitment" as const) : ("preapproval" as const),
     status: "active" as const,
     expiresAt: Date.UTC(2026, 9, 30),
     compensationModel: "none" as const,
@@ -61,6 +63,7 @@ export function seedLenderAssignment() {
       status: "active",
       propertyCity: "Huntsville",
       propertyState: "AL",
+      ...(demo ? { propertyLine1: "814 Maple Ave" as const } : {}),
     },
   };
 }

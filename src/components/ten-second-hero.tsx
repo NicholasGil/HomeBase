@@ -9,6 +9,7 @@ import {
 import { MoneyFigureView } from "@/components/money-figure-view";
 import { Badge } from "@/components/ui/badge";
 import type { BuyerDashboardView } from "../../convex/lib/dashboardView";
+import { waitingOnDisplayLabel } from "@/lib/waiting-on-label";
 import { cn } from "@/lib/utils";
 
 /*
@@ -99,14 +100,24 @@ export function TenSecondHeroGrid({
   const drill = detailHref;
   const compact = variant === "coach";
   const addressLine = view.propertyAddress?.line1;
+  const nextAssigneeLabel =
+    view.next === null
+      ? null
+      : (view.contacts.find((c) => c.role === view.next!.assigneeRole)?.name ??
+        view.next.assigneeRole);
+  const coachMobileStack =
+    compact &&
+    "max-md:grid-cols-1 max-md:[&_[data-testid=ten-second-where]]:order-1 max-md:[&_[data-testid=ten-second-owe]]:order-2 max-md:[&_[data-testid=ten-second-next]]:order-3 max-md:[&_[data-testid=journey-tracker]]:order-4 max-md:[&_[data-testid=ten-second-done]]:order-5 max-md:[&_[data-testid=ten-second-waiting]]:order-6";
 
   return (
     <div
       data-testid="ten-second-hero"
       className={cn(
-        "grid gap-2.5 lg:gap-x-8 lg:gap-y-6",
+        "grid min-w-0 max-w-full gap-2.5 lg:gap-x-8 lg:gap-y-6",
         compact ? "px-0 pt-0 pb-1 lg:px-0" : "px-5 pt-2.5 pb-5 lg:px-6 lg:py-6",
         at.grid,
+        coachMobileStack,
+        compact && "max-md:overflow-x-hidden",
       )}
     >
       <div
@@ -145,8 +156,11 @@ export function TenSecondHeroGrid({
       <JourneyTracker
         stages={view.stages}
         href={drill}
-        orientation={journeyOrientation}
-        className={cn(at.rail, compact && "max-md:hidden")}
+        orientation={compact ? "responsive" : journeyOrientation}
+        className={cn(
+          at.rail,
+          compact && "max-md:order-4 max-md:hidden lg:block",
+        )}
       />
 
       <section
@@ -172,7 +186,7 @@ export function TenSecondHeroGrid({
               <span className="text-eyebrow font-medium uppercase tracking-[0.2em] text-next">
                 Next
               </span>
-              <Badge variant="sage">{view.next.assigneeRole}</Badge>
+              <Badge variant="sage">{nextAssigneeLabel}</Badge>
             </span>
             <span
               className={cn(
@@ -190,13 +204,15 @@ export function TenSecondHeroGrid({
         data-testid="ten-second-owe"
         className={cn(
           "rounded-xl bg-sky px-4 py-3 lg:px-5 lg:py-6",
-          compact && "max-md:hidden",
+          compact && "min-h-11",
           at.owe,
         )}
       >
         <DrillLink
           href={drill}
-          className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 lg:block"
+          className={cn(
+            "flex min-h-11 flex-wrap items-center gap-x-2 gap-y-0.5 lg:block lg:min-h-0",
+          )}
         >
           <p className="text-eyebrow font-medium uppercase tracking-[0.2em] text-muted-foreground">
             Due today
@@ -229,7 +245,7 @@ export function TenSecondHeroGrid({
             Waiting on
           </p>
           <p className={cn("mt-2 font-medium", compact ? "text-body" : "text-h3")}>
-            {view.waitingOn ?? "Nobody"}
+            {waitingOnDisplayLabel(view)}
           </p>
         </section>
       </div>

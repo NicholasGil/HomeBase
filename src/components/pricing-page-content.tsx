@@ -11,6 +11,7 @@ import {
   COACH_ENTRY_PRICE_MONTHLY_USD,
   PRICING_BILLING_DISCLAIMER,
 } from "@/lib/pricing";
+import { isDemoMode } from "@/lib/auth-config";
 import { cn } from "@/lib/utils";
 
 function ContinueCoachLink({
@@ -39,8 +40,10 @@ function ContinueCoachLink({
 
 export function PricingPageContent({
   continueCoachHref,
+  demoMode = isDemoMode(),
 }: {
   continueCoachHref: string;
+  demoMode?: boolean;
 }) {
   return (
     <div
@@ -111,17 +114,22 @@ export function PricingPageContent({
           data-testid="pricing-not-included-heading"
           className="text-eyebrow font-medium tracking-[0.12em] text-muted-foreground/90 uppercase"
         >
-          Not included — full OS upsells
+          {demoMode ? "Full OS — open in this demo" : "Not included — full OS upsells"}
         </h2>
         <p className="text-small text-muted-foreground">
-          Search, Pipeline, Tours, and Vault stay locked until your agent or
-          brokerage enables the full transaction OS.
+          {demoMode
+            ? "On realtyrise.app demo, Search, Pipeline, Tours, and Vault open with sample data so you can explore the full buyer OS. Live accounts turn these on through your agent or brokerage."
+            : "Search, Pipeline, Tours, and Vault stay locked until your agent or brokerage enables the full transaction OS."}
         </p>
         <div className="space-y-2.5">
           {BUYER_LOCKED_UPSELLS.map((upsell) => (
             <BuyerLockedUpsellCard
               key={upsell.area}
-              upsell={upsell}
+              upsell={
+                demoMode
+                  ? { ...upsell, title: upsell.label }
+                  : upsell
+              }
               bulletsOnly
             />
           ))}

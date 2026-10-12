@@ -1,12 +1,15 @@
 import Link from "next/link";
 
+import { CoachFileSessionShell } from "@/components/coach-file-session-shell";
 import { CoachHabitConcierge } from "@/components/coach-habit-concierge";
 import { CoachReturnHeaderHint } from "@/components/coach-return-header-hint";
-import { CoachTenSecondReturnGate } from "@/components/coach-ten-second-return-gate";
 import { ConciergeChat } from "@/components/concierge-chat";
+import { FILE_SESSION_CONCIERGE_STARTERS } from "@/lib/concierge-starters";
+import { BuyerFullOsTeaser } from "@/components/buyer-full-os-teaser";
 import {
   BuyerLockedUpsellRail,
 } from "@/components/buyer-locked-upsell";
+import { buyerFixtureOsUnlocked } from "@/lib/demo-buyer-os";
 import type { ConciergeScope } from "@/components/concierge-sheet";
 import { TenSecondHeroGrid } from "@/components/ten-second-hero";
 import { transactionHref } from "@/components/buyer-dashboard-view";
@@ -45,17 +48,24 @@ export function CoachHome({
   const coachUnavailable = availability === "model_key_missing";
   const firstName = buyerName.split(" ")[0] ?? buyerName;
   const showTenSecond = dashboardView !== null && !firstSession;
+  const demoOsOpen = buyerFixtureOsUnlocked();
+  const conciergeStarters = firstSession
+    ? COACH_FIRST_SESSION_STARTERS
+    : FILE_SESSION_CONCIERGE_STARTERS;
 
   return (
     <div
       data-testid="coach-home"
-      className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_min(100%,18rem)] lg:items-start"
+      className={cn(
+        "grid gap-8 lg:grid-cols-[minmax(0,1fr)_min(100%,18rem)] lg:items-start",
+        !firstSession && "max-md:pb-[var(--coach-mobile-page-clearance)]",
+      )}
     >
       <section
         aria-label="Personal coach"
         className={cn(
-          "flex min-h-0 flex-col overflow-x-hidden rounded-2xl border border-border/80 bg-card shadow-sm max-md:overflow-y-hidden",
-          "max-md:max-h-[calc(100dvh-var(--coach-mobile-chrome)-var(--coach-compose-clearance))]",
+          "flex min-h-0 flex-col overflow-x-hidden rounded-2xl border border-border/80 bg-card shadow-sm",
+          !firstSession && "max-md:min-h-0",
           "md:min-h-[min(70vh,640px)]",
         )}
       >
@@ -96,6 +106,11 @@ export function CoachHome({
               {eyebrow}
             </p>
           ) : null}
+          {showTenSecond ? (
+            <h1 className="mt-1 text-h3 font-semibold tracking-tight text-foreground md:text-h2">
+              Your coach
+            </h1>
+          ) : null}
           {!showTenSecond ? (
             <h1
               className={cn(
@@ -132,52 +147,96 @@ export function CoachHome({
             />
           ) : null}
         </header>
-        {showTenSecond ? (
-          habitStorageKey ? (
-            <CoachTenSecondReturnGate
-              storageKey={habitStorageKey}
-              firstSession={firstSession}
-              className="shrink-0 border-b border-border/70 px-5 py-4"
-            >
+        {showTenSecond && habitStorageKey ? (
+          <CoachFileSessionShell
+            storageKey={habitStorageKey}
+            firstSession={firstSession}
+            dashboardView={dashboardView!}
+            tenSecondClassName="relative z-0 shrink-0 overflow-x-hidden border-b border-border/70 px-5 py-3 max-md:min-w-0 md:py-4"
+            tenSecondChildren={
               <TenSecondHeroGrid
-                view={dashboardView}
+                view={dashboardView!}
                 buyerName={buyerName}
-                journeyOrientation="horizontal"
+                journeyOrientation="responsive"
                 detailHref={transactionHref(dashboardView!.transactionId)}
                 variant="coach"
               />
-            </CoachTenSecondReturnGate>
-          ) : (
-            <div
-              data-testid="coach-ten-second"
-              className="shrink-0 border-b border-border/70 px-5 py-4"
-            >
-              <TenSecondHeroGrid
-                view={dashboardView}
-                buyerName={buyerName}
-                journeyOrientation="horizontal"
-                detailHref={transactionHref(dashboardView.transactionId)}
-                variant="coach"
-              />
-            </div>
-          )
+            }
+            stageLabel={scope.stage}
+            firstName={firstName}
+            habitClassName={cn(
+              "relative z-10 px-5 pb-5",
+              firstSession
+                ? "min-h-0 flex-1 pt-2 max-md:pt-2 md:pt-4"
+                : "max-md:flex-none max-md:shrink-0 md:min-h-0 md:flex-1 pt-4",
+            )}
+            availability={availability}
+            showAgentLinkWhenUnavailable={!firstSession}
+            starters={conciergeStarters}
+            pinStartersAboveScrollOnMobile={!coachUnavailable}
+            wrapMobileQuestionStarters={firstSession}
+            scrollIntro={
+              firstSession && !coachUnavailable
+                ? (
+                    <EmptyState
+                      testId="coach-first-session-empty"
+                      icon={MessageCircle}
+                      title="Coach is on"
+                      description={
+                        <>
+                          Tap a starter or ask below. Search, Pipeline, Tours, and
+                          Vault unlock with the full OS —{" "}
+                          <Link href="/pricing" className={textLinkClassName}>
+                            see pricing
+                          </Link>
+                          .
+                        </>
+                      }
+                      className="border-solid bg-muted/25 max-md:gap-2 max-md:py-4 max-md:[&_[data-slot=empty-title]]:text-h3 max-md:[&_[data-slot=empty-description]]:text-small"
+                    />
+                  )
+                : undefined
+            }
+            idleHint={
+              firstSession ? "Tap a starter or type a question." : undefined
+            }
+            questionPlaceholder={
+              firstSession ? "Ask about buying" : "Ask about your file"
+            }
+          />
         ) : null}
-        {habitStorageKey ? (
+        {showTenSecond && !habitStorageKey ? (
+          <div
+            data-testid="coach-ten-second"
+            className="relative z-0 shrink-0 overflow-x-hidden border-b border-border/70 px-5 py-4 max-md:min-w-0"
+          >
+            <TenSecondHeroGrid
+              view={dashboardView!}
+              buyerName={buyerName}
+              journeyOrientation="responsive"
+              detailHref={transactionHref(dashboardView!.transactionId)}
+              variant="coach"
+            />
+          </div>
+        ) : null}
+        {habitStorageKey && !showTenSecond ? (
           <CoachHabitConcierge
             storageKey={habitStorageKey}
             firstSession={firstSession}
             stageLabel={scope.stage}
             firstName={firstName}
             className={cn(
-              "min-h-0 flex-1 px-5 pb-5",
-              firstSession ? "pt-2 max-md:pt-2 md:pt-4" : "pt-4",
+              "relative z-10 px-5 pb-5",
+              firstSession
+                ? "min-h-0 flex-1 pt-2 max-md:pt-2 md:pt-4"
+                : "max-md:flex-none max-md:shrink-0 md:min-h-0 md:flex-1 pt-4",
             )}
             availability={availability}
             showAgentLinkWhenUnavailable={!firstSession}
-            starters={
-              firstSession ? COACH_FIRST_SESSION_STARTERS : undefined
-            }
+            starters={conciergeStarters}
             pinStartersAboveScrollOnMobile={!coachUnavailable}
+            wrapMobileQuestionStarters={firstSession}
+            mobileStickyDockAboveTabBar={!firstSession}
             scrollIntro={
               firstSession && !coachUnavailable
                 ? (
@@ -206,21 +265,24 @@ export function CoachHome({
                 : undefined
             }
             questionPlaceholder={
-              firstSession ? "Ask about buying" : undefined
+              firstSession ? "Ask about buying" : "Ask about your file"
             }
           />
-        ) : (
+        ) : null}
+        {!habitStorageKey ? (
           <ConciergeChat
             className={cn(
-              "min-h-0 flex-1 px-5 pb-5",
-              firstSession ? "pt-2 max-md:pt-2 md:pt-4" : "pt-4",
+              "relative z-10 px-5 pb-5",
+              firstSession
+                ? "min-h-0 flex-1 pt-2 max-md:pt-2 md:pt-4"
+                : "max-md:flex-none max-md:shrink-0 md:min-h-0 md:flex-1 pt-4",
             )}
             availability={availability}
             showAgentLinkWhenUnavailable={!firstSession}
-            starters={
-              firstSession ? COACH_FIRST_SESSION_STARTERS : undefined
-            }
+            starters={conciergeStarters}
             pinStartersAboveScrollOnMobile={!coachUnavailable}
+            wrapMobileQuestionStarters={firstSession}
+            mobileStickyDockAboveTabBar={!firstSession}
             scrollIntro={
               firstSession && !coachUnavailable
                 ? (
@@ -249,13 +311,17 @@ export function CoachHome({
                 : undefined
             }
             questionPlaceholder={
-              firstSession ? "Ask about buying" : undefined
+              firstSession ? "Ask about buying" : "Ask about your file"
             }
           />
-        )}
+        ) : null}
       </section>
 
-      <BuyerLockedUpsellRail upsells={BUYER_LOCKED_UPSELLS} />
+      {demoOsOpen ? (
+        <BuyerFullOsTeaser />
+      ) : (
+        <BuyerLockedUpsellRail upsells={BUYER_LOCKED_UPSELLS} />
+      )}
     </div>
   );
 }

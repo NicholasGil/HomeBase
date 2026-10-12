@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useEffect, useRef } from "react";
+import { useLayoutEffect, useEffect, useRef, useCallback } from "react";
 import { usePathname } from "next/navigation";
 
 import {
@@ -48,20 +48,20 @@ export function TransactionScrollRestoration() {
   const lastYForPath = (path: string): number =>
     lastScrollYByPathRef.current.get(path) ?? 0;
 
-  const setLastYForPath = (path: string, y: number) => {
+  const setLastYForPath = useCallback((path: string, y: number) => {
     lastScrollYByPathRef.current.set(path, y);
-  };
+  }, []);
 
-  const seedLastYFromStorage = (path: string) => {
+  const seedLastYFromStorage = useCallback((path: string) => {
     const stored = readTransactionScrollY(path);
     setLastYForPath(path, stored !== null && stored > 0 ? stored : 0);
-  };
+  }, [setLastYForPath]);
 
   useEffect(() => {
     pathnameRef.current = pathname;
   }, [pathname]);
 
-  const applyScrollY = (path: string, y: number) => {
+  const applyScrollY = useCallback((path: string, y: number) => {
     const target = clampTransactionScrollTarget(
       y,
       document.documentElement.scrollHeight,
@@ -77,7 +77,7 @@ export function TransactionScrollRestoration() {
       });
     });
     return target;
-  };
+  }, [setLastYForPath]);
 
   useLayoutEffect(() => {
     if (!onTransaction) {
@@ -249,7 +249,13 @@ export function TransactionScrollRestoration() {
         resetCoachScrollRestorationToAuto();
       }
     };
-  }, [pathname, onTransaction]);
+  }, [
+    pathname,
+    onTransaction,
+    applyScrollY,
+    seedLastYFromStorage,
+    setLastYForPath,
+  ]);
 
   useEffect(() => {
     if (!onTransaction) {
@@ -346,7 +352,7 @@ export function TransactionScrollRestoration() {
       document.removeEventListener("mousedown", onLeavingPointer, true);
       window.cancelAnimationFrame(frame);
     };
-  }, [pathname, onTransaction]);
+  }, [pathname, onTransaction, setLastYForPath]);
 
   return null;
 }

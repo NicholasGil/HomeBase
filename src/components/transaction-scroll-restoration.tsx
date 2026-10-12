@@ -9,10 +9,14 @@ import {
   readTransactionScrollY,
   writeTransactionScrollY,
 } from "@/lib/transaction-scroll-storage";
+import { recordCoachScrollRestorationOriginal } from "@/lib/coach-scroll-restoration-window";
 import {
-  recordCoachScrollRestorationOriginal,
-  resetCoachScrollRestorationToAuto,
-} from "@/lib/coach-scroll-restoration-window";
+  consumeTransactionScrollPopNavigation,
+  ensureTransactionScrollPopstateListener,
+} from "@/lib/transaction-scroll-pop-navigation";
+import { transactionScrollRestoreOnPageShow } from "@/lib/transaction-scroll-pageshow";
+
+ensureTransactionScrollPopstateListener();
 
 function shouldSaveScrollForLink(anchor: HTMLAnchorElement): boolean {
   const href = anchor.getAttribute("href") ?? "";
@@ -77,48 +81,34 @@ export function TransactionScrollRestoration() {
           lastHeight = height;
         }
 
-        if (storedY === null || storedY <= 0) {
-          const live = readTransactionScrollY(activePath);
-          if (live !== null && live > 0) {
-            const target = applyScrollY(activePath, live);
-            if (Math.abs(window.scrollY - target) > 10) {
-              applyScrollY(activePath, live);
-            }
-          } else if (attempts < 6 && window.scrollY > 4) {
-            window.scrollTo(0, 0);
-          }
+        const liveY = readTransactionScrollY(activePath);
+        const effectiveY =
+          storedY !== null && storedY > 0 ? storedY : liveY;
+
+        if (effectiveY === null || effectiveY <= 0) {
+          // Fresh navigation: do not write or force scroll on mount.
         } else {
-          const minHeight = storedY + window.innerHeight;
+          const minHeight = effectiveY + window.innerHeight;
           if (height < minHeight) {
             if (attempts < maxAttempts) {
               window.requestAnimationFrame(tick);
             }
             return;
           }
-          const target = applyScrollY(activePath, storedY);
+          const target = applyScrollY(activePath, effectiveY);
           if (Math.abs(window.scrollY - target) > 10) {
-            applyScrollY(activePath, storedY);
+            applyScrollY(activePath, effectiveY);
           }
         }
 
         attempts += 1;
-        const liveStored = readTransactionScrollY(activePath);
         const done =
-          storedY === null || storedY <= 0
-            ? (liveStored !== null && liveStored > 0
-                ? Math.abs(
-                    window.scrollY -
-                      clampTransactionScrollTarget(
-                        liveStored,
-                        height,
-                        window.innerHeight,
-                      ),
-                  ) <= 10
-                : window.scrollY <= 4) && stableHeightPasses >= 1
+          effectiveY === null || effectiveY <= 0
+            ? window.scrollY <= 4 && stableHeightPasses >= 1
             : Math.abs(
                 window.scrollY -
                   clampTransactionScrollTarget(
-                    storedY,
+                    effectiveY,
                     height,
                     window.innerHeight,
                   ),
@@ -142,40 +132,46 @@ export function TransactionScrollRestoration() {
       // ignore
     }
 
-    const path = pathnameRef.current;
-    const storedY = readTransactionScrollY(path);
-    if (window.scrollY > 0) {
-      lastScrollYRef.current = window.scrollY;
-      writeTransactionScrollY(window.scrollY, path);
-    }
-    const cancelRestore = restoreUntilStable(path, storedY);
+    let cancelRestore = () => {};
 
     const restoreFromStorage = () => {
       if (!isTransactionScrollPath(pathnameRef.current)) {
         return;
       }
+      cancelRestore();
       const y = readTransactionScrollY(pathnameRef.current);
-      restoreUntilStable(pathnameRef.current, y);
+      cancelRestore = restoreUntilStable(pathnameRef.current, y);
     };
 
     const onPopState = () => {
+      pathnameRef.current = window.location.pathname;
+      if (!isTransactionScrollPath(pathnameRef.current)) {
+        return;
+      }
       restoreFromStorage();
     };
     window.addEventListener("popstate", onPopState);
-    const onPageShow = () => {
+
+    if (consumeTransactionScrollPopNavigation(pathname)) {
+      restoreFromStorage();
+    }
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (
+        !transactionScrollRestoreOnPageShow(
+          event,
+          window.location.pathname,
+        )
+      ) {
+        return;
+      }
       restoreFromStorage();
     };
     window.addEventListener("pageshow", onPageShow);
 
     return () => {
       cancelRestore();
-      writeTransactionScrollY(
-        Math.max(window.scrollY, lastScrollYRef.current),
-        path,
-      );
       window.removeEventListener("popstate", onPopState);
       window.removeEventListener("pageshow", onPageShow);
-      resetCoachScrollRestorationToAuto();
     };
   }, [pathname, onTransaction]);
 
@@ -225,21 +221,13 @@ export function TransactionScrollRestoration() {
         saveScroll();
       }
     };
-    const onPageHide = () => {
-      if (isTransactionScrollPath(window.location.pathname)) {
-        saveScroll();
-      }
-    };
     document.addEventListener("pointerdown", onLeavingPointer, true);
     document.addEventListener("mousedown", onLeavingPointer, true);
-    window.addEventListener("pagehide", onPageHide);
 
     return () => {
-      saveScroll();
       window.removeEventListener("scroll", onScroll);
       document.removeEventListener("pointerdown", onLeavingPointer, true);
       document.removeEventListener("mousedown", onLeavingPointer, true);
-      window.removeEventListener("pagehide", onPageHide);
       window.cancelAnimationFrame(frame);
     };
   }, [pathname, onTransaction]);

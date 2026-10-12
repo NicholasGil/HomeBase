@@ -28,10 +28,14 @@ export function writeTransactionScrollY(y: number, pathname: string): void {
   if (!isTransactionScrollPath(pathname)) {
     return;
   }
+  if (!Number.isFinite(y)) {
+    return;
+  }
+  const rounded = Math.max(0, Math.round(y));
   try {
     sessionStorage.setItem(
       transactionScrollStorageKey(pathname),
-      String(Math.max(0, Math.round(y))),
+      String(rounded),
     );
   } catch {
     // ignore
@@ -44,5 +48,5 @@ export function clampTransactionScrollTarget(
   innerHeight: number,
 ): number {
   const max = Math.max(0, scrollHeight - innerHeight);
-  return Math.min(y, max);
+  return Math.min(Math.max(0, y), max);
 }

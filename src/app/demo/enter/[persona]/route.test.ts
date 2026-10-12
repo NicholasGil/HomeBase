@@ -55,6 +55,23 @@ describe("GET /demo/enter/[persona]", () => {
     ).rejects.toMatchObject({ name: "ProductionAuthMisconfiguredError" });
   });
 
+  it("throws when both gates are closed even for prefetch requests", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("REALTYRISE_DEMO_MODE", "0");
+
+    const GET = await loadGet();
+    await expect(
+      GET(
+        new Request("http://localhost/demo/enter/buyer-coach", {
+          headers: { Purpose: "prefetch" },
+        }),
+        {
+          params: Promise.resolve({ persona: "buyer-coach" }),
+        },
+      ),
+    ).rejects.toMatchObject({ name: "ProductionAuthMisconfiguredError" });
+  });
+
   it("redirects unknown persona to the demo chooser without setting a cookie", async () => {
     vi.stubEnv("VERCEL_ENV", "production");
     vi.stubEnv("REALTYRISE_DEMO_MODE", "1");
@@ -115,6 +132,26 @@ describe("GET /demo/enter/[persona]", () => {
     expect(response.cookies.get(TEST_SESSION_COOKIE)).toBeUndefined();
   });
 
+  it("returns 204 without a cookie for next-router-prefetch requests", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("REALTYRISE_DEMO_MODE", "1");
+    vi.stubEnv("CLERK_SECRET_KEY", "");
+    vi.stubEnv("NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", "");
+
+    const GET = await loadGet();
+    const response = await GET(
+      new Request("http://localhost/demo/enter/buyer-coach", {
+        headers: { "next-router-prefetch": "1" },
+      }),
+      {
+        params: Promise.resolve({ persona: "buyer-coach" }),
+      },
+    );
+
+    expect(response.status).toBe(204);
+    expect(response.cookies.get(TEST_SESSION_COOKIE)).toBeUndefined();
+  });
+
   it("returns 204 without a cookie for prefetch requests", async () => {
     vi.stubEnv("VERCEL_ENV", "production");
     vi.stubEnv("REALTYRISE_DEMO_MODE", "1");
@@ -157,6 +194,8 @@ describe("GET /demo/enter/[persona]", () => {
     expect(cookie?.value).toMatch(/^clerk_buyer_a/);
     expect(cookie?.maxAge).toBe(TEST_SESSION_MAX_AGE_SECONDS);
     expect(cookie?.secure).toBe(true);
+    expect(cookie?.httpOnly).toBe(true);
+    expect(cookie?.sameSite).toBe("lax");
   });
 
   it("clears vendor expiry cookie when entering as vendor", async () => {

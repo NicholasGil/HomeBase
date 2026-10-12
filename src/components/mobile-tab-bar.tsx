@@ -79,7 +79,6 @@ export function MobileTabBar({ links }: { links: AppNavLink[] }) {
               <li key={`${link.href}-${link.label}`} className="min-w-0 flex-1">
                 <Link
                   href={link.href}
-                  scroll={false}
                   aria-current={active ? "page" : undefined}
                   aria-label={
                     locked ? `${link.label} (locked preview)` : link.label

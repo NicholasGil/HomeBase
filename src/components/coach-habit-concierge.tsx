@@ -120,7 +120,7 @@ export function CoachHabitConcierge({
           !firstSession && repeatVisit && initialTurn !== null
         }
         scrollIntro={hideColdOpenEmpty ? undefined : scrollIntro}
-        idleHint={firstSession ? undefined : idleHint}
+        idleHint={idleHint}
         questionPlaceholder={questionPlaceholder}
         initialTurn={initialTurn}
         onTurnComplete={handleTurnComplete}

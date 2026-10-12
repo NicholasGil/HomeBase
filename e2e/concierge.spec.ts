@@ -3,11 +3,6 @@ import { expect, type Locator, type Page, test } from "@playwright/test";
 const MOBILE = { width: 375, height: 812 };
 const DESKTOP = { width: 1280, height: 800 };
 const FAB_SIZE = 56;
-/** Preview fixture: eight dock chips; public demo: three dock chips plus More. */
-function expectedVisibleStarterChipCount() {
-  return process.env.REALTYRISE_DEMO_MODE === "1" ? 3 : 8;
-}
-
 async function signInAs(page: Page, name: string) {
   await page.goto("/test-login");
   await page.getByRole("button", { name: `Sign in as ${name}` }).click();
@@ -108,10 +103,7 @@ test.describe("coach home concierge", () => {
     await expect(scope).toContainText("Personal coach");
 
     const chips = page.getByLabel("Suggested questions").getByRole("button");
-    await expect(chips).toHaveCount(expectedVisibleStarterChipCount());
-    if (process.env.REALTYRISE_DEMO_MODE === "1") {
-      await expect(page.getByTestId("concierge-more-starters")).toBeVisible();
-    }
+    await expect(chips).toHaveCount(8);
     for (const chip of await chips.all()) {
       const box = await chip.boundingBox();
       expect(box).not.toBeNull();

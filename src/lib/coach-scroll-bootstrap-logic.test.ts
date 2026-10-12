@@ -72,6 +72,7 @@ describe("coachScrollBootstrapScript", () => {
     expect(script).toContain("pointerdown");
     expect(script).toContain("pagehide");
     expect(script).toContain("scrollTo");
+    expect(script).toContain("scheduleRestore");
     expect(script).toContain("resetScrollRestoration");
   });
 });

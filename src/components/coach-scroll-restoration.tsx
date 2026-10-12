@@ -65,8 +65,13 @@ export function CoachScrollRestoration() {
     programmaticScrollRef.current = true;
     window.scrollTo(0, target);
     requestAnimationFrame(() => {
-      programmaticScrollRef.current = false;
+      requestAnimationFrame(() => {
+        programmaticScrollRef.current = false;
+      });
     });
+    window.setTimeout(() => {
+      programmaticScrollRef.current = false;
+    }, 120);
     return target;
   };
 
@@ -212,6 +217,12 @@ export function CoachScrollRestoration() {
     }
     const saveScroll = () => {
       const y = Math.max(window.scrollY, lastScrollYRef.current);
+      if (y <= 0) {
+        const stored = readCoachScrollY(pathname);
+        if (stored !== null && stored > 0) {
+          return;
+        }
+      }
       writeCoachScrollY(y, pathname);
     };
     const onLeavingPointer = (event: Event) => {

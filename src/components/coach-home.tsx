@@ -38,6 +38,9 @@ import type { BuyerDashboardView } from "../../convex/lib/dashboardView";
 const FILE_SESSION_CONCIERGE_IDLE_HINT =
   "Tap a starter below or ask about this transaction. I explain what is on this file; I do not advise.";
 
+const DISCOVERY_CONCIERGE_IDLE_HINT =
+  "Tap a starter or ask below. I explain the buying process; I do not advise.";
+
 export function CoachHome({
   scope,
   buyerName,
@@ -226,7 +229,9 @@ export function CoachHome({
               firstSession ? "Ask about buying" : "Ask about your file"
             }
             idleHint={
-              firstSession ? undefined : FILE_SESSION_CONCIERGE_IDLE_HINT
+              firstSession
+                ? DISCOVERY_CONCIERGE_IDLE_HINT
+                : FILE_SESSION_CONCIERGE_IDLE_HINT
             }
           />
         ) : null}
@@ -290,7 +295,9 @@ export function CoachHome({
               firstSession ? "Ask about buying" : "Ask about your file"
             }
             idleHint={
-              firstSession ? undefined : FILE_SESSION_CONCIERGE_IDLE_HINT
+              firstSession
+                ? DISCOVERY_CONCIERGE_IDLE_HINT
+                : FILE_SESSION_CONCIERGE_IDLE_HINT
             }
           />
         ) : null}
@@ -336,7 +343,9 @@ export function CoachHome({
               firstSession ? "Ask about buying" : "Ask about your file"
             }
             idleHint={
-              firstSession ? undefined : FILE_SESSION_CONCIERGE_IDLE_HINT
+              firstSession
+                ? DISCOVERY_CONCIERGE_IDLE_HINT
+                : FILE_SESSION_CONCIERGE_IDLE_HINT
             }
           />
         ) : null}

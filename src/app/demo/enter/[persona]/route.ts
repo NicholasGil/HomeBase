@@ -53,7 +53,9 @@ export async function GET(
   }
 
   const { persona } = await context.params;
-  const config = PERSONAS[persona];
+  const config = Object.hasOwn(PERSONAS, persona)
+    ? PERSONAS[persona]
+    : undefined;
   if (config === undefined) {
     return redirectToChooser(request);
   }

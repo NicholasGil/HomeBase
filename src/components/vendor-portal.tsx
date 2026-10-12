@@ -23,6 +23,8 @@ import type { SeedAssignment } from "@/lib/seed-vendors";
 import { ActionNotice } from "@/components/action-notice";
 import { isDemoMode } from "@/lib/auth-config";
 import {
+  fixtureVendorDocumentButtonLabel,
+  fixtureVendorDocumentType,
   fixtureVendorFileLabel,
   fixtureVendorStageLabel,
   fixtureVendorTaskLabel,
@@ -109,26 +111,46 @@ function AssignmentPanel({
   assignment: SeedAssignment;
   state: FixtureVendorPortalState;
 }) {
+  const demo = isDemoMode();
+  const fileLabel = fixtureVendorFileLabel(assignment);
+  const taskLabel = fixtureVendorTaskLabel(
+    assignment.scope,
+    assignment.transaction.stage,
+  );
+  const stageLabel = fixtureVendorStageLabel(assignment.transaction.stage);
+
   return (
     <section className="space-y-4" data-testid="vendor-assignment">
       <Card>
         <CardHeader>
           <CardTitle>Assigned transaction</CardTitle>
-          <CardDescription>
-            {fixtureVendorFileLabel(assignment)} ·{" "}
-            {fixtureVendorTaskLabel(
-              assignment.scope,
-              assignment.transaction.stage,
-            )}
-          </CardDescription>
+          {demo ? (
+            <CardDescription className="text-pretty">{fileLabel}</CardDescription>
+          ) : (
+            <CardDescription>
+              {assignment.transaction.propertyCity},{" "}
+              {assignment.transaction.propertyState} · {assignment.scope}
+            </CardDescription>
+          )}
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
-          <p data-testid="vendor-assignment-stage">
-            Stage {fixtureVendorStageLabel(assignment.transaction.stage)}
-          </p>
-          <p data-testid="vendor-assignment-file">
-            {fixtureVendorFileLabel(assignment)}
-          </p>
+          {demo ? (
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="outline" data-testid="vendor-assignment-stage">
+                Stage: {stageLabel}
+              </Badge>
+              <span className="text-muted-foreground">{taskLabel}</span>
+            </div>
+          ) : (
+            <>
+              <p data-testid="vendor-assignment-stage">
+                Stage {stageLabel}
+              </p>
+              <p data-testid="vendor-assignment-file">
+                File {assignment.transaction.transactionId}
+              </p>
+            </>
+          )}
           {!isDemoMode() ? (
             <Badge variant="sage">Compensation: none</Badge>
           ) : (
@@ -213,16 +235,10 @@ function AssignmentPanel({
               <input
                 type="hidden"
                 name="documentType"
-                value={
-                  assignment.scope === "inspection_report"
-                    ? "inspection_report"
-                    : "preapproval"
-                }
+                value={fixtureVendorDocumentType(assignment.scope)}
               />
               <Button type="submit" variant="outline" className="min-h-11">
-                {assignment.scope === "inspection_report"
-                  ? "Request inspection report"
-                  : "Request preapproval"}
+                {fixtureVendorDocumentButtonLabel(assignment.scope)}
               </Button>
             </form>
           </CardContent>

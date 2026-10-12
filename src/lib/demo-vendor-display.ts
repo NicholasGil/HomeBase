@@ -38,12 +38,35 @@ export function formatFixtureVendorExpiry(ms: number): string {
   }).format(new Date(ms));
 }
 
-export function fixtureVendorTaskLabel(scope: string, stage: string): string {
-  if (scope === "inspection_report" || stage === "inspection") {
+export function fixtureVendorTaskLabel(scope: string, _stage: string): string {
+  if (scope === "loan_commitment") {
+    return "Confirm loan commitment";
+  }
+  if (scope === "inspection_report") {
     return "Inspection report";
   }
   if (scope === "preapproval") {
     return "Pre-approval letter";
   }
   return scope.replaceAll("_", " ");
+}
+
+export function fixtureVendorDocumentType(scope: string): string {
+  if (scope === "loan_commitment") {
+    return "loan_commitment";
+  }
+  if (scope === "inspection_report") {
+    return "inspection_report";
+  }
+  return "preapproval";
+}
+
+export function fixtureVendorDocumentButtonLabel(scope: string): string {
+  if (scope === "loan_commitment") {
+    return "Upload appraisal";
+  }
+  if (scope === "inspection_report") {
+    return "Request inspection report";
+  }
+  return "Request preapproval";
 }

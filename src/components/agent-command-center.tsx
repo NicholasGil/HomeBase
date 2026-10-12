@@ -88,7 +88,7 @@ export function AgentCommandCenterView({
         </Card>
       ) : (
       <section className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-        <Card data-testid="command-center-priority">
+        <Card data-testid="command-center-priority" className="lg:self-start">
           <CardHeader>
             <CardTitle>Today</CardTitle>
             <CardDescription>

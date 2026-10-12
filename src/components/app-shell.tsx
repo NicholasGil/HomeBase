@@ -49,14 +49,14 @@ export async function AppShell({
   return (
     <div className="min-h-full bg-background">
       <header className="sticky top-0 z-20 border-b border-sand/80 bg-card/90 backdrop-blur">
-        <div className="mx-auto flex max-w-5xl items-center gap-4 px-5 py-2">
+        <div className="mx-auto flex max-w-5xl items-center gap-2 px-4 py-2 sm:gap-4 sm:px-5">
           <Link
             href={wordmarkHrefFor(context.role)}
             className="inline-flex min-h-11 shrink-0 items-center text-body font-semibold tracking-tight"
           >
             RealtyRise
           </Link>
-          <div className="ml-auto flex min-w-0 items-center gap-2">
+          <div className="ml-auto flex min-w-0 flex-1 items-center justify-end gap-1 sm:gap-2">
             <DemoShellBadge />
             {nav}
             {liveNav ? (

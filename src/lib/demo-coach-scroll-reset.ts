@@ -11,6 +11,7 @@ export function demoCoachScrollResetCookieOptions(
     maxAge: 120,
     sameSite: "lax" as const,
     secure: env.NODE_ENV === "production",
+    httpOnly: false,
   };
 }
 

@@ -44,6 +44,9 @@ test("same-tab demo persona switch does not carry file coach scroll depth", asyn
 
   await expect(page).toHaveURL(/\/coach$/);
   await expect(page.getByTestId("coach-first-session-empty")).toBeVisible();
+  await page.waitForFunction(() => window.scrollY <= 10, { timeout: 200 });
+  await page.waitForTimeout(1300);
+  await page.waitForFunction(() => window.scrollY <= 10);
 
   const after = await page.evaluate(() => {
     const epoch =

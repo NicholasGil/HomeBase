@@ -31,6 +31,9 @@ test("test-login persona switch clears coach scroll and back does not restore de
     .click();
   await expect(page).toHaveURL(/\/coach$/);
   await expectCoachNearTop(page);
+  await page.waitForFunction(() => window.scrollY <= 10, { timeout: 200 });
+  await page.waitForTimeout(1300);
+  await page.waitForFunction(() => window.scrollY <= 10);
   const afterSwitch = await page.evaluate(() => {
     const epoch =
       sessionStorage.getItem("realtyrise.coach.scrollY.epoch") ?? "0";

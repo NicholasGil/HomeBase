@@ -98,14 +98,16 @@ window.addEventListener('touchmove',markUserScroll,{passive:true});
 window.addEventListener('keydown',markUserScroll);
 window.addEventListener('scroll',function(){if(!coachScrollReady||!onCoach())return;if(enterSaveBlocked())return;if(window.scrollY>0){leavingCoach=false;rememberY();try{sessionStorage.setItem(scrollKey(),String(Math.max(0,Math.round(lastCoachY))));}catch(e){}return;}if(leavingCoach||Date.now()<blockZeroSaveUntil)return;if(userScrolled&&lastCoachY>0){userScrolled=false;}lastCoachY=0;try{sessionStorage.setItem(scrollKey(),'0');}catch(e){}},{passive:true});
 function restore(){if(!onCoach())return;syncEpochFromCookie();var y=readY();if(y===null||y<=0){if(window.scrollY>10){window.scrollTo(0,0);}return;}var max=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);var t=Math.min(y,max);blockZeroSaveUntil=Date.now()+500;window.scrollTo(0,t);}
-function applyDemoCoachScrollReset(){try{var needs=document.cookie.split(';').some(function(p){return p.trim().indexOf(${JSON.stringify(resetCookie)}+'=')===0;});if(!needs)return false;document.cookie=${JSON.stringify(resetCookie)}+'=; Max-Age=0; path=/';return true;}catch(e){return false;}}
-function shouldSaveForLink(a){if(!a)return false;var href=a.getAttribute('href');if(!href||href.charAt(0)!=='/')return false;if(href.indexOf('/transactions/')===0)return true;if(href.indexOf('/pricing')===0)return true;if(a.closest('[data-testid="app-tab-bar"]'))return true;return false;}
+function applyDemoCoachScrollReset(){try{var needs=document.cookie.split(';').some(function(p){return p.trim().indexOf(${JSON.stringify(resetCookie)}+'=')===0;});if(!needs)return false;document.cookie=${JSON.stringify(resetCookie)}+'=; Max-Age=0; path=/';try{sessionStorage.setItem(scrollKey(),'0');}catch(e){}lastCoachY=0;return true;}catch(e){return false;}}
+function navLeaves(href){if(!href||href.charAt(0)!=='/')return false;return pathNorm(href)!==pathNorm(location.pathname);}
+function shouldSaveForLink(a){if(!a)return false;var href=a.getAttribute('href');if(!href||href.charAt(0)!=='/')return false;if(!navLeaves(href))return false;if(href.indexOf('/transactions/')===0)return true;if(href.indexOf('/pricing')===0)return true;if(a.closest('[data-testid="app-tab-bar"]'))return true;return false;}
 function resetScrollRestoration(){try{history.scrollRestoration='auto';}catch(e){}}
 function onDemoEnterPointer(e){var t=e.target;if(!(t instanceof Element))return;var a=t.closest('a[href]');if(!a)return;var href=a.getAttribute('href');if(hrefDemoEnter(href)){markEnterStarted();}}
 document.addEventListener('pointerdown',onDemoEnterPointer,true);
 document.addEventListener('mousedown',onDemoEnterPointer,true);
 if(onCoach()){try{if(typeof window[${JSON.stringify(origKey)}]==='undefined'){window[${JSON.stringify(origKey)}]=history.scrollRestoration;}history.scrollRestoration='manual';}catch(e){}afterCoachNavigationRestore();coachScrollReady=true;}
 function onLeavingClick(e){if(!onCoach())return;if(enterSaveBlocked())return;var t=e.target;if(!(t instanceof Element))return;var a=t.closest('a[href]');if(!shouldSaveForLink(a))return;var href=a.getAttribute('href');if(hrefDemoEnter(href)){markEnterStarted();return;}saveY();leavingCoach=true;}
+document.addEventListener('pointercancel',function(){leavingCoach=false;},true);
 document.addEventListener('pointerdown',onLeavingClick,true);
 document.addEventListener('mousedown',onLeavingClick,true);
 document.addEventListener('click',onLeavingClick,true);

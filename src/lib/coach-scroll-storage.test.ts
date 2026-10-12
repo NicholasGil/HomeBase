@@ -5,7 +5,10 @@ import {
   COACH_SCROLL_EPOCH_SESSION_KEY,
 } from "@/lib/coach-scroll-epoch";
 import { coachScrollStorageKeyForEpoch } from "@/lib/coach-scroll-key";
+import { DEMO_COACH_SCROLL_RESET_COOKIE } from "@/lib/demo-coach-scroll-reset";
 import {
+  applyCoachPersonaEnterClear,
+  coachNavLinkLeavesPath,
   coachScrollYForLeavePersist,
   readCoachScrollY,
   writeCoachScrollY,
@@ -57,6 +60,33 @@ describe("coach scroll storage", () => {
     expect(
       store.get(coachScrollStorageKeyForEpoch("/coach", "1")),
     ).toBe("0");
+  });
+
+  it("applyCoachPersonaEnterClear writes zero when reset cookie is present", () => {
+    vi.stubGlobal("document", {
+      cookie: `${COACH_SCROLL_EPOCH_COOKIE}=1; ${DEMO_COACH_SCROLL_RESET_COOKIE}=1`,
+    });
+    writeCoachScrollY(365, "/coach");
+    const result = applyCoachPersonaEnterClear("/coach");
+    expect(result.cleared).toBe(true);
+    expect(readCoachScrollY("/coach")).toBe(0);
+  });
+
+  it("applyCoachPersonaEnterClear clears depth when epoch cookie bumps", () => {
+    writeCoachScrollY(365, "/coach");
+    vi.stubGlobal("document", {
+      cookie: `${COACH_SCROLL_EPOCH_COOKIE}=2`,
+    });
+    store.set(COACH_SCROLL_EPOCH_SESSION_KEY, "1");
+    const result = applyCoachPersonaEnterClear("/coach");
+    expect(result.cleared).toBe(true);
+    expect(result.epochChanged).toBe(true);
+    expect(readCoachScrollY("/coach")).toBe(0);
+  });
+
+  it("coachNavLinkLeavesPath ignores same-route tab taps", () => {
+    expect(coachNavLinkLeavesPath("/coach", "/coach")).toBe(false);
+    expect(coachNavLinkLeavesPath("/search", "/coach")).toBe(true);
   });
 
   describe("coachScrollYForLeavePersist", () => {

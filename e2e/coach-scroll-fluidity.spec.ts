@@ -54,6 +54,39 @@ test("coach @375 Y≈387 — ten-second drill lands transaction at top", async (
   await expectScrollStableNear(page, 0, 4);
 });
 
+test("coach @375 — tapping Coach tab while on coach still persists scroll depth", async ({
+  page,
+}) => {
+  await signInAlexWithFile(page);
+  const depthBefore = await scrollCoachTo(page, 280);
+  const coachTab = page
+    .getByTestId("app-tab-bar")
+    .getByRole("link", { name: "Coach" });
+  await coachTab.dispatchEvent("pointerdown");
+  const depthAfter = await page.evaluate(() => {
+    const max = Math.max(
+      0,
+      document.documentElement.scrollHeight - window.innerHeight,
+    );
+    window.scrollTo(0, Math.min(max, window.scrollY + 80));
+    return window.scrollY;
+  });
+  expect(depthAfter).toBeGreaterThan(depthBefore);
+  await page.waitForFunction(
+    (expected) => {
+      const epoch =
+        sessionStorage.getItem("realtyrise.coach.scrollY.epoch") ?? "0";
+      const raw = sessionStorage.getItem(
+        `realtyrise.coach.scrollY.v1:${epoch}:/coach`,
+      );
+      const stored = raw === null ? 0 : Number.parseInt(raw, 10);
+      return stored >= expected;
+    },
+    depthAfter,
+    { timeout: 2000 },
+  );
+});
+
 for (const targetY of [90, 387]) {
   test(`coach @375 Y≈${targetY} — browser back restores scroll`, async ({
     page,

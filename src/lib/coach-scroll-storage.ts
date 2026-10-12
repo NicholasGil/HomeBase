@@ -2,6 +2,8 @@ import {
   coachScrollEnterSaveBlocked,
   syncCoachScrollEpochFromCookie,
 } from "@/lib/coach-scroll-epoch";
+import { DEMO_COACH_SCROLL_RESET_COOKIE } from "@/lib/demo-coach-scroll-reset";
+import { coachScrollStorageKey } from "@/lib/coach-scroll-key";
 
 /** Persist on pointerdown/pagehide leave; scrollY=0 during nav keeps last depth (no spurious clobber). */
 export function coachScrollYForLeavePersist(
@@ -14,8 +16,6 @@ export function coachScrollYForLeavePersist(
       : lastCoachScrollY;
   return Math.max(0, Math.round(y));
 }
-import { DEMO_COACH_SCROLL_RESET_COOKIE } from "@/lib/demo-coach-scroll-reset";
-import { coachScrollStorageKey } from "@/lib/coach-scroll-key";
 
 export function readCoachScrollY(pathname: string): number | null {
   syncCoachScrollEpochFromCookie();

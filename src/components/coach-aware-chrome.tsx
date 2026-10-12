@@ -9,6 +9,7 @@ import {
 import type { ConciergeAvailability } from "@/lib/concierge-availability";
 import { CoachScrollBootstrap } from "@/components/coach-scroll-bootstrap";
 import { CoachScrollRestoration } from "@/components/coach-scroll-restoration";
+import { TransactionScrollRestoration } from "@/components/transaction-scroll-restoration";
 import { MobileTabBar } from "@/components/mobile-tab-bar";
 import { BUYER_COACH_HOME } from "@/lib/buyer-shell";
 import type { AppNavLink } from "@/lib/app-nav";
@@ -32,6 +33,7 @@ export function CoachAwareMain({
     <>
       <CoachScrollBootstrap />
       <CoachScrollRestoration />
+      <TransactionScrollRestoration />
       <main
         className={cn(
           "mx-auto max-w-5xl px-5 py-10",

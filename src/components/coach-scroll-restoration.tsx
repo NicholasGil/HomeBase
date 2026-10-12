@@ -99,6 +99,7 @@ export function CoachScrollRestoration() {
     );
     restoringRef.current = true;
     blockZeroSaveUntilRef.current = Date.now() + 500;
+    lastScrollYRef.current = target;
     window.scrollTo(0, target);
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -212,10 +213,10 @@ export function CoachScrollRestoration() {
     };
 
     const restore = () => {
-      if (cancelled) {
+      if (cancelled || !isCoachScrollPath(pathnameRef.current)) {
         return;
       }
-      applyStoredCoachScroll(pathname, storedY);
+      applyStoredCoachScroll(pathnameRef.current, storedY);
     };
 
     restore();

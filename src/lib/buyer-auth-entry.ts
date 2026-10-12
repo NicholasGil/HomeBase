@@ -8,7 +8,9 @@ export const BUYER_SOLD_SIGN_UP = "/sign-up" as const;
 /** Preview / CI / agents only — not the buyer product path. */
 export const BUYER_PREVIEW_FIXTURE_LOGIN = "/test-login" as const;
 
-export const DEMO_ENTER_BUYER_COACH = "/demo/enter/buyer-coach" as const;
+import { DEMO_PERSONA_ENTER } from "@/lib/demo-persona-enter";
+
+export const DEMO_ENTER_BUYER_COACH = DEMO_PERSONA_ENTER.buyerCoach;
 
 export function pricingContinueCoachHref(
   isBuyerSignedIn: boolean,

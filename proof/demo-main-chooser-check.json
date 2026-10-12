@@ -1,0 +1,14 @@
+{
+  "checkedAt": "2026-10-12T03:40:00Z",
+  "gitRef": "origin/main",
+  "commit": "28b30c0",
+  "build": "VERCEL_ENV=production REALTYRISE_DEMO_MODE=1 npm run build && npm run start --hostname localhost --port 3001",
+  "chooserPath": "startTestSessionFromForm (server action POST)",
+  "test": "Playwright: /demo -> click demo-persona-buyer-coach button",
+  "result": {
+    "finalUrl": "http://localhost:3001/coach",
+    "sessionCookieSet": true,
+    "brokenOnProdDemoBuild": false
+  },
+  "note": "Main chooser form works on localhost prod demo build. Direct /demo/enter had 127.0.0.1 vs localhost cookie mismatch in dev; PR branch uses Link + NextResponse enter route."
+}

@@ -1,11 +1,28 @@
+const PREFETCH_PURPOSE_TOKENS = new Set(["prefetch", "prerender"]);
+
+function purposeHeaderTokens(value: string | null): string[] {
+  if (value === null) {
+    return [];
+  }
+  return value
+    .split(/[,;]/)
+    .map((part) => part.trim().toLowerCase())
+    .filter((part) => part.length > 0);
+}
+
+function purposeHeadersIndicatePrefetch(request: Request): boolean {
+  for (const name of ["purpose", "sec-purpose", "x-purpose"]) {
+    const tokens = purposeHeaderTokens(request.headers.get(name));
+    if (tokens.some((token) => PREFETCH_PURPOSE_TOKENS.has(token))) {
+      return true;
+    }
+  }
+  return false;
+}
+
 /** True when Next.js or the browser is prefetching (must not mint a session). */
 export function isDemoEnterPrefetchRequest(request: Request): boolean {
-  const purpose = request.headers.get("purpose")?.toLowerCase();
-  if (purpose === "prefetch") {
-    return true;
-  }
-  const secPurpose = request.headers.get("sec-purpose")?.toLowerCase();
-  if (secPurpose === "prefetch") {
+  if (purposeHeadersIndicatePrefetch(request)) {
     return true;
   }
   const nextPrefetch = request.headers.get("next-router-prefetch");

@@ -71,6 +71,46 @@ describe("GET /demo/enter/[persona]", () => {
     expect(response.cookies.get(TEST_SESSION_COOKIE)).toBeUndefined();
   });
 
+  it("returns 204 without a cookie for Chrome prerender Sec-Purpose", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("REALTYRISE_DEMO_MODE", "1");
+    vi.stubEnv("CLERK_SECRET_KEY", "");
+    vi.stubEnv("NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", "");
+
+    const GET = await loadGet();
+    const response = await GET(
+      new Request("http://localhost/demo/enter/buyer-coach", {
+        headers: { "Sec-Purpose": "prefetch;prerender" },
+      }),
+      {
+        params: Promise.resolve({ persona: "buyer-coach" }),
+      },
+    );
+
+    expect(response.status).toBe(204);
+    expect(response.cookies.get(TEST_SESSION_COOKIE)).toBeUndefined();
+  });
+
+  it("returns 204 without a cookie for private prefetch Sec-Purpose", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("REALTYRISE_DEMO_MODE", "1");
+    vi.stubEnv("CLERK_SECRET_KEY", "");
+    vi.stubEnv("NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", "");
+
+    const GET = await loadGet();
+    const response = await GET(
+      new Request("http://localhost/demo/enter/buyer-coach", {
+        headers: { "Sec-Purpose": "prefetch;anonymous-client-ip" },
+      }),
+      {
+        params: Promise.resolve({ persona: "buyer-coach" }),
+      },
+    );
+
+    expect(response.status).toBe(204);
+    expect(response.cookies.get(TEST_SESSION_COOKIE)).toBeUndefined();
+  });
+
   it("returns 204 without a cookie for prefetch requests", async () => {
     vi.stubEnv("VERCEL_ENV", "production");
     vi.stubEnv("REALTYRISE_DEMO_MODE", "1");

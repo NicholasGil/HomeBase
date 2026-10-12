@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
 import { describe, expect, it, vi } from "vitest";
 
 import {
@@ -83,5 +86,15 @@ describe("coachScrollBootstrapScript", () => {
     expect(script).toContain("resetScrollRestoration");
     expect(script).toContain("applyDemoCoachScrollReset");
     expect(script).toContain("e.persisted");
+  });
+
+  it("coach scroll restoration client registers pageshow bfcache restore", () => {
+    const source = readFileSync(
+      resolve(process.cwd(), "src/components/coach-scroll-restoration.tsx"),
+      "utf8",
+    );
+    expect(source).toContain("pageshow");
+    expect(source).toContain("event.persisted");
+    expect(source).toContain("popstate");
   });
 });

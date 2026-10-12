@@ -59,7 +59,7 @@ export function CoachScrollRestoration() {
   const leavingCoachRef = useRef(false);
   const leaveCaptureReleaseTimerRef = useRef(0);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     pathnameRef.current = pathname;
   }, [pathname]);
 
@@ -118,6 +118,7 @@ export function CoachScrollRestoration() {
       return;
     }
 
+    const coachPathname = pathname;
     const personaEnter = applyCoachPersonaEnterClear(pathname);
     if (personaEnter.cleared) {
       lastScrollYRef.current = 0;
@@ -195,6 +196,13 @@ export function CoachScrollRestoration() {
     window.addEventListener("pagehide", onPageHide);
 
     return () => {
+      writeCoachScrollY(
+        coachScrollYForLeavePersist(
+          window.scrollY,
+          lastScrollYRef.current,
+        ),
+        coachPathname,
+      );
       window.removeEventListener("popstate", onPopState);
       window.removeEventListener("pageshow", onPageShow);
       window.removeEventListener("pagehide", onPageHide);
@@ -319,12 +327,18 @@ export function CoachScrollRestoration() {
       if (!isCoachScrollPath(window.location.pathname)) {
         return;
       }
+      const y = window.scrollY;
+      if (y > 0) {
+        leavingCoachRef.current = false;
+        lastScrollYRef.current = y;
+        writeCoachScrollY(y, pathname);
+      }
       window.cancelAnimationFrame(frame);
       frame = window.requestAnimationFrame(() => {
+        if (!isCoachScrollPath(window.location.pathname)) {
+          return;
+        }
         if (window.scrollY > 0) {
-          leavingCoachRef.current = false;
-          lastScrollYRef.current = window.scrollY;
-          writeCoachScrollY(window.scrollY, pathname);
           return;
         }
         if (leavingCoachRef.current || Date.now() < blockZeroSaveUntilRef.current) {
@@ -344,6 +358,12 @@ export function CoachScrollRestoration() {
       window.removeEventListener("keydown", markUserScroll);
       window.removeEventListener("scroll", onScroll);
       window.cancelAnimationFrame(frame);
+      if (isCoachScrollPath(pathname)) {
+        const depth = Math.max(window.scrollY, lastScrollYRef.current);
+        if (depth > 0) {
+          writeCoachScrollY(depth, pathname);
+        }
+      }
     };
   }, [pathname, onCoach]);
 

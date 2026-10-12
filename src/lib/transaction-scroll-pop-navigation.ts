@@ -39,6 +39,7 @@ export function ensureTransactionScrollPopstateListener(): void {
     );
   };
   window.addEventListener("pagehide", persistTxnScrollOnLeave, true);
+  window.addEventListener("beforeunload", persistTxnScrollOnLeave, true);
   document.addEventListener(
     "visibilitychange",
     () => {

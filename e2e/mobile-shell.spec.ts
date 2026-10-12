@@ -5,7 +5,7 @@ const DESKTOP = { width: 1280, height: 800 };
 
 const ROUTES = [
   { name: "Alex Rivera", role: "buyer", path: "/coach", tabs: 5 },
-  { name: "Casey Holt", role: "agent", path: "/agent", tabs: 4 },
+  { name: "Casey Holt", role: "agent", path: "/agent", tabs: 5 },
   { name: "Jordan Hale", role: "vendor", path: "/vendor", tabs: 2 },
 ] as const;
 

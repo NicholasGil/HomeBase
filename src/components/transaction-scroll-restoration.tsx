@@ -11,6 +11,7 @@ import {
 } from "@/lib/transaction-scroll-storage";
 import { recordCoachScrollRestorationOriginal } from "@/lib/coach-scroll-restoration-window";
 import {
+  clearTransactionScrollPopNavigation,
   consumeTransactionScrollPopNavigation,
   ensureTransactionScrollPopstateListener,
 } from "@/lib/transaction-scroll-pop-navigation";
@@ -149,6 +150,7 @@ export function TransactionScrollRestoration() {
         return;
       }
       restoreFromStorage();
+      clearTransactionScrollPopNavigation();
     };
     window.addEventListener("popstate", onPopState);
 

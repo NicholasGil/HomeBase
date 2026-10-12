@@ -35,6 +35,11 @@ export function consumeTransactionScrollPopNavigation(pathname: string): boolean
   return false;
 }
 
+/** Drop a stale POP flag after in-component restore (forward drill must not consume). */
+export function clearTransactionScrollPopNavigation(): void {
+  pendingPopTransactionPath = null;
+}
+
 /** Test-only reset */
 export function resetTransactionScrollPopNavigationForTests(): void {
   pendingPopTransactionPath = null;

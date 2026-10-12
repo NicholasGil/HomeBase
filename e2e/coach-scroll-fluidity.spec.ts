@@ -333,6 +333,40 @@ test("transactions @375 — deep scroll survives Search tab back forward back", 
   await expectScrollStableNear(page, savedY, 10);
 });
 
+test("transactions @375 — Search b/f/b then fresh drill lands at top within 4px", async ({
+  page,
+}) => {
+  await signInAlexWithFile(page);
+  await page.getByTestId("ten-second-next").getByRole("link").click();
+  await page.waitForURL(/\/transactions\/seed:buyer-a/);
+  await page.evaluate(() => {
+    const target = Math.min(
+      1095,
+      document.documentElement.scrollHeight - window.innerHeight,
+    );
+    window.scrollTo(0, target);
+  });
+  await page
+    .getByTestId("app-tab-bar")
+    .getByRole("link", { name: "Search" })
+    .click();
+  await page.waitForURL(/\/search/);
+  await page.goBack();
+  await page.waitForURL(/\/transactions\/seed:buyer-a/);
+  await page.goForward();
+  await page.waitForURL(/\/search/);
+  await page.goBack();
+  await page.waitForURL(/\/transactions\/seed:buyer-a/);
+  await page
+    .getByTestId("app-tab-bar")
+    .getByRole("link", { name: "Coach", exact: true })
+    .click();
+  await page.waitForURL(/\/coach$/);
+  await page.getByTestId("ten-second-next").getByRole("link").click();
+  await page.waitForURL(/\/transactions\/seed:buyer-a/);
+  await expectScrollStableNear(page, 0, 4);
+});
+
 test("transactions @375 — native back forward preserves scroll within 10px", async ({
   page,
 }) => {

@@ -1,5 +1,11 @@
 const TRANSACTION_SCROLL_KEY_PREFIX = "realtyrise.transaction.scrollY.v1";
 
+const lastKnownScrollYByPath = new Map<string, number>();
+
+export function transactionScrollLastKnown(pathname: string): number {
+  return lastKnownScrollYByPath.get(pathname) ?? 0;
+}
+
 export function isTransactionScrollPath(pathname: string): boolean {
   return pathname.startsWith("/transactions/");
 }
@@ -18,10 +24,15 @@ export function readTransactionScrollY(pathname: string): number | null {
       return null;
     }
     const y = Number.parseInt(raw, 10);
-    return Number.isFinite(y) ? y : null;
-  } catch {
+    if (Number.isFinite(y)) {
+      return y;
+    }
     return null;
+  } catch {
+    // ignore
   }
+  const known = lastKnownScrollYByPath.get(pathname);
+  return known !== undefined && known > 0 ? known : null;
 }
 
 export type WriteTransactionScrollOptions = { forceZero?: boolean };
@@ -43,6 +54,9 @@ export function writeTransactionScrollY(
     if (existing !== null && existing > 0) {
       return;
     }
+  }
+  if (rounded > 0) {
+    lastKnownScrollYByPath.set(pathname, rounded);
   }
   try {
     sessionStorage.setItem(

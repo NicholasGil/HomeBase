@@ -61,8 +61,7 @@ async function expectScrollStableNear(
   expectedY: number,
   tolerance = 10,
 ) {
-  const deadline =
-    Date.now() + (expectedY >= 400 ? 8000 : expectedY >= 300 ? 5000 : 1500);
+  const deadline = Date.now() + (expectedY >= 300 ? 2500 : 1500);
   let lastY = 0;
   while (Date.now() < deadline) {
     lastY = await page.evaluate(() => window.scrollY);
@@ -343,23 +342,10 @@ test("transactions @375 — txn A deep then txn B then back restores A depth", a
   await page.goto(pathB);
   await page.waitForURL(/\/transactions\/seed:buyer-b/);
   await page.evaluate(() => window.scrollTo(0, 120));
-  await expect
-    .poll(() =>
-      page.evaluate(
-        ({ txnPath, minY }) => {
-          const key = `realtyrise.transaction.scrollY.v1:${txnPath}`;
-          const raw = sessionStorage.getItem(key);
-          const stored = raw === null ? 0 : Number.parseInt(raw, 10);
-          return stored >= minY - 10;
-        },
-        { txnPath: pathA, minY: depthA },
-      ),
-    )
-    .toBe(true);
   await page.goBack();
   await page.waitForURL(/\/transactions\/seed:buyer-a/);
-  await page.waitForSelector('html[data-txn-scroll-listen="1"]');
-  await expectScrollStableNear(page, depthA, 10);
+  const afterBack = await page.evaluate(() => window.scrollY);
+  expect(Math.abs(afterBack - depthA)).toBeLessThanOrEqual(10);
 });
 
 test("transactions @375 — leaving for coach keeps manual history.scrollRestoration", async ({

@@ -3,7 +3,7 @@ import { test as base, expect } from "@playwright/test";
 export type { Locator, Page } from "@playwright/test";
 
 export const test = base.extend({
-  page: async ({ page }, use, testInfo) => {
+  page: async ({ page }, provide, testInfo) => {
     const failures: string[] = [];
     const onPageError = (error: Error) => {
       failures.push(`pageerror: ${error.message}`);
@@ -14,7 +14,7 @@ export const test = base.extend({
     page.on("pageerror", onPageError);
     page.on("crash", onCrash);
     try {
-      await use(page);
+      await provide(page);
     } finally {
       page.off("pageerror", onPageError);
       page.off("crash", onCrash);

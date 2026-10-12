@@ -16,9 +16,10 @@ import {
   resetCoachScrollRestorationToAuto,
 } from "@/lib/coach-scroll-restoration-window";
 import {
-  clearTransactionScrollPopNavigation,
   consumeTransactionScrollPopNavigation,
   ensureTransactionScrollPopstateListener,
+  peekTransactionScrollPopNavigation,
+  TRANSACTION_POP_RESTORE_PATH_KEY,
 } from "@/lib/transaction-scroll-pop-navigation";
 import { transactionScrollRestoreOnPageShow } from "@/lib/transaction-scroll-pageshow";
 
@@ -161,15 +162,17 @@ export function TransactionScrollRestoration() {
     let cancelRestore = () => {};
 
     const restoreFromStorage = () => {
-      if (!isTransactionScrollPath(pathnameRef.current)) {
+      const path = pathnameRef.current;
+      if (!isTransactionScrollPath(path)) {
         return;
       }
       cancelRestore();
-      const y = readTransactionScrollY(pathnameRef.current);
+      const y = readTransactionScrollY(path);
       if (y !== null && y > 0) {
-        setLastYForPath(pathnameRef.current, y);
+        setLastYForPath(path, y);
+        applyScrollY(path, y);
       }
-      cancelRestore = restoreUntilStable(pathnameRef.current, y);
+      cancelRestore = restoreUntilStable(path, y);
     };
 
     const onPopState = () => {
@@ -180,11 +183,28 @@ export function TransactionScrollRestoration() {
       userScrolledRef.current = false;
       seedLastYFromStorage(pathnameRef.current);
       restoreFromStorage();
-      clearTransactionScrollPopNavigation();
     };
     window.addEventListener("popstate", onPopState);
 
-    if (consumeTransactionScrollPopNavigation(mountPath)) {
+    const sessionPopPending = (() => {
+      try {
+        return sessionStorage.getItem(TRANSACTION_POP_RESTORE_PATH_KEY);
+      } catch {
+        return null;
+      }
+    })();
+    const shouldPopRestore =
+      consumeTransactionScrollPopNavigation(mountPath) ||
+      peekTransactionScrollPopNavigation() === mountPath ||
+      sessionPopPending === mountPath;
+    if (sessionPopPending === mountPath) {
+      try {
+        sessionStorage.removeItem(TRANSACTION_POP_RESTORE_PATH_KEY);
+      } catch {
+        // ignore
+      }
+    }
+    if (shouldPopRestore) {
       restoreFromStorage();
     }
     const onPageShow = (event: PageTransitionEvent) => {

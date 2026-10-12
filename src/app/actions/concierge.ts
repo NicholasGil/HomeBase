@@ -9,6 +9,8 @@ import {
   conciergeAvailability,
   type ConciergeAvailability,
 } from "@/lib/concierge-availability";
+import { enrichDemoFileSessionAnswer } from "@/lib/demo-concierge-answers";
+import { isDemoMode } from "@/lib/auth-config";
 import { OTHER_CLIENT_NAMES } from "@/lib/seed-concierge";
 
 export type ConciergeAskFailureReason =
@@ -44,11 +46,22 @@ export async function askConcierge(input: { question: string }) {
     }
     try {
       const facts = conciergeFactsForCoach(session);
-      const answer = completeConcierge({
+      let answer = completeConcierge({
         question: input.question,
         facts,
         otherClientNames: OTHER_CLIENT_NAMES,
       });
+      if (
+        isDemoMode(process.env) &&
+        !session.emptyCoachFile &&
+        answer.kind === "answer"
+      ) {
+        answer = enrichDemoFileSessionAnswer(
+          input.question,
+          answer,
+          facts,
+        );
+      }
       return { ok: true as const, answer };
     } catch {
       return { ok: false as const, reason: "SERVER_ERROR" as const };

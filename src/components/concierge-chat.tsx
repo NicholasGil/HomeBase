@@ -2,6 +2,7 @@
 
 import {
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   useSyncExternalStore,
@@ -35,7 +36,7 @@ const MOBILE_STICKY_DOCK =
   "max-md:fixed max-md:inset-x-0 max-md:z-40 max-md:bottom-[calc(var(--tab-bar-height)+env(safe-area-inset-bottom))] max-md:border-t max-md:border-border/70 max-md:bg-card max-md:px-5 max-md:pt-2 max-md:pb-2 max-md:shadow-[0_-8px_24px_-12px_rgba(15,23,42,0.14)]";
 
 const CONCIERGE_SERVER_ERROR_MESSAGE =
-  "Coach could not load an answer. Try again.";
+  "Coach could not load an answer.";
 
 const COACH_MOBILE_MQ = "(max-width: 767px)";
 
@@ -79,6 +80,8 @@ export function ConciergeChat({
   pinRestoredThreadOnMobile = false,
   /** File session @375: sticky chips + Ask above tab bar; document scroll only. */
   mobileStickyDockAboveTabBar = false,
+  fileSummaryAboveThread = null,
+  onThreadActiveChange,
   showAgentLinkWhenUnavailable = true,
   initialTurn = null,
   onTurnComplete,
@@ -93,6 +96,8 @@ export function ConciergeChat({
   wrapMobileQuestionStarters?: boolean;
   pinRestoredThreadOnMobile?: boolean;
   mobileStickyDockAboveTabBar?: boolean;
+  fileSummaryAboveThread?: ReactNode | null;
+  onThreadActiveChange?: (active: boolean) => void;
   showAgentLinkWhenUnavailable?: boolean;
   initialTurn?: ConciergePersistedTurn | null;
   onTurnComplete?: (turn: ConciergePersistedTurn) => void;
@@ -103,7 +108,12 @@ export function ConciergeChat({
   const [kind, setKind] = useState<string | null>(initialTurn?.kind ?? null);
   const [busy, setBusy] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [lastFailedQuestion, setLastFailedQuestion] = useState<string | null>(
+    null,
+  );
   const pinnedThreadRef = useRef<HTMLDivElement>(null);
+  const answerRef = useRef<HTMLDivElement>(null);
+  const chipsScrollRef = useRef<HTMLDivElement>(null);
 
   const coachUnavailable = availability === "model_key_missing";
   const pinFirstSessionMobile = pinStartersAboveScrollOnMobile;
@@ -145,6 +155,26 @@ export function ConciergeChat({
       inline: "nearest",
     });
   }, [answer, showPinnedMobileThread]);
+
+  useEffect(() => {
+    if (asked !== null) {
+      onThreadActiveChange?.(true);
+    }
+  }, [asked, onThreadActiveChange]);
+
+  useLayoutEffect(() => {
+    if (!mobileStickyDock || chipsScrollRef.current === null) {
+      return;
+    }
+    chipsScrollRef.current.scrollLeft = 0;
+  }, [mobileStickyDock, starters]);
+
+  useEffect(() => {
+    if (!mobileStickyDock || answer === null) {
+      return;
+    }
+    answerRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
+  }, [answer, mobileStickyDock]);
 
   function showUnavailableAnswer() {
     setAnswer(CONCIERGE_MODEL_UNAVAILABLE_ANSWER.text);
@@ -189,6 +219,8 @@ export function ConciergeChat({
         );
       } else if (result.reason === "SERVER_ERROR") {
         setErrorMessage(CONCIERGE_SERVER_ERROR_MESSAGE);
+        setLastFailedQuestion(nextQuestion);
+        setQuestion(nextQuestion);
         setAnswer(null);
         setKind(null);
       } else {
@@ -218,8 +250,8 @@ export function ConciergeChat({
             className="my-auto"
           />
         ) : null}
-        {!coachUnavailable && asked === null ? (
-          <p className="my-auto text-center text-sm text-muted-foreground">
+        {!coachUnavailable && asked === null && idleHint ? (
+          <p className="text-center text-sm text-muted-foreground">
             {idleHint}
           </p>
         ) : null}
@@ -232,22 +264,49 @@ export function ConciergeChat({
           <p className="text-sm text-muted-foreground">Checking this file…</p>
         ) : null}
         {errorMessage ? (
-          <p
+          <div
             role="alert"
             data-testid="concierge-error"
-            className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+            className="flex flex-col gap-3 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
           >
-            {errorMessage}
-          </p>
+            <p>{errorMessage}</p>
+            <Button
+              type="button"
+              variant="outline"
+              data-testid="concierge-error-retry"
+              className="min-h-11 w-full max-w-xs self-start rounded-full border-destructive/40 bg-card text-destructive hover:bg-destructive/10"
+              onClick={() => {
+                const retry =
+                  question.trim().length > 0
+                    ? question
+                    : lastFailedQuestion ?? asked ?? "";
+                if (retry.length === 0) {
+                  return;
+                }
+                void submit(retry);
+              }}
+            >
+              Try again
+            </Button>
+          </div>
         ) : null}
         {answer !== null ? (
-          <ConciergeAnswerView
-            text={answer}
-            kind={kind}
+          <div
+            ref={answerRef}
             className={
-              omitUserBubble ? compactFirstSessionAnswer : undefined
+              mobileStickyDock
+                ? "scroll-mt-4 [scroll-margin-bottom:var(--coach-answer-scroll-margin)]"
+                : undefined
             }
-          />
+          >
+            <ConciergeAnswerView
+              text={answer}
+              kind={kind}
+              className={
+                omitUserBubble ? compactFirstSessionAnswer : undefined
+              }
+            />
+          </div>
         ) : null}
       </>
     );
@@ -304,24 +363,37 @@ export function ConciergeChat({
 
   const starterChips = (
     <div
-      aria-label="Suggested questions"
       className={cn(
-        "-mx-5 flex gap-2 px-5 pb-1 md:mx-0",
-        wrapMobileStarters && "flex-wrap",
-        horizontalScrollChips &&
-          "max-md:min-w-0 max-md:w-full max-md:max-w-full max-md:flex-nowrap max-md:overflow-x-auto max-md:overflow-y-hidden max-md:overscroll-x-contain max-md:[scrollbar-width:none] max-md:[mask-image:linear-gradient(to_right,transparent,black_1.5rem,black_calc(100%-1.5rem),transparent)] max-md:[&::-webkit-scrollbar]:hidden",
+        "relative max-md:min-w-0",
+        mobileStickyDock && horizontalScrollChips && "max-md:pr-1",
       )}
     >
+      <div
+        ref={mobileStickyDock ? chipsScrollRef : undefined}
+        aria-label="Suggested questions"
+        className={cn(
+          "-mx-5 flex gap-2 px-5 pb-1 md:mx-0",
+          wrapMobileStarters && "flex-wrap",
+          horizontalScrollChips &&
+            "max-md:min-w-0 max-md:w-full max-md:max-w-full max-md:flex-nowrap max-md:justify-start max-md:overflow-x-auto max-md:overflow-y-hidden max-md:overscroll-x-contain max-md:[scrollbar-width:none] max-md:[&::-webkit-scrollbar]:hidden",
+          horizontalScrollChips &&
+            !mobileStickyDock &&
+            "max-md:[mask-image:linear-gradient(to_right,transparent,black_1.5rem,black_calc(100%-1.5rem),transparent)]",
+        )}
+      >
       {starters.map((starter) => (
         <Button
           key={starter}
           type="button"
           variant="secondary"
           className={cn(
-            "h-auto min-h-11 w-max max-w-[min(17.5rem,calc(100vw-3rem))] shrink-0 rounded-full bg-sage px-4 py-2 text-left text-sm whitespace-normal text-sage-foreground hover:bg-sage/80",
+            "h-auto min-h-11 shrink-0 rounded-full bg-sage px-4 py-2 text-left text-sm text-sage-foreground hover:bg-sage/80",
             !wrapMobileStarters &&
-              "max-md:max-h-11 max-md:min-h-11 max-md:overflow-hidden max-md:text-ellipsis max-md:leading-none max-md:whitespace-nowrap",
+              "w-max max-md:h-11 max-md:justify-start max-md:whitespace-nowrap",
+            wrapMobileStarters &&
+              "w-max max-w-[min(17.5rem,calc(100vw-3rem))] whitespace-normal",
             (wrapMobileStarters || pinRestoredThreadOnMobile) &&
+              !mobileStickyDock &&
               "max-md:px-3 max-md:py-2 max-md:text-xs max-md:leading-snug max-md:whitespace-normal",
           )}
           disabled={busy || coachUnavailable}
@@ -334,6 +406,13 @@ export function ConciergeChat({
           {starter}
         </Button>
       ))}
+      </div>
+      {mobileStickyDock && horizontalScrollChips ? (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-gradient-to-l from-card from-30% to-transparent max-md:block md:hidden"
+        />
+      ) : null}
     </div>
   );
 
@@ -395,6 +474,11 @@ export function ConciergeChat({
           data-testid="concierge-scroll-region"
           className="flex flex-col gap-3 py-4 max-md:overflow-visible max-md:py-3"
         >
+          {fileSummaryAboveThread ? (
+            <div className="shrink-0 max-md:block md:hidden">
+              {fileSummaryAboveThread}
+            </div>
+          ) : null}
           {scrollIntro && asked === null ? (
             <div className="shrink-0">{scrollIntro}</div>
           ) : null}
@@ -411,10 +495,6 @@ export function ConciergeChat({
           {starterChips}
           <div data-testid="concierge-compose">{composeForm}</div>
         </div>
-        <div
-          className="max-md:h-[var(--coach-mobile-dock-clearance)] md:hidden"
-          aria-hidden
-        />
       </section>
     );
   }

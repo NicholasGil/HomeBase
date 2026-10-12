@@ -21,6 +21,7 @@ test("concierge shows error and re-enables Ask on server failure @375", async ({
   await expect(page.getByTestId("concierge-error")).toContainText(
     /could not load an answer/i,
   );
+  await expect(page.getByTestId("concierge-error-retry")).toBeVisible();
   await expect(page.getByTestId("concierge-ask")).toBeEnabled();
   await expect(page.getByText("Checking this file")).toHaveCount(0);
 });

@@ -7,6 +7,7 @@ import {
   type ConciergeScope,
 } from "@/components/concierge-sheet";
 import type { ConciergeAvailability } from "@/lib/concierge-availability";
+import { CoachScrollRestoration } from "@/components/coach-scroll-restoration";
 import { MobileTabBar } from "@/components/mobile-tab-bar";
 import { BUYER_COACH_HOME } from "@/lib/buyer-shell";
 import type { AppNavLink } from "@/lib/app-nav";
@@ -28,6 +29,7 @@ export function CoachAwareMain({
 
   return (
     <>
+      <CoachScrollRestoration />
       <main
         className={cn(
           "mx-auto max-w-5xl px-5 py-10",

@@ -15,6 +15,6 @@ export const CONCIERGE_STARTERS = [
 
 export const FILE_SESSION_CONCIERGE_STARTERS = [
   "What happens next?",
-  "When is my inspection and what should I bring?",
+  "When's my inspection?",
   "What am I missing?",
 ] as const;

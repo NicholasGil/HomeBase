@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useSyncExternalStore, type ReactNode } from "react";
 
 import { ConciergeChat } from "@/components/concierge-chat";
 import { CoachDailyCheckIn } from "@/components/coach-daily-check-in";
@@ -27,6 +27,8 @@ export function CoachHabitConcierge({
   pinStartersAboveScrollOnMobile,
   wrapMobileQuestionStarters,
   mobileStickyDockAboveTabBar,
+  fileSummaryAboveThread,
+  onThreadActiveChange,
   scrollIntro,
   idleHint,
   questionPlaceholder,
@@ -42,6 +44,8 @@ export function CoachHabitConcierge({
   pinStartersAboveScrollOnMobile?: boolean;
   wrapMobileQuestionStarters?: boolean;
   mobileStickyDockAboveTabBar?: boolean;
+  fileSummaryAboveThread?: ReactNode | null;
+  onThreadActiveChange?: (active: boolean) => void;
   scrollIntro?: ReactNode;
   idleHint?: string;
   questionPlaceholder?: string;
@@ -60,6 +64,12 @@ export function CoachHabitConcierge({
   function handleTurnComplete(turn: CoachHabitTurn) {
     persistCoachHabitSessionTurn(storageKey, turn);
   }
+
+  useEffect(() => {
+    if (initialTurn !== null) {
+      onThreadActiveChange?.(true);
+    }
+  }, [initialTurn, onThreadActiveChange]);
 
   return (
     <div
@@ -87,6 +97,8 @@ export function CoachHabitConcierge({
         pinStartersAboveScrollOnMobile={pinStartersAboveScrollOnMobile}
         wrapMobileQuestionStarters={wrapMobileQuestionStarters}
         mobileStickyDockAboveTabBar={mobileStickyDockAboveTabBar}
+        fileSummaryAboveThread={fileSummaryAboveThread}
+        onThreadActiveChange={onThreadActiveChange}
         pinRestoredThreadOnMobile={
           !firstSession && repeatVisit && initialTurn !== null
         }

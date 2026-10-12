@@ -157,7 +157,10 @@ export function TenSecondHeroGrid({
         stages={view.stages}
         href={drill}
         orientation={compact ? "responsive" : journeyOrientation}
-        className={cn(at.rail, compact && "max-md:order-4")}
+        className={cn(
+          at.rail,
+          compact && "max-md:order-4 max-md:hidden lg:block",
+        )}
       />
 
       <section

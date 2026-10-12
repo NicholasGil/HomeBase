@@ -1,0 +1,70 @@
+{
+  "capturedAt": "2026-10-12T00:58:40.350Z",
+  "viewportWidth": 375,
+  "env": {
+    "VERCEL_ENV": "production",
+    "REALTYRISE_DEMO_MODE": "1"
+  },
+  "answerReadable": true,
+  "lastContentClearsDock": true,
+  "chipLabelsUnclipped": true,
+  "backScrollRestored": true,
+  "pages": {
+    "home": {
+      "path": "/",
+      "documentScrollWidth": 375,
+      "consoleErrorCount": 0,
+      "consoleErrors": [],
+      "failedRequestCount": 0,
+      "failedRequests": []
+    },
+    "demo": {
+      "path": "/demo",
+      "documentScrollWidth": 375,
+      "consoleErrorCount": 0,
+      "consoleErrors": [],
+      "failedRequestCount": 0,
+      "failedRequests": []
+    },
+    "coach": {
+      "path": "/coach",
+      "documentScrollWidth": 375,
+      "consoleErrorCount": 0,
+      "consoleErrors": [],
+      "failedRequestCount": 0,
+      "failedRequests": []
+    },
+    "vendor": {
+      "path": "/vendor",
+      "documentScrollWidth": 375,
+      "consoleErrorCount": 0,
+      "consoleErrors": [],
+      "failedRequestCount": 0,
+      "failedRequests": []
+    },
+    "agent": {
+      "path": "/agent",
+      "documentScrollWidth": 375,
+      "consoleErrorCount": 0,
+      "consoleErrors": [],
+      "failedRequestCount": 0,
+      "failedRequests": []
+    },
+    "pricing": {
+      "path": "/pricing",
+      "documentScrollWidth": 375,
+      "consoleErrorCount": 0,
+      "consoleErrors": [],
+      "failedRequestCount": 0,
+      "failedRequests": []
+    },
+    "brokerage_onboarding": {
+      "path": "/brokerage/onboarding",
+      "documentScrollWidth": 375,
+      "consoleErrorCount": 0,
+      "consoleErrors": [],
+      "failedRequestCount": 0,
+      "failedRequests": []
+    }
+  }
+}

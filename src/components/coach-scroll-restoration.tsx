@@ -158,14 +158,36 @@ export function CoachScrollRestoration() {
       restoreFromStorage();
     }
 
-    const onPopState = () => {
+    const onCoachHistoryEntry = () => {
       if (!isCoachScrollPath(window.location.pathname)) {
         return;
       }
       pathnameRef.current = window.location.pathname;
+      recordCoachScrollRestorationOriginal();
+      try {
+        history.scrollRestoration = "manual";
+      } catch {
+        // ignore
+      }
       restoreFromStorage();
     };
+
+    const onPopState = () => {
+      onCoachHistoryEntry();
+    };
     window.addEventListener("popstate", onPopState);
+
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (!isCoachScrollPath(window.location.pathname)) {
+        resetCoachScrollRestorationToAuto();
+        return;
+      }
+      if (!event.persisted) {
+        return;
+      }
+      onCoachHistoryEntry();
+    };
+    window.addEventListener("pageshow", onPageShow);
 
     const onPageHide = () => {
       resetCoachScrollRestorationToAuto();
@@ -174,6 +196,7 @@ export function CoachScrollRestoration() {
 
     return () => {
       window.removeEventListener("popstate", onPopState);
+      window.removeEventListener("pageshow", onPageShow);
       window.removeEventListener("pagehide", onPageHide);
       resetCoachScrollRestorationToAuto();
     };

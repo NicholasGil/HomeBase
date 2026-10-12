@@ -1,4 +1,5 @@
 import { chromium } from "@playwright/test";
+import { execSync } from "node:child_process";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -71,9 +72,19 @@ for (const targetY of [90, 387]) {
   });
 }
 
+const gitSha = execSync("git rev-parse HEAD", { encoding: "utf8" }).trim();
 await writeFile(
   path.join(outDir, "metrics.json"),
-  JSON.stringify({ baseURL, viewport: { width: 375, height: 812 }, shots }, null, 2),
+  JSON.stringify(
+    {
+      baseURL,
+      viewport: { width: 375, height: 812 },
+      gitSha,
+      shots,
+    },
+    null,
+    2,
+  ),
 );
 
 await browser.close();

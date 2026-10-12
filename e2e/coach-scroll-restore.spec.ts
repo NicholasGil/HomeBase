@@ -90,6 +90,34 @@ test("coach file session @375 — tab return avoids a zero scroll frame", async 
   expect(samples.at(-1)).toBeGreaterThanOrEqual(300);
 });
 
+test("coach file session @375 — pageshow persisted restores saved scroll within 10px", async ({
+  page,
+}) => {
+  await signInAlexWithFile(page);
+  await page.evaluate(() => window.scrollTo(0, 372));
+  await page.waitForFunction(() => window.scrollY >= 300);
+  const target = await page.evaluate(() => {
+    const epoch =
+      sessionStorage.getItem("realtyrise.coach.scrollY.epoch") ?? "0";
+    const key = `realtyrise.coach.scrollY.v1:${epoch}:/coach`;
+    const raw = sessionStorage.getItem(key);
+    return raw === null ? 0 : Number.parseInt(raw, 10);
+  });
+  expect(target).toBeGreaterThanOrEqual(300);
+
+  await page.evaluate(() => {
+    window.scrollTo(0, 0);
+    window.dispatchEvent(
+      new PageTransitionEvent("pageshow", { persisted: true }),
+    );
+  });
+  await page.waitForFunction(
+    (minY) => window.scrollY >= minY - 10,
+    target,
+    { timeout: 2000 },
+  );
+});
+
 test("coach — leaving /coach resets history.scrollRestoration to auto", async ({
   page,
 }) => {

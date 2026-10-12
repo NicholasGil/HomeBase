@@ -110,6 +110,13 @@ describe("coachScrollBootstrapScript", () => {
     );
   });
 
+  it("parses coachScrollBootstrapScriptBody with short storage key k", () => {
+    const body = coachScrollBootstrapScriptBody("k");
+    expect(() => {
+      new Function(`(function(){${body}})();`);
+    }).not.toThrow();
+  });
+
   it.each([
     ["coachScrollBootstrapScript()", () => coachScrollBootstrapScript()],
     [

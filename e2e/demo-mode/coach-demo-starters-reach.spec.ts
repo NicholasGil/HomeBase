@@ -1,9 +1,11 @@
 import { expect, test } from "@playwright/test";
 
 import { CONCIERGE_STARTERS } from "../../src/lib/concierge-starters";
-import { fileSessionDockPreviewLabels } from "../../src/lib/concierge-dock-chips";
+import { FILE_SESSION_DOCK_CHIPS } from "../../src/lib/concierge-dock-chips";
 
-const DOCK_STARTERS = new Set<string>(fileSessionDockPreviewLabels());
+const DOCK_LABEL_BY_QUESTION = new Map(
+  FILE_SESSION_DOCK_CHIPS.map((chip) => [chip.question, chip.label]),
+);
 
 test.use({
   viewport: { width: 375, height: 812 },
@@ -17,31 +19,32 @@ async function signInDemoBuyerCoach(page: import("@playwright/test").Page) {
   await expect(page.getByTestId("concierge-mobile-dock")).toBeVisible();
 }
 
-async function assertStarterTappable(
+async function tapStarterAndAssertAnswer(
   page: import("@playwright/test").Page,
-  label: string,
+  question: string,
 ) {
-  const moreTrigger = page.getByTestId("concierge-more-starters");
-  const needsMoreSheet =
-    !DOCK_STARTERS.has(label) && (await moreTrigger.isVisible());
-  let chip;
-  if (needsMoreSheet) {
-    await moreTrigger.click();
+  const dockLabel = DOCK_LABEL_BY_QUESTION.get(question);
+  if (dockLabel !== undefined) {
+    const chip = page
+      .getByLabel("Suggested questions")
+      .getByRole("button", { name: dockLabel });
+    await chip.scrollIntoViewIfNeeded();
+    await expect(chip).toBeVisible();
+    await chip.click();
+  } else {
+    await page.getByTestId("concierge-more-starters").click();
     const sheet = page.getByTestId("concierge-more-starters-sheet");
     await expect(sheet).toBeVisible();
-    chip = sheet.getByRole("button", { name: label });
-  } else {
-    chip = page
-      .getByLabel("Suggested questions")
-      .getByRole("button", { name: label });
+    const chip = sheet.getByRole("button", { name: question });
+    await chip.scrollIntoViewIfNeeded();
+    await expect(chip).toBeVisible();
+    await chip.click();
   }
-  await chip.scrollIntoViewIfNeeded();
-  await expect(chip).toBeVisible();
-  await expect(chip).toBeEnabled();
-  if (needsMoreSheet) {
-    await page.keyboard.press("Escape");
-    await expect(page.getByTestId("concierge-more-starters-sheet")).toBeHidden();
-  }
+  await expect(page.getByTestId("concierge-answer")).toHaveAttribute(
+    "data-kind",
+    "answer",
+    { timeout: 20_000 },
+  );
 }
 
 test("demo file session @375 — all CONCIERGE_STARTERS reachable via dock or More", async ({
@@ -49,7 +52,7 @@ test("demo file session @375 — all CONCIERGE_STARTERS reachable via dock or Mo
 }) => {
   await signInDemoBuyerCoach(page);
   await expect(page.getByTestId("concierge-more-starters")).toBeVisible();
-  for (const label of CONCIERGE_STARTERS) {
-    await assertStarterTappable(page, label);
+  for (const question of CONCIERGE_STARTERS) {
+    await tapStarterAndAssertAnswer(page, question);
   }
 });

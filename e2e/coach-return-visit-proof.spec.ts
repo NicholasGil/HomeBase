@@ -78,6 +78,29 @@ test("RET-003 @375 — discovery return shows continue header scoped to thread",
   );
 });
 
+test("RET-002 @375 — file reload with check-in keeps restored answer above dock", async ({
+  page,
+}) => {
+  await signInAlexWithFile(page);
+  await page
+    .getByLabel("Suggested questions")
+    .getByRole("button", { name: "What happens next?" })
+    .click();
+  await expect(page.getByTestId("concierge-answer")).toHaveAttribute(
+    "data-kind",
+    "answer",
+    { timeout: 15_000 },
+  );
+  await page.goto("/dashboard");
+  await page.goto("/coach");
+  await expect(page.getByTestId("coach-daily-check-in")).toBeVisible();
+  await expect(page.getByTestId("concierge-restored-thread")).toBeVisible();
+  await page.reload();
+  await expect(page.getByTestId("concierge-restored-thread")).toBeVisible();
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await assertRestoredAnswerClearsDock(page);
+});
+
 test("RET-002 @375 — return visit without thread shows daily check-in", async ({
   page,
 }) => {

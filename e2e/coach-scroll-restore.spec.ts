@@ -94,7 +94,10 @@ test("coach — leaving /coach resets history.scrollRestoration to auto", async 
   page,
 }) => {
   await signInAlexWithFile(page);
-  await page.goto("/search");
+  await page
+    .getByTestId("app-tab-bar")
+    .getByRole("link", { name: "Search" })
+    .click();
   await page.waitForURL(/\/search/);
   await expect
     .poll(() => page.evaluate(() => history.scrollRestoration))

@@ -120,11 +120,7 @@ export function CoachHabitConcierge({
           !firstSession && repeatVisit && initialTurn !== null
         }
         scrollIntro={hideColdOpenEmpty ? undefined : scrollIntro}
-        idleHint={
-          returnWithThread && firstSession
-            ? "Your last answer is below — tap a starter or keep asking."
-            : idleHint
-        }
+        idleHint={firstSession ? undefined : idleHint}
         questionPlaceholder={questionPlaceholder}
         initialTurn={initialTurn}
         onTurnComplete={handleTurnComplete}

@@ -1,3 +1,4 @@
+import { execSync } from "node:child_process";
 import { chromium, devices } from "playwright";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -77,6 +78,7 @@ async function main() {
   moreSheetStarterLabel = (await moreStarter.innerText()).trim();
   await moreStarter.click();
   await page.getByTestId("concierge-answer").waitFor({ timeout: 20_000 });
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.waitForTimeout(350);
   await page.screenshot({
     path: path.join(OUT, "more-sheet-starter-answer-375.png"),
@@ -99,39 +101,53 @@ async function main() {
     fullPage: false,
   });
 
+  await context.clearCookies();
+  await page.evaluate(() => {
+    localStorage.clear();
+    sessionStorage.clear();
+  });
   await signInDemoBuyerCoach(page);
-  await page.evaluate(() => window.scrollTo(0, 360));
-  await page.waitForTimeout(120);
+  await page.getByTestId("coach-ten-second").waitFor({ state: "visible" });
+  await page.evaluate(() => window.scrollTo(0, 387));
+  await page.waitForFunction(() => window.scrollY >= 300);
   const scrollBefore = await page.evaluate(() => window.scrollY);
   let backScrollRestored = false;
-  const txHref = await page.evaluate(() => {
-    const link = document.querySelector('a[href^="/transactions/"]');
-    return link?.getAttribute("href") ?? null;
-  });
-  if (txHref) {
-    const scrollKey = await coachScrollStorageKey(page);
-    await page.evaluate(
-      ({ key, y }) => {
-        sessionStorage.setItem(key, String(y));
-      },
-      { key: scrollKey, y: scrollBefore },
-    );
-    await page.goto(`${BASE}${txHref}`);
+  const txLink = page.getByTestId("ten-second-next").getByRole("link");
+  if (await txLink.count()) {
+    await txLink.click();
     await page.waitForURL(/\/transactions\//);
     await page.goBack();
     await page.waitForURL(/\/coach$/);
-    await page.waitForTimeout(600);
-    const scrollAfter = await page.evaluate(() => window.scrollY);
+    let scrollAfter = 0;
+    const restoreDeadline = Date.now() + 2000;
+    while (Date.now() < restoreDeadline) {
+      scrollAfter = await page.evaluate(() => window.scrollY);
+      if (scrollAfter >= 300) {
+        break;
+      }
+      await page.waitForTimeout(50);
+    }
     backScrollRestored =
-      scrollBefore > 80 && Math.abs(scrollAfter - scrollBefore) < 48;
+      scrollBefore >= 300 &&
+      scrollAfter >= 300 &&
+      Math.abs(scrollAfter - scrollBefore) < 48;
+    await page.evaluate((y) => {
+      window.scrollTo(0, Math.max(0, y - 120));
+    }, scrollAfter);
+    await page.waitForTimeout(200);
     await page.screenshot({
       path: path.join(OUT, "back-from-transaction-scroll-375.png"),
       fullPage: false,
     });
   }
 
+  const gitSha =
+    process.env.PROOF_GIT_SHA ??
+    execSync("git rev-parse HEAD", { encoding: "utf8" }).trim();
+
   const metrics = {
     capturedAt: new Date().toISOString(),
+    gitSha,
     viewportWidth: VIEWPORT.width,
     env: {
       VERCEL_ENV: "production",

@@ -19,4 +19,18 @@ describe("sanitizeRedirectPath", () => {
       SAFE_REDIRECT_FALLBACK,
     );
   });
+
+  it("rejects control characters and whitespace in the path", () => {
+    for (const malicious of [
+      "/\t/evil.com",
+      "/\n/evil.com",
+      "/\r/evil.com",
+      "/ /evil.com",
+      "/%09/evil.com",
+      "/coach%09/evil",
+      "/coach?next=%09",
+    ]) {
+      expect(sanitizeRedirectPath(malicious)).toBe(SAFE_REDIRECT_FALLBACK);
+    }
+  });
 });

@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 
-import { sanitizeRedirectPath } from "@/lib/safe-redirect-path";
+import {
+  SAFE_REDIRECT_FALLBACK,
+  isSafeRedirectPathname,
+  redirectPathContainsUnsafeCharacters,
+  sanitizeRedirectPath,
+} from "@/lib/safe-redirect-path";
 
 /** Redirect with a root-relative Location so host/proto follow the incoming request. */
 export function redirectToPath(
@@ -27,13 +32,29 @@ export function redirectToPathFromRequestUrl(
 ): NextResponse {
   const requestUrl = new URL(request.url);
   const safeDestination = sanitizeRedirectPath(destinationPath);
-  const target = new URL(safeDestination, requestUrl);
-  if (target.origin !== requestUrl.origin) {
-    return redirectToPath(safeDestination, request, init);
+  if (safeDestination === SAFE_REDIRECT_FALLBACK) {
+    return redirectToPath(SAFE_REDIRECT_FALLBACK, request, init);
   }
-  return redirectToPath(
-    `${target.pathname}${target.search}${target.hash}`,
-    request,
-    init,
-  );
+
+  let target: URL;
+  try {
+    target = new URL(safeDestination, requestUrl);
+  } catch {
+    return redirectToPath(SAFE_REDIRECT_FALLBACK, request, init);
+  }
+
+  if (target.origin !== requestUrl.origin) {
+    return redirectToPath(SAFE_REDIRECT_FALLBACK, request, init);
+  }
+
+  const relative = `${target.pathname}${target.search}${target.hash}`;
+  if (
+    !isSafeRedirectPathname(target.pathname) ||
+    redirectPathContainsUnsafeCharacters(relative)
+  ) {
+    return redirectToPath(SAFE_REDIRECT_FALLBACK, request, init);
+  }
+
+  const normalized = sanitizeRedirectPath(relative);
+  return redirectToPath(normalized, request, init);
 }

@@ -35,6 +35,9 @@ import { cn } from "@/lib/utils";
 import { MessageCircle } from "lucide-react";
 import type { BuyerDashboardView } from "../../convex/lib/dashboardView";
 
+const FILE_SESSION_CONCIERGE_IDLE_HINT =
+  "Tap a starter below or ask about this transaction. I explain what is on this file; I do not advise.";
+
 export function CoachHome({
   scope,
   buyerName,
@@ -222,6 +225,9 @@ export function CoachHome({
             questionPlaceholder={
               firstSession ? "Ask about buying" : "Ask about your file"
             }
+            idleHint={
+              firstSession ? undefined : FILE_SESSION_CONCIERGE_IDLE_HINT
+            }
           />
         ) : null}
         {showTenSecond && !habitStorageKey ? (
@@ -283,6 +289,9 @@ export function CoachHome({
             questionPlaceholder={
               firstSession ? "Ask about buying" : "Ask about your file"
             }
+            idleHint={
+              firstSession ? undefined : FILE_SESSION_CONCIERGE_IDLE_HINT
+            }
           />
         ) : null}
         {!habitStorageKey ? (
@@ -325,6 +334,9 @@ export function CoachHome({
             }
             questionPlaceholder={
               firstSession ? "Ask about buying" : "Ask about your file"
+            }
+            idleHint={
+              firstSession ? undefined : FILE_SESSION_CONCIERGE_IDLE_HINT
             }
           />
         ) : null}

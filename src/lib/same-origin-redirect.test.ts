@@ -4,11 +4,10 @@ import { SAFE_REDIRECT_FALLBACK } from "@/lib/safe-redirect-path";
 import { redirectToPathFromRequestUrl } from "@/lib/same-origin-redirect";
 
 describe("redirectToPathFromRequestUrl", () => {
+  const request = new Request("https://realtyrise.app/demo/enter/buyer-coach");
+
   it("uses a root-relative Location header on the request host", async () => {
-    const response = redirectToPathFromRequestUrl(
-      "/coach",
-      new Request("https://realtyrise.app/demo/enter/buyer-coach"),
-    );
+    const response = redirectToPathFromRequestUrl("/coach", request);
     expect(response.status).toBe(307);
     expect(response.headers.get("location")).toBe("/coach");
   });
@@ -29,11 +28,14 @@ describe("redirectToPathFromRequestUrl", () => {
       "/\\evil.com",
       "https://evil.com",
       "javascript:alert(1)",
+      "/\t/evil.com",
+      "/\n/evil.com",
+      "/\r/evil.com",
+      "/ /evil.com",
+      "/%09/evil.com",
+      "/%09%09/evil.com",
     ]) {
-      const response = redirectToPathFromRequestUrl(
-        malicious,
-        new Request("https://realtyrise.app/demo/enter/buyer-coach"),
-      );
+      const response = redirectToPathFromRequestUrl(malicious, request);
       expect(response.headers.get("location")).toBe(SAFE_REDIRECT_FALLBACK);
     }
   });

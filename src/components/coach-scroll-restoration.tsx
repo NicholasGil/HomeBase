@@ -38,13 +38,20 @@ function shouldSaveScrollForLink(anchor: HTMLAnchorElement): boolean {
   return false;
 }
 
-function applyStoredCoachScroll(pathname: string, y: number) {
+function applyStoredCoachScroll(
+  y: number,
+  programmaticScrollRef: { current: boolean },
+) {
   const target = clampCoachScrollTarget(
     y,
     document.documentElement.scrollHeight,
     window.innerHeight,
   );
+  programmaticScrollRef.current = true;
   window.scrollTo(0, target);
+  requestAnimationFrame(() => {
+    programmaticScrollRef.current = false;
+  });
   return target;
 }
 
@@ -55,6 +62,7 @@ export function CoachScrollRestoration() {
   const pathnameRef = useRef(pathname);
   const lastScrollYRef = useRef(0);
   const userScrolledRef = useRef(false);
+  const programmaticScrollRef = useRef(false);
 
   useEffect(() => {
     pathnameRef.current = pathname;
@@ -85,7 +93,7 @@ export function CoachScrollRestoration() {
         return;
       }
       restoringRef.current = true;
-      applyStoredCoachScroll(pathnameRef.current, storedY);
+      applyStoredCoachScroll(storedY, programmaticScrollRef);
       restoringRef.current = false;
     };
 
@@ -144,7 +152,7 @@ export function CoachScrollRestoration() {
       if (cancelled) {
         return;
       }
-      applyStoredCoachScroll(pathname, storedY);
+      applyStoredCoachScroll(storedY, programmaticScrollRef);
     };
 
     restore();
@@ -153,6 +161,9 @@ export function CoachScrollRestoration() {
     timeoutIds.push(window.setTimeout(restore, 0), window.setTimeout(restore, 80));
 
     const onUserScrollIntent = () => {
+      if (programmaticScrollRef.current) {
+        return;
+      }
       cancelDeferredRestore();
     };
     window.addEventListener("touchstart", onUserScrollIntent, {

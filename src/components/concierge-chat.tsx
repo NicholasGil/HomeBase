@@ -111,7 +111,7 @@ export function ConciergeChat({
   starters = CONCIERGE_STARTERS,
   allStarters,
   dockChipPreset,
-  idleHint = "Tap a starter below or ask about this transaction. I explain what is on this file; I do not advise.",
+  idleHint,
   questionPlaceholder = "Ask about this transaction",
   availability = "ready",
   /** Renders inside the scroll region (e.g. first-session empty state). */
@@ -243,15 +243,20 @@ export function ConciergeChat({
     ) {
       return;
     }
-    const answerEl = answerRef.current;
-    if (answerEl !== null) {
-      scrollAnswerClearOfMobileDock(answerEl);
-    }
+    const clearAnswerAboveDock = () => {
+      const answerEl = answerRef.current;
+      if (answerEl !== null) {
+        scrollAnswerClearOfMobileDock(answerEl);
+      }
+    };
+    clearAnswerAboveDock();
+    requestAnimationFrame(clearAnswerAboveDock);
   }, [
     answer,
     mobileStickyDock,
     pinRestoredThreadOnMobile,
     initialTurn,
+    threadHeader,
   ]);
 
   useEffect(() => {

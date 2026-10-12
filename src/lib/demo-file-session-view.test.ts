@@ -1,7 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   coachFileNextDisplayLabel,
+  demoBookedInspectionApplies,
+  demoBookedInspectionTasks,
   DEMO_ATTEND_INSPECTION_TITLE,
 } from "@/lib/demo-file-session-view";
 import { seedDashboardForClerkId } from "@/lib/seed-dashboard";
@@ -38,5 +40,34 @@ describe("coachFileNextDisplayLabel", () => {
     expect(coachFileNextDisplayLabel(view, fixturePreviewEnv)).toBe(
       "Schedule inspection",
     );
+  });
+});
+
+describe("demoBookedInspectionApplies", () => {
+  it("is true for buyer A inspection in demo mode", () => {
+    const view = seedDashboardForClerkId(SEED_CLERK_IDS.buyerA);
+    expect(demoBookedInspectionApplies(view, demoProductionEnv)).toBe(true);
+    expect(demoBookedInspectionApplies(view, fixturePreviewEnv)).toBe(false);
+  });
+});
+
+describe("demoBookedInspectionTasks", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("marks schedule done and adds attend inspection in demo mode", () => {
+    vi.stubEnv("REALTYRISE_DEMO_MODE", "1");
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", "");
+    vi.stubEnv("CLERK_SECRET_KEY", "");
+    const view = seedDashboardForClerkId(SEED_CLERK_IDS.buyerA);
+    const tasks = demoBookedInspectionTasks(view.currentStageTasks);
+    expect(
+      tasks.find((task) => task.title === "Schedule inspection")?.status,
+    ).toBe("done");
+    expect(
+      tasks.find((task) => task.title === DEMO_ATTEND_INSPECTION_TITLE)?.status,
+    ).toBe("open");
   });
 });

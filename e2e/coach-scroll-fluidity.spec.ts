@@ -154,7 +154,10 @@ for (const targetY of [90, 387]) {
         (anchor as HTMLAnchorElement).click();
       });
     await page.waitForURL(/\/search/);
-    await page.goto("/coach");
+    await page
+      .getByTestId("app-tab-bar")
+      .getByRole("link", { name: "Coach", exact: true })
+      .click();
     await page.waitForURL(/\/coach$/);
     await expect(page.getByTestId("coach-ten-second")).toBeVisible();
     await expectScrollStableNear(page, savedY, 10);
@@ -217,6 +220,31 @@ test("transactions @375 — fresh drill navigation lands at top within 4px", asy
 }) => {
   await signInAlexWithFile(page);
   await scrollCoachTo(page, 387);
+  await page.getByTestId("ten-second-next").getByRole("link").click();
+  await page.waitForURL(/\/transactions\//);
+  await expectScrollStableNear(page, 0, 4);
+});
+
+test("transactions @375 — second fresh drill after deep visit lands at top within 4px", async ({
+  page,
+}) => {
+  await signInAlexWithFile(page);
+  await page.getByTestId("ten-second-next").getByRole("link").click();
+  await page.waitForURL(/\/transactions\//);
+  const deepY = await page.evaluate(() => {
+    const target = Math.min(
+      1095,
+      document.documentElement.scrollHeight - window.innerHeight,
+    );
+    window.scrollTo(0, target);
+    return window.scrollY;
+  });
+  expect(deepY).toBeGreaterThan(400);
+  await page
+    .getByTestId("app-tab-bar")
+    .getByRole("link", { name: "Coach", exact: true })
+    .click();
+  await page.waitForURL(/\/coach$/);
   await page.getByTestId("ten-second-next").getByRole("link").click();
   await page.waitForURL(/\/transactions\//);
   await expectScrollStableNear(page, 0, 4);

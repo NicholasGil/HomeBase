@@ -42,5 +42,28 @@ describe("transaction scroll storage", () => {
 
   it("clamps scroll targets", () => {
     expect(clampTransactionScrollTarget(900, 1200, 812)).toBe(388);
+    expect(clampTransactionScrollTarget(-20, 1200, 812)).toBe(0);
+  });
+
+  it("ignores writes and reads off transaction paths", () => {
+    writeTransactionScrollY(200, "/coach");
+    expect(readTransactionScrollY("/coach")).toBeNull();
+    expect(store.size).toBe(0);
+    expect(readTransactionScrollY("/search")).toBeNull();
+  });
+
+  it("ignores non-finite write values", () => {
+    const path = "/transactions/seed:buyer-a";
+    writeTransactionScrollY(Number.NaN, path);
+    writeTransactionScrollY(Number.POSITIVE_INFINITY, path);
+    expect(readTransactionScrollY(path)).toBeNull();
+  });
+
+  it("rounds and clamps stored depth to >= 0", () => {
+    const path = "/transactions/seed:buyer-a";
+    writeTransactionScrollY(445.7, path);
+    expect(readTransactionScrollY(path)).toBe(446);
+    writeTransactionScrollY(-3.2, path);
+    expect(readTransactionScrollY(path)).toBe(0);
   });
 });

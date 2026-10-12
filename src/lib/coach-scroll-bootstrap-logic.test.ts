@@ -87,6 +87,15 @@ describe("coachScrollBootstrapScript", () => {
     expect(script).toContain("e.persisted");
   });
 
+  it("keys first-paint restore by location.pathname (not hardcoded /coach)", () => {
+    const script = coachScrollBootstrapScript();
+    expect(script).toContain("location.pathname");
+    expect(script).toMatch(
+      /scrollKey\(\)[\s\S]*location\.pathname/,
+    );
+    expect(script).not.toContain(":'+epoch+':/coach'");
+  });
+
   it("pageshow bfcache restore gate matches client handler", () => {
     expect(coachScrollRestoreOnPageShow({ persisted: true }, "/coach")).toBe(
       true,

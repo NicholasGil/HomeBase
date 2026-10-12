@@ -10,6 +10,7 @@ import {
   writeTransactionScrollY,
 } from "@/lib/transaction-scroll-storage";
 import { recordCoachScrollRestorationOriginal } from "@/lib/coach-scroll-restoration-window";
+import { transactionScrollRestoreOnPageShow } from "@/lib/transaction-scroll-pageshow";
 
 function shouldSaveScrollForLink(anchor: HTMLAnchorElement): boolean {
   const href = anchor.getAttribute("href") ?? "";
@@ -95,7 +96,6 @@ export function TransactionScrollRestoration() {
         }
 
         attempts += 1;
-        const liveStored = readTransactionScrollY(activePath);
         const done =
           effectiveY === null || effectiveY <= 0
             ? window.scrollY <= 4 && stableHeightPasses >= 1
@@ -126,27 +126,30 @@ export function TransactionScrollRestoration() {
       // ignore
     }
 
-    const path = pathnameRef.current;
-    if (window.scrollY > 0) {
-      lastScrollYRef.current = window.scrollY;
-      writeTransactionScrollY(window.scrollY, path);
-    }
-    const storedY = readTransactionScrollY(path);
-    const cancelRestore = restoreUntilStable(path, storedY);
+    let cancelRestore = () => {};
 
     const restoreFromStorage = () => {
       if (!isTransactionScrollPath(pathnameRef.current)) {
         return;
       }
+      cancelRestore();
       const y = readTransactionScrollY(pathnameRef.current);
-      restoreUntilStable(pathnameRef.current, y);
+      cancelRestore = restoreUntilStable(pathnameRef.current, y);
     };
 
     const onPopState = () => {
       restoreFromStorage();
     };
     window.addEventListener("popstate", onPopState);
-    const onPageShow = () => {
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (
+        !transactionScrollRestoreOnPageShow(
+          event,
+          window.location.pathname,
+        )
+      ) {
+        return;
+      }
       restoreFromStorage();
     };
     window.addEventListener("pageshow", onPageShow);

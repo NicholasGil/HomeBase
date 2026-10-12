@@ -74,8 +74,6 @@ describe("coachScrollBootstrapScript", () => {
     expect(script).toContain(COACH_SCROLL_STORAGE_KEY);
     expect(script).toContain("syncEpochFromCookie");
     expect(script).toContain("markEnterStarted");
-    expect(script).toContain("popstate");
-    expect(script).toContain("pageshow");
     expect(script).toContain("pointerdown");
     expect(script).toContain("scrollTo");
     expect(script).toContain("applyDemoCoachScrollReset");

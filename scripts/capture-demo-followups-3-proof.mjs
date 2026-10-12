@@ -146,6 +146,11 @@ async function main() {
   if (await txLink.count()) {
     await txLink.click();
     await page.waitForURL(/\/transactions\//);
+    await page.waitForFunction(() => window.scrollY <= 16);
+    await page.screenshot({
+      path: path.join(OUT, "drill-from-coach-lands-top-375.png"),
+      fullPage: false,
+    });
     await page.goBack();
     await page.waitForURL(/\/coach$/);
     let scrollAfter = 0;

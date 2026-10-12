@@ -27,7 +27,7 @@ async function expectScrollStableNear(
   expectedY: number,
   tolerance = 24,
 ) {
-  const deadline = Date.now() + 1500;
+  const deadline = Date.now() + (expectedY >= 300 ? 2500 : 1500);
   while (Date.now() < deadline) {
     const y = await page.evaluate(() => window.scrollY);
     expect(Math.abs(y - expectedY)).toBeLessThanOrEqual(tolerance);
@@ -39,6 +39,16 @@ async function drillToTransaction(page: import("@playwright/test").Page) {
   await page.getByTestId("ten-second-owe").getByRole("link").click();
   await page.waitForURL(/\/transactions\//);
 }
+
+test("coach @375 Y≈387 — ten-second drill lands transaction at top", async ({
+  page,
+}) => {
+  await signInAlexWithFile(page);
+  await scrollCoachTo(page, 387);
+  await page.getByTestId("ten-second-next").getByRole("link").click();
+  await page.waitForURL(/\/transactions\//);
+  await expectScrollStableNear(page, 0, 16);
+});
 
 for (const targetY of [90, 387]) {
   test(`coach @375 Y≈${targetY} — browser back restores scroll`, async ({
@@ -82,7 +92,9 @@ for (const targetY of [90, 387]) {
     await signInAlexWithFile(page);
     const savedY = await scrollCoachTo(page, targetY);
     const tabBar = page.getByTestId("app-tab-bar");
-    await tabBar.getByRole("link", { name: "Search" }).click();
+    await tabBar.getByRole("link", { name: "Search" }).evaluate((anchor) => {
+      (anchor as HTMLAnchorElement).click();
+    });
     await page.waitForURL(/\/search/);
     const coachTab = tabBar.getByRole("link", { name: "Coach", exact: true });
     await coachTab.evaluate((anchor) => {
@@ -97,7 +109,12 @@ for (const targetY of [90, 387]) {
   }) => {
     await signInAlexWithFile(page);
     const savedY = await scrollCoachTo(page, targetY);
-    await page.getByTestId("app-tab-bar").getByRole("link", { name: "Search" }).click();
+    await page
+      .getByTestId("app-tab-bar")
+      .getByRole("link", { name: "Search" })
+      .evaluate((anchor) => {
+        (anchor as HTMLAnchorElement).click();
+      });
     await page.waitForURL(/\/search/);
     await page.goto("/coach");
     await page.waitForURL(/\/coach$/);

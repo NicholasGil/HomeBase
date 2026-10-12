@@ -8,7 +8,12 @@ import {
   clampCoachScrollTarget,
   isCoachScrollPath,
 } from "@/lib/coach-scroll-bootstrap-logic";
-import { readCoachScrollY, writeCoachScrollY } from "@/lib/coach-scroll-storage";
+import { DEMO_COACH_SCROLL_RESET_COOKIE } from "@/lib/demo-coach-scroll-reset";
+import {
+  clearAllCoachScrollY,
+  readCoachScrollY,
+  writeCoachScrollY,
+} from "@/lib/coach-scroll-storage";
 import {
   recordCoachScrollRestorationOriginal,
   resetCoachScrollRestorationToAuto,
@@ -42,12 +47,32 @@ export function CoachScrollRestoration() {
   const pathname = usePathname();
   const onCoach = coachPath(pathname);
   const pathnameRef = useRef(pathname);
-  const lastScrollYRef = useRef(0);
   const programmaticScrollRef = useRef(false);
+  const suppressZeroScrollSaveUntilRef = useRef(0);
 
   useEffect(() => {
     pathnameRef.current = pathname;
   }, [pathname]);
+
+  useEffect(() => {
+    if (!onCoach) {
+      return;
+    }
+    try {
+      const needsReset = document.cookie
+        .split(";")
+        .some((part) =>
+          part.trim().startsWith(`${DEMO_COACH_SCROLL_RESET_COOKIE}=`),
+        );
+      if (!needsReset) {
+        return;
+      }
+      clearAllCoachScrollY();
+      document.cookie = `${DEMO_COACH_SCROLL_RESET_COOKIE}=; Max-Age=0; path=/`;
+    } catch {
+      // ignore
+    }
+  }, [onCoach, pathname]);
 
   useEffect(() => {
     if (onCoach) {
@@ -161,6 +186,9 @@ export function CoachScrollRestoration() {
       window.setTimeout(restore, 80),
       window.setTimeout(restore, 150),
       window.setTimeout(restore, 300),
+      window.setTimeout(restore, 500),
+      window.setTimeout(restore, 800),
+      window.setTimeout(restore, 1200),
     );
 
     const onUserScrollIntent = () => {
@@ -196,6 +224,17 @@ export function CoachScrollRestoration() {
     if (!onCoach) {
       return;
     }
+    const saveScrollFromUser = () => {
+      const y = window.scrollY;
+      if (
+        y === 0 &&
+        (Date.now() < suppressZeroScrollSaveUntilRef.current ||
+          document.visibilityState !== "visible")
+      ) {
+        return;
+      }
+      writeCoachScrollY(y, pathname);
+    };
     let frame = 0;
     const onScroll = () => {
       if (document.visibilityState === "hidden") {
@@ -203,10 +242,7 @@ export function CoachScrollRestoration() {
       }
       window.cancelAnimationFrame(frame);
       frame = window.requestAnimationFrame(() => {
-        if (window.scrollY > 0) {
-          lastScrollYRef.current = window.scrollY;
-          writeCoachScrollY(window.scrollY, pathname);
-        }
+        saveScrollFromUser();
       });
     };
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -220,8 +256,8 @@ export function CoachScrollRestoration() {
     if (!onCoach) {
       return;
     }
-    const saveScroll = () => {
-      const y = Math.max(window.scrollY, lastScrollYRef.current);
+    const saveScrollOnLeave = () => {
+      const y = window.scrollY;
       if (y <= 0) {
         const stored = readCoachScrollY(pathname);
         if (stored !== null && stored > 0) {
@@ -237,11 +273,12 @@ export function CoachScrollRestoration() {
       }
       const anchor = target.closest("a[href]");
       if (anchor instanceof HTMLAnchorElement && shouldSaveScrollForLink(anchor)) {
-        saveScroll();
+        suppressZeroScrollSaveUntilRef.current = Date.now() + 800;
+        saveScrollOnLeave();
       }
     };
     const onPageHide = () => {
-      saveScroll();
+      saveScrollOnLeave();
     };
     document.addEventListener("pointerdown", onLeavingPointer, true);
     document.addEventListener("mousedown", onLeavingPointer, true);

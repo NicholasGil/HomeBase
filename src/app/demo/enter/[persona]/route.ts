@@ -6,6 +6,7 @@ import {
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
 import { DEMO_CHOOSER_PATH } from "@/lib/demo-copy";
+import { DEMO_COACH_SCROLL_RESET_COOKIE } from "@/lib/demo-coach-scroll-reset";
 import { isDemoEnterPrefetchRequest } from "@/lib/demo-enter-prefetch";
 import { redirectToPathFromRequestUrl } from "@/lib/same-origin-redirect";
 import {
@@ -80,6 +81,11 @@ export async function GET(
     encodeTestSessionCookie(started.session),
     testSessionCookieOptions(),
   );
+  response.cookies.set(DEMO_COACH_SCROLL_RESET_COOKIE, "1", {
+    path: "/",
+    maxAge: 120,
+    sameSite: "lax",
+  });
   if (started.session.role === "vendor") {
     response.cookies.delete(VENDOR_EXPIRY_COOKIE);
   }

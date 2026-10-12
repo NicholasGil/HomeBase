@@ -1,4 +1,7 @@
-import { coachScrollStorageKey } from "@/lib/coach-scroll-key";
+import {
+  COACH_SCROLL_STORAGE_KEY,
+  coachScrollStorageKey,
+} from "@/lib/coach-scroll-key";
 
 export function readCoachScrollY(pathname: string): number | null {
   const key = coachScrollStorageKey(pathname);
@@ -20,5 +23,20 @@ export function writeCoachScrollY(y: number, pathname: string): void {
     sessionStorage.setItem(key, String(Math.max(0, Math.round(y))));
   } catch {
     // Private mode / quota — ignore.
+  }
+}
+
+/** Clears pathname-keyed coach scroll offsets (demo persona switch / sign-in). */
+export function clearAllCoachScrollY(): void {
+  try {
+    const prefix = `${COACH_SCROLL_STORAGE_KEY}:`;
+    for (let index = sessionStorage.length - 1; index >= 0; index -= 1) {
+      const key = sessionStorage.key(index);
+      if (key !== null && key.startsWith(prefix)) {
+        sessionStorage.removeItem(key);
+      }
+    }
+  } catch {
+    // ignore
   }
 }

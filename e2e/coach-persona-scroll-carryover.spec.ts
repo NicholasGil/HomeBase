@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+/** Fixture test-login carry-over; demo same-tab coverage in demo-mode/coach-persona-scroll-carryover.spec.ts */
+
 test.use({
   viewport: { width: 375, height: 812 },
   hasTouch: true,

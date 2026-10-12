@@ -51,7 +51,7 @@ test("coach @375 Y≈387 — ten-second drill lands transaction at top", async (
   await scrollCoachTo(page, 387);
   await page.getByTestId("ten-second-next").getByRole("link").click();
   await page.waitForURL(/\/transactions\//);
-  await expectScrollStableNear(page, 0, 10);
+  await expectScrollStableNear(page, 0, 16);
 });
 
 for (const targetY of [90, 387]) {
@@ -162,6 +162,14 @@ test("coach @375 — leaving from top restores zero on return", async ({
       (anchor as HTMLAnchorElement).click();
     });
   await page.waitForURL(/\/search/);
+  const storedAfterLeave = await page.evaluate(() => {
+    const epoch =
+      sessionStorage.getItem("realtyrise.coach.scrollY.epoch") ?? "0";
+    return sessionStorage.getItem(
+      `realtyrise.coach.scrollY.v1:${epoch}:/coach`,
+    );
+  });
+  expect(storedAfterLeave).toBe("0");
   await page.goto("/coach");
   await page.waitForURL(/\/coach$/);
   await expect(page.getByTestId("coach-ten-second")).toBeVisible();

@@ -24,6 +24,7 @@ import {
   recordCoachScrollRestorationOriginal,
   resetCoachScrollRestorationToAuto,
 } from "@/lib/coach-scroll-restoration-window";
+import { isTransactionScrollPath } from "@/lib/transaction-scroll-storage";
 
 function coachPath(pathname: string) {
   return (
@@ -90,8 +91,11 @@ export function CoachScrollRestoration() {
     if (onCoach) {
       return;
     }
+    if (isTransactionScrollPath(pathname)) {
+      return;
+    }
     resetCoachScrollRestorationToAuto();
-  }, [onCoach]);
+  }, [onCoach, pathname]);
 
   const applyStoredCoachScroll = (path: string, y: number) => {
     const target = clampCoachScrollTarget(

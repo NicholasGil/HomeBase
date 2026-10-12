@@ -17,7 +17,7 @@ export function coachScrollEpochCookieOptions(
 ) {
   return {
     path: "/",
-    maxAge: 120,
+    maxAge: 8 * 60 * 60,
     sameSite: "lax" as const,
     secure: env.NODE_ENV === "production",
   };
@@ -41,12 +41,17 @@ export function parseCoachScrollEpochCookie(
 
 export function readCoachScrollEpochFromDocument(): string {
   if (typeof document === "undefined") {
-    return "0";
+    return readCoachScrollEpochSession();
   }
   try {
-    return parseCoachScrollEpochCookie(document.cookie);
+    const fromCookie = parseCoachScrollEpochCookie(document.cookie);
+    if (fromCookie !== "0") {
+      return fromCookie;
+    }
+    const session = readCoachScrollEpochSession();
+    return session !== "0" ? session : "0";
   } catch {
-    return "0";
+    return readCoachScrollEpochSession();
   }
 }
 
@@ -75,8 +80,12 @@ export function syncCoachScrollEpochFromCookie(): string {
 
 export function syncCoachScrollEpochFromCookieWithMeta(): CoachScrollEpochSync {
   const previous = readCoachScrollEpochSession();
+  const cookieEpoch =
+    typeof document === "undefined"
+      ? "0"
+      : parseCoachScrollEpochCookie(document.cookie);
   const epoch = readCoachScrollEpochFromDocument();
-  const changed = epoch !== previous;
+  const changed = cookieEpoch !== "0" && cookieEpoch !== previous;
   try {
     sessionStorage.setItem(COACH_SCROLL_EPOCH_SESSION_KEY, epoch);
     sessionStorage.removeItem(COACH_SCROLL_ENTER_STARTED_KEY);

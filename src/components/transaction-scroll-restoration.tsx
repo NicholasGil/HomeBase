@@ -9,7 +9,11 @@ import {
   readTransactionScrollY,
   writeTransactionScrollY,
 } from "@/lib/transaction-scroll-storage";
-import { recordCoachScrollRestorationOriginal } from "@/lib/coach-scroll-restoration-window";
+import { isCoachScrollPath } from "@/lib/coach-scroll-bootstrap-logic";
+import {
+  recordCoachScrollRestorationOriginal,
+  resetCoachScrollRestorationToAuto,
+} from "@/lib/coach-scroll-restoration-window";
 import {
   clearTransactionScrollPopNavigation,
   consumeTransactionScrollPopNavigation,
@@ -170,10 +174,32 @@ export function TransactionScrollRestoration() {
     };
     window.addEventListener("pageshow", onPageShow);
 
+    const onPageHide = () => {
+      const path = pathnameRef.current;
+      if (!isTransactionScrollPath(path)) {
+        return;
+      }
+      const y =
+        window.scrollY > 0 ? window.scrollY : lastScrollYRef.current;
+      lastScrollYRef.current = y;
+      writeTransactionScrollY(y, path);
+    };
+    window.addEventListener("pagehide", onPageHide);
+
     return () => {
       cancelRestore();
       window.removeEventListener("popstate", onPopState);
       window.removeEventListener("pageshow", onPageShow);
+      window.removeEventListener("pagehide", onPageHide);
+      const path = pathnameRef.current;
+      if (isTransactionScrollPath(path)) {
+        const y =
+          window.scrollY > 0 ? window.scrollY : lastScrollYRef.current;
+        writeTransactionScrollY(y, path);
+      }
+      if (!isCoachScrollPath(window.location.pathname)) {
+        resetCoachScrollRestorationToAuto();
+      }
     };
   }, [pathname, onTransaction]);
 
@@ -206,7 +232,8 @@ export function TransactionScrollRestoration() {
     window.addEventListener("scroll", onScroll, { passive: true });
 
     const saveScroll = () => {
-      const y = Math.max(window.scrollY, lastScrollYRef.current);
+      const y =
+        window.scrollY > 0 ? window.scrollY : lastScrollYRef.current;
       lastScrollYRef.current = y;
       writeTransactionScrollY(y, pathname);
     };

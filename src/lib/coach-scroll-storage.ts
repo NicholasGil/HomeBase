@@ -11,10 +11,7 @@ export function coachScrollYForLeavePersist(
   scrollY: number,
   lastCoachScrollY: number,
 ): number {
-  const y =
-    scrollY > 0
-      ? Math.max(scrollY, lastCoachScrollY)
-      : lastCoachScrollY;
+  const y = scrollY > 0 ? scrollY : lastCoachScrollY;
   return Math.max(0, Math.round(y));
 }
 

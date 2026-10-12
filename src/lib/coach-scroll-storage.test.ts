@@ -104,6 +104,10 @@ describe("coach scroll storage", () => {
       expect(coachScrollYForLeavePersist(387, 300)).toBe(387);
     });
 
+    it("does not inflate leave depth with a stale lastCoachScrollY", () => {
+      expect(coachScrollYForLeavePersist(250, 365)).toBe(250);
+    });
+
     it("persists zero when genuinely at the top on leave", () => {
       expect(coachScrollYForLeavePersist(0, 0)).toBe(0);
     });

@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+import { waitCoachScrollRange } from "./helpers/coach-scroll-deep";
+
 test.use({
   viewport: { width: 375, height: 812 },
   hasTouch: true,
@@ -378,8 +380,7 @@ test("transactions @375 — native back forward preserves scroll within 10px", a
   await page.waitForURL(/\/coach$/);
   await page.goForward();
   await page.waitForURL(/\/transactions\/seed:buyer-a/);
-  const after = await page.evaluate(() => window.scrollY);
-  expect(Math.abs(after - savedY)).toBeLessThanOrEqual(10);
+  await expectScrollStableNear(page, savedY, 10);
 });
 
 test("coach @375 — non-Coach tab opens at scroll top", async ({ page }) => {
@@ -396,6 +397,49 @@ test("coach @375 — non-Coach tab opens at scroll top", async ({ page }) => {
   });
   await page.waitForURL(/\/tours/);
   await expectScrollStableNear(page, 0, 10);
+});
+
+test("pricing @375 — tall non-Coach re-entry opens at scroll top after deep visit", async ({
+  page,
+}) => {
+  await signInAlexWithFile(page);
+  await page.getByTestId("coach-pricing-link").click();
+  await page.waitForURL(/\/pricing/);
+  await waitCoachScrollRange(page, 80);
+  const deepY = await page.evaluate(() => {
+    const target = Math.min(
+      1200,
+      document.documentElement.scrollHeight - window.innerHeight,
+    );
+    window.scrollTo(0, target);
+    return window.scrollY;
+  });
+  expect(deepY).toBeGreaterThan(80);
+  const tabBar = page.getByTestId("app-tab-bar");
+  await tabBar.getByRole("link", { name: "Coach", exact: true }).click();
+  await page.waitForURL(/\/coach$/);
+  await page.getByTestId("coach-pricing-link").click();
+  await page.waitForURL(/\/pricing/);
+  await expectScrollStableNear(page, 0, 10);
+});
+
+test("search → transaction → search restores history.scrollRestoration auto", async ({
+  page,
+}) => {
+  await signInAlexWithFile(page);
+  await page.getByTestId("ten-second-next").getByRole("link").click();
+  await page.waitForURL(/\/transactions\//);
+  await expect
+    .poll(() => page.evaluate(() => history.scrollRestoration))
+    .toBe("manual");
+  await page
+    .getByTestId("app-tab-bar")
+    .getByRole("link", { name: "Search" })
+    .click();
+  await page.waitForURL(/\/search/);
+  await expect
+    .poll(() => page.evaluate(() => history.scrollRestoration))
+    .toBe("auto");
 });
 
 test("pricing @375 — native back forward preserves scroll within 10px", async ({

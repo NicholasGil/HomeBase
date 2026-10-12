@@ -6,15 +6,6 @@ import path from "node:path";
 const OUT = path.join(process.cwd(), "proof/demo-followups-3");
 const BASE = process.env.PROOF_BASE_URL ?? "http://127.0.0.1:3000";
 const VIEWPORT = { width: 375, height: 812 };
-const SCROLL_KEY_PREFIX = "realtyrise.coach.scrollY.v1";
-
-async function coachScrollStorageKey(page) {
-  return page.evaluate(
-    (prefix) => `${prefix}:/coach`,
-    SCROLL_KEY_PREFIX,
-  );
-}
-
 async function signInDemoBuyerCoach(page) {
   await page.goto(`${BASE}/demo/enter/buyer-coach`);
   await page.waitForURL(/\/coach$/);
@@ -25,12 +16,45 @@ async function signInDemoBuyerDiscovery(page) {
   await page.waitForURL(/\/coach$/);
 }
 
+/** Scroll the answer into the viewport without resetting coach scroll to 0. */
+async function expectAnswerVisibleInViewport(page, answerLocator) {
+  await answerLocator.evaluate((el) => {
+    el.scrollIntoView({ block: "center", behavior: "instant" });
+  });
+  await page.waitForFunction(
+    (testId) => {
+      const el = document.querySelector(`[data-testid="${testId}"]`);
+      if (!el) {
+        return false;
+      }
+      const rect = el.getBoundingClientRect();
+      const tabBar = document.querySelector('[data-testid="app-tab-bar"]');
+      const dock = document.querySelector('[data-testid="concierge-mobile-dock"]');
+      const bottomInset = Math.max(
+        tabBar ? tabBar.getBoundingClientRect().top : window.innerHeight,
+        dock ? dock.getBoundingClientRect().top : 0,
+      );
+      return (
+        rect.height > 0 &&
+        rect.top >= 0 &&
+        rect.bottom <= bottomInset &&
+        el.textContent.trim().length > 0
+      );
+    },
+    "concierge-answer",
+    { timeout: 10_000 },
+  );
+  await page.waitForTimeout(200);
+}
+
 async function main() {
   await mkdir(OUT, { recursive: true });
   const browser = await chromium.launch();
   const context = await browser.newContext({
     ...devices["iPhone 13"],
     viewport: VIEWPORT,
+    hasTouch: true,
+    isMobile: true,
   });
   const page = await context.newPage();
   let moreSheetStarterLabel = null;
@@ -75,15 +99,17 @@ async function main() {
   const moreStarter = await moreSheet.getByRole("button").first();
   moreSheetStarterLabel = (await moreStarter.innerText()).trim();
   await moreStarter.click();
-  await page.getByTestId("concierge-answer").waitFor({ timeout: 20_000 });
-  await page.evaluate(() => window.scrollTo(0, 0));
-  await page.waitForTimeout(350);
+  const answer = page.getByTestId("concierge-answer");
+  await answer.waitFor({ timeout: 20_000 });
+  await expectAnswerVisibleInViewport(page, answer);
   await page.screenshot({
     path: path.join(OUT, "more-sheet-starter-answer-375.png"),
     fullPage: false,
   });
-  await page.keyboard.press("Escape");
-  await moreSheet.waitFor({ state: "hidden" });
+  if (await moreSheet.isVisible()) {
+    await page.keyboard.press("Escape");
+    await moreSheet.waitFor({ state: "hidden" });
+  }
 
   await page
     .getByTestId("concierge-mobile-dock")

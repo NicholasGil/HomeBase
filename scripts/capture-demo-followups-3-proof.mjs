@@ -3,6 +3,12 @@ import { chromium, devices } from "playwright";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+/**
+ * Capture demo-followups-3 proof against a production demo build.
+ * Run while checked out on the code commit under test (git rev-parse HEAD);
+ * commit screenshots/metrics.json in a follow-up proof-only commit so gitSha
+ * always points at the code revision that was captured, not the proof commit.
+ */
 const OUT = path.join(process.cwd(), "proof/demo-followups-3");
 const BASE = process.env.PROOF_BASE_URL ?? "http://127.0.0.1:3000";
 const VIEWPORT = { width: 375, height: 812 };
@@ -165,13 +171,13 @@ async function main() {
     });
   }
 
-  const gitSha =
-    process.env.PROOF_GIT_SHA ??
-    execSync("git rev-parse HEAD", { encoding: "utf8" }).trim();
+  const gitSha = execSync("git rev-parse HEAD", { encoding: "utf8" }).trim();
 
   const metrics = {
     capturedAt: new Date().toISOString(),
     gitSha,
+    gitShaNote:
+      "Capture-time HEAD (code under test). Proof files are committed separately.",
     viewportWidth: VIEWPORT.width,
     env: {
       VERCEL_ENV: "production",

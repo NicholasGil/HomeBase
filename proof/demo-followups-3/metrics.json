@@ -1,6 +1,7 @@
 {
   "capturedAt": "2026-10-12T06:26:13.380Z",
   "gitSha": "bc42340a049f7b0b74881453b3272618def9cd01",
+  "gitShaNote": "Capture-time HEAD (code under test). Proof files are committed separately.",
   "viewportWidth": 375,
   "env": {
     "VERCEL_ENV": "production",

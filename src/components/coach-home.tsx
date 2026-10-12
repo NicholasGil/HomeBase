@@ -8,7 +8,6 @@ import {
   CONCIERGE_STARTERS,
   FILE_SESSION_CONCIERGE_STARTERS,
 } from "@/lib/concierge-starters";
-import { isDemoMode } from "@/lib/auth-config";
 import { BuyerFullOsTeaser } from "@/components/buyer-full-os-teaser";
 import {
   BuyerLockedUpsellRail,
@@ -53,11 +52,15 @@ export function CoachHome({
   const firstName = buyerName.split(" ")[0] ?? buyerName;
   const showTenSecond = dashboardView !== null && !firstSession;
   const demoOsOpen = buyerFixtureOsUnlocked();
+  const demoFileSessionDock = !firstSession && buyerFixtureOsUnlocked();
   const conciergeStarters = firstSession
     ? COACH_FIRST_SESSION_STARTERS
-    : isDemoMode()
+    : demoFileSessionDock
       ? FILE_SESSION_CONCIERGE_STARTERS
       : CONCIERGE_STARTERS;
+  const conciergeAllStarters = demoFileSessionDock
+    ? CONCIERGE_STARTERS
+    : undefined;
 
   return (
     <div
@@ -180,6 +183,7 @@ export function CoachHome({
             availability={availability}
             showAgentLinkWhenUnavailable={!firstSession}
             starters={conciergeStarters}
+            allStarters={conciergeAllStarters}
             pinStartersAboveScrollOnMobile={!coachUnavailable}
             wrapMobileQuestionStarters={firstSession}
             scrollIntro={

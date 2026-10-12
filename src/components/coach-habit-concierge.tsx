@@ -30,6 +30,7 @@ export function CoachHabitConcierge({
   availability,
   showAgentLinkWhenUnavailable,
   starters,
+  allStarters,
   pinStartersAboveScrollOnMobile,
   wrapMobileQuestionStarters,
   mobileStickyDockAboveTabBar,
@@ -47,6 +48,7 @@ export function CoachHabitConcierge({
   availability?: ConciergeAvailability;
   showAgentLinkWhenUnavailable?: boolean;
   starters?: readonly string[];
+  allStarters?: readonly string[];
   pinStartersAboveScrollOnMobile?: boolean;
   wrapMobileQuestionStarters?: boolean;
   mobileStickyDockAboveTabBar?: boolean;
@@ -102,6 +104,7 @@ export function CoachHabitConcierge({
         availability={availability}
         showAgentLinkWhenUnavailable={showAgentLinkWhenUnavailable}
         starters={starters}
+        allStarters={allStarters}
         pinStartersAboveScrollOnMobile={pinStartersAboveScrollOnMobile}
         wrapMobileQuestionStarters={wrapMobileQuestionStarters}
         mobileStickyDockAboveTabBar={mobileStickyDockAboveTabBar}

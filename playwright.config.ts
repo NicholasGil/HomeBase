@@ -16,7 +16,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npm run dev -- --hostname 127.0.0.1 --port 3000",
+    command: `env VERCEL_ENV=preview REALTYRISE_DEMO_MODE=${process.env.REALTYRISE_DEMO_MODE ?? "0"} npm run dev -- --hostname 127.0.0.1 --port 3000`,
     url: "http://127.0.0.1:3000",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

@@ -21,6 +21,7 @@ export function CoachFileSessionShell({
   availability,
   showAgentLinkWhenUnavailable,
   starters,
+  allStarters,
   pinStartersAboveScrollOnMobile,
   wrapMobileQuestionStarters,
   scrollIntro,
@@ -38,6 +39,7 @@ export function CoachFileSessionShell({
   availability?: ConciergeAvailability;
   showAgentLinkWhenUnavailable?: boolean;
   starters?: readonly string[];
+  allStarters?: readonly string[];
   pinStartersAboveScrollOnMobile?: boolean;
   wrapMobileQuestionStarters?: boolean;
   scrollIntro?: ReactNode;
@@ -76,6 +78,7 @@ export function CoachFileSessionShell({
         availability={availability}
         showAgentLinkWhenUnavailable={showAgentLinkWhenUnavailable}
         starters={starters}
+        allStarters={allStarters}
         pinStartersAboveScrollOnMobile={pinStartersAboveScrollOnMobile}
         wrapMobileQuestionStarters={wrapMobileQuestionStarters}
         mobileStickyDockAboveTabBar={!firstSession}

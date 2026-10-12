@@ -31,6 +31,19 @@ async function signInAlexWithFile(page: import("@playwright/test").Page) {
   await expect(page).toHaveURL(/\/coach$/);
 }
 
+test("RET-002 @375 — return visit without thread shows daily check-in", async ({
+  page,
+}) => {
+  await signInAlexWithFile(page);
+  await expect(page.getByTestId("coach-ten-second")).toBeVisible();
+  await expect(page.getByTestId("concierge-answer")).toHaveCount(0);
+
+  await page.goto("/dashboard");
+  await page.goto("/coach");
+  await expect(page.getByTestId("coach-daily-check-in")).toBeVisible();
+  await expect(page.getByTestId("concierge-restored-thread")).toHaveCount(0);
+});
+
 test("return visit proof @375 — discovery thread, file thread, daily check-in", async ({
   page,
 }) => {

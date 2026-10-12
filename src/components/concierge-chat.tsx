@@ -15,6 +15,12 @@ import { askConcierge } from "@/app/actions/concierge";
 import { ConciergeAnswerView } from "@/components/concierge-answer";
 import { ConciergeUnavailableState } from "@/components/concierge-unavailable";
 import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import type { ConciergeAvailability } from "@/lib/concierge-availability";
 import { CONCIERGE_STARTERS } from "@/lib/concierge-starters";
 import { CONCIERGE_MODEL_UNAVAILABLE_ANSWER } from "../../lib/llm/types";
@@ -70,6 +76,7 @@ export type ConciergePersistedTurn = {
 export function ConciergeChat({
   className,
   starters = CONCIERGE_STARTERS,
+  allStarters,
   idleHint = "Pick a question above or ask about this transaction. I explain what is on this file; I do not advise.",
   questionPlaceholder = "Ask about this transaction",
   availability = "ready",
@@ -92,6 +99,8 @@ export function ConciergeChat({
 }: {
   className?: string;
   starters?: readonly string[];
+  /** Full starter catalog (e.g. demo dock shows `starters` + More sheet). */
+  allStarters?: readonly string[];
   idleHint?: string;
   questionPlaceholder?: string;
   availability?: ConciergeAvailability;
@@ -119,6 +128,7 @@ export function ConciergeChat({
   const pinnedThreadRef = useRef<HTMLDivElement>(null);
   const answerRef = useRef<HTMLDivElement>(null);
   const chipsScrollRef = useRef<HTMLDivElement>(null);
+  const [moreStartersOpen, setMoreStartersOpen] = useState(false);
 
   const coachUnavailable = availability === "model_key_missing";
   const pinFirstSessionMobile = pinStartersAboveScrollOnMobile;
@@ -136,6 +146,10 @@ export function ConciergeChat({
   const coachMaxMd = useCoachMaxMdViewport();
   const mobileStickyDock =
     mobileStickyDockAboveTabBar && coachMaxMd && !coachUnavailable;
+  const showMoreStartersChip =
+    mobileStickyDock &&
+    allStarters !== undefined &&
+    allStarters.length > starters.length;
   const mobileReplyGrid = showPinnedMobileThread && !mobileStickyDock;
   const mobilePinnedLayout =
     !mobileStickyDock &&
@@ -369,6 +383,38 @@ export function ConciergeChat({
     );
   }
 
+  function renderStarterChip(starter: string, inMoreSheet = false) {
+    return (
+      <Button
+        key={inMoreSheet ? `more-${starter}` : starter}
+        type="button"
+        variant="secondary"
+        className={cn(
+          "h-auto min-h-11 shrink-0 rounded-full bg-sage px-4 py-2 text-left text-sm text-sage-foreground hover:bg-sage/80",
+          !wrapMobileStarters &&
+            !inMoreSheet &&
+            "w-max max-md:h-11 max-md:justify-start max-md:whitespace-nowrap",
+          wrapMobileStarters &&
+            "w-max max-w-[min(17.5rem,calc(100vw-3rem))] whitespace-normal",
+          (wrapMobileStarters || pinRestoredThreadOnMobile) &&
+            !mobileStickyDock &&
+            !inMoreSheet &&
+            "max-md:px-3 max-md:py-2 max-md:text-xs max-md:leading-snug max-md:whitespace-normal",
+          inMoreSheet && "w-full justify-start whitespace-normal",
+        )}
+        disabled={busy || coachUnavailable}
+        title={coachUnavailable ? CHIP_DISABLED_REASON : undefined}
+        onClick={() => {
+          setMoreStartersOpen(false);
+          setQuestion(starter);
+          void submit(starter);
+        }}
+      >
+        {starter}
+      </Button>
+    );
+  }
+
   const starterChips = (
     <div
       className={cn(
@@ -389,31 +435,31 @@ export function ConciergeChat({
             "max-md:[mask-image:linear-gradient(to_right,transparent,black_1.5rem,black_calc(100%-1.5rem),transparent)]",
         )}
       >
-      {starters.map((starter) => (
-        <Button
-          key={starter}
-          type="button"
-          variant="secondary"
-          className={cn(
-            "h-auto min-h-11 shrink-0 rounded-full bg-sage px-4 py-2 text-left text-sm text-sage-foreground hover:bg-sage/80",
-            !wrapMobileStarters &&
-              "w-max max-md:h-11 max-md:justify-start max-md:whitespace-nowrap",
-            wrapMobileStarters &&
-              "w-max max-w-[min(17.5rem,calc(100vw-3rem))] whitespace-normal",
-            (wrapMobileStarters || pinRestoredThreadOnMobile) &&
-              !mobileStickyDock &&
-              "max-md:px-3 max-md:py-2 max-md:text-xs max-md:leading-snug max-md:whitespace-normal",
-          )}
-          disabled={busy || coachUnavailable}
-          title={coachUnavailable ? CHIP_DISABLED_REASON : undefined}
-          onClick={() => {
-            setQuestion(starter);
-            void submit(starter);
-          }}
-        >
-          {starter}
-        </Button>
-      ))}
+      {starters.map((starter) => renderStarterChip(starter))}
+      {showMoreStartersChip ? (
+        <Sheet open={moreStartersOpen} onOpenChange={setMoreStartersOpen}>
+          <SheetTrigger
+            type="button"
+            data-testid="concierge-more-starters"
+            disabled={busy || coachUnavailable}
+            className="h-auto min-h-11 w-max shrink-0 rounded-full bg-muted px-4 py-2 text-left text-sm text-foreground hover:bg-muted/80 max-md:h-11 max-md:whitespace-nowrap disabled:pointer-events-none disabled:opacity-50"
+          >
+            More questions
+          </SheetTrigger>
+          <SheetContent
+            side="bottom"
+            data-testid="concierge-more-starters-sheet"
+            className="max-h-[min(70vh,28rem)] overflow-y-auto rounded-t-2xl px-5 pb-8"
+          >
+            <SheetTitle className="text-h3 font-semibold tracking-tight">
+              Suggested questions
+            </SheetTitle>
+            <div className="mt-4 flex flex-col gap-2">
+              {allStarters!.map((starter) => renderStarterChip(starter, true))}
+            </div>
+          </SheetContent>
+        </Sheet>
+      ) : null}
       </div>
       {mobileStickyDock && horizontalScrollChips ? (
         <div

@@ -36,6 +36,8 @@ describe("redirectToPathFromRequestUrl", () => {
       "/%09%09/evil.com",
       "/coach?next=%09",
       "/coach?next=%0d%0a",
+      "/coach?next=\r\n",
+      "/coach?q=a%0d%0aSet-Cookie:x",
       "/%252F%252Fevil.com",
     ]) {
       const response = redirectToPathFromRequestUrl(malicious, request);

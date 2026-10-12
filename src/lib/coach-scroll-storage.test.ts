@@ -5,7 +5,11 @@ import {
   COACH_SCROLL_EPOCH_SESSION_KEY,
 } from "@/lib/coach-scroll-epoch";
 import { coachScrollStorageKeyForEpoch } from "@/lib/coach-scroll-key";
-import { readCoachScrollY, writeCoachScrollY } from "@/lib/coach-scroll-storage";
+import {
+  coachScrollYForLeavePersist,
+  readCoachScrollY,
+  writeCoachScrollY,
+} from "@/lib/coach-scroll-storage";
 
 describe("coach scroll storage", () => {
   const store = new Map<string, string>();
@@ -53,5 +57,19 @@ describe("coach scroll storage", () => {
     expect(
       store.get(coachScrollStorageKeyForEpoch("/coach", "1")),
     ).toBe("0");
+  });
+
+  describe("coachScrollYForLeavePersist", () => {
+    it("does not clobber a deeper Y with spurious scrollY=0 on leave", () => {
+      expect(coachScrollYForLeavePersist(0, 365)).toBe(365);
+    });
+
+    it("captures the current depth when scrollY is still positive on leave", () => {
+      expect(coachScrollYForLeavePersist(387, 300)).toBe(387);
+    });
+
+    it("persists zero when genuinely at the top on leave", () => {
+      expect(coachScrollYForLeavePersist(0, 0)).toBe(0);
+    });
   });
 });

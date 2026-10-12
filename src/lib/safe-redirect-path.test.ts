@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   SAFE_REDIRECT_FALLBACK,
   sanitizeRedirectPath,
+  searchOrHashContainsUnsafeCharacters,
 } from "@/lib/safe-redirect-path";
 
 describe("sanitizeRedirectPath", () => {
@@ -33,6 +34,10 @@ describe("sanitizeRedirectPath", () => {
     ]) {
       expect(sanitizeRedirectPath(malicious)).toBe(SAFE_REDIRECT_FALLBACK);
     }
+  });
+
+  it("flags encoded tab in query via searchOrHashContainsUnsafeCharacters", () => {
+    expect(searchOrHashContainsUnsafeCharacters("?next=%09")).toBe(true);
   });
 
   it("rejects control characters in the query string", () => {

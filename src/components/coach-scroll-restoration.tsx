@@ -15,6 +15,7 @@ import {
 } from "@/lib/coach-scroll-epoch";
 import {
   applyDemoCoachScrollResetFromCookie,
+  coachScrollYForLeavePersist,
   readCoachScrollY,
   writeCoachScrollY,
 } from "@/lib/coach-scroll-storage";
@@ -312,11 +313,13 @@ export function CoachScrollRestoration() {
       return;
     }
     const saveScroll = () => {
-      const y =
-        window.scrollY > 0
-          ? Math.max(window.scrollY, lastScrollYRef.current)
-          : lastScrollYRef.current;
-      writeCoachScrollY(y, pathname);
+      writeCoachScrollY(
+        coachScrollYForLeavePersist(
+          window.scrollY,
+          lastScrollYRef.current,
+        ),
+        pathname,
+      );
     };
     const onLeavingPointer = (event: Event) => {
       const target = event.target;

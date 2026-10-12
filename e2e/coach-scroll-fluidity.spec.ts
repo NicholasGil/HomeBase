@@ -51,7 +51,7 @@ test("coach @375 Y≈387 — ten-second drill lands transaction at top", async (
   await scrollCoachTo(page, 387);
   await page.getByTestId("ten-second-next").getByRole("link").click();
   await page.waitForURL(/\/transactions\//);
-  await expectScrollStableNear(page, 0, 16);
+  await expectScrollStableNear(page, 0, 10);
 });
 
 for (const targetY of [90, 387]) {

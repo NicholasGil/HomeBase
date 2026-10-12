@@ -1,10 +1,10 @@
 {
-  "baseURL": "http://127.0.0.1:3000",
+  "baseURL": "http://localhost:3000",
   "viewport": {
     "width": 375,
     "height": 812
   },
-  "gitSha": "c6db06ea3d4fc268cc7ace9def868cf29cbdc11b",
+  "deviceScaleFactor": 2,
   "shots": [
     {
       "targetY": 90,
@@ -15,20 +15,26 @@
     {
       "targetY": 90,
       "savedY": 90,
-      "afterGoto": 90,
-      "searchThenCoach": "/workspace/proof/coach-scroll-restore/y90-search-then-coach-375.png"
+      "afterSearchThenCoach": 90,
+      "searchThenCoach": "/workspace/proof/coach-scroll-restore/y90-search-then-coach-375.png",
+      "searchThenCoachCoachScrollY": 90
     },
     {
       "targetY": 387,
-      "savedY": 347,
-      "afterTab": 347,
+      "savedY": 387,
+      "afterTab": 387,
       "tabReturn": "/workspace/proof/coach-scroll-restore/y387-tab-return-375.png"
     },
     {
       "targetY": 387,
-      "savedY": 347,
-      "afterGoto": 347,
-      "searchThenCoach": "/workspace/proof/coach-scroll-restore/y387-search-then-coach-375.png"
+      "savedY": 387,
+      "afterSearchThenCoach": 387,
+      "searchThenCoach": "/workspace/proof/coach-scroll-restore/y387-search-then-coach-375.png",
+      "searchThenCoachCoachScrollY": 387
     }
-  ]
+  ],
+  "txnProof": {
+    "redrillTopPin": "/workspace/proof/coach-scroll-restore/txn-redrill-top-pin-375.png",
+    "historyBackDepth": "/workspace/proof/coach-scroll-restore/txn-history-back-depth-375.png"
+  }
 }

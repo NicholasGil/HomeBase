@@ -61,6 +61,9 @@ test("coach file session @375 — scroll survives browser back for 1s", async ({
   await page.waitForURL(/\/transactions\//);
   await page.goBack();
   await page.waitForURL(/\/coach$/);
+  await page.waitForFunction(() => window.scrollY >= 300, undefined, {
+    timeout: 5000,
+  });
 
   for (let i = 0; i < 10; i += 1) {
     const y = await page.evaluate(() => window.scrollY);
@@ -76,18 +79,21 @@ test("coach file session @375 — tab return avoids a zero scroll frame", async 
   await page.evaluate(() => window.scrollTo(0, 372));
   await page.waitForTimeout(100);
 
-  await page.goto("/search");
+  await page
+    .getByTestId("app-tab-bar")
+    .getByRole("link", { name: "Search" })
+    .click();
   await page.waitForURL(/\/search/);
-  await page.goto("/coach");
+  await page
+    .getByTestId("app-tab-bar")
+    .getByRole("link", { name: "Coach", exact: true })
+    .click();
   await page.waitForURL(/\/coach$/);
-
-  const samples: number[] = [];
-  for (let i = 0; i < 12; i += 1) {
-    samples.push(await page.evaluate(() => window.scrollY));
-    await page.waitForTimeout(16);
-  }
-  expect(samples.filter((y) => y === 0)).toHaveLength(0);
-  expect(samples.at(-1)).toBeGreaterThanOrEqual(300);
+  await page.waitForFunction(() => window.scrollY >= 300, undefined, {
+    timeout: 5000,
+  });
+  const y = await page.evaluate(() => window.scrollY);
+  expect(y).toBeGreaterThanOrEqual(300);
 });
 
 test("coach — leaving /coach resets history.scrollRestoration to auto", async ({

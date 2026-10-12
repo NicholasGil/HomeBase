@@ -62,16 +62,28 @@ export function readCoachScrollEpochSession(): string {
   }
 }
 
+export type CoachScrollEpochSync = {
+  epoch: string;
+  /** True when the server bumped hb_coach_scroll_epoch since the last client sync. */
+  changed: boolean;
+};
+
 /** Apply server-bumped epoch cookie before any coach scroll read/write. */
 export function syncCoachScrollEpochFromCookie(): string {
+  return syncCoachScrollEpochFromCookieWithMeta().epoch;
+}
+
+export function syncCoachScrollEpochFromCookieWithMeta(): CoachScrollEpochSync {
+  const previous = readCoachScrollEpochSession();
   const epoch = readCoachScrollEpochFromDocument();
+  const changed = epoch !== previous;
   try {
     sessionStorage.setItem(COACH_SCROLL_EPOCH_SESSION_KEY, epoch);
     sessionStorage.removeItem(COACH_SCROLL_ENTER_STARTED_KEY);
   } catch {
     // ignore
   }
-  return epoch;
+  return { epoch, changed };
 }
 
 export function coachScrollEnterSaveBlocked(): boolean {

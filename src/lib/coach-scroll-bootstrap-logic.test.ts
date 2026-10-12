@@ -19,14 +19,14 @@ describe("coach scroll bootstrap logic", () => {
     expect(isCoachScrollPath("/pricing")).toBe(false);
   });
 
-  it("reads stored scroll offsets keyed by pathname and epoch", () => {
+  it("reads stored scroll offsets keyed by epoch and pathname", () => {
     const coachKey = coachScrollStorageKeyForEpoch("/coach", "42");
     const storage = {
       getItem: (key: string) => (key === coachKey ? "240" : null),
     };
     expect(readCoachScrollYFromStorage(storage, "/coach", "42")).toBe(240);
     expect(
-      readCoachScrollYFromStorage({ getItem: () => "nope" }, "/coach", "42"),
+      readCoachScrollYFromStorage({ getItem: () => "nope" }, "/coach", "0"),
     ).toBeNull();
   });
 
@@ -41,6 +41,7 @@ describe("coach scroll bootstrap logic", () => {
     const key = coachScrollStorageKeyForEpoch("/coach", epoch);
     const ok = restoreCoachScrollY({
       pathname: "/coach",
+      epoch,
       storage: {
         getItem: (storageKey: string) =>
           storageKey === key ? "320" : null,
@@ -48,7 +49,6 @@ describe("coach scroll bootstrap logic", () => {
       scrollTo,
       scrollHeight: 2000,
       innerHeight: 812,
-      epoch,
     });
     expect(ok).toBe(true);
     expect(scrollTo).toHaveBeenCalledWith(0, 320);
@@ -69,15 +69,18 @@ describe("coach scroll bootstrap logic", () => {
 });
 
 describe("coachScrollBootstrapScript", () => {
-  it("includes epoch sync and coach-only restore hooks", () => {
+  it("includes popstate and pageshow listeners for coach restore", () => {
     const script = coachScrollBootstrapScript();
     expect(script).toContain(COACH_SCROLL_STORAGE_KEY);
-    expect(script).toContain("syncEpochFromCookie");
-    expect(script).toContain("markEnterStarted");
+    expect(script).toContain("popstate");
+    expect(script).toContain("pageshow");
     expect(script).toContain("pointerdown");
+    expect(script).toContain("pagehide");
     expect(script).toContain("scrollTo");
+    expect(script).toContain("syncEpochFromCookie");
+    expect(script).toContain("afterCoachNavigationRestore");
+    expect(script).toContain("enterSaveBlocked");
+    expect(script).toContain("resetScrollRestoration");
     expect(script).toContain("applyDemoCoachScrollReset");
-    expect(script).toContain("markEnterStarted");
-    expect(script).not.toContain("scheduleRestore");
   });
 });

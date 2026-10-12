@@ -5,13 +5,9 @@ import {
   COACH_SCROLL_EPOCH_SESSION_KEY,
 } from "@/lib/coach-scroll-epoch";
 import { coachScrollStorageKeyForEpoch } from "@/lib/coach-scroll-key";
-import {
-  captureCoachScrollBeforeLeave,
-  readCoachScrollY,
-  writeCoachScrollY,
-} from "@/lib/coach-scroll-storage";
+import { readCoachScrollY, writeCoachScrollY } from "@/lib/coach-scroll-storage";
 
-describe("coach scroll storage leave capture", () => {
+describe("coach scroll storage", () => {
   const store = new Map<string, string>();
 
   beforeEach(() => {
@@ -42,20 +38,8 @@ describe("coach scroll storage leave capture", () => {
     vi.unstubAllGlobals();
   });
 
-  it("does not replace a stored depth with a spurious zero on leave", () => {
-    writeCoachScrollY(347, "/coach");
-    captureCoachScrollBeforeLeave(0);
-    expect(readCoachScrollY("/coach")).toBe(347);
-  });
-
-  it("persists zero when the user left from the top", () => {
-    writeCoachScrollY(0, "/coach");
-    captureCoachScrollBeforeLeave(0);
-    expect(readCoachScrollY("/coach")).toBe(0);
-  });
-
-  it("records the captured positive offset on leave", () => {
-    captureCoachScrollBeforeLeave(280);
+  it("round-trips scroll depth for the active epoch", () => {
+    writeCoachScrollY(280, "/coach");
     expect(readCoachScrollY("/coach")).toBe(280);
     expect(
       store.get(coachScrollStorageKeyForEpoch("/coach", "1")),

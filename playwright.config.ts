@@ -1,6 +1,14 @@
 import { defineConfig, devices } from "@playwright/test";
 
 const demoSuite = process.env.PLAYWRIGHT_DEMO_SUITE === "1";
+const demoMode = process.env.REALTYRISE_DEMO_MODE ?? "0";
+
+function playwrightWebServerCommand(): string {
+  const env = demoSuite
+    ? "VERCEL_ENV=production REALTYRISE_DEMO_MODE=1"
+    : `VERCEL_ENV=preview REALTYRISE_DEMO_MODE=${demoMode}`;
+  return `sh -c '${env} npm run build && ${env} npm run start -- --hostname localhost --port 3000'`;
+}
 
 export default defineConfig({
   testDir: demoSuite ? "./e2e/demo-mode" : "./e2e",
@@ -19,11 +27,10 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: demoSuite
-      ? `sh -c 'VERCEL_ENV=production REALTYRISE_DEMO_MODE=1 npm run build && VERCEL_ENV=production REALTYRISE_DEMO_MODE=1 npm run start -- --hostname localhost --port 3000'`
-      : `env VERCEL_ENV=preview REALTYRISE_DEMO_MODE=${process.env.REALTYRISE_DEMO_MODE ?? "0"} npm run dev -- --hostname localhost --port 3000`,
+    command: playwrightWebServerCommand(),
     url: "http://localhost:3000",
-    reuseExistingServer: !process.env.CI,
-    timeout: demoSuite ? 300_000 : 120_000,
+    reuseExistingServer:
+      !process.env.CI || Boolean(process.env.PLAYWRIGHT_BASE_URL),
+    timeout: 300_000,
   },
 });

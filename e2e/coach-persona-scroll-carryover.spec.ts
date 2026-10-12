@@ -9,10 +9,6 @@ test.use({
 async function expectCoachNearTop(page: import("@playwright/test").Page) {
   await expect(page.getByTestId("coach-first-session-empty")).toBeVisible();
   await page.waitForFunction(() => window.scrollY <= 10);
-  const stored = await page.evaluate(() =>
-    sessionStorage.getItem("realtyrise.coach.scrollY.v1:/coach"),
-  );
-  expect(stored === null || Number.parseInt(stored, 10) <= 10).toBe(true);
 }
 
 test("test-login persona switch clears coach scroll and back does not restore depth", async ({

@@ -23,6 +23,7 @@ export function CoachFileSessionShell({
   starters,
   pinStartersAboveScrollOnMobile,
   wrapMobileQuestionStarters,
+  moreConciergeStarters,
   scrollIntro,
   idleHint,
   questionPlaceholder,
@@ -40,6 +41,7 @@ export function CoachFileSessionShell({
   starters?: readonly string[];
   pinStartersAboveScrollOnMobile?: boolean;
   wrapMobileQuestionStarters?: boolean;
+  moreConciergeStarters?: readonly string[];
   scrollIntro?: ReactNode;
   idleHint?: string;
   questionPlaceholder?: string;
@@ -78,6 +80,7 @@ export function CoachFileSessionShell({
         starters={starters}
         pinStartersAboveScrollOnMobile={pinStartersAboveScrollOnMobile}
         wrapMobileQuestionStarters={wrapMobileQuestionStarters}
+        moreConciergeStarters={moreConciergeStarters}
         mobileStickyDockAboveTabBar
         fileSummaryAboveThread={fileSummaryCompact}
         onThreadActiveChange={onThreadActiveChange}

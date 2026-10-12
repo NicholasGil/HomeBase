@@ -68,6 +68,15 @@ async function expectAnswerBetweenChipsAndAsk(
   if (dockBox === null) {
     expect(threadBox!.y).toBeGreaterThanOrEqual(chipBox!.y - 2);
     expect(answerBox!.y).toBeGreaterThanOrEqual(chipBox!.y - 2);
+  } else {
+    expect(chipBox!.y).toBeGreaterThanOrEqual(dockBox.y - 2);
+    expect(chipBox!.y + chipBox!.height).toBeLessThanOrEqual(dockBox.y + dockBox.height + 1);
+    expect(threadBox!.y + threadBox!.height).toBeLessThanOrEqual(
+      dockBox.y - MIN_ASK_CLEARANCE_PX + 1,
+    );
+    expect(answerBox!.y + answerBox!.height).toBeLessThanOrEqual(
+      dockBox.y - MIN_ASK_CLEARANCE_PX + 1,
+    );
   }
 
   await expect(answer).toBeInViewport();

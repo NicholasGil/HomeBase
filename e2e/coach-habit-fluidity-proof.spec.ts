@@ -6,6 +6,7 @@ import { expect, test } from "@playwright/test";
 import {
   CONCIERGE_STARTERS,
   FILE_SESSION_CONCIERGE_STARTERS,
+  FILE_SESSION_MORE_CONCIERGE_STARTERS,
 } from "../src/lib/concierge-starters";
 
 const PROOF_DIR = path.join("proof", "coach-habit-fluidity");
@@ -45,8 +46,49 @@ async function scrollConciergeToEnd(page: import("@playwright/test").Page) {
   });
 }
 
+async function starterChip(
+  page: import("@playwright/test").Page,
+  label: string,
+) {
+  const aliases =
+    label === "When is my inspection?"
+      ? ["When's my inspection?", "When is my inspection?"]
+      : [label];
+  const dock = page.getByTestId("concierge-mobile-dock");
+  if ((await dock.count()) > 0) {
+    for (const name of aliases) {
+      const chip = dock.getByRole("button", { name, exact: true });
+      if ((await chip.count()) > 0) {
+        return chip;
+      }
+    }
+    await page.getByTestId("concierge-more-questions").click();
+    return page
+      .getByTestId("concierge-more-questions-sheet")
+      .getByRole("button", { name: label, exact: true });
+  }
+  const row = page.getByLabel("Suggested questions");
+  for (const name of aliases) {
+    const visible = row.getByRole("button", { name, exact: true });
+    if ((await visible.count()) > 0) {
+      return visible;
+    }
+  }
+  await page.getByTestId("concierge-more-questions").click();
+  return page
+    .getByTestId("concierge-more-questions-sheet")
+    .getByRole("button", { name: label, exact: true });
+}
+
 async function assertAskCenterHitsButton(page: import("@playwright/test").Page) {
-  const ask = page.getByTestId("concierge-compose").getByTestId("concierge-ask");
+  if ((await page.getByTestId("concierge-more-questions-sheet").count()) > 0) {
+    await page.keyboard.press("Escape");
+  }
+  const dock = page.getByTestId("concierge-mobile-dock");
+  const ask =
+    (await dock.count()) > 0
+      ? dock.getByTestId("concierge-ask")
+      : page.getByTestId("concierge-compose").getByTestId("concierge-ask");
   await expect(ask).toBeVisible();
   const hit = await ask.evaluate((button) => {
     const box = button.getBoundingClientRect();
@@ -62,9 +104,7 @@ async function assertChipCenterHitsButton(
   page: import("@playwright/test").Page,
   label: string,
 ) {
-  const chip = page
-    .getByLabel("Suggested questions")
-    .getByRole("button", { name: label });
+  const chip = await starterChip(page, label);
   await chip.scrollIntoViewIfNeeded();
   await chip.evaluate((el) => {
     el.scrollIntoView({ block: "nearest", inline: "center" });
@@ -86,15 +126,16 @@ async function assertChipCenterHitsButton(
     { cx, cy, label },
   );
   expect(hit).toBe(true);
+  if ((await page.getByTestId("concierge-more-questions-sheet").count()) > 0) {
+    await page.keyboard.press("Escape");
+  }
 }
 
 async function assertChipClearsComposeAtScrollEnd(
   page: import("@playwright/test").Page,
   label: string,
 ) {
-  const chip = page
-    .getByLabel("Suggested questions")
-    .getByRole("button", { name: label });
+  const chip = await starterChip(page, label);
   const compose = page.getByTestId("concierge-compose");
   const chipBox = await chip.boundingBox();
   const composeBox = await compose.boundingBox();
@@ -132,18 +173,30 @@ test("coach habit fluidity — chip center hits + scroll-end clearance @375", as
     fullPage: false,
   });
 
-  const fileStarters = FILE_SESSION_CONCIERGE_STARTERS;
-
   await signInAlexWithFile(page);
   await expect(page.getByTestId("coach-ten-second")).toBeVisible();
-  for (const label of fileStarters) {
+  const fileReachable = [
+    ...FILE_SESSION_CONCIERGE_STARTERS,
+    ...FILE_SESSION_MORE_CONCIERGE_STARTERS,
+  ];
+  for (const label of FILE_SESSION_CONCIERGE_STARTERS) {
     await assertChipCenterHitsButton(page, label);
   }
   await assertAskCenterHitsButton(page);
   await scrollConciergeToEnd(page);
-  for (const label of fileStarters) {
+  for (const label of FILE_SESSION_CONCIERGE_STARTERS) {
     await assertChipCenterHitsButton(page, label);
     await assertChipClearsComposeAtScrollEnd(page, label);
+  }
+  for (const label of FILE_SESSION_MORE_CONCIERGE_STARTERS) {
+    const chip = await starterChip(page, label);
+    await expect(chip).toBeVisible();
+    if ((await page.getByTestId("concierge-more-questions-sheet").count()) > 0) {
+      await page.keyboard.press("Escape");
+    }
+  }
+  if ((await page.getByTestId("concierge-more-questions-sheet").count()) > 0) {
+    await page.keyboard.press("Escape");
   }
   await page.screenshot({
     path: path.join(PROOF_DIR, "file-session-chips-clear-375.png"),
@@ -177,6 +230,15 @@ test("coach habit fluidity — chip center hits + scroll-end clearance @375", as
 
   for (const label of FILE_SESSION_CONCIERGE_STARTERS) {
     await assertChipCenterHitsButton(page, label);
+  }
+  for (const label of FILE_SESSION_MORE_CONCIERGE_STARTERS) {
+    await page.getByTestId("concierge-more-questions").click();
+    await expect(
+      page
+        .getByTestId("concierge-more-questions-sheet")
+        .getByRole("button", { name: label, exact: true }),
+    ).toBeVisible();
+    await page.keyboard.press("Escape");
   }
   await assertAskCenterHitsButton(page);
 

@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { DEMO_CHOOSER_PATH } from "@/lib/demo-copy";
+
 const redirect = vi.fn((url: string) => {
   throw new Error(`REDIRECT:${url}`);
 });
@@ -28,7 +30,7 @@ describe("GET /demo/enter/[persona]", () => {
     return mod.GET;
   }
 
-  it("throws when fixture preview is not allowed (production without demo)", async () => {
+  it("throws when demo mode is on but Clerk keys are configured in production", async () => {
     vi.stubEnv("VERCEL_ENV", "production");
     vi.stubEnv("REALTYRISE_DEMO_MODE", "1");
     vi.stubEnv("CLERK_SECRET_KEY", "sk_test");
@@ -67,6 +69,23 @@ describe("GET /demo/enter/[persona]", () => {
       }),
     ).rejects.toMatchObject({ name: "ProductionAuthMisconfiguredError" });
     expect(cookieSet).not.toHaveBeenCalled();
+  });
+
+  it("redirects unknown persona to the demo chooser without setting a cookie", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("REALTYRISE_DEMO_MODE", "1");
+    vi.stubEnv("CLERK_SECRET_KEY", "");
+    vi.stubEnv("NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", "");
+
+    const GET = await loadGet();
+    await expect(
+      GET(new Request("http://localhost/demo/enter/not-a-persona"), {
+        params: Promise.resolve({ persona: "not-a-persona" }),
+      }),
+    ).rejects.toThrow(/^REDIRECT:/);
+
+    expect(cookieSet).not.toHaveBeenCalled();
+    expect(redirect).toHaveBeenCalledWith(DEMO_CHOOSER_PATH);
   });
 
   it("sets the test-session cookie and redirects when demo + fixtures are allowed", async () => {

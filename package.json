@@ -10,7 +10,8 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "capture:e2e-pr67-fix-proof": "node scripts/capture-e2e-pr67-fix-proof.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

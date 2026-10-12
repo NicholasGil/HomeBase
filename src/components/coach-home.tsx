@@ -4,10 +4,7 @@ import { CoachFileSessionShell } from "@/components/coach-file-session-shell";
 import { CoachHabitConcierge } from "@/components/coach-habit-concierge";
 import { CoachReturnHeaderHint } from "@/components/coach-return-header-hint";
 import { ConciergeChat } from "@/components/concierge-chat";
-import {
-  FILE_SESSION_CONCIERGE_STARTERS,
-  FILE_SESSION_MORE_CONCIERGE_STARTERS,
-} from "@/lib/concierge-starters";
+import { FILE_SESSION_CONCIERGE_STARTERS } from "@/lib/concierge-starters";
 import { BuyerFullOsTeaser } from "@/components/buyer-full-os-teaser";
 import {
   BuyerLockedUpsellRail,
@@ -55,17 +52,13 @@ export function CoachHome({
   const conciergeStarters = firstSession
     ? COACH_FIRST_SESSION_STARTERS
     : FILE_SESSION_CONCIERGE_STARTERS;
-  const moreConciergeStarters = firstSession
-    ? []
-    : FILE_SESSION_MORE_CONCIERGE_STARTERS;
 
   return (
     <div
       data-testid="coach-home"
       className={cn(
         "grid gap-8 lg:grid-cols-[minmax(0,1fr)_min(100%,18rem)] lg:items-start",
-        !coachUnavailable &&
-          "max-md:pb-[var(--coach-mobile-page-clearance)]",
+        !firstSession && "max-md:pb-[var(--coach-mobile-page-clearance)]",
       )}
     >
       <section
@@ -181,8 +174,7 @@ export function CoachHome({
             showAgentLinkWhenUnavailable={!firstSession}
             starters={conciergeStarters}
             pinStartersAboveScrollOnMobile={!coachUnavailable}
-            wrapMobileQuestionStarters={false}
-            moreConciergeStarters={moreConciergeStarters}
+            wrapMobileQuestionStarters={firstSession}
             scrollIntro={
               firstSession && !coachUnavailable
                 ? (
@@ -243,9 +235,8 @@ export function CoachHome({
             showAgentLinkWhenUnavailable={!firstSession}
             starters={conciergeStarters}
             pinStartersAboveScrollOnMobile={!coachUnavailable}
-            wrapMobileQuestionStarters={false}
-            moreConciergeStarters={moreConciergeStarters}
-            mobileStickyDockAboveTabBar={!coachUnavailable}
+            wrapMobileQuestionStarters={firstSession}
+            mobileStickyDockAboveTabBar={!firstSession}
             scrollIntro={
               firstSession && !coachUnavailable
                 ? (
@@ -290,9 +281,8 @@ export function CoachHome({
             showAgentLinkWhenUnavailable={!firstSession}
             starters={conciergeStarters}
             pinStartersAboveScrollOnMobile={!coachUnavailable}
-            wrapMobileQuestionStarters={false}
-            moreConciergeStarters={moreConciergeStarters}
-            mobileStickyDockAboveTabBar={!coachUnavailable}
+            wrapMobileQuestionStarters={firstSession}
+            mobileStickyDockAboveTabBar={!firstSession}
             scrollIntro={
               firstSession && !coachUnavailable
                 ? (

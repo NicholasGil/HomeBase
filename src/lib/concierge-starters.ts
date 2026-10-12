@@ -18,15 +18,3 @@ export const FILE_SESSION_CONCIERGE_STARTERS = [
   "When's my inspection?",
   "What am I missing?",
 ] as const;
-
-/** Remaining §M3 canonical starters (file session shows three chips + More). */
-export const FILE_SESSION_MORE_CONCIERGE_STARTERS = [
-  "How much cash will I need?",
-  "What did the inspection find?",
-  "What changed in the counteroffer?",
-  "Who is my lender?",
-  "When do I leave for my first showing?",
-] as const;
-
-export const FILE_SESSION_SUGGESTED_CHIP_COUNT =
-  FILE_SESSION_CONCIERGE_STARTERS.length;

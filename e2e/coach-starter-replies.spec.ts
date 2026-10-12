@@ -45,7 +45,6 @@ async function expectAnswerBetweenChipsAndAsk(
   answer: import("@playwright/test").Locator,
 ) {
   const compose = page.getByTestId("concierge-compose");
-  const mobileDock = page.getByTestId("concierge-mobile-dock");
   const chips = page.getByLabel("Suggested questions").getByRole("button");
   const lastChip = chips.last();
 
@@ -53,34 +52,19 @@ async function expectAnswerBetweenChipsAndAsk(
   const answerBox = await answer.boundingBox();
   const composeBox = await compose.boundingBox();
   const chipBox = await lastChip.boundingBox();
-  const dockBox =
-    (await mobileDock.count()) > 0 ? await mobileDock.boundingBox() : null;
   expect(threadBox).not.toBeNull();
   expect(answerBox).not.toBeNull();
   expect(composeBox).not.toBeNull();
   expect(chipBox).not.toBeNull();
 
-  const askCeilingY = dockBox !== null ? dockBox.y : composeBox!.y;
+  expect(threadBox!.y).toBeGreaterThanOrEqual(chipBox!.y - 2);
   expect(threadBox!.y + threadBox!.height).toBeLessThanOrEqual(
-    askCeilingY - MIN_ASK_CLEARANCE_PX + 1,
+    composeBox!.y - MIN_ASK_CLEARANCE_PX + 1,
   );
-
-  if (dockBox === null) {
-    expect(threadBox!.y).toBeGreaterThanOrEqual(chipBox!.y - 2);
-    expect(answerBox!.y).toBeGreaterThanOrEqual(chipBox!.y - 2);
-  } else {
-    expect(chipBox!.y).toBeGreaterThanOrEqual(dockBox.y - 2);
-    expect(chipBox!.y + chipBox!.height).toBeLessThanOrEqual(dockBox.y + dockBox.height + 1);
-    expect(threadBox!.y + threadBox!.height).toBeLessThanOrEqual(
-      dockBox.y - MIN_ASK_CLEARANCE_PX + 1,
-    );
-    expect(answerBox!.y + answerBox!.height).toBeLessThanOrEqual(
-      dockBox.y - MIN_ASK_CLEARANCE_PX + 1,
-    );
-  }
 
   await expect(answer).toBeInViewport();
   expect(answerBox!.height).toBeGreaterThan(20);
+  expect(answerBox!.y).toBeGreaterThanOrEqual(chipBox!.y - 2);
   expect(answerBox!.y).toBeLessThan(composeBox!.y);
 }
 

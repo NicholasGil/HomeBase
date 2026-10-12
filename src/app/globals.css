@@ -126,15 +126,14 @@
   );
   /* Scroll-end spacer so max vertical scroll clears the docked Ask row. */
   --coach-compose-inset: calc(2.75rem + 1rem);
-  /* Mobile dock: one chip row + Ask, flush above tab bar (~120px). */
-  --coach-mobile-dock-height: 128px;
+  /* File-session mobile dock: chip row + Ask (above tab bar), ~117px. */
+  --coach-mobile-dock-height: 117px;
   --coach-mobile-page-clearance: calc(
-    var(--coach-mobile-dock-height) + var(--tab-bar-height) +
-      env(safe-area-inset-bottom) + 1rem
+    var(--coach-mobile-dock-height) + env(safe-area-inset-bottom)
   );
   --coach-answer-scroll-margin: calc(
     var(--coach-mobile-dock-height) + var(--tab-bar-height) +
-      env(safe-area-inset-bottom) + 1rem
+      env(safe-area-inset-bottom)
   );
   --fab-dock-clearance: 0px;
   --sidebar: oklch(0.98 0.016 75);

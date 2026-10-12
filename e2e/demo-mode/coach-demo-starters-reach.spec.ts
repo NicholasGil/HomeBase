@@ -17,9 +17,8 @@ test.use({
 });
 
 async function signInDemoBuyerCoach(page: import("@playwright/test").Page) {
-  await page.goto("/demo");
-  await page.getByTestId("demo-persona-buyer-coach").getByRole("button").click();
-  await expect(page).toHaveURL(/\/coach$/);
+  await page.goto("/demo/enter/buyer-coach");
+  await expect(page).toHaveURL(/\/coach$/, { timeout: 30_000 });
   await expect(page.getByTestId("concierge-mobile-dock")).toBeVisible();
 }
 

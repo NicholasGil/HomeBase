@@ -38,10 +38,10 @@ async function signInAlexDiscoveryEmpty(page: import("@playwright/test").Page) {
   await expect(page).toHaveURL(/\/coach$/);
 }
 
-function conciergeScrollRegion(page: import("@playwright/test").Page) {
-  return page
-    .locator('[data-testid="concierge"] > div.overflow-y-auto')
-    .first();
+function scrollCoachToEnd(page: import("@playwright/test").Page) {
+  return page.evaluate(() =>
+    window.scrollTo(0, document.documentElement.scrollHeight),
+  );
 }
 
 async function sha256File(path: string) {
@@ -87,10 +87,7 @@ test("first-session chips clear sticky Ask at scroll end @375", async ({
 }) => {
   await signInAlexDiscoveryEmpty(page);
 
-  const scroll = conciergeScrollRegion(page);
-  await scroll.evaluate((el) => {
-    el.scrollTop = el.scrollHeight;
-  });
+  await scrollCoachToEnd(page);
 
   const compose = page.getByTestId("concierge-compose");
 
@@ -110,10 +107,7 @@ test("first-session chips clear sticky Ask at scroll end @375", async ({
 test("coach first-session proof screenshots @375", async ({ page }) => {
   await signInAlexDiscoveryEmpty(page);
 
-  const scroll = conciergeScrollRegion(page);
-  await scroll.evaluate((el) => {
-    el.scrollTop = 0;
-  });
+  await page.evaluate(() => window.scrollTo(0, 0));
 
   const scope = page.getByTestId("concierge-scope");
   const empty = page.getByTestId("coach-first-session-empty");
@@ -147,9 +141,7 @@ test("coach first-session proof screenshots @375", async ({ page }) => {
     fullPage: false,
   });
 
-  await scroll.evaluate((el) => {
-    el.scrollTop = el.scrollHeight;
-  });
+  await scrollCoachToEnd(page);
   await expect(page.getByTestId("concierge-compose")).toBeVisible();
 
   const lastChip = page.getByRole("button", {

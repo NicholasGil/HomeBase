@@ -3,7 +3,7 @@
 - **Fixture:** test-login → Discovery Alex (no property)
 - **Branch tip:** `96c68c7`
 - **Viewport:** 375×812, touch, mobile
-- **Generated:** 2026-10-12T02:42:05.200Z
+- **Generated:** 2026-10-12T02:49:36.304Z
 
 ## Verdict: PASS
 

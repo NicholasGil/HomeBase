@@ -2,7 +2,6 @@
 
 import {
   useCallback,
-  useEffect,
   useState,
   useSyncExternalStore,
   type ReactNode,
@@ -68,7 +67,8 @@ export function CoachHabitConcierge({
   const returnWithThread = repeatVisit && hasCoachThread(habitSnapshot);
   const hideColdOpenEmpty =
     firstSession && returnWithThread && initialTurn !== null;
-  const [threadActive, setThreadActive] = useState(initialTurn !== null);
+  const [threadFromSubmit, setThreadFromSubmit] = useState(false);
+  const threadActive = initialTurn !== null || threadFromSubmit;
 
   function handleTurnComplete(turn: CoachHabitTurn) {
     persistCoachHabitSessionTurn(storageKey, turn);
@@ -76,17 +76,13 @@ export function CoachHabitConcierge({
 
   const handleThreadActiveChange = useCallback(
     (active: boolean) => {
-      setThreadActive(active);
+      if (active) {
+        setThreadFromSubmit(true);
+      }
       onThreadActiveChange?.(active);
     },
     [onThreadActiveChange],
   );
-
-  useEffect(() => {
-    if (initialTurn !== null) {
-      handleThreadActiveChange(true);
-    }
-  }, [initialTurn, handleThreadActiveChange]);
 
   return (
     <div

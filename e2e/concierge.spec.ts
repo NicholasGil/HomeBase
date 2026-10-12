@@ -3,8 +3,10 @@ import { expect, type Locator, type Page, test } from "@playwright/test";
 const MOBILE = { width: 375, height: 812 };
 const DESKTOP = { width: 1280, height: 800 };
 const FAB_SIZE = 56;
-/** File-session coach home shows three suggested chips; all eight canonical questions are covered in a separate test. */
-const FILE_SESSION_SUGGESTED_CHIP_COUNT = 3;
+/** Preview fixture: eight dock chips; public demo: three dock chips plus More. */
+function expectedVisibleStarterChipCount() {
+  return process.env.REALTYRISE_DEMO_MODE === "1" ? 4 : 8;
+}
 
 async function signInAs(page: Page, name: string) {
   await page.goto("/test-login");
@@ -29,6 +31,13 @@ async function askCanonicalQuestion(page: Page, label: string) {
       await chip.first().click();
       return;
     }
+  }
+  const more = page.getByTestId("concierge-more-starters");
+  if (await more.isVisible()) {
+    await more.click();
+    const sheet = page.getByTestId("concierge-more-starters-sheet");
+    await sheet.getByRole("button", { name: aliases[0], exact: true }).click();
+    return;
   }
   await page.getByTestId("concierge-question").fill(label);
   await page.getByTestId("concierge-ask").click();
@@ -78,7 +87,7 @@ test("concierge answers a seed question and refuses another client", async ({
 });
 
 test.describe("coach home concierge", () => {
-  test("shows transaction scope, three suggestion chips, and locked upsell rail", async ({
+  test("shows transaction scope, suggestion chips, and locked upsell rail", async ({
     page,
   }) => {
     await signInAs(page, "Alex Rivera");
@@ -94,7 +103,10 @@ test.describe("coach home concierge", () => {
     await expect(scope).toContainText("Personal coach");
 
     const chips = page.getByLabel("Suggested questions").getByRole("button");
-    await expect(chips).toHaveCount(FILE_SESSION_SUGGESTED_CHIP_COUNT);
+    await expect(chips).toHaveCount(expectedVisibleStarterChipCount());
+    if (process.env.REALTYRISE_DEMO_MODE === "1") {
+      await expect(page.getByTestId("concierge-more-starters")).toBeVisible();
+    }
     for (const chip of await chips.all()) {
       const box = await chip.boundingBox();
       expect(box).not.toBeNull();

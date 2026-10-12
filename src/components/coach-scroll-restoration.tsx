@@ -10,9 +10,11 @@ import {
 } from "@/lib/coach-scroll-bootstrap-logic";
 import { DEMO_COACH_SCROLL_RESET_COOKIE } from "@/lib/demo-coach-scroll-reset";
 import {
+  captureCoachScrollBeforeLeave,
   clearAllCoachScrollY,
+  persistCoachScrollYOffset,
   readCoachScrollY,
-  writeCoachScrollY,
+  setCoachScrollLeaveCaptureLock,
 } from "@/lib/coach-scroll-storage";
 import {
   recordCoachScrollRestorationOriginal,
@@ -49,6 +51,7 @@ export function CoachScrollRestoration() {
   const pathnameRef = useRef(pathname);
   const programmaticScrollRef = useRef(false);
   const suppressZeroScrollSaveUntilRef = useRef(0);
+  const blockScrollSaveUntilRef = useRef(0);
 
   useEffect(() => {
     pathnameRef.current = pathname;
@@ -113,13 +116,17 @@ export function CoachScrollRestoration() {
     }
 
     const restoreFromStorage = () => {
-      const storedY = readCoachScrollY(pathnameRef.current);
+      if (!isCoachScrollPath(window.location.pathname)) {
+        return;
+      }
+      const storedY = readCoachScrollY(window.location.pathname);
       if (storedY === null || storedY <= 0) {
         return;
       }
       applyStoredCoachScroll(storedY);
     };
 
+    setCoachScrollLeaveCaptureLock(false);
     restoreFromStorage();
 
     const onPopState = () => {
@@ -224,25 +231,31 @@ export function CoachScrollRestoration() {
     if (!onCoach) {
       return;
     }
-    const saveScrollFromUser = () => {
-      const y = window.scrollY;
-      if (
-        y === 0 &&
-        (Date.now() < suppressZeroScrollSaveUntilRef.current ||
-          document.visibilityState !== "visible")
-      ) {
-        return;
-      }
-      writeCoachScrollY(y, pathname);
-    };
     let frame = 0;
     const onScroll = () => {
       if (document.visibilityState === "hidden") {
         return;
       }
+      if (programmaticScrollRef.current) {
+        return;
+      }
       window.cancelAnimationFrame(frame);
       frame = window.requestAnimationFrame(() => {
-        saveScrollFromUser();
+        if (!isCoachScrollPath(window.location.pathname)) {
+          return;
+        }
+        if (Date.now() < blockScrollSaveUntilRef.current) {
+          return;
+        }
+        const y = window.scrollY;
+        if (
+          y === 0 &&
+          (Date.now() < suppressZeroScrollSaveUntilRef.current ||
+            document.visibilityState !== "visible")
+        ) {
+          return;
+        }
+        persistCoachScrollYOffset(y);
       });
     };
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -256,37 +269,28 @@ export function CoachScrollRestoration() {
     if (!onCoach) {
       return;
     }
-    const saveScrollOnLeave = () => {
-      const y = window.scrollY;
-      if (y <= 0) {
-        const stored = readCoachScrollY(pathname);
-        if (stored !== null && stored > 0) {
-          return;
-        }
-      }
-      writeCoachScrollY(y, pathname);
-    };
     const onLeavingPointer = (event: Event) => {
+      if (!isCoachScrollPath(window.location.pathname)) {
+        return;
+      }
       const target = event.target;
       if (!(target instanceof Element)) {
         return;
       }
       const anchor = target.closest("a[href]");
       if (anchor instanceof HTMLAnchorElement && shouldSaveScrollForLink(anchor)) {
-        suppressZeroScrollSaveUntilRef.current = Date.now() + 800;
-        saveScrollOnLeave();
+        const capturedY = window.scrollY;
+        const blockUntil = Date.now() + 1500;
+        suppressZeroScrollSaveUntilRef.current = blockUntil;
+        blockScrollSaveUntilRef.current = blockUntil;
+        captureCoachScrollBeforeLeave(capturedY);
       }
-    };
-    const onPageHide = () => {
-      saveScrollOnLeave();
     };
     document.addEventListener("pointerdown", onLeavingPointer, true);
     document.addEventListener("mousedown", onLeavingPointer, true);
-    window.addEventListener("pagehide", onPageHide);
     return () => {
       document.removeEventListener("pointerdown", onLeavingPointer, true);
       document.removeEventListener("mousedown", onLeavingPointer, true);
-      window.removeEventListener("pagehide", onPageHide);
     };
   }, [pathname, onCoach]);
 

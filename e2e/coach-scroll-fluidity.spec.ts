@@ -101,6 +101,7 @@ for (const targetY of [90, 387]) {
       (anchor as HTMLAnchorElement).click();
     });
     await page.waitForURL(/\/coach$/);
+    await expect(page.getByTestId("coach-ten-second")).toBeVisible();
     await expectScrollStableNear(page, savedY);
   });
 
@@ -118,6 +119,7 @@ for (const targetY of [90, 387]) {
     await page.waitForURL(/\/search/);
     await page.goto("/coach");
     await page.waitForURL(/\/coach$/);
+    await expect(page.getByTestId("coach-ten-second")).toBeVisible();
     await expectScrollStableNear(page, savedY);
   });
 }

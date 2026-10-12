@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useSyncExternalStore, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 
 import { ConciergeChat } from "@/components/concierge-chat";
 import { CoachDailyCheckIn } from "@/components/coach-daily-check-in";
@@ -60,16 +66,25 @@ export function CoachHabitConcierge({
   const returnWithThread = repeatVisit && hasCoachThread(habitSnapshot);
   const hideColdOpenEmpty =
     firstSession && returnWithThread && initialTurn !== null;
+  const [threadActive, setThreadActive] = useState(initialTurn !== null);
 
   function handleTurnComplete(turn: CoachHabitTurn) {
     persistCoachHabitSessionTurn(storageKey, turn);
   }
 
+  const handleThreadActiveChange = useCallback(
+    (active: boolean) => {
+      setThreadActive(active);
+      onThreadActiveChange?.(active);
+    },
+    [onThreadActiveChange],
+  );
+
   useEffect(() => {
     if (initialTurn !== null) {
-      onThreadActiveChange?.(true);
+      handleThreadActiveChange(true);
     }
-  }, [initialTurn, onThreadActiveChange]);
+  }, [initialTurn, handleThreadActiveChange]);
 
   return (
     <div
@@ -81,13 +96,6 @@ export function CoachHabitConcierge({
         className,
       )}
     >
-      {showDailyCheckIn ? (
-        <CoachDailyCheckIn
-          stageLabel={stageLabel}
-          firstName={firstName}
-          className="shrink-0"
-        />
-      ) : null}
       <ConciergeChat
         key={initialTurn?.asked ?? "idle"}
         className="min-h-0 flex-1 px-0 pb-0 pt-0"
@@ -98,7 +106,18 @@ export function CoachHabitConcierge({
         wrapMobileQuestionStarters={wrapMobileQuestionStarters}
         mobileStickyDockAboveTabBar={mobileStickyDockAboveTabBar}
         fileSummaryAboveThread={fileSummaryAboveThread}
-        onThreadActiveChange={onThreadActiveChange}
+        threadHeader={
+          showDailyCheckIn && !threadActive
+            ? (
+                <CoachDailyCheckIn
+                  stageLabel={stageLabel}
+                  firstName={firstName}
+                  className="shrink-0"
+                />
+              )
+            : null
+        }
+        onThreadActiveChange={handleThreadActiveChange}
         pinRestoredThreadOnMobile={
           !firstSession && repeatVisit && initialTurn !== null
         }

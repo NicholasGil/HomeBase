@@ -4,6 +4,7 @@ import { transactionHref } from "@/components/buyer-dashboard-view";
 import { MoneyFigureView } from "@/components/money-figure-view";
 import type { BuyerDashboardView } from "../../convex/lib/dashboardView";
 import { journeyStepProgress } from "../../convex/lib/journeyLogic";
+import { coachFileNextDisplayLabel } from "@/lib/demo-file-session-view";
 import { cn } from "@/lib/utils";
 
 /** Mobile file-session thread: keep stage, due today, and next visible above answers. */
@@ -14,7 +15,8 @@ export function CoachFileSummaryCompact({
   view: BuyerDashboardView;
   className?: string;
 }) {
-  const nextLabel = view.next?.title ?? "No open task";
+  const nextLabel =
+    view.next === null ? "No open task" : coachFileNextDisplayLabel(view);
   const owed = view.owedToday;
   const { step, total } = journeyStepProgress(view.stages);
 

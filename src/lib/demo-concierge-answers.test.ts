@@ -31,6 +31,29 @@ describe("enrichDemoFileSessionAnswer", () => {
     expect(inspection.text).not.toMatch(SNAKE_CASE);
   });
 
+  it("matches booked demo inspection as the next step", () => {
+    const attendFacts = facts.map((row) =>
+      row.key === "next"
+        ? {
+            ...row,
+            text: "Next is Attend inspection on Wed, Oct 15, 2026, assigned to buyer.",
+          }
+        : row,
+    );
+    const next = enrichDemoFileSessionAnswer(
+      "What happens next?",
+      { text: "stub", kind: "answer", sources: ["tasks"] },
+      attendFacts,
+    );
+    expect(next.text.toLowerCase()).toContain("attend inspection");
+    const inspection = enrichDemoFileSessionAnswer(
+      "When's my inspection?",
+      { text: "stub", kind: "answer", sources: ["appointments"] },
+      attendFacts,
+    );
+    expect(inspection.text).not.toContain("repair request");
+  });
+
   it("does not leak snake_case ids in file-session demo answers", () => {
     for (const question of FILE_SESSION_CONCIERGE_STARTERS) {
       const base = completeConcierge({

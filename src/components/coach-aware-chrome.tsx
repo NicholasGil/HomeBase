@@ -7,6 +7,7 @@ import {
   type ConciergeScope,
 } from "@/components/concierge-sheet";
 import type { ConciergeAvailability } from "@/lib/concierge-availability";
+import { CoachScrollBootstrap } from "@/components/coach-scroll-bootstrap";
 import { CoachScrollRestoration } from "@/components/coach-scroll-restoration";
 import { MobileTabBar } from "@/components/mobile-tab-bar";
 import { BUYER_COACH_HOME } from "@/lib/buyer-shell";
@@ -29,6 +30,7 @@ export function CoachAwareMain({
 
   return (
     <>
+      <CoachScrollBootstrap />
       <CoachScrollRestoration />
       <main
         className={cn(

@@ -84,6 +84,7 @@ export function ConciergeChat({
   /** File session @375: sticky chips + Ask above tab bar; document scroll only. */
   mobileStickyDockAboveTabBar = false,
   fileSummaryAboveThread = null,
+  threadHeader = null,
   onThreadActiveChange,
   showAgentLinkWhenUnavailable = true,
   initialTurn = null,
@@ -100,6 +101,7 @@ export function ConciergeChat({
   pinRestoredThreadOnMobile?: boolean;
   mobileStickyDockAboveTabBar?: boolean;
   fileSummaryAboveThread?: ReactNode | null;
+  threadHeader?: ReactNode | null;
   onThreadActiveChange?: (active: boolean) => void;
   showAgentLinkWhenUnavailable?: boolean;
   initialTurn?: ConciergePersistedTurn | null;
@@ -259,7 +261,10 @@ export function ConciergeChat({
           </p>
         ) : null}
         {asked !== null && !omitUserBubble ? (
-          <p className="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-primary px-4 py-2.5 text-sm text-primary-foreground">
+          <p
+            data-testid="concierge-user-question"
+            className="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-primary px-4 py-2.5 text-sm text-primary-foreground"
+          >
             {asked}
           </p>
         ) : null}
@@ -477,6 +482,9 @@ export function ConciergeChat({
           data-testid="concierge-scroll-region"
           className="flex flex-col gap-3 py-4 max-md:overflow-visible max-md:py-3"
         >
+          {threadHeader ? (
+            <div className="shrink-0 max-md:block md:hidden">{threadHeader}</div>
+          ) : null}
           {fileSummaryAboveThread ? (
             <div className="shrink-0 max-md:block md:hidden">
               {fileSummaryAboveThread}

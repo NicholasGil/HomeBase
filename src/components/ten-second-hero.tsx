@@ -10,6 +10,7 @@ import { MoneyFigureView } from "@/components/money-figure-view";
 import { Badge } from "@/components/ui/badge";
 import type { BuyerDashboardView } from "../../convex/lib/dashboardView";
 import { journeyStepProgress } from "../../convex/lib/journeyLogic";
+import { coachFileNextDisplayLabel } from "@/lib/demo-file-session-view";
 import { waitingOnDisplayLabel } from "@/lib/waiting-on-label";
 import { cn } from "@/lib/utils";
 
@@ -109,6 +110,7 @@ export function TenSecondHeroGrid({
   const { step: journeyStep, total: journeyTotal } = journeyStepProgress(
     view.stages,
   );
+  const nextTitle = coachFileNextDisplayLabel(view);
   const coachMobileStack =
     compact &&
     "max-md:grid-cols-1 max-md:[&_[data-testid=ten-second-where]]:order-1 max-md:[&_[data-testid=ten-second-owe]]:order-2 max-md:[&_[data-testid=ten-second-next]]:order-3 max-md:[&_[data-testid=journey-tracker]]:order-4 max-md:[&_[data-testid=ten-second-done]]:order-5 max-md:[&_[data-testid=ten-second-waiting]]:order-6";
@@ -208,7 +210,7 @@ export function TenSecondHeroGrid({
                 compact ? "text-h3" : "text-h2 lg:text-h1",
               )}
             >
-              {view.next.title}
+              {nextTitle}
             </span>
           </DrillLink>
         )}

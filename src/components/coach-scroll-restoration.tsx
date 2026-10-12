@@ -4,8 +4,9 @@ import { useLayoutEffect, useEffect } from "react";
 import { usePathname } from "next/navigation";
 
 import { BUYER_COACH_HOME } from "@/lib/buyer-shell";
+import { COACH_SCROLL_STORAGE_KEY } from "@/lib/coach-scroll-key";
 
-const COACH_SCROLL_KEY = "realtyrise.coach.scrollY.v1";
+const COACH_SCROLL_KEY = COACH_SCROLL_STORAGE_KEY;
 const MAX_RESTORE_ATTEMPTS = 12;
 
 function coachPath(pathname: string) {
@@ -83,6 +84,12 @@ export function CoachScrollRestoration() {
   }, [pathname]);
 
   useEffect(() => {
+    if (typeof window !== "undefined" && "scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+  }, []);
+
+  useEffect(() => {
     if (!coachPath(pathname)) {
       return;
     }
@@ -96,6 +103,10 @@ export function CoachScrollRestoration() {
       }
       const link = target.closest('a[href^="/transactions/"]');
       if (link !== null) {
+        saveScroll();
+        return;
+      }
+      if (target.closest('[data-testid="coach-pricing-link"]') !== null) {
         saveScroll();
         return;
       }

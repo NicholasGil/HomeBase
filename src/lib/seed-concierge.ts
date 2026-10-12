@@ -2,7 +2,8 @@ import type { ConciergeFact } from "../../lib/llm/types";
 import { formatDisplayDateTime } from "../../convex/lib/displayTime";
 import { SEED_CLERK_IDS, SEED_CONCIERGE } from "../../convex/seedPlan";
 import { discoveryEmptyConciergeFacts } from "@/lib/seed-concierge-discovery";
-import type { AuthEnv } from "@/lib/auth-config";
+import { isDemoMode, type AuthEnv } from "@/lib/auth-config";
+import { demoBookedInspectionConciergeNextLine } from "@/lib/demo-file-session-view";
 import {
   fixtureConciergeInspectionAt,
   fixtureConciergeShowingAt,
@@ -34,10 +35,14 @@ export function seedConciergeFacts(
   const inspectionAt = fixtureConciergeInspectionAt(env, now);
   const showingAt = fixtureConciergeShowingAt(env, now);
 
+  const nextLine = isDemoMode(env)
+    ? demoBookedInspectionConciergeNextLine(env, now)
+    : "Next is Schedule inspection, assigned to agent.";
+
   return [
     {
       key: "next",
-      text: "Next is Schedule inspection, assigned to agent.",
+      text: nextLine,
       source: "tasks",
     },
     {

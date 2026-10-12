@@ -50,7 +50,7 @@ test("return visit proof @375 — discovery thread, file thread, daily check-in"
   await page.goto("/dashboard");
   await page.goto("/coach");
   await expect(page.getByTestId("coach-return-continue")).toBeVisible();
-  await expect(page.getByTestId("coach-daily-check-in")).toBeVisible();
+  await expect(page.getByTestId("coach-daily-check-in")).toHaveCount(0);
   await expect(page.getByTestId("coach-first-session-empty")).toHaveCount(0);
   await expect(
     page
@@ -79,7 +79,7 @@ test("return visit proof @375 — discovery thread, file thread, daily check-in"
   await expect(page.getByTestId("coach-return-continue")).toContainText(
     fileStarter,
   );
-  await expect(page.getByTestId("coach-daily-check-in")).toBeVisible();
+  await expect(page.getByTestId("coach-daily-check-in")).toHaveCount(0);
   const restoredThread = page.getByTestId("concierge-restored-thread");
   await expect(restoredThread).toBeVisible();
   const restoredAnswer = restoredThread.getByTestId("concierge-answer");

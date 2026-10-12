@@ -3,6 +3,7 @@ import { formatDisplayDateTime } from "../../convex/lib/displayTime";
 import { SEED_PLAN } from "../../convex/seedPlan";
 import { fixtureConciergeInspectionAt } from "@/lib/demo-fixture-dates";
 import { humanizeDemoMissingFragment } from "@/lib/demo-humanize-doc-id";
+import { DEMO_ATTEND_INSPECTION_TITLE } from "@/lib/demo-file-session-view";
 
 const AGENT_NAME = SEED_PLAN.agent.name;
 
@@ -29,7 +30,21 @@ export function enrichDemoFileSessionAnswer(
   const missingItem =
     missingRaw === null ? null : humanizeDemoMissingFragment(missingRaw);
 
+  const nextFact = fact(facts, "next");
+  const attendInspectionNext =
+    nextFact?.text.includes(DEMO_ATTEND_INSPECTION_TITLE) === true;
+
   if (normalized.includes("happen") && normalized.includes("next")) {
+    if (attendInspectionNext) {
+      const when =
+        inspectionWhen?.text ??
+        `Inspection is at ${formatDisplayDateTime(fixtureConciergeInspectionAt())}.`;
+      return {
+        ...answer,
+        text: `Your next step is ${DEMO_ATTEND_INSPECTION_TITLE.toLowerCase()} — ${when.replace(/\.$/, "")}.\nYou're in the Inspection stage; ${AGENT_NAME} already scheduled the visit.`,
+        sources: answer.sources,
+      };
+    }
     return {
       ...answer,
       text: `${AGENT_NAME} is assigned to schedule your inspection — that's the open next task on this file.\nYou're in the Inspection stage; nothing else is queued ahead of that.`,
@@ -43,9 +58,10 @@ export function enrichDemoFileSessionAnswer(
       `Inspection is at ${formatDisplayDateTime(fixtureConciergeInspectionAt())}.`;
     const bring =
       "Bring photo ID, utility access, and any repair notes you already have.";
-    const gap = missingItem
-      ? `\nThe file still needs ${missingItem} before this stage clears.`
-      : "";
+    const gap =
+      !attendInspectionNext && missingItem
+        ? `\nThe file still needs ${missingItem} before this stage clears.`
+        : "";
     return {
       ...answer,
       text: `${when}\n${bring}${gap}`,

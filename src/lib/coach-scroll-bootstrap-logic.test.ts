@@ -69,16 +69,19 @@ describe("coach scroll bootstrap logic", () => {
 });
 
 describe("coachScrollBootstrapScript", () => {
-  it("includes epoch sync and coach-only first-paint restore hooks", () => {
+  it("includes popstate and pageshow listeners for coach restore", () => {
     const script = coachScrollBootstrapScript();
     expect(script).toContain(COACH_SCROLL_STORAGE_KEY);
-    expect(script).toContain("syncEpochFromCookie");
-    expect(script).toContain("markEnterStarted");
+    expect(script).toContain("popstate");
+    expect(script).toContain("pageshow");
     expect(script).toContain("pointerdown");
+    expect(script).toContain("pagehide");
     expect(script).toContain("scrollTo");
+    expect(script).toContain("syncEpochFromCookie");
+    expect(script).toContain("afterCoachNavigationRestore");
+    expect(script).toContain("enterSaveBlocked");
+    expect(script).toContain("resetScrollRestoration");
     expect(script).toContain("applyDemoCoachScrollReset");
-    expect(script).not.toContain("popstate");
-    expect(script).not.toContain("pageshow");
-    expect(script).not.toContain("scheduleRestore");
+    expect(script).toContain("e.persisted");
   });
 });

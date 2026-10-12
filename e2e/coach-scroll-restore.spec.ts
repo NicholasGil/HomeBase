@@ -75,11 +75,24 @@ test("coach file session @375 — tab return avoids a zero scroll frame", async 
   await signInAlexWithFile(page);
   await page.evaluate(() => window.scrollTo(0, 372));
   await page.waitForTimeout(100);
+  const savedY = await page.evaluate(() => window.scrollY);
+  expect(savedY).toBeGreaterThanOrEqual(300);
 
-  await page.goto("/search");
+  await page
+    .getByTestId("app-tab-bar")
+    .getByRole("link", { name: "Search" })
+    .click();
   await page.waitForURL(/\/search/);
-  await page.goto("/coach");
+  await page
+    .getByTestId("app-tab-bar")
+    .getByRole("link", { name: "Coach", exact: true })
+    .click();
   await page.waitForURL(/\/coach$/);
+  await page.waitForFunction(
+    (minY) => window.scrollY >= minY - 10,
+    savedY,
+    { timeout: 5000 },
+  );
 
   const samples: number[] = [];
   for (let i = 0; i < 12; i += 1) {
@@ -87,7 +100,9 @@ test("coach file session @375 — tab return avoids a zero scroll frame", async 
     await page.waitForTimeout(16);
   }
   expect(samples.filter((y) => y === 0)).toHaveLength(0);
-  expect(samples.at(-1)).toBeGreaterThanOrEqual(300);
+  for (const y of samples) {
+    expect(Math.abs(y - savedY)).toBeLessThanOrEqual(10);
+  }
 });
 
 test("coach file session @375 — pageshow persisted restores saved scroll within 10px", async ({

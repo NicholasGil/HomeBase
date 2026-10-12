@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
-import { CONCIERGE_STARTERS } from "../src/lib/concierge-starters";
-import { FILE_SESSION_CONCIERGE_STARTERS } from "../src/lib/concierge-starters";
+import { CONCIERGE_STARTERS } from "../../src/lib/concierge-starters";
+import { FILE_SESSION_CONCIERGE_STARTERS } from "../../src/lib/concierge-starters";
 
 const DOCK_STARTERS = new Set<string>(FILE_SESSION_CONCIERGE_STARTERS);
 
@@ -11,17 +11,9 @@ test.use({
   isMobile: true,
 });
 
-async function signInFileSessionBuyer(page: import("@playwright/test").Page) {
-  if (process.env.REALTYRISE_DEMO_MODE === "1") {
-    await page.goto("/demo");
-    await page
-      .getByTestId("demo-persona-buyer-coach")
-      .getByRole("button")
-      .click();
-  } else {
-    await page.goto("/test-login");
-    await page.getByRole("button", { name: "Sign in as Alex Rivera" }).click();
-  }
+async function signInDemoBuyerCoach(page: import("@playwright/test").Page) {
+  await page.goto("/demo");
+  await page.getByTestId("demo-persona-buyer-coach").getByRole("button").click();
   await expect(page).toHaveURL(/\/coach$/);
   await expect(page.getByTestId("concierge-mobile-dock")).toBeVisible();
 }
@@ -53,13 +45,11 @@ async function assertStarterTappable(
   }
 }
 
-test("file session @375 — all CONCIERGE_STARTERS reachable via dock or More", async ({
+test("demo file session @375 — all CONCIERGE_STARTERS reachable via dock or More", async ({
   page,
 }) => {
-  await signInFileSessionBuyer(page);
-  if (process.env.REALTYRISE_DEMO_MODE === "1") {
-    await expect(page.getByTestId("concierge-more-starters")).toBeVisible();
-  }
+  await signInDemoBuyerCoach(page);
+  await expect(page.getByTestId("concierge-more-starters")).toBeVisible();
   for (const label of CONCIERGE_STARTERS) {
     await assertStarterTappable(page, label);
   }

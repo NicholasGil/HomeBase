@@ -10,7 +10,8 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:e2e:demo": "PLAYWRIGHT_DEMO_SUITE=1 playwright test"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

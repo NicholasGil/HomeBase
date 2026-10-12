@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { CONCIERGE_STARTERS } from "../../src/lib/concierge-starters";
+import { CONCIERGE_STARTERS, FILE_SESSION_DOCK_PREVIEW_COUNT } from "../../src/lib/concierge-starters";
 import { FILE_SESSION_DOCK_CHIPS } from "../../src/lib/concierge-dock-chips";
 
 const DOCK_LABEL_BY_QUESTION = new Map(
@@ -22,7 +22,7 @@ async function signInDemoBuyerCoach(page: import("@playwright/test").Page) {
 async function tapStarterAndAssertAnswer(
   page: import("@playwright/test").Page,
   question: string,
-) {
+): Promise<"dock" | "more"> {
   const dockLabel = DOCK_LABEL_BY_QUESTION.get(question);
   if (dockLabel !== undefined) {
     const chip = page
@@ -45,6 +45,7 @@ async function tapStarterAndAssertAnswer(
     "answer",
     { timeout: 20_000 },
   );
+  return dockLabel !== undefined ? "dock" : "more";
 }
 
 test("demo file session @375 — all CONCIERGE_STARTERS reachable via dock or More", async ({
@@ -52,7 +53,18 @@ test("demo file session @375 — all CONCIERGE_STARTERS reachable via dock or Mo
 }) => {
   await signInDemoBuyerCoach(page);
   await expect(page.getByTestId("concierge-more-starters")).toBeVisible();
+
+  let dockTaps = 0;
+  let moreTaps = 0;
   for (const question of CONCIERGE_STARTERS) {
-    await tapStarterAndAssertAnswer(page, question);
+    const path = await tapStarterAndAssertAnswer(page, question);
+    if (path === "dock") {
+      dockTaps += 1;
+    } else {
+      moreTaps += 1;
+    }
   }
+
+  expect(dockTaps).toBe(FILE_SESSION_DOCK_PREVIEW_COUNT);
+  expect(moreTaps).toBe(CONCIERGE_STARTERS.length - FILE_SESSION_DOCK_PREVIEW_COUNT);
 });

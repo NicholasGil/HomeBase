@@ -4,6 +4,8 @@ import path from "node:path";
 import { expect, test } from "@playwright/test";
 
 import { CONCIERGE_STARTERS } from "../src/components/concierge-chat";
+import { discoveryDockPreviewLabels } from "../src/lib/concierge-dock-chips";
+import { COACH_FIRST_SESSION_STARTERS } from "../src/lib/coach-first-session";
 import {
   assertNextCardClearsDock,
   scrollCoachConciergeToEnd,
@@ -48,13 +50,29 @@ async function assertAskCenterHitsButton(page: import("@playwright/test").Page) 
   expect(hit).toBe(true);
 }
 
+async function chipButtonForLabel(
+  page: import("@playwright/test").Page,
+  label: string,
+) {
+  const dock = page.getByLabel("Suggested questions");
+  const onDock = dock.getByRole("button", { name: label, exact: true });
+  if ((await onDock.count()) > 0) {
+    return onDock.first();
+  }
+  const more = page.getByTestId("concierge-more-starters");
+  if (await more.isVisible()) {
+    await more.click();
+    const sheet = page.getByTestId("concierge-more-starters-sheet");
+    return sheet.getByRole("button", { name: label, exact: true });
+  }
+  return dock.getByRole("button", { name: label, exact: true });
+}
+
 async function assertChipCenterHitsButton(
   page: import("@playwright/test").Page,
   label: string,
 ) {
-  const chip = page
-    .getByLabel("Suggested questions")
-    .getByRole("button", { name: label });
+  const chip = await chipButtonForLabel(page, label);
   await chip.scrollIntoViewIfNeeded();
   await chip.evaluate((el) => {
     el.scrollIntoView({ block: "nearest", inline: "center" });
@@ -82,9 +100,7 @@ async function assertChipClearsComposeAtScrollEnd(
   page: import("@playwright/test").Page,
   label: string,
 ) {
-  const chip = page
-    .getByLabel("Suggested questions")
-    .getByRole("button", { name: label });
+  const chip = await chipButtonForLabel(page, label);
   const compose = page.getByTestId("concierge-compose");
   const chipBox = await chip.boundingBox();
   const composeBox = await compose.boundingBox();
@@ -100,21 +116,18 @@ test("coach habit fluidity — chip center hits + scroll-end clearance @375", as
 }) => {
   await mkdir(PROOF_DIR, { recursive: true });
 
-  const discoveryStarters = [
-    "What happens next?",
-    "What am I missing for this stage?",
-    "What's already on my file?",
-  ] as const;
+  const discoveryDockLabels = discoveryDockPreviewLabels();
 
   await signInAlexDiscoveryEmpty(page);
   await expect(page.getByTestId("coach-first-session-empty")).toBeVisible();
-  for (const label of discoveryStarters) {
+  for (const label of discoveryDockLabels) {
     await assertChipCenterHitsButton(page, label);
   }
   await assertAskCenterHitsButton(page);
+  await assertChipCenterHitsButton(page, COACH_FIRST_SESSION_STARTERS[2]);
+  await page.keyboard.press("Escape");
   await scrollCoachConciergeToEnd(page);
-  for (const label of discoveryStarters) {
-    await assertChipCenterHitsButton(page, label);
+  for (const label of discoveryDockLabels) {
     await assertChipClearsComposeAtScrollEnd(page, label);
   }
   await page.screenshot({

@@ -4,7 +4,6 @@ import { useLayoutEffect, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 
 import { BUYER_COACH_HOME } from "@/lib/buyer-shell";
-import { COACH_SCROLL_STORAGE_KEY } from "@/lib/coach-scroll-key";
 import {
   clampCoachScrollTarget,
   isCoachScrollPath,
@@ -18,13 +17,29 @@ function coachPath(pathname: string) {
   );
 }
 
-function applyStoredCoachScroll(y: number) {
+function shouldSaveScrollForLink(anchor: HTMLAnchorElement): boolean {
+  const href = anchor.getAttribute("href") ?? "";
+  if (!href.startsWith("/")) {
+    return false;
+  }
+  if (href.startsWith("/transactions/")) {
+    return true;
+  }
+  if (href.startsWith("/pricing")) {
+    return true;
+  }
+  if (anchor.closest('[data-testid="app-tab-bar"]') !== null) {
+    return true;
+  }
+  return false;
+}
+
+function applyStoredCoachScroll(pathname: string, y: number) {
   const target = clampCoachScrollTarget(
     y,
     document.documentElement.scrollHeight,
     window.innerHeight,
   );
-  document.documentElement.style.scrollBehavior = "auto";
   window.scrollTo(0, target);
   return target;
 }
@@ -33,6 +48,12 @@ export function CoachScrollRestoration() {
   const pathname = usePathname();
   const onCoach = coachPath(pathname);
   const restoringRef = useRef(false);
+  const pathnameRef = useRef(pathname);
+  const lastScrollYRef = useRef(0);
+
+  useEffect(() => {
+    pathnameRef.current = pathname;
+  }, [pathname]);
 
   useLayoutEffect(() => {
     if (!onCoach) {
@@ -41,91 +62,69 @@ export function CoachScrollRestoration() {
 
     const previousRestoration = history.scrollRestoration;
     try {
-      history.scrollRestoration = "auto";
+      history.scrollRestoration = "manual";
     } catch {
       // ignore
     }
 
-    const storedY = readCoachScrollY();
-    if (storedY === null || storedY <= 0) {
-      return () => {
-        try {
-          history.scrollRestoration = previousRestoration;
-        } catch {
-          // ignore
-        }
-      };
-    }
-
-    let userInteracted = false;
-    let resizeListener: (() => void) | null = null;
-    const timeoutIds: number[] = [];
-
-    const stopProgrammaticRestore = () => {
-      userInteracted = true;
-      if (resizeListener !== null) {
-        window.removeEventListener("resize", resizeListener);
-        resizeListener = null;
-      }
-      for (const id of timeoutIds) {
-        window.clearTimeout(id);
-      }
-      timeoutIds.length = 0;
-    };
-
-    const markUserIntent = () => {
-      if (!restoringRef.current) {
-        stopProgrammaticRestore();
-      }
-    };
-
-    const restore = () => {
-      if (userInteracted) {
+    const restoreFromStorage = () => {
+      const storedY = readCoachScrollY(pathnameRef.current);
+      if (storedY === null || storedY <= 0) {
         return;
       }
       restoringRef.current = true;
-      applyStoredCoachScroll(storedY);
+      applyStoredCoachScroll(pathnameRef.current, storedY);
       restoringRef.current = false;
     };
 
-    restore();
-
-    resizeListener = () => {
-      restore();
-    };
-    window.addEventListener("resize", resizeListener);
-
-    timeoutIds.push(
-      window.setTimeout(restore, 0),
-      window.setTimeout(restore, 80),
-    );
-
-    window.addEventListener("wheel", markUserIntent, {
-      passive: true,
-      capture: true,
-    });
-    window.addEventListener("touchstart", markUserIntent, {
-      passive: true,
-      capture: true,
-    });
+    restoreFromStorage();
 
     const onPopState = () => {
-      if (isCoachScrollPath(window.location.pathname)) {
-        userInteracted = false;
-        restore();
+      if (!isCoachScrollPath(window.location.pathname)) {
+        return;
       }
+      pathnameRef.current = window.location.pathname;
+      restoreFromStorage();
     };
     window.addEventListener("popstate", onPopState);
 
     return () => {
-      stopProgrammaticRestore();
-      window.removeEventListener("wheel", markUserIntent, true);
-      window.removeEventListener("touchstart", markUserIntent, true);
       window.removeEventListener("popstate", onPopState);
       try {
         history.scrollRestoration = previousRestoration;
       } catch {
         // ignore
+      }
+    };
+  }, [pathname, onCoach]);
+
+  useLayoutEffect(() => {
+    if (!onCoach) {
+      return;
+    }
+    const storedY = readCoachScrollY(pathname);
+    if (storedY === null || storedY <= 0) {
+      return;
+    }
+
+    let resizeListener: (() => void) | null = null;
+    const timeoutIds: number[] = [];
+
+    const restore = () => {
+      applyStoredCoachScroll(pathname, storedY);
+    };
+
+    restore();
+    resizeListener = restore;
+    window.addEventListener("resize", resizeListener);
+    timeoutIds.push(window.setTimeout(restore, 0), window.setTimeout(restore, 80));
+
+    return () => {
+      if (resizeListener !== null) {
+        window.removeEventListener("resize", resizeListener);
+      }
+      for (const id of timeoutIds) {
+        window.clearTimeout(id);
       }
     };
   }, [pathname, onCoach]);
@@ -136,9 +135,15 @@ export function CoachScrollRestoration() {
     }
     let frame = 0;
     const onScroll = () => {
+      if (document.visibilityState === "hidden") {
+        return;
+      }
       window.cancelAnimationFrame(frame);
       frame = window.requestAnimationFrame(() => {
-        writeCoachScrollY(window.scrollY);
+        if (window.scrollY > 0) {
+          lastScrollYRef.current = window.scrollY;
+          writeCoachScrollY(window.scrollY, pathname);
+        }
       });
     };
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -146,39 +151,37 @@ export function CoachScrollRestoration() {
       window.removeEventListener("scroll", onScroll);
       window.cancelAnimationFrame(frame);
     };
-  }, [onCoach]);
+  }, [pathname, onCoach]);
 
   useEffect(() => {
     if (!onCoach) {
       return;
     }
     const saveScroll = () => {
-      writeCoachScrollY(window.scrollY);
+      const y = Math.max(window.scrollY, lastScrollYRef.current);
+      writeCoachScrollY(y, pathname);
     };
-    const onClick = (event: MouseEvent) => {
+    const onLeavingPointer = (event: Event) => {
       const target = event.target;
       if (!(target instanceof Element)) {
         return;
       }
-      const link = target.closest('a[href^="/transactions/"]');
-      if (link !== null) {
+      const anchor = target.closest("a[href]");
+      if (anchor instanceof HTMLAnchorElement && shouldSaveScrollForLink(anchor)) {
         saveScroll();
-        return;
-      }
-      if (target.closest('[data-testid="coach-pricing-link"]') !== null) {
-        saveScroll();
-        return;
-      }
-      const tab = target.closest('[data-testid="app-tab-bar"] a[href]');
-      if (tab !== null && tab instanceof HTMLAnchorElement) {
-        const href = tab.getAttribute("href") ?? "";
-        if (href !== pathname && href.startsWith("/")) {
-          saveScroll();
-        }
       }
     };
-    document.addEventListener("click", onClick, true);
-    return () => document.removeEventListener("click", onClick, true);
+    const onPageHide = () => {
+      saveScroll();
+    };
+    document.addEventListener("pointerdown", onLeavingPointer, true);
+    document.addEventListener("mousedown", onLeavingPointer, true);
+    window.addEventListener("pagehide", onPageHide);
+    return () => {
+      document.removeEventListener("pointerdown", onLeavingPointer, true);
+      document.removeEventListener("mousedown", onLeavingPointer, true);
+      window.removeEventListener("pagehide", onPageHide);
+    };
   }, [pathname, onCoach]);
 
   return null;

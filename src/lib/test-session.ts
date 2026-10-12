@@ -11,6 +11,21 @@ import {
 
 export const TEST_SESSION_COOKIE = "hb_test_identity";
 
+/** Fixture / demo test-session cookie lifetime (8 hours). */
+export const TEST_SESSION_MAX_AGE_SECONDS = 8 * 60 * 60;
+
+export function testSessionCookieOptions(
+  env: Pick<NodeJS.ProcessEnv, "NODE_ENV"> = process.env,
+) {
+  return {
+    httpOnly: true,
+    sameSite: "lax" as const,
+    path: "/",
+    secure: env.NODE_ENV === "production",
+    maxAge: TEST_SESSION_MAX_AGE_SECONDS,
+  };
+}
+
 export const SEED_TRANSACTION_IDS = {
   [SEED_CLERK_IDS.buyerA]: "seed:buyer-a",
   [SEED_CLERK_IDS.buyerB]: "seed:buyer-b",

@@ -6,9 +6,12 @@ import { CoachReturnHeaderHint } from "@/components/coach-return-header-hint";
 import { ConciergeChat } from "@/components/concierge-chat";
 import {
   CONCIERGE_STARTERS,
-  FILE_SESSION_CONCIERGE_STARTERS,
-  FILE_SESSION_DOCK_PREVIEW_COUNT,
 } from "@/lib/concierge-starters";
+import {
+  discoveryDockPreviewLabels,
+  fileSessionDockPreviewLabels,
+} from "@/lib/concierge-dock-chips";
+import type { ConciergeDockChipPreset } from "@/components/concierge-chat";
 import { BuyerFullOsTeaser } from "@/components/buyer-full-os-teaser";
 import {
   BuyerLockedUpsellRail,
@@ -55,13 +58,20 @@ export function CoachHome({
   const demoOsOpen = buyerFixtureOsUnlocked();
   const demoFileSessionDock = !firstSession && buyerFixtureOsUnlocked();
   const conciergeStarters = firstSession
+    ? discoveryDockPreviewLabels()
+    : demoFileSessionDock
+      ? fileSessionDockPreviewLabels()
+      : CONCIERGE_STARTERS;
+  const conciergeAllStarters = firstSession
     ? COACH_FIRST_SESSION_STARTERS
     : demoFileSessionDock
-      ? FILE_SESSION_CONCIERGE_STARTERS.slice(0, FILE_SESSION_DOCK_PREVIEW_COUNT)
-      : CONCIERGE_STARTERS;
-  const conciergeAllStarters = demoFileSessionDock
-    ? CONCIERGE_STARTERS
-    : undefined;
+      ? CONCIERGE_STARTERS
+      : undefined;
+  const dockChipPreset: ConciergeDockChipPreset | undefined = firstSession
+    ? "discovery"
+    : demoFileSessionDock
+      ? "file-demo"
+      : undefined;
 
   return (
     <div
@@ -185,6 +195,7 @@ export function CoachHome({
             showAgentLinkWhenUnavailable={!firstSession}
             starters={conciergeStarters}
             allStarters={conciergeAllStarters}
+            dockChipPreset={dockChipPreset}
             pinStartersAboveScrollOnMobile={!coachUnavailable}
             wrapMobileQuestionStarters={false}
             scrollIntro={
@@ -209,7 +220,7 @@ export function CoachHome({
                 : undefined
             }
             idleHint={
-              firstSession ? "Tap a starter or type a question." : undefined
+              firstSession ? "Tap a starter or ask below." : undefined
             }
             questionPlaceholder={
               firstSession ? "Ask about buying" : "Ask about your file"
@@ -245,6 +256,8 @@ export function CoachHome({
             availability={availability}
             showAgentLinkWhenUnavailable={!firstSession}
             starters={conciergeStarters}
+            allStarters={conciergeAllStarters}
+            dockChipPreset={dockChipPreset}
             pinStartersAboveScrollOnMobile={!coachUnavailable}
             wrapMobileQuestionStarters={false}
             mobileStickyDockAboveTabBar
@@ -272,7 +285,7 @@ export function CoachHome({
             }
             idleHint={
               firstSession
-                ? "Tap a starter or type a question."
+                ? "Tap a starter or ask below."
                 : undefined
             }
             questionPlaceholder={
@@ -291,6 +304,8 @@ export function CoachHome({
             availability={availability}
             showAgentLinkWhenUnavailable={!firstSession}
             starters={conciergeStarters}
+            allStarters={conciergeAllStarters}
+            dockChipPreset={dockChipPreset}
             pinStartersAboveScrollOnMobile={!coachUnavailable}
             wrapMobileQuestionStarters={false}
             mobileStickyDockAboveTabBar
@@ -318,7 +333,7 @@ export function CoachHome({
             }
             idleHint={
               firstSession
-                ? "Tap a starter or type a question."
+                ? "Tap a starter or ask below."
                 : undefined
             }
             questionPlaceholder={

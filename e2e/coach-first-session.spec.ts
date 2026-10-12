@@ -3,6 +3,9 @@ import { readFile } from "node:fs/promises";
 
 import { expect, test } from "@playwright/test";
 
+import { discoveryDockPreviewLabels } from "../src/lib/concierge-dock-chips";
+import { tapConciergeStarter } from "./concierge-dock-helpers";
+
 const FIRST_SESSION_STARTERS = [
   "What happens next?",
   "What am I missing for this stage?",
@@ -56,7 +59,7 @@ async function expectDistinctProofHashes(paths: string[]) {
   expect(new Set(paths).size).toBe(paths.length);
 }
 
-test("empty Discovery coach shows empty state and three starters @375", async ({
+test("empty Discovery coach shows empty state, two dock starters, and More @375", async ({
   page,
 }) => {
   await signInAlexDiscoveryEmpty(page);
@@ -69,7 +72,8 @@ test("empty Discovery coach shows empty state and three starters @375", async ({
 
   const chips = page.getByLabel("Suggested questions").getByRole("button");
   await expect(chips).toHaveCount(3);
-  for (const label of FIRST_SESSION_STARTERS) {
+  await expect(page.getByTestId("concierge-more-starters")).toBeVisible();
+  for (const label of discoveryDockPreviewLabels()) {
     await expect(page.getByRole("button", { name: label })).toBeVisible();
   }
   for (const chip of await chips.all()) {
@@ -94,7 +98,7 @@ test("first-session chips clear sticky Ask at scroll end @375", async ({
   const composeBox = await compose.boundingBox();
   expect(composeBox).not.toBeNull();
 
-  for (const label of FIRST_SESSION_STARTERS) {
+  for (const label of discoveryDockPreviewLabels()) {
     const chip = page.getByRole("button", { name: label });
     const chipBox = await chip.boundingBox();
     expect(chipBox).not.toBeNull();
@@ -132,9 +136,10 @@ test("coach first-session proof screenshots @375", async ({ page }) => {
     },
   });
 
-  for (const label of FIRST_SESSION_STARTERS) {
+  for (const label of discoveryDockPreviewLabels()) {
     await expect(page.getByRole("button", { name: label })).toBeVisible();
   }
+  await expect(page.getByTestId("concierge-more-starters")).toBeVisible();
 
   await page.screenshot({
     path: PROOF_PATHS.starters,
@@ -145,7 +150,7 @@ test("coach first-session proof screenshots @375", async ({ page }) => {
   await expect(page.getByTestId("concierge-compose")).toBeVisible();
 
   const lastChip = page.getByRole("button", {
-    name: FIRST_SESSION_STARTERS[2],
+    name: discoveryDockPreviewLabels()[1],
   });
   const lastChipBox = await lastChip.boundingBox();
   const composeBox = await page.getByTestId("concierge-compose").boundingBox();
@@ -168,7 +173,7 @@ test("coach first-session proof screenshots @375", async ({ page }) => {
   const expandedPaths: string[] = [];
   for (const label of FIRST_SESSION_STARTERS) {
     await signInAlexDiscoveryEmpty(page);
-    await page.getByRole("button", { name: label }).click();
+    await tapConciergeStarter(page, label);
     await expect(
       page
         .getByTestId("concierge-first-session-thread")

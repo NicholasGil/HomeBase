@@ -1,14 +1,9 @@
 import { expect, test } from "@playwright/test";
 
 import { CONCIERGE_STARTERS } from "../../src/lib/concierge-starters";
-import {
-  FILE_SESSION_CONCIERGE_STARTERS,
-  FILE_SESSION_DOCK_PREVIEW_COUNT,
-} from "../../src/lib/concierge-starters";
+import { fileSessionDockPreviewLabels } from "../../src/lib/concierge-dock-chips";
 
-const DOCK_STARTERS = new Set<string>(
-  FILE_SESSION_CONCIERGE_STARTERS.slice(0, FILE_SESSION_DOCK_PREVIEW_COUNT),
-);
+const DOCK_STARTERS = new Set<string>(fileSessionDockPreviewLabels());
 
 test.use({
   viewport: { width: 375, height: 812 },

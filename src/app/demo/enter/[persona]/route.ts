@@ -7,12 +7,15 @@ import {
 } from "@/lib/auth-config";
 import { DEMO_CHOOSER_PATH } from "@/lib/demo-copy";
 import { isDemoEnterPrefetchRequest } from "@/lib/demo-enter-prefetch";
+import { redirectToPathFromRequestUrl } from "@/lib/same-origin-redirect";
 import {
   encodeTestSessionCookie,
   fixtureHomePath,
   startTestSessionDecision,
   TEST_SESSION_COOKIE,
+  testSessionCookieOptions,
 } from "@/lib/test-session";
+import { VENDOR_EXPIRY_COOKIE } from "@/lib/vendor-access";
 import { SEED_CLERK_IDS, SEED_PLAN } from "../../../../../convex/seedPlan";
 
 export const dynamic = "force-dynamic";
@@ -34,7 +37,7 @@ const PERSONAS: Record<string, PersonaConfig> = {
 };
 
 function redirectToChooser(request: Request) {
-  return NextResponse.redirect(new URL(DEMO_CHOOSER_PATH, request.url));
+  return redirectToPathFromRequestUrl(DEMO_CHOOSER_PATH, request);
 }
 
 export async function GET(
@@ -69,16 +72,14 @@ export async function GET(
   }
 
   const destination = fixtureHomePath(started.session);
-  const response = NextResponse.redirect(new URL(destination, request.url));
+  const response = redirectToPathFromRequestUrl(destination, request);
   response.cookies.set(
     TEST_SESSION_COOKIE,
     encodeTestSessionCookie(started.session),
-    {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      path: "/",
-    },
+    testSessionCookieOptions(),
   );
+  if (started.session.role === "vendor") {
+    response.cookies.delete(VENDOR_EXPIRY_COOKIE);
+  }
   return response;
 }

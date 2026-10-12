@@ -5,17 +5,15 @@ import path from "node:path";
 const OUT = path.join(process.cwd(), "proof/demo-followups-3");
 const BASE = process.env.PROOF_BASE_URL ?? "http://127.0.0.1:3000";
 const VIEWPORT = { width: 375, height: 812 };
-const SCROLL_KEY = "realtyrise.coach.scrollY.v1";
+const SCROLL_KEY = "realtyrise.coach.scrollY.v1:/coach";
 
 async function signInDemoBuyerCoach(page) {
-  await page.goto(`${BASE}/demo`);
-  await page.getByTestId("demo-persona-buyer-coach").getByRole("button").click();
+  await page.goto(`${BASE}/demo/enter/buyer-coach`);
   await page.waitForURL(/\/coach$/);
 }
 
 async function signInDemoBuyerDiscovery(page) {
-  await page.goto(`${BASE}/demo`);
-  await page.getByTestId("demo-persona-buyer-discovery").getByRole("button").click();
+  await page.goto(`${BASE}/demo/enter/buyer-discovery`);
   await page.waitForURL(/\/coach$/);
 }
 
@@ -35,8 +33,7 @@ async function main() {
     fullPage: false,
   });
 
-  const discoveryStarter = "What happens next?";
-  await page.getByRole("button", { name: discoveryStarter }).click();
+  await page.getByRole("button", { name: "What's next?" }).click();
   await page.getByTestId("concierge-answer").waitFor({ timeout: 20_000 });
   await page.screenshot({
     path: path.join(OUT, "discovery-after-ask-375.png"),
@@ -69,7 +66,7 @@ async function main() {
 
   await page
     .getByTestId("concierge-mobile-dock")
-    .getByRole("button", { name: "What happens next?" })
+    .getByRole("button", { name: "What's next?" })
     .click();
   await page.getByTestId("concierge-answer").waitFor({ timeout: 20_000 });
   await page.goto(`${BASE}/pricing`);

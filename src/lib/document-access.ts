@@ -165,7 +165,11 @@ export function listFixtureDocuments(input: {
           isGrantActive(grant, now),
       );
     })
-    .map(({ extractedSummary: _extractedSummary, ...listed }) => listed);
+    .map((row) => {
+      const { extractedSummary: _omit, ...listed } = row;
+      void _omit;
+      return listed;
+    });
 }
 
 export function grantFixtureDocument(input: {

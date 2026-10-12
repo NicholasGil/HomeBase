@@ -40,7 +40,7 @@ export function CoachFileSummaryCompact({
         </div>
         <Link
           href={transactionHref(view.transactionId)}
-          className="text-eyebrow font-medium text-muted-foreground underline-offset-2 hover:underline"
+          className="inline-flex min-h-11 items-center px-2 text-eyebrow font-medium text-muted-foreground underline-offset-2 hover:underline"
         >
           View file
         </Link>

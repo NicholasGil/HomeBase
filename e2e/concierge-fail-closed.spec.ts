@@ -54,7 +54,7 @@ test("fixture Alex discovery coach still answers when model key is not required"
   await page.getByTestId("sign-in-alex-discovery-empty").click();
   await expect(page).toHaveURL(/\/coach$/);
   const concierge = page.getByTestId("concierge");
-  await concierge.getByRole("button", { name: "What happens next?" }).click();
+  await concierge.getByRole("button", { name: "What's next?" }).click();
   const answer = concierge.getByTestId("concierge-answer").first();
   await expect(answer).toHaveAttribute("data-kind", "answer");
   await expect(answer).toContainText("No property is on this file yet");

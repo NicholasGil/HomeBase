@@ -2,12 +2,14 @@
 
 import {
   useCallback,
-  useState,
   useSyncExternalStore,
   type ReactNode,
 } from "react";
 
-import { ConciergeChat } from "@/components/concierge-chat";
+import {
+  ConciergeChat,
+  type ConciergeDockChipPreset,
+} from "@/components/concierge-chat";
 import { CoachDailyCheckIn } from "@/components/coach-daily-check-in";
 import {
   getCoachHabitSessionServerSnapshot,
@@ -30,6 +32,7 @@ export function CoachHabitConcierge({
   showAgentLinkWhenUnavailable,
   starters,
   allStarters,
+  dockChipPreset,
   pinStartersAboveScrollOnMobile,
   wrapMobileQuestionStarters,
   mobileStickyDockAboveTabBar,
@@ -48,6 +51,7 @@ export function CoachHabitConcierge({
   showAgentLinkWhenUnavailable?: boolean;
   starters?: readonly string[];
   allStarters?: readonly string[];
+  dockChipPreset?: ConciergeDockChipPreset;
   pinStartersAboveScrollOnMobile?: boolean;
   wrapMobileQuestionStarters?: boolean;
   mobileStickyDockAboveTabBar?: boolean;
@@ -67,18 +71,12 @@ export function CoachHabitConcierge({
   const returnWithThread = repeatVisit && hasCoachThread(habitSnapshot);
   const hideColdOpenEmpty =
     firstSession && returnWithThread && initialTurn !== null;
-  const [threadFromSubmit, setThreadFromSubmit] = useState(false);
-  const threadActive = initialTurn !== null || threadFromSubmit;
-
   function handleTurnComplete(turn: CoachHabitTurn) {
     persistCoachHabitSessionTurn(storageKey, turn);
   }
 
   const handleThreadActiveChange = useCallback(
     (active: boolean) => {
-      if (active) {
-        setThreadFromSubmit(true);
-      }
       onThreadActiveChange?.(active);
     },
     [onThreadActiveChange],
@@ -101,6 +99,7 @@ export function CoachHabitConcierge({
         showAgentLinkWhenUnavailable={showAgentLinkWhenUnavailable}
         starters={starters}
         allStarters={allStarters}
+        dockChipPreset={dockChipPreset}
         pinStartersAboveScrollOnMobile={pinStartersAboveScrollOnMobile}
         wrapMobileQuestionStarters={wrapMobileQuestionStarters}
         mobileStickyDockAboveTabBar={mobileStickyDockAboveTabBar}

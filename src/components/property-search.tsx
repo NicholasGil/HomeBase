@@ -144,7 +144,11 @@ export function PropertySearch({
       </div>
 
       <form className="space-y-3" action="/search" method="get">
-        <SearchQueryPill name="q" defaultValue={view.query} />
+        <SearchQueryPill
+          name="q"
+          defaultValue={view.query}
+          submitVariant={polishDemoUi ? "default" : "next"}
+        />
         <div className="flex flex-wrap items-center justify-between gap-2 px-1">
           <Link
             href={`/search?q=${encodeURIComponent(CANONICAL_SEARCH_QUERY)}`}

@@ -10,6 +10,7 @@ import {
   parseTestSessionCookie,
   startTestSessionDecision,
   TEST_SESSION_COOKIE,
+  testSessionCookieOptions,
   type TestSession,
 } from "@/lib/test-session";
 import { VENDOR_EXPIRY_COOKIE } from "@/lib/vendor-access";
@@ -34,11 +35,11 @@ export async function startTestSession(input: {
     return started;
   }
   const store = await cookies();
-  store.set(TEST_SESSION_COOKIE, encodeTestSessionCookie(started.session), {
-    httpOnly: true,
-    sameSite: "lax",
-    path: "/",
-  });
+  store.set(
+    TEST_SESSION_COOKIE,
+    encodeTestSessionCookie(started.session),
+    testSessionCookieOptions(),
+  );
   if (started.session.role === "vendor") {
     store.delete(VENDOR_EXPIRY_COOKIE);
   }

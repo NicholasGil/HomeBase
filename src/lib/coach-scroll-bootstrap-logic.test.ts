@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { COACH_SCROLL_STORAGE_KEY } from "@/lib/coach-scroll-key";
+import {
+  COACH_SCROLL_STORAGE_KEY,
+  coachScrollStorageKey,
+} from "@/lib/coach-scroll-key";
 import {
   clampCoachScrollTarget,
   isCoachScrollPath,
@@ -16,13 +19,13 @@ describe("coach scroll bootstrap logic", () => {
     expect(isCoachScrollPath("/pricing")).toBe(false);
   });
 
-  it("reads stored scroll offsets", () => {
+  it("reads stored scroll offsets keyed by pathname", () => {
+    const coachKey = coachScrollStorageKey("/coach");
     const storage = {
-      getItem: (key: string) =>
-        key === COACH_SCROLL_STORAGE_KEY ? "240" : null,
+      getItem: (key: string) => (key === coachKey ? "240" : null),
     };
-    expect(readCoachScrollYFromStorage(storage)).toBe(240);
-    expect(readCoachScrollYFromStorage({ getItem: () => "nope" })).toBeNull();
+    expect(readCoachScrollYFromStorage(storage, "/coach")).toBe(240);
+    expect(readCoachScrollYFromStorage({ getItem: () => "nope" }, "/coach")).toBeNull();
   });
 
   it("clamps scroll targets to the document", () => {
@@ -32,7 +35,6 @@ describe("coach scroll bootstrap logic", () => {
 
   it("restores scroll on coach when session storage has a value", () => {
     const scrollTo = vi.fn();
-    const style = { scrollBehavior: "" };
     const ok = restoreCoachScrollY({
       pathname: "/coach",
       storage: {
@@ -41,11 +43,9 @@ describe("coach scroll bootstrap logic", () => {
       scrollTo,
       scrollHeight: 2000,
       innerHeight: 812,
-      scrollBehaviorStyle: style,
     });
     expect(ok).toBe(true);
     expect(scrollTo).toHaveBeenCalledWith(0, 320);
-    expect(style.scrollBehavior).toBe("auto");
   });
 
   it("skips restore off coach or without a stored offset", () => {
@@ -56,7 +56,6 @@ describe("coach scroll bootstrap logic", () => {
       scrollTo,
       scrollHeight: 2000,
       innerHeight: 812,
-      scrollBehaviorStyle: { scrollBehavior: "" },
     });
     expect(scrollTo).not.toHaveBeenCalled();
   });
@@ -68,6 +67,8 @@ describe("coachScrollBootstrapScript", () => {
     expect(script).toContain(COACH_SCROLL_STORAGE_KEY);
     expect(script).toContain("popstate");
     expect(script).toContain("pageshow");
+    expect(script).toContain("pointerdown");
+    expect(script).toContain("pagehide");
     expect(script).toContain("scrollTo");
   });
 });

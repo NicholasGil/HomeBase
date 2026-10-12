@@ -235,6 +235,16 @@ You are the CTO and Directly Responsible Individual for the homebase repository.
 
 Post your P0 plan as PR-sized units with acceptance criteria, then execute. I read threads view-only.
 
-## 11. needs-human QUEUE — items the team will escalate
+## 11. MOBILE COACH DOCK (public demo @375)
+
+**RR-D-20 — File session dock:** Two short starter chips plus **More**, all at 14px (`text-sm`), `w-max` labels (no truncate). Preview labels e.g. “What’s next?”, “My inspection?”, “More”; canonical question strings stay in the More sheet, user bubble, and concierge answers. All eight `CONCIERGE_STARTERS` must remain reachable. The chip row fits one 331px-wide row with no horizontal scroll and no clipped text.
+
+**RR-D-21 — Discovery dock:** Same 2 short chips + **More** pattern (no sideways-scrolling full-length labels).
+
+**Flush opaque dock:** The sticky concierge dock sits flush above the tab bar; Playwright `assertComposeClearsTabBar` enforces **0px** clearance between compose and tab bar (safe-area only). Tab bar **hide-on-focus is dropped** — `MobileTabBar` is always visible on mobile; concierge compose does not hide it.
+
+**RR-D-23 — Daily check-in on return:** On every return visit (thread or not), `coach-daily-check-in` renders in the concierge scroll region **above** the file summary card, never under the sticky dock. It may remain visible during an active thread.
+
+## 12. needs-human QUEUE — items the team will escalate
 
 Brokerage formation or written partnership with a licensed broker · Valley MLS / NALMLS membership · signed IDX or RESO data license · attorney review of RESPA structure before M10 compensation · attorney review of M7 output against state UPL rules · E&O and cyber liability coverage · per-state biometric/IDV review before FLAG_IDV · every production credential, payment method, and signature.

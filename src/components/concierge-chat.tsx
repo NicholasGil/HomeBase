@@ -23,12 +23,31 @@ import {
 } from "@/components/ui/sheet";
 import type { ConciergeAvailability } from "@/lib/concierge-availability";
 import {
+  resolveDiscoveryDockQuestion,
+  resolveFileSessionDockQuestion,
+} from "@/lib/concierge-dock-chips";
+import {
   CONCIERGE_STARTERS,
   FILE_SESSION_DOCK_PREVIEW_COUNT,
 } from "@/lib/concierge-starters";
 import { CONCIERGE_MODEL_UNAVAILABLE_ANSWER } from "../../lib/llm/types";
 
 export { CONCIERGE_STARTERS };
+
+export type ConciergeDockChipPreset = "discovery" | "file-demo";
+
+function resolveQuestionForDockPreset(
+  preset: ConciergeDockChipPreset | undefined,
+  label: string,
+): string {
+  if (preset === "discovery") {
+    return resolveDiscoveryDockQuestion(label);
+  }
+  if (preset === "file-demo") {
+    return resolveFileSessionDockQuestion(label);
+  }
+  return label;
+}
 
 const CHIP_DISABLED_REASON =
   "AI coach unavailable — model key not configured on this deployment.";
@@ -39,9 +58,6 @@ const MOBILE_COMPOSE_DOCK =
 
 const MOBILE_COMPOSE_FIXED =
   "max-md:fixed max-md:inset-x-0 max-md:z-40 max-md:bottom-[calc(var(--tab-bar-height)+env(safe-area-inset-bottom)+1rem)] max-md:border-t max-md:border-border/70 max-md:bg-card max-md:px-5 max-md:pt-2 max-md:pb-4 max-md:shadow-[0_-8px_24px_-12px_rgba(15,23,42,0.14)]";
-
-const MOBILE_COMPOSE_GRID =
-  "max-md:row-start-3 max-md:-mx-5 max-md:px-5 max-md:pb-[env(safe-area-inset-bottom)]";
 
 /** File-session mobile: chips + Ask fixed above the tab bar; page scrolls. */
 const MOBILE_STICKY_DOCK =
@@ -80,6 +96,7 @@ export function ConciergeChat({
   className,
   starters = CONCIERGE_STARTERS,
   allStarters,
+  dockChipPreset,
   idleHint = "Tap a starter below or ask about this transaction. I explain what is on this file; I do not advise.",
   questionPlaceholder = "Ask about this transaction",
   availability = "ready",
@@ -104,6 +121,8 @@ export function ConciergeChat({
   starters?: readonly string[];
   /** Full starter catalog (e.g. demo dock shows `starters` + More sheet). */
   allStarters?: readonly string[];
+  /** Maps short dock chip labels to canonical concierge questions. */
+  dockChipPreset?: ConciergeDockChipPreset;
   idleHint?: string;
   questionPlaceholder?: string;
   availability?: ConciergeAvailability;
@@ -201,13 +220,25 @@ export function ConciergeChat({
     chipsScrollRef.current.scrollLeft = 0;
   }, [mobileStickyDock, starters]);
 
-  const skipInitialAnswerScrollRef = useRef(initialTurn !== null);
-  useEffect(() => {
-    if (!mobileStickyDock || answer === null) {
+  useLayoutEffect(() => {
+    if (
+      !mobileStickyDock ||
+      answer === null ||
+      !pinRestoredThreadOnMobile ||
+      initialTurn === null
+    ) {
       return;
     }
-    if (skipInitialAnswerScrollRef.current) {
-      skipInitialAnswerScrollRef.current = false;
+    answerRef.current?.scrollIntoView({ block: "end", behavior: "auto" });
+  }, [
+    answer,
+    mobileStickyDock,
+    pinRestoredThreadOnMobile,
+    initialTurn,
+  ]);
+
+  useEffect(() => {
+    if (!mobileStickyDock || answer === null || initialTurn !== null) {
       return;
     }
     answerRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
@@ -402,6 +433,13 @@ export function ConciergeChat({
   }
 
   function renderStarterChip(starter: string, inMoreSheet = false) {
+    const question = resolveQuestionForDockPreset(dockChipPreset, starter);
+    const title =
+      coachUnavailable
+        ? CHIP_DISABLED_REASON
+        : question !== starter
+          ? question
+          : undefined;
     return (
       <Button
         key={inMoreSheet ? `more-${starter}` : starter}
@@ -414,6 +452,11 @@ export function ConciergeChat({
             "w-max max-md:h-11 max-md:justify-start max-md:whitespace-nowrap",
           mobileStickyDock &&
             !inMoreSheet &&
+            dockUsesCompactGrid &&
+            "max-md:h-11 max-md:w-max max-md:max-w-none max-md:shrink-0 max-md:px-3 max-md:text-sm max-md:leading-snug max-md:whitespace-nowrap",
+          mobileStickyDock &&
+            !inMoreSheet &&
+            !dockUsesCompactGrid &&
             "max-md:min-h-11 max-md:min-w-0 max-md:max-w-full max-md:truncate max-md:px-3 max-md:text-xs max-md:leading-snug",
           wrapMobileStarters &&
             "w-max max-w-[min(17.5rem,calc(100vw-3rem))] whitespace-normal",
@@ -424,11 +467,11 @@ export function ConciergeChat({
           inMoreSheet && "w-full justify-start whitespace-normal",
         )}
         disabled={busy || coachUnavailable}
-        title={coachUnavailable ? CHIP_DISABLED_REASON : undefined}
+        title={title}
         onClick={() => {
           setMoreStartersOpen(false);
-          setQuestion(starter);
-          void submit(starter);
+          setQuestion(question);
+          void submit(question);
         }}
       >
         {starter}
@@ -451,7 +494,7 @@ export function ConciergeChat({
           wrapMobileStarters && "flex-wrap",
           mobileStickyDock &&
             dockUsesCompactGrid &&
-            "max-md:grid max-md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] max-md:items-center max-md:gap-2 max-md:pb-0",
+            "max-md:flex max-md:flex-row max-md:flex-nowrap max-md:items-center max-md:justify-start max-md:gap-2 max-md:overflow-x-hidden max-md:pb-0",
           mobileStickyDock &&
             !dockUsesCompactGrid &&
             "max-md:flex-wrap max-md:gap-2 max-md:pb-0",
@@ -472,7 +515,7 @@ export function ConciergeChat({
             data-testid="concierge-more-starters"
             aria-label="More questions"
             disabled={busy || coachUnavailable}
-            className="h-auto min-h-11 w-max max-w-[5.5rem] shrink-0 rounded-full bg-muted px-3 py-2 text-left text-sm text-foreground hover:bg-muted/80 max-md:col-span-1 max-md:h-11 max-md:min-w-[3.25rem] max-md:justify-center max-md:px-3 max-md:whitespace-nowrap disabled:pointer-events-none disabled:opacity-50"
+            className="h-auto min-h-11 w-max shrink-0 rounded-full bg-muted px-3 py-2 text-left text-sm text-foreground hover:bg-muted/80 max-md:h-11 max-md:justify-center max-md:px-3 max-md:text-sm max-md:whitespace-nowrap disabled:pointer-events-none disabled:opacity-50"
           >
             More
           </SheetTrigger>

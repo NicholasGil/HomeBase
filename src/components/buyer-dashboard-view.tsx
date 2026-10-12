@@ -9,19 +9,13 @@ import { seedPropertyPhoto } from "@/components/property-photo";
 import { StageTaskRows } from "@/components/stage-task-rows";
 import { taskAnchorId } from "@/components/task-anchor";
 import { Badge } from "@/components/ui/badge";
-import {
-  HERO_GRID_CLASS,
-  OwedTodayFigure,
-  TenSecondHeroGrid,
-} from "@/components/ten-second-hero";
+import { TenSecondHeroGrid } from "@/components/ten-second-hero";
 import type { JourneyOrientation } from "@/components/journey-tracker";
 import type {
   BuyerDashboardView,
   DashboardContact,
 } from "../../convex/lib/dashboardView";
 import { heroPhotoWashClassName } from "@/lib/trip-ui";
-import { cn } from "@/lib/utils";
-
 export { HERO_GRID_CLASS, OwedTodayFigure } from "@/components/ten-second-hero";
 
 /** Same shape the agent command center links with; the route decodes it. */

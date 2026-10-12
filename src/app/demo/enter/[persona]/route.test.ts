@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { TEST_SESSION_COOKIE } from "@/lib/test-session";
+import {
+  TEST_SESSION_COOKIE,
+  TEST_SESSION_MAX_AGE_SECONDS,
+} from "@/lib/test-session";
+import { VENDOR_EXPIRY_COOKIE } from "@/lib/vendor-access";
 
 describe("GET /demo/enter/[persona]", () => {
   beforeEach(() => {
@@ -67,7 +71,7 @@ describe("GET /demo/enter/[persona]", () => {
 
     expect(response.status).toBeGreaterThanOrEqual(300);
     expect(response.status).toBeLessThan(400);
-    expect(new URL(response.headers.get("location")!).pathname).toBe("/demo");
+    expect(response.headers.get("location")).toBe("/demo");
     expect(response.cookies.get(TEST_SESSION_COOKIE)).toBeUndefined();
   });
 
@@ -133,6 +137,7 @@ describe("GET /demo/enter/[persona]", () => {
 
   it("sets the test-session cookie and redirects buyer-coach to /coach", async () => {
     vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("REALTYRISE_DEMO_MODE", "1");
     vi.stubEnv("CLERK_SECRET_KEY", "");
     vi.stubEnv("NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", "");
@@ -147,9 +152,47 @@ describe("GET /demo/enter/[persona]", () => {
 
     expect(response.status).toBeGreaterThanOrEqual(300);
     expect(response.status).toBeLessThan(400);
-    expect(new URL(response.headers.get("location")!).pathname).toBe("/coach");
+    expect(response.headers.get("location")).toBe("/coach");
     const cookie = response.cookies.get(TEST_SESSION_COOKIE);
     expect(cookie?.value).toMatch(/^clerk_buyer_a/);
+    expect(cookie?.maxAge).toBe(TEST_SESSION_MAX_AGE_SECONDS);
+    expect(cookie?.secure).toBe(true);
+  });
+
+  it("clears vendor expiry cookie when entering as vendor", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("REALTYRISE_DEMO_MODE", "1");
+    vi.stubEnv("CLERK_SECRET_KEY", "");
+    vi.stubEnv("NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", "");
+
+    const GET = await loadGet();
+    const response = await GET(
+      new Request("http://localhost/demo/enter/vendor"),
+      {
+        params: Promise.resolve({ persona: "vendor" }),
+      },
+    );
+
+    expect(response.headers.get("location")).toBe("/vendor");
+    expect(response.cookies.get(VENDOR_EXPIRY_COOKIE)?.value).toBe("");
+  });
+
+  it("redirects with a root-relative Location on the request host (not hardcoded localhost)", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("REALTYRISE_DEMO_MODE", "1");
+    vi.stubEnv("CLERK_SECRET_KEY", "");
+    vi.stubEnv("NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", "");
+
+    const GET = await loadGet();
+    const response = await GET(
+      new Request("https://realtyrise.app/demo/enter/buyer-coach"),
+      {
+        params: Promise.resolve({ persona: "buyer-coach" }),
+      },
+    );
+
+    expect(response.headers.get("location")).toBe("/coach");
   });
 
   it("redirects buyer-discovery to /coach with discovery-empty session marker", async () => {
@@ -166,7 +209,7 @@ describe("GET /demo/enter/[persona]", () => {
       },
     );
 
-    expect(new URL(response.headers.get("location")!).pathname).toBe("/coach");
+    expect(response.headers.get("location")).toBe("/coach");
     const cookie = response.cookies.get(TEST_SESSION_COOKIE);
     expect(cookie?.value).toContain("empty");
   });

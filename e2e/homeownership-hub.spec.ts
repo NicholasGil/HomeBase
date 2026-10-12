@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("closed buyer sees the four hub surfaces", async ({ page }) => {
   await page.goto("/test-login");

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("FLAG_ESIGN off rejects provider send and sign", async ({ page }) => {
   await page.goto("/test-login");

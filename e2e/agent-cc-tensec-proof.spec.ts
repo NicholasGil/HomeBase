@@ -1,7 +1,7 @@
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
 
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 const PROOF_DIR = path.join("proof", "agent-cc-tensec");
 const VIEWPORT = { width: 375, height: 812 };

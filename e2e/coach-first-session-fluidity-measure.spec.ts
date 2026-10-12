@@ -1,7 +1,7 @@
 import { writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 import { discoveryDockPreviewLabels } from "../src/lib/concierge-dock-chips";
 import { scrollCoachConciergeToEnd } from "./coach-dock-assertions";

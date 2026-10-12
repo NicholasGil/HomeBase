@@ -24,7 +24,13 @@ export function readTransactionScrollY(pathname: string): number | null {
   }
 }
 
-export function writeTransactionScrollY(y: number, pathname: string): void {
+export type WriteTransactionScrollOptions = { forceZero?: boolean };
+
+export function writeTransactionScrollY(
+  y: number,
+  pathname: string,
+  options?: WriteTransactionScrollOptions,
+): void {
   if (!isTransactionScrollPath(pathname)) {
     return;
   }
@@ -32,6 +38,12 @@ export function writeTransactionScrollY(y: number, pathname: string): void {
     return;
   }
   const rounded = Math.max(0, Math.round(y));
+  if (rounded <= 0 && !options?.forceZero) {
+    const existing = readTransactionScrollY(pathname);
+    if (existing !== null && existing > 0) {
+      return;
+    }
+  }
   try {
     sessionStorage.setItem(
       transactionScrollStorageKey(pathname),
@@ -40,6 +52,35 @@ export function writeTransactionScrollY(y: number, pathname: string): void {
   } catch {
     // ignore
   }
+}
+
+/** Pointerdown / pagehide leave — never clobber positive depth with zero. */
+export function transactionScrollYForLeavePersist(
+  scrollY: number,
+  lastScrollYForPath: number,
+): number | null {
+  const y = scrollY > 0 ? scrollY : lastScrollYForPath;
+  return y > 0 ? Math.round(y) : null;
+}
+
+/** @deprecated use transactionScrollYForLeavePersist */
+export function transactionScrollYForPageHidePersist(
+  scrollY: number,
+  lastScrollY: number,
+): number | null {
+  return transactionScrollYForLeavePersist(scrollY, lastScrollY);
+}
+
+export function persistTransactionScrollOnLeave(
+  scrollY: number,
+  lastScrollYForPath: number,
+  pathname: string,
+): void {
+  const y = transactionScrollYForLeavePersist(scrollY, lastScrollYForPath);
+  if (y === null) {
+    return;
+  }
+  writeTransactionScrollY(y, pathname);
 }
 
 export function clampTransactionScrollTarget(

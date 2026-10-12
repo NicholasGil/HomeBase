@@ -1,7 +1,7 @@
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
 
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 import { CONCIERGE_STARTERS } from "../src/components/concierge-chat";
 import { discoveryDockPreviewLabels } from "../src/lib/concierge-dock-chips";

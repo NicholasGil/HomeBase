@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   clampTransactionScrollTarget,
   isTransactionScrollPath,
+  persistTransactionScrollOnLeave,
   readTransactionScrollY,
   writeTransactionScrollY,
 } from "@/lib/transaction-scroll-storage";
@@ -39,7 +40,21 @@ export function TransactionScrollRestoration() {
   const onTransaction = isTransactionScrollPath(pathname);
   const pathnameRef = useRef(pathname);
   const restoringRef = useRef(false);
-  const lastScrollYRef = useRef(0);
+  const lastScrollYByPathRef = useRef<Map<string, number>>(new Map());
+  const userScrolledRef = useRef(false);
+  const blockZeroSaveUntilRef = useRef(0);
+
+  const lastYForPath = (path: string): number =>
+    lastScrollYByPathRef.current.get(path) ?? 0;
+
+  const setLastYForPath = (path: string, y: number) => {
+    lastScrollYByPathRef.current.set(path, y);
+  };
+
+  const seedLastYFromStorage = (path: string) => {
+    const stored = readTransactionScrollY(path);
+    setLastYForPath(path, stored !== null && stored > 0 ? stored : 0);
+  };
 
   useEffect(() => {
     pathnameRef.current = pathname;
@@ -52,6 +67,8 @@ export function TransactionScrollRestoration() {
       window.innerHeight,
     );
     restoringRef.current = true;
+    blockZeroSaveUntilRef.current = Date.now() + 500;
+    setLastYForPath(path, target);
     window.scrollTo(0, target);
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -65,6 +82,10 @@ export function TransactionScrollRestoration() {
     if (!onTransaction) {
       return;
     }
+
+    const mountPath = pathname;
+    userScrolledRef.current = false;
+    seedLastYFromStorage(mountPath);
 
     const restoreUntilStable = (path: string, storedY: number | null) => {
       let cancelled = false;
@@ -145,6 +166,9 @@ export function TransactionScrollRestoration() {
       }
       cancelRestore();
       const y = readTransactionScrollY(pathnameRef.current);
+      if (y !== null && y > 0) {
+        setLastYForPath(pathnameRef.current, y);
+      }
       cancelRestore = restoreUntilStable(pathnameRef.current, y);
     };
 
@@ -153,12 +177,14 @@ export function TransactionScrollRestoration() {
       if (!isTransactionScrollPath(pathnameRef.current)) {
         return;
       }
+      userScrolledRef.current = false;
+      seedLastYFromStorage(pathnameRef.current);
       restoreFromStorage();
       clearTransactionScrollPopNavigation();
     };
     window.addEventListener("popstate", onPopState);
 
-    if (consumeTransactionScrollPopNavigation(pathname)) {
+    if (consumeTransactionScrollPopNavigation(mountPath)) {
       restoreFromStorage();
     }
     const onPageShow = (event: PageTransitionEvent) => {
@@ -175,14 +201,15 @@ export function TransactionScrollRestoration() {
     window.addEventListener("pageshow", onPageShow);
 
     const onPageHide = () => {
-      const path = pathnameRef.current;
+      const path = window.location.pathname;
       if (!isTransactionScrollPath(path)) {
         return;
       }
-      const y =
-        window.scrollY > 0 ? window.scrollY : lastScrollYRef.current;
-      lastScrollYRef.current = y;
-      writeTransactionScrollY(y, path);
+      persistTransactionScrollOnLeave(
+        window.scrollY,
+        lastYForPath(path),
+        path,
+      );
     };
     window.addEventListener("pagehide", onPageHide);
 
@@ -191,11 +218,12 @@ export function TransactionScrollRestoration() {
       window.removeEventListener("popstate", onPopState);
       window.removeEventListener("pageshow", onPageShow);
       window.removeEventListener("pagehide", onPageHide);
-      const path = pathnameRef.current;
-      if (isTransactionScrollPath(path)) {
-        const y =
-          window.scrollY > 0 ? window.scrollY : lastScrollYRef.current;
-        writeTransactionScrollY(y, path);
+      if (isTransactionScrollPath(mountPath)) {
+        persistTransactionScrollOnLeave(
+          window.scrollY,
+          lastYForPath(mountPath),
+          mountPath,
+        );
       }
       if (!isCoachScrollPath(window.location.pathname)) {
         resetCoachScrollRestorationToAuto();
@@ -207,36 +235,63 @@ export function TransactionScrollRestoration() {
     if (!onTransaction) {
       return;
     }
+    userScrolledRef.current = false;
+    document.documentElement.dataset.txnScrollListen = "1";
+
+    const markUserScroll = () => {
+      if (!restoringRef.current) {
+        userScrolledRef.current = true;
+      }
+    };
+    window.addEventListener("wheel", markUserScroll, { passive: true });
+    window.addEventListener("touchmove", markUserScroll, { passive: true });
+    window.addEventListener("keydown", markUserScroll);
+
     let frame = 0;
     const onScroll = () => {
-      if (!isTransactionScrollPath(pathnameRef.current)) {
+      const path = pathnameRef.current;
+      if (!isTransactionScrollPath(path)) {
         return;
       }
       const y = window.scrollY;
       if (y > 0) {
-        lastScrollYRef.current = y;
-        writeTransactionScrollY(y, pathnameRef.current);
+        setLastYForPath(path, y);
+        writeTransactionScrollY(y, path);
+      }
+      if (restoringRef.current) {
+        return;
       }
       window.cancelAnimationFrame(frame);
       frame = window.requestAnimationFrame(() => {
-        if (!isTransactionScrollPath(pathnameRef.current)) {
+        if (restoringRef.current) {
+          return;
+        }
+        const activePath = pathnameRef.current;
+        if (!isTransactionScrollPath(activePath)) {
           return;
         }
         const latest = window.scrollY;
         if (latest > 0) {
-          lastScrollYRef.current = latest;
-          writeTransactionScrollY(latest, pathnameRef.current);
+          setLastYForPath(activePath, latest);
+          writeTransactionScrollY(latest, activePath);
+          return;
         }
+        if (Date.now() < blockZeroSaveUntilRef.current) {
+          return;
+        }
+        const prev = readTransactionScrollY(activePath);
+        if (prev !== null && prev > 0 && !userScrolledRef.current) {
+          return;
+        }
+        if (userScrolledRef.current && lastYForPath(activePath) > 0) {
+          userScrolledRef.current = false;
+        }
+        setLastYForPath(activePath, 0);
+        writeTransactionScrollY(0, activePath, { forceZero: true });
       });
     };
     window.addEventListener("scroll", onScroll, { passive: true });
 
-    const saveScroll = () => {
-      const y =
-        window.scrollY > 0 ? window.scrollY : lastScrollYRef.current;
-      lastScrollYRef.current = y;
-      writeTransactionScrollY(y, pathname);
-    };
     const onLeavingPointer = (event: Event) => {
       const target = event.target;
       if (!(target instanceof Element)) {
@@ -247,13 +302,25 @@ export function TransactionScrollRestoration() {
         anchor instanceof HTMLAnchorElement &&
         shouldSaveScrollForLink(anchor)
       ) {
-        saveScroll();
+        const path = pathnameRef.current;
+        if (!isTransactionScrollPath(path)) {
+          return;
+        }
+        persistTransactionScrollOnLeave(
+          window.scrollY,
+          lastYForPath(path),
+          path,
+        );
       }
     };
     document.addEventListener("pointerdown", onLeavingPointer, true);
     document.addEventListener("mousedown", onLeavingPointer, true);
 
     return () => {
+      delete document.documentElement.dataset.txnScrollListen;
+      window.removeEventListener("wheel", markUserScroll);
+      window.removeEventListener("touchmove", markUserScroll);
+      window.removeEventListener("keydown", markUserScroll);
       window.removeEventListener("scroll", onScroll);
       document.removeEventListener("pointerdown", onLeavingPointer, true);
       document.removeEventListener("mousedown", onLeavingPointer, true);

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("buyer login lands on coach and denies another transaction by URL", async ({
   page,

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../fixtures";
 
 import { DEMO_PERSONA_ENTER } from "../../src/lib/demo-persona-enter";
 import { TEST_SESSION_COOKIE } from "../../src/lib/test-session";

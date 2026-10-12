@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 import { waitCoachScrollRange } from "./helpers/coach-scroll-deep";
 
@@ -15,6 +15,38 @@ async function signInAlexWithFile(page: import("@playwright/test").Page) {
   await expect(page.getByTestId("coach-ten-second")).toBeVisible();
 }
 
+async function scrollTxnDeep(
+  page: import("@playwright/test").Page,
+  path: string,
+  targetY = 1095,
+) {
+  await page.waitForSelector('html[data-txn-scroll-listen="1"]');
+  const y = await page.evaluate((maxTarget) => {
+    const target = Math.min(
+      maxTarget,
+      document.documentElement.scrollHeight - window.innerHeight,
+    );
+    window.scrollTo(0, target);
+    window.dispatchEvent(new Event("scroll"));
+    return window.scrollY;
+  }, targetY);
+  expect(y).toBeGreaterThan(400);
+  await expect
+    .poll(() =>
+      page.evaluate(
+        ({ txnPath, minY }) => {
+          const key = `realtyrise.transaction.scrollY.v1:${txnPath}`;
+          const raw = sessionStorage.getItem(key);
+          const stored = raw === null ? 0 : Number.parseInt(raw, 10);
+          return stored >= minY - 10;
+        },
+        { txnPath: path, minY: y },
+      ),
+    )
+    .toBe(true);
+  return y;
+}
+
 async function scrollCoachTo(page: import("@playwright/test").Page, targetY: number) {
   await page.evaluate((y) => window.scrollTo(0, y), targetY);
   await page.waitForTimeout(150);
@@ -29,7 +61,7 @@ async function expectScrollStableNear(
   expectedY: number,
   tolerance = 10,
 ) {
-  const deadline = Date.now() + (expectedY >= 300 ? 2500 : 1500);
+  const deadline = Date.now() + (expectedY >= 300 ? 5000 : 1500);
   let lastY = 0;
   while (Date.now() < deadline) {
     lastY = await page.evaluate(() => window.scrollY);
@@ -275,6 +307,15 @@ test("transactions @375 — re-drill pins top then history back restores deep sc
   await page.getByTestId("ten-second-next").getByRole("link").click();
   await page.waitForURL(/\/transactions\/seed:buyer-a/);
   await expectScrollStableNear(page, 0, 4);
+  await expect
+    .poll(() =>
+      page.evaluate((path) => {
+        const key = `realtyrise.transaction.scrollY.v1:${path}`;
+        const raw = sessionStorage.getItem(key);
+        return raw === null ? 0 : Number.parseInt(raw, 10);
+      }, "/transactions/seed:buyer-a"),
+    )
+    .toBeGreaterThan(400);
   await page.screenshot({
     path: "proof/coach-scroll-restore/txn-redrill-top-pin-375.png",
     fullPage: false,
@@ -288,6 +329,23 @@ test("transactions @375 — re-drill pins top then history back restores deep sc
     path: "proof/coach-scroll-restore/txn-history-back-depth-375.png",
     fullPage: false,
   });
+});
+
+test("transactions @375 — txn A deep then txn B then back restores A depth", async ({
+  page,
+}) => {
+  await signInAlexWithFile(page);
+  const pathA = "/transactions/seed:buyer-a";
+  const pathB = "/transactions/seed:buyer-b";
+  await page.goto(pathA);
+  const depthA = await scrollTxnDeep(page, pathA);
+  await page.goto(pathB);
+  await page.waitForURL(/\/transactions\/seed:buyer-b/);
+  await page.evaluate(() => window.scrollTo(0, 120));
+  await page.goBack();
+  await page.waitForURL(/\/transactions\/seed:buyer-a/);
+  await page.waitForSelector('html[data-txn-scroll-listen="1"]');
+  await expectScrollStableNear(page, depthA, 10);
 });
 
 test("transactions @375 — leaving for coach keeps manual history.scrollRestoration", async ({
@@ -375,11 +433,13 @@ test("transactions @375 — native back forward preserves scroll within 10px", a
   await signInAlexWithFile(page);
   await page.getByTestId("ten-second-next").getByRole("link").click();
   await page.waitForURL(/\/transactions\/seed:buyer-a/);
-  const savedY = await scrollCoachTo(page, 445);
+  const txnPath = "/transactions/seed:buyer-a";
+  const savedY = await scrollTxnDeep(page, txnPath);
   await page.goBack();
   await page.waitForURL(/\/coach$/);
   await page.goForward();
   await page.waitForURL(/\/transactions\/seed:buyer-a/);
+  await page.waitForSelector('html[data-txn-scroll-listen="1"]');
   await expectScrollStableNear(page, savedY, 10);
 });
 

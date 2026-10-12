@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../fixtures";
 
 import { CONCIERGE_STARTERS } from "../../src/lib/concierge-starters";
 import {

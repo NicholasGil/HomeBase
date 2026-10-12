@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../fixtures";
 
 import { CONCIERGE_STARTERS, FILE_SESSION_DOCK_PREVIEW_COUNT } from "../../src/lib/concierge-starters";
 import { FILE_SESSION_DOCK_CHIPS } from "../../src/lib/concierge-dock-chips";

@@ -8,6 +8,7 @@ import {
 } from "@/lib/coach-scroll-key";
 import {
   clampCoachScrollTarget,
+  coachScrollBootstrapScriptBody,
   isCoachScrollPath,
   readCoachScrollYFromStorage,
   restoreCoachScrollY,
@@ -85,6 +86,10 @@ describe("coachScrollBootstrapScript", () => {
     expect(script).toContain("resetScrollRestoration");
     expect(script).toContain("applyDemoCoachScrollReset");
     expect(script).toContain("e.persisted");
+    expect(script).toContain("userScrolled");
+    expect(script).toContain("markUserScroll");
+    expect(script).toContain("touchmove");
+    expect(script).toContain("!userScrolled");
   });
 
   it("keys first-paint restore by location.pathname (not hardcoded /coach)", () => {
@@ -103,5 +108,24 @@ describe("coachScrollBootstrapScript", () => {
     expect(coachScrollRestoreOnPageShow({ persisted: false }, "/coach")).toBe(
       false,
     );
+  });
+
+  it.each([
+    ["coachScrollBootstrapScript()", () => coachScrollBootstrapScript()],
+    [
+      "coachScrollBootstrapScriptBody(storage key)",
+      () =>
+        `(function(){${coachScrollBootstrapScriptBody("realtyrise.coach.scrollY")}})();`,
+    ],
+    [
+      "coachScrollBootstrapScriptBody(custom prefix)",
+      () =>
+        `(function(){${coachScrollBootstrapScriptBody("custom.prefix.v2")}})();`,
+    ],
+  ])("parses emitted inline bootstrap script: %s", (_label, scriptFn) => {
+    const script = scriptFn();
+    expect(() => {
+      new Function(script);
+    }).not.toThrow();
   });
 });

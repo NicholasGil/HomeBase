@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 import { DEFAULT_FEATURE_FLAGS } from "../src/lib/flags";
 

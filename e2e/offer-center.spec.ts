@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("offer draft is blocked by the licensee gate", async ({ page }) => {
   await page.goto("/test-login");

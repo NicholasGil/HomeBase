@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 import { SEED_TOUR, SEED_TOUR_PROPERTY_IDS } from "../convex/seedPlan";
 

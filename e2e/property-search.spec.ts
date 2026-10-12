@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 import { CANONICAL_SEARCH_QUERY } from "../convex/lib/propertySearch";
 import {

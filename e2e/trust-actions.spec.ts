@@ -1,4 +1,4 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, type Page, test } from "./fixtures";
 
 async function expectNoRuntimeOverlay(page: Page) {
   await expect(page.getByRole("heading", { name: "Runtime Error" })).toHaveCount(

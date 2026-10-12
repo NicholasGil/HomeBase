@@ -1,7 +1,7 @@
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
 
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 import { COACH_FIRST_SESSION_STARTERS } from "../src/lib/coach-first-session";
 import { tapConciergeStarter } from "./concierge-dock-helpers";

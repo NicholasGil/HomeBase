@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("buyer vault route shows locked upsell copy", async ({ page }) => {
   await page.goto("/test-login");

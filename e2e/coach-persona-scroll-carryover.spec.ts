@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 /** Fixture test-login carry-over; demo same-tab coverage in demo-mode/coach-persona-scroll-carryover.spec.ts */
 

@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -39,7 +37,7 @@ function PersonaCard({
         <CardDescription className="text-pretty">{description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <Link
+        <a
           href={enterHref}
           className={cn(
             buttonVariants({ variant: "default" }),
@@ -47,7 +45,7 @@ function PersonaCard({
           )}
         >
           {actionLabel}
-        </Link>
+        </a>
       </CardContent>
     </Card>
   );

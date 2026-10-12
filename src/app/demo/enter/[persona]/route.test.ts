@@ -71,6 +71,26 @@ describe("GET /demo/enter/[persona]", () => {
     expect(response.cookies.get(TEST_SESSION_COOKIE)).toBeUndefined();
   });
 
+  it("returns 204 without a cookie for prefetch requests", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("REALTYRISE_DEMO_MODE", "1");
+    vi.stubEnv("CLERK_SECRET_KEY", "");
+    vi.stubEnv("NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", "");
+
+    const GET = await loadGet();
+    const response = await GET(
+      new Request("http://localhost/demo/enter/buyer-coach", {
+        headers: { Purpose: "prefetch" },
+      }),
+      {
+        params: Promise.resolve({ persona: "buyer-coach" }),
+      },
+    );
+
+    expect(response.status).toBe(204);
+    expect(response.cookies.get(TEST_SESSION_COOKIE)).toBeUndefined();
+  });
+
   it("sets the test-session cookie and redirects buyer-coach to /coach", async () => {
     vi.stubEnv("VERCEL_ENV", "production");
     vi.stubEnv("REALTYRISE_DEMO_MODE", "1");

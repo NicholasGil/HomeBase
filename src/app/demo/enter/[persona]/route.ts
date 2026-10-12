@@ -6,6 +6,7 @@ import {
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
 import { DEMO_CHOOSER_PATH } from "@/lib/demo-copy";
+import { isDemoEnterPrefetchRequest } from "@/lib/demo-enter-prefetch";
 import {
   encodeTestSessionCookie,
   fixtureHomePath,
@@ -42,6 +43,10 @@ export async function GET(
 ) {
   if (!fixtureAllowed() || !isDemoMode()) {
     throw new ProductionAuthMisconfiguredError();
+  }
+
+  if (isDemoEnterPrefetchRequest(request)) {
+    return new NextResponse(null, { status: 204 });
   }
 
   const { persona } = await context.params;

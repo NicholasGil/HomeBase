@@ -1,6 +1,6 @@
 {
-  "capturedAt": "2026-10-12T06:26:13.380Z",
-  "gitSha": "bc42340a049f7b0b74881453b3272618def9cd01",
+  "capturedAt": "2026-10-12T06:54:33.127Z",
+  "gitSha": "f6d7f6103493a5f12bd06869b33c469f6b5f1095",
   "gitShaNote": "Capture-time HEAD (code under test). Proof files are committed separately.",
   "viewportWidth": 375,
   "env": {

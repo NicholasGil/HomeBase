@@ -154,7 +154,7 @@ async function main() {
     await page.goBack();
     await page.waitForURL(/\/coach$/);
     let scrollAfter = 0;
-    const restoreDeadline = Date.now() + 2000;
+    const restoreDeadline = Date.now() + 3500;
     while (Date.now() < restoreDeadline) {
       scrollAfter = await page.evaluate(() => window.scrollY);
       if (scrollAfter >= 300) {

@@ -18,7 +18,6 @@ import { Button } from "@/components/ui/button";
 import type { ConciergeAvailability } from "@/lib/concierge-availability";
 import { CONCIERGE_STARTERS } from "@/lib/concierge-starters";
 import { CONCIERGE_MODEL_UNAVAILABLE_ANSWER } from "../../lib/llm/types";
-import { setCoachAskInputFocused } from "@/lib/coach-mobile-chrome";
 
 export { CONCIERGE_STARTERS };
 
@@ -29,12 +28,15 @@ const CHIP_DISABLED_REASON =
 const MOBILE_COMPOSE_DOCK =
   "max-md:absolute max-md:inset-x-0 max-md:bottom-2 max-md:z-20 max-md:-mx-5 max-md:px-5 max-md:pb-[env(safe-area-inset-bottom)]";
 
+const MOBILE_COMPOSE_FIXED =
+  "max-md:fixed max-md:inset-x-0 max-md:z-40 max-md:bottom-[calc(var(--tab-bar-height)+env(safe-area-inset-bottom)+1rem)] max-md:border-t max-md:border-border/70 max-md:bg-card max-md:px-5 max-md:pt-2 max-md:pb-4 max-md:shadow-[0_-8px_24px_-12px_rgba(15,23,42,0.14)]";
+
 const MOBILE_COMPOSE_GRID =
   "max-md:row-start-3 max-md:-mx-5 max-md:px-5 max-md:pb-[env(safe-area-inset-bottom)]";
 
 /** File-session mobile: chips + Ask fixed above the tab bar; page scrolls. */
 const MOBILE_STICKY_DOCK =
-  "max-md:fixed max-md:inset-x-0 max-md:z-40 max-md:bottom-[calc(var(--coach-tab-bar-offset)+env(safe-area-inset-bottom))] max-md:border-t max-md:border-border/70 max-md:bg-card max-md:px-5 max-md:pt-2 max-md:pb-2 max-md:shadow-[0_-8px_24px_-12px_rgba(15,23,42,0.14)]";
+  "max-md:fixed max-md:inset-x-0 max-md:z-40 max-md:bottom-[calc(var(--tab-bar-height)+env(safe-area-inset-bottom))] max-md:border-t max-md:border-border/70 max-md:bg-card max-md:px-5 max-md:pt-2 max-md:pb-5 max-md:shadow-[0_-8px_24px_-12px_rgba(15,23,42,0.14)]";
 
 const CONCIERGE_SERVER_ERROR_MESSAGE =
   "Coach could not load an answer.";
@@ -176,16 +178,6 @@ export function ConciergeChat({
     }
     answerRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
   }, [answer, mobileStickyDock]);
-
-  useEffect(() => {
-    if (!mobileStickyDock) {
-      setCoachAskInputFocused(false);
-      return;
-    }
-    return () => {
-      setCoachAskInputFocused(false);
-    };
-  }, [mobileStickyDock]);
 
   function showUnavailableAnswer() {
     setAnswer(CONCIERGE_MODEL_UNAVAILABLE_ANSWER.text);
@@ -446,7 +438,7 @@ export function ConciergeChat({
     >
       <input
         data-testid="concierge-question"
-        className="relative z-10 min-h-11 min-w-0 flex-1 rounded-full border bg-background px-4 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 max-md:text-[0.8125rem] disabled:cursor-not-allowed disabled:opacity-60"
+        className="relative z-10 min-h-11 min-w-0 flex-1 rounded-full border bg-background px-4 text-sm outline-none focus-visible:border-foreground/25 focus-visible:ring-3 focus-visible:ring-foreground/15 max-md:text-[0.8125rem] disabled:cursor-not-allowed disabled:opacity-60"
         value={question}
         onChange={(event) => setQuestion(event.target.value)}
         placeholder={
@@ -456,16 +448,6 @@ export function ConciergeChat({
         }
         disabled={coachUnavailable}
         aria-disabled={coachUnavailable}
-        onFocus={() => {
-          if (mobileStickyDock) {
-            setCoachAskInputFocused(true);
-          }
-        }}
-        onBlur={() => {
-          if (mobileStickyDock) {
-            setCoachAskInputFocused(false);
-          }
-        }}
       />
       <Button
         type="submit"
@@ -514,7 +496,12 @@ export function ConciergeChat({
           className={cn(MOBILE_STICKY_DOCK, "max-md:min-w-0")}
         >
           {starterChips}
-          <div data-testid="concierge-compose">{composeForm}</div>
+          <div
+            data-testid="concierge-compose"
+            className="max-md:pb-4 max-md:[&_form]:pb-0"
+          >
+            {composeForm}
+          </div>
         </div>
       </section>
     );
@@ -561,7 +548,8 @@ export function ConciergeChat({
           "flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto py-4",
           !mobilePinnedLayout && "max-md:pb-[var(--coach-compose-inset)]",
           pinMobileChips && "max-md:pt-0",
-          mobilePinnedLayout && "max-md:row-start-2 max-md:min-h-0 max-md:pb-0",
+          mobilePinnedLayout &&
+            "max-md:row-start-2 max-md:min-h-0 max-md:pb-[calc(3.25rem+env(safe-area-inset-bottom)+1rem)]",
           renderPinnedMobileThread && "max-md:hidden",
         )}
       >
@@ -588,9 +576,8 @@ export function ConciergeChat({
       <div
         className={cn(
           "shrink-0 md:static",
-          mobilePinnedLayout ? MOBILE_COMPOSE_GRID : MOBILE_COMPOSE_DOCK,
-          mobilePinnedLayout &&
-            "max-md:z-30 max-md:row-start-3 max-md:min-w-0 max-md:w-full max-md:max-w-full max-md:overflow-visible",
+          mobilePinnedLayout ? MOBILE_COMPOSE_FIXED : MOBILE_COMPOSE_DOCK,
+          mobilePinnedLayout && "max-md:min-w-0 max-md:w-full max-md:max-w-full",
         )}
         data-testid="concierge-compose"
       >

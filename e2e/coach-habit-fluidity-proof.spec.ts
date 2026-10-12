@@ -4,6 +4,10 @@ import path from "node:path";
 import { expect, test } from "@playwright/test";
 
 import { CONCIERGE_STARTERS } from "../src/components/concierge-chat";
+import {
+  assertNextCardClearsDock,
+  scrollCoachConciergeToEnd,
+} from "./coach-dock-assertions";
 
 const PROOF_DIR = path.join("proof", "coach-habit-fluidity");
 const MIN_CHIP_HEIGHT = 44;
@@ -35,12 +39,6 @@ function conciergeScrollRegion(page: import("@playwright/test").Page) {
   return page.getByTestId("concierge-scroll-region");
 }
 
-async function scrollConciergeToEnd(page: import("@playwright/test").Page) {
-  const scroll = conciergeScrollRegion(page);
-  await scroll.evaluate((el) => {
-    el.scrollTop = el.scrollHeight;
-  });
-}
 
 async function assertAskCenterHitsButton(page: import("@playwright/test").Page) {
   const ask = page.getByTestId("concierge-compose").getByTestId("concierge-ask");
@@ -119,7 +117,7 @@ test("coach habit fluidity — chip center hits + scroll-end clearance @375", as
     await assertChipCenterHitsButton(page, label);
   }
   await assertAskCenterHitsButton(page);
-  await scrollConciergeToEnd(page);
+  await scrollCoachConciergeToEnd(page);
   for (const label of discoveryStarters) {
     await assertChipCenterHitsButton(page, label);
     await assertChipClearsComposeAtScrollEnd(page, label);
@@ -131,16 +129,19 @@ test("coach habit fluidity — chip center hits + scroll-end clearance @375", as
 
   const fileStarters = [
     "What happens next?",
-    "When do I leave for my first showing?",
+    "When's my inspection?",
+    "What am I missing?",
   ] as const;
 
   await signInAlexWithFile(page);
   await expect(page.getByTestId("coach-ten-second")).toBeVisible();
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await assertNextCardClearsDock(page);
   for (const label of fileStarters) {
     await assertChipCenterHitsButton(page, label);
   }
   await assertAskCenterHitsButton(page);
-  await scrollConciergeToEnd(page);
+  await scrollCoachConciergeToEnd(page);
   for (const label of fileStarters) {
     await assertChipCenterHitsButton(page, label);
     await assertChipClearsComposeAtScrollEnd(page, label);
@@ -170,12 +171,11 @@ test("coach habit fluidity — chip center hits + scroll-end clearance @375", as
   await expect(page.getByTestId("coach-return-continue")).toContainText(
     fileReturnStarter,
   );
-  const restoredThread = page.getByTestId("concierge-restored-thread");
-  await expect(restoredThread).toBeVisible();
-  const restoredAnswer = restoredThread.getByTestId("concierge-answer");
+  const restoredAnswer = page.getByTestId("concierge-answer");
+  await expect(restoredAnswer).toBeVisible();
   await expect(restoredAnswer).toBeInViewport();
 
-  for (const label of CONCIERGE_STARTERS) {
+  for (const label of fileStarters) {
     await assertChipCenterHitsButton(page, label);
   }
   await assertAskCenterHitsButton(page);

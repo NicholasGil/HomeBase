@@ -14,14 +14,9 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSyncExternalStore } from "react";
 
 import { TabLockChromeBadge } from "@/components/lock-chrome";
 import type { AppNavLink } from "@/lib/app-nav";
-import {
-  getCoachAskInputFocused,
-  subscribeCoachAskInputFocused,
-} from "@/lib/coach-mobile-chrome";
 import { cn } from "@/lib/utils";
 
 const TAB_ICONS: ReadonlyArray<readonly [prefix: string, icon: LucideIcon]> = [
@@ -59,38 +54,21 @@ function isActive(pathname: string, href: string): boolean {
  */
 export function MobileTabBar({ links }: { links: AppNavLink[] }) {
   const pathname = usePathname();
-  const askFocused = useSyncExternalStore(
-    subscribeCoachAskInputFocused,
-    getCoachAskInputFocused,
-    () => false,
-  );
 
   if (links.length === 0) {
     return null;
   }
 
-  const hideForKeyboard = askFocused;
-
   return (
     <>
       <div
         aria-hidden
-        data-tab-bar-spacer
-        className={cn(
-          "md:hidden",
-          hideForKeyboard
-            ? "h-0"
-            : "h-[calc(var(--tab-bar-height)+env(safe-area-inset-bottom))]",
-        )}
+        className="h-[calc(var(--tab-bar-height)+env(safe-area-inset-bottom))] md:hidden"
       />
       <nav
         aria-label="Primary tabs"
         data-testid="app-tab-bar"
-        data-hidden-for-keyboard={hideForKeyboard ? "true" : undefined}
-        className={cn(
-          "fixed inset-x-0 bottom-0 z-20 bg-card/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-1px_0_0_var(--color-sand)] backdrop-blur transition-transform duration-200 motion-reduce:transition-none md:hidden",
-          hideForKeyboard && "pointer-events-none translate-y-full",
-        )}
+        className="fixed inset-x-0 bottom-0 z-20 bg-card/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-1px_0_0_var(--color-sand)] backdrop-blur md:hidden"
       >
         <ul className="mx-auto flex h-(--tab-bar-height) max-w-5xl items-stretch px-1">
           {links.map((link) => {

@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+import { scrollCoachConciergeToEnd } from "./coach-dock-assertions";
+
 test.use({ viewport: { width: 375, height: 812 }, hasTouch: true, isMobile: true });
 
 test("last suggestion chip clears sticky Ask at scroll end @375", async ({
@@ -9,20 +11,19 @@ test("last suggestion chip clears sticky Ask at scroll end @375", async ({
   await page.getByRole("button", { name: "Sign in as Alex Rivera" }).click();
   await expect(page).toHaveURL(/\/coach$/);
 
-  const scroll = page.getByTestId("concierge-scroll-region");
-  await scroll.evaluate((el) => {
-    el.scrollTop = el.scrollHeight;
-  });
+  await scrollCoachConciergeToEnd(page);
 
   const starters = page.getByLabel("Suggested questions").first();
-  const lastChip = starters.getByRole("button", {
-    name: "When do I leave for my first showing?",
-  });
-  const lenderChip = starters.getByRole("button", { name: "Who is my lender?" });
+  const chipsToCheck = [
+    "What happens next?",
+    "When's my inspection?",
+    "What am I missing?",
+  ];
   const compose = page.getByTestId("concierge-compose");
   const tabBar = page.getByTestId("app-tab-bar");
 
-  for (const chip of [lenderChip, lastChip]) {
+  for (const label of chipsToCheck) {
+    const chip = starters.getByRole("button", { name: label });
     const chipBox = await chip.boundingBox();
     const composeBox = await compose.boundingBox();
     expect(chipBox).not.toBeNull();

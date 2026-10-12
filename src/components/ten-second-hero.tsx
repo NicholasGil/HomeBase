@@ -122,6 +122,8 @@ export function TenSecondHeroGrid({
         at.grid,
         coachMobileStack,
         compact && "max-md:overflow-x-hidden",
+        compact &&
+          "max-md:[&_[data-testid=ten-second-done]]:hidden max-md:[&_[data-testid=ten-second-waiting]]:hidden",
       )}
     >
       <div
@@ -171,7 +173,7 @@ export function TenSecondHeroGrid({
         data-testid="ten-second-next"
         className={cn(
           "rounded-xl bg-sand px-4 py-3 lg:px-5 lg:py-6",
-          compact && "max-md:px-3 max-md:py-2",
+          compact && "max-md:px-3 max-md:py-1.5",
           at.next,
         )}
       >
@@ -216,7 +218,7 @@ export function TenSecondHeroGrid({
         data-testid="ten-second-owe"
         className={cn(
           "rounded-xl bg-sky px-4 py-3 lg:px-5 lg:py-6",
-          compact && "min-h-11",
+          compact && "min-h-0 max-md:px-3 max-md:py-2",
           at.owe,
         )}
       >

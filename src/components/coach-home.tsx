@@ -74,6 +74,7 @@ export function CoachHome({
           className={cn(
             "shrink-0 border-b border-border/70 px-5 pt-5 pb-4",
             firstSession && "max-md:pt-4 max-md:pb-3",
+            showTenSecond && "max-md:pt-4 max-md:pb-2",
           )}
         >
           <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
@@ -107,7 +108,7 @@ export function CoachHome({
             </p>
           ) : null}
           {showTenSecond ? (
-            <h1 className="mt-1 text-h3 font-semibold tracking-tight text-foreground md:text-h2">
+            <h1 className="mt-1 hidden text-h3 font-semibold tracking-tight text-foreground max-md:sr-only md:block md:text-h2">
               Your coach
             </h1>
           ) : null}

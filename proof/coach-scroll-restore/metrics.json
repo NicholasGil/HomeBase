@@ -5,6 +5,7 @@
     "height": 812
   },
   "deviceScaleFactor": 2,
+  "gitSha": "4f28c5f88b6763814662ec6b7a49caa9d990f185",
   "shots": [
     {
       "targetY": 90,
@@ -36,6 +37,5 @@
   "txnProof": {
     "redrillTopPin": "/workspace/proof/coach-scroll-restore/txn-redrill-top-pin-375.png",
     "historyBackDepth": "/workspace/proof/coach-scroll-restore/txn-history-back-depth-375.png"
-  },
-  "gitSha": "7981f74262f6e5b2999307e58d365326b9fb05d5"
+  }
 }

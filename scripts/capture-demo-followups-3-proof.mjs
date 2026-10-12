@@ -146,7 +146,8 @@ async function main() {
   if (await txLink.count()) {
     await txLink.click();
     await page.waitForURL(/\/transactions\//);
-    await page.waitForFunction(() => window.scrollY <= 16);
+    await page.locator("main").first().waitFor({ timeout: 15_000 });
+    await page.waitForFunction(() => window.scrollY <= 4);
     await page.screenshot({
       path: path.join(OUT, "drill-from-coach-lands-top-375.png"),
       fullPage: false,

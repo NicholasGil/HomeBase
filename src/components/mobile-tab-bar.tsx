@@ -75,13 +75,11 @@ export function MobileTabBar({ links }: { links: AppNavLink[] }) {
             const active = isActive(pathname, link.href);
             const locked = link.locked === true;
             const Icon = iconFor(link.href, locked);
-            const preserveCoachScroll =
-              link.href === "/coach" || link.href.startsWith("/coach/");
             return (
               <li key={`${link.href}-${link.label}`} className="min-w-0 flex-1">
                 <Link
                   href={link.href}
-                  scroll={preserveCoachScroll ? false : undefined}
+                  scroll={false}
                   aria-current={active ? "page" : undefined}
                   aria-label={
                     locked ? `${link.label} (locked preview)` : link.label

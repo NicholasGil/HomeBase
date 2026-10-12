@@ -1,10 +1,19 @@
 import { isCoachScrollPath } from "@/lib/coach-scroll-bootstrap-logic";
 import {
+  coachScrollEnterSaveBlocked,
+  syncCoachScrollEpochFromCookie,
+} from "@/lib/coach-scroll-epoch";
+import {
+  resolveLeaveCaptureYOffset,
+} from "@/lib/coach-scroll-leave-capture";
+import { DEMO_COACH_SCROLL_RESET_COOKIE } from "@/lib/demo-coach-scroll-reset";
+import {
   COACH_SCROLL_STORAGE_KEY,
   coachScrollStorageKey,
 } from "@/lib/coach-scroll-key";
 
 export function readCoachScrollY(pathname: string): number | null {
+  syncCoachScrollEpochFromCookie();
   const key = coachScrollStorageKey(pathname);
   try {
     const raw = sessionStorage.getItem(key);
@@ -19,6 +28,10 @@ export function readCoachScrollY(pathname: string): number | null {
 }
 
 export function writeCoachScrollY(y: number, pathname: string): void {
+  if (coachScrollEnterSaveBlocked()) {
+    return;
+  }
+  syncCoachScrollEpochFromCookie();
   const key = coachScrollStorageKey(pathname);
   try {
     sessionStorage.setItem(key, String(Math.max(0, Math.round(y))));
@@ -51,6 +64,9 @@ function coachScrollLeaveCaptureLocked(): boolean {
 }
 
 export function persistCoachScrollYOffset(y: number): void {
+  if (coachScrollEnterSaveBlocked()) {
+    return;
+  }
   if (coachScrollLeaveCaptureLocked()) {
     return;
   }
@@ -63,19 +79,43 @@ export function persistCoachScrollYOffset(y: number): void {
 
 /** Pointerdown leave capture: never clobber a deeper stored Y with a spurious 0. */
 export function captureCoachScrollBeforeLeave(y: number): void {
-  const rounded = Math.max(0, Math.round(y));
-  const existing = readCoachScrollY("/coach");
-  if (rounded > 0) {
-    writeCoachScrollY(rounded, "/coach");
-  } else if (existing !== null && existing > 0) {
-    writeCoachScrollY(existing, "/coach");
-  } else {
-    writeCoachScrollY(0, "/coach");
+  if (coachScrollEnterSaveBlocked()) {
+    return;
   }
+  syncCoachScrollEpochFromCookie();
+  const existing = readCoachScrollY("/coach");
+  writeCoachScrollY(resolveLeaveCaptureYOffset(y, existing), "/coach");
   setCoachScrollLeaveCaptureLock(true);
 }
 
-/** Clears pathname-keyed coach scroll offsets (demo persona switch / sign-in). */
+export function documentHasDemoCoachScrollResetCookie(): boolean {
+  try {
+    return document.cookie
+      .split(";")
+      .some((part) =>
+        part.trim().startsWith(`${DEMO_COACH_SCROLL_RESET_COOKIE}=`),
+      );
+  } catch {
+    return false;
+  }
+}
+
+/** Sync epoch from server enter + scroll coach to top when reset cookie is set. */
+export function applyDemoCoachScrollResetFromCookie(): boolean {
+  syncCoachScrollEpochFromCookie();
+  if (!documentHasDemoCoachScrollResetCookie()) {
+    return false;
+  }
+  setCoachScrollLeaveCaptureLock(false);
+  try {
+    document.cookie = `${DEMO_COACH_SCROLL_RESET_COOKIE}=; Max-Age=0; path=/`;
+  } catch {
+    // ignore
+  }
+  return true;
+}
+
+/** Removes coach scroll keys for all epochs (maintenance / tests). */
 export function clearAllCoachScrollY(): void {
   try {
     const prefix = `${COACH_SCROLL_STORAGE_KEY}:`;

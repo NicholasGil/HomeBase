@@ -38,6 +38,11 @@ test("demo discovery @375 — dock chips fit; More sheet starters are tappable",
 }) => {
   await page.goto("/demo/enter/buyer-discovery");
   await expect(page).toHaveURL(/\/coach$/, { timeout: 30_000 });
+  await expect(page.getByTestId("coach-first-session-empty")).toBeVisible();
+  await expect(page.getByTestId("concierge-idle-hint")).toHaveCount(0);
+  await expect(
+    page.getByText(/Tap a starter or ask below/i),
+  ).toHaveCount(1);
   await assertDockChipRowFitsViewport(page);
   await assertComposeClearsTabBar(page);
 

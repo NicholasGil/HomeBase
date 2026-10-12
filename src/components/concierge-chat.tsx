@@ -350,7 +350,10 @@ export function ConciergeChat({
           />
         ) : null}
         {!coachUnavailable && asked === null && idleHint ? (
-          <p className="text-center text-sm text-muted-foreground">
+          <p
+            data-testid="concierge-idle-hint"
+            className="text-center text-sm text-muted-foreground"
+          >
             {idleHint}
           </p>
         ) : null}

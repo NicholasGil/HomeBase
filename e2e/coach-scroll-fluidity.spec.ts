@@ -25,14 +25,18 @@ async function scrollCoachTo(page: import("@playwright/test").Page, targetY: num
 async function expectScrollStableNear(
   page: import("@playwright/test").Page,
   expectedY: number,
-  tolerance = 24,
+  tolerance = 10,
 ) {
   const deadline = Date.now() + (expectedY >= 300 ? 2500 : 1500);
+  let lastY = 0;
   while (Date.now() < deadline) {
-    const y = await page.evaluate(() => window.scrollY);
-    expect(Math.abs(y - expectedY)).toBeLessThanOrEqual(tolerance);
+    lastY = await page.evaluate(() => window.scrollY);
+    if (Math.abs(lastY - expectedY) <= tolerance) {
+      return;
+    }
     await page.waitForTimeout(50);
   }
+  expect(Math.abs(lastY - expectedY)).toBeLessThanOrEqual(tolerance);
 }
 
 async function drillToTransaction(page: import("@playwright/test").Page) {
@@ -47,7 +51,7 @@ test("coach @375 Y≈387 — ten-second drill lands transaction at top", async (
   await scrollCoachTo(page, 387);
   await page.getByTestId("ten-second-next").getByRole("link").click();
   await page.waitForURL(/\/transactions\//);
-  await expectScrollStableNear(page, 0, 16);
+  await expectScrollStableNear(page, 0, 4);
 });
 
 for (const targetY of [90, 387]) {
@@ -102,7 +106,7 @@ for (const targetY of [90, 387]) {
     });
     await page.waitForURL(/\/coach$/);
     await expect(page.getByTestId("coach-ten-second")).toBeVisible();
-    await expectScrollStableNear(page, savedY);
+    await expectScrollStableNear(page, savedY, 10);
   });
 
   test(`coach @375 Y≈${targetY} — Search then Coach restores scroll`, async ({
@@ -120,9 +124,70 @@ for (const targetY of [90, 387]) {
     await page.goto("/coach");
     await page.waitForURL(/\/coach$/);
     await expect(page.getByTestId("coach-ten-second")).toBeVisible();
-    await expectScrollStableNear(page, savedY);
+    await expectScrollStableNear(page, savedY, 10);
   });
 }
+
+test("coach @375 — leaving from top restores zero on return", async ({
+  page,
+}) => {
+  await signInAlexWithFile(page);
+  await scrollCoachTo(page, 387);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.waitForFunction(() => window.scrollY === 0);
+  await page.waitForFunction(() => {
+    if (window.scrollY === 0) {
+      return true;
+    }
+    for (let index = 0; index < sessionStorage.length; index += 1) {
+      const key = sessionStorage.key(index);
+      if (key !== null && key.endsWith(":/coach")) {
+        return sessionStorage.getItem(key) === "0";
+      }
+    }
+    return false;
+  });
+  await page
+    .getByTestId("app-tab-bar")
+    .getByRole("link", { name: "Search" })
+    .evaluate((anchor) => {
+      (anchor as HTMLAnchorElement).click();
+    });
+  await page.waitForURL(/\/search/);
+  await page.goto("/coach");
+  await page.waitForURL(/\/coach$/);
+  await expect(page.getByTestId("coach-ten-second")).toBeVisible();
+  await expectScrollStableNear(page, 0, 10);
+});
+
+test("transactions @375 — deep scroll survives Search tab back forward back", async ({
+  page,
+}) => {
+  await signInAlexWithFile(page);
+  await page.getByTestId("ten-second-next").getByRole("link").click();
+  await page.waitForURL(/\/transactions\/seed:buyer-a/);
+  const savedY = await page.evaluate(() => {
+    const target = Math.min(
+      1095,
+      document.documentElement.scrollHeight - window.innerHeight,
+    );
+    window.scrollTo(0, target);
+    return window.scrollY;
+  });
+  expect(savedY).toBeGreaterThan(400);
+  await page
+    .getByTestId("app-tab-bar")
+    .getByRole("link", { name: "Search" })
+    .click();
+  await page.waitForURL(/\/search/);
+  await page.goBack();
+  await page.waitForURL(/\/transactions\/seed:buyer-a/);
+  await page.goForward();
+  await page.waitForURL(/\/search/);
+  await page.goBack();
+  await page.waitForURL(/\/transactions\/seed:buyer-a/);
+  await expectScrollStableNear(page, savedY, 10);
+});
 
 test("transactions @375 — native back forward preserves scroll within 10px", async ({
   page,
@@ -137,6 +202,22 @@ test("transactions @375 — native back forward preserves scroll within 10px", a
   await page.waitForURL(/\/transactions\/seed:buyer-a/);
   const after = await page.evaluate(() => window.scrollY);
   expect(Math.abs(after - savedY)).toBeLessThanOrEqual(10);
+});
+
+test("coach @375 — non-Coach tab opens at scroll top", async ({ page }) => {
+  await signInAlexWithFile(page);
+  await scrollCoachTo(page, 387);
+  const tabBar = page.getByTestId("app-tab-bar");
+  await tabBar.getByRole("link", { name: "Search" }).evaluate((anchor) => {
+    (anchor as HTMLAnchorElement).click();
+  });
+  await page.waitForURL(/\/search/);
+  await expectScrollStableNear(page, 0, 10);
+  await tabBar.getByRole("link", { name: "Tours" }).evaluate((anchor) => {
+    (anchor as HTMLAnchorElement).click();
+  });
+  await page.waitForURL(/\/tours/);
+  await expectScrollStableNear(page, 0, 10);
 });
 
 test("pricing @375 — native back forward preserves scroll within 10px", async ({

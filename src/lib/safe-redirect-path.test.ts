@@ -29,8 +29,18 @@ describe("sanitizeRedirectPath", () => {
       "/ /evil.com",
       "/%09/evil.com",
       "/coach%09/evil",
+      "/%252F%252Fevil.com",
     ]) {
       expect(sanitizeRedirectPath(malicious)).toBe(SAFE_REDIRECT_FALLBACK);
     }
+  });
+
+  it("rejects control characters in the query string", () => {
+    expect(sanitizeRedirectPath("/coach?next=%09")).toBe(SAFE_REDIRECT_FALLBACK);
+    expect(sanitizeRedirectPath("/coach?next=%0d%0a")).toBe(
+      SAFE_REDIRECT_FALLBACK,
+    );
+    expect(sanitizeRedirectPath("/coach?next=\r\n")).toBe(SAFE_REDIRECT_FALLBACK);
+    expect(sanitizeRedirectPath("/coach?q=a%20b")).toBe("/coach?q=a%20b");
   });
 });

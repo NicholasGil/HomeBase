@@ -1,5 +1,11 @@
-import { coachScrollStorageKey } from "@/lib/coach-scroll-key";
+import { coachScrollStorageKeyForEpoch } from "@/lib/coach-scroll-key";
+import {
+  COACH_SCROLL_ENTER_STARTED_KEY,
+  COACH_SCROLL_EPOCH_COOKIE,
+  COACH_SCROLL_EPOCH_SESSION_KEY,
+} from "@/lib/coach-scroll-epoch";
 import { COACH_SCROLL_RESTORATION_ORIGINAL_KEY } from "@/lib/coach-scroll-restoration-window";
+import { DEMO_COACH_SCROLL_RESET_COOKIE } from "@/lib/demo-coach-scroll-reset";
 
 export function isCoachScrollPath(pathname: string): boolean {
   return /^\/coach(\/|$)/.test(pathname);
@@ -8,9 +14,11 @@ export function isCoachScrollPath(pathname: string): boolean {
 export function readCoachScrollYFromStorage(
   storage: Pick<Storage, "getItem">,
   pathname: string,
+  epoch: string,
 ): number | null {
+  const storageKey = coachScrollStorageKeyForEpoch(pathname, epoch);
   try {
-    const raw = storage.getItem(coachScrollStorageKey(pathname));
+    const raw = storage.getItem(storageKey);
     if (raw === null) {
       return null;
     }
@@ -36,11 +44,17 @@ export function restoreCoachScrollY(options: {
   scrollTo: (x: number, y: number) => void;
   scrollHeight: number;
   innerHeight: number;
+  epoch?: string;
 }): boolean {
   if (!isCoachScrollPath(options.pathname)) {
     return false;
   }
-  const y = readCoachScrollYFromStorage(options.storage, options.pathname);
+  const epoch = options.epoch ?? "0";
+  const y = readCoachScrollYFromStorage(
+    options.storage,
+    options.pathname,
+    epoch,
+  );
   if (y === null || y <= 0) {
     return false;
   }
@@ -53,34 +67,30 @@ export function restoreCoachScrollY(options: {
   return true;
 }
 
-/** Inline script: pathname-keyed save on pointerdown/pagehide; restore on popstate/pageshow. */
+/**
+ * Inline script: sync scroll epoch + block demo-enter races before first paint on /coach.
+ * Ongoing save/restore lives in CoachScrollRestoration (client) so other routes keep native scroll.
+ */
 export function coachScrollBootstrapScriptBody(keyPrefix: string): string {
   const origKey = COACH_SCROLL_RESTORATION_ORIGINAL_KEY;
+  const resetCookie = DEMO_COACH_SCROLL_RESET_COOKIE;
+  const epochCookie = COACH_SCROLL_EPOCH_COOKIE;
+  const epochSessionKey = COACH_SCROLL_EPOCH_SESSION_KEY;
+  const enterStartedKey = COACH_SCROLL_ENTER_STARTED_KEY;
   return `
 function onCoach(){return/^\\/coach(\\/|$)/.test(location.pathname);}
-function scrollKey(){return ${JSON.stringify(keyPrefix)}+':'+location.pathname;}
-var suppressZeroSaveUntil=0;
-var blockScrollSaveUntil=0;
-var leaveCaptureLock=false;
-function coachHomeKey(){return ${JSON.stringify(keyPrefix)}+':/coach';}
+function readEpochCookie(){try{var parts=document.cookie.split(';');for(var i=0;i<parts.length;i++){var p=parts[i].trim();if(p.indexOf(${JSON.stringify(epochCookie)}+'=')===0){var v=p.slice(${JSON.stringify(epochCookie)}.length+1);return v&&v.length?v:'0';}}return '0';}catch(e){return '0';}}
+function syncEpochFromCookie(){var e=readEpochCookie();try{sessionStorage.setItem(${JSON.stringify(epochSessionKey)},e);sessionStorage.removeItem(${JSON.stringify(enterStartedKey)});}catch(err){}return e;}
+function markEnterStarted(){try{sessionStorage.setItem(${JSON.stringify(enterStartedKey)},'1');}catch(e){}}
+function pathNorm(h){var q=h.split('?')[0].split('#')[0];return q.length>1&&q.charAt(q.length-1)==='/'?q.slice(0,-1):q;}
+function hrefDemoEnter(href){if(!href||href.charAt(0)!=='/')return false;var path=pathNorm(href.split('?')[0].split('#')[0]);return path==='/demo'||path.indexOf('/demo/enter')===0;}
+function onDemoEnterPointer(e){var t=e.target;if(!(t instanceof Element))return;var a=t.closest('a[href]');if(!a)return;var href=a.getAttribute('href');if(hrefDemoEnter(href)){markEnterStarted();}}
+syncEpochFromCookie();
+document.addEventListener('pointerdown',onDemoEnterPointer,true);
+document.addEventListener('mousedown',onDemoEnterPointer,true);
+function coachHomeKey(){var epoch=syncEpochFromCookie();return ${JSON.stringify(keyPrefix)}+':'+epoch+':/coach';}
 function readY(){try{var raw=sessionStorage.getItem(coachHomeKey());if(raw===null)return null;var y=parseInt(raw,10);return isFinite(y)?y:null;}catch(e){return null;}}
-function writeCoachHomeY(y){try{sessionStorage.setItem(coachHomeKey(),String(Math.max(0,Math.round(y))));}catch(e){}}
-function writeCoachY(y){if(!onCoach())return;if(leaveCaptureLock)return;writeCoachHomeY(y);}
-var programmaticScroll=false;
-function saveY(){if(!onCoach())return;if(leaveCaptureLock)return;if(Date.now()<blockScrollSaveUntil)return;var y=window.scrollY;if(y===0&&(Date.now()<suppressZeroSaveUntil||document.visibilityState!=='visible'))return;writeCoachY(y);}
-function rememberY(){if(!onCoach())return;if(programmaticScroll)return;if(leaveCaptureLock)return;if(Date.now()<blockScrollSaveUntil)return;saveY();}
-window.addEventListener('scroll',rememberY,{passive:true});
-function restore(){if(!onCoach())return;var y=readY();if(y===null||y<=0)return;var max=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);var t=Math.min(y,max);programmaticScroll=true;window.scrollTo(0,t);requestAnimationFrame(function(){requestAnimationFrame(function(){programmaticScroll=false;});});}
-function scheduleRestore(){if(onCoach()){leaveCaptureLock=false;}restore();setTimeout(restore,0);setTimeout(restore,80);setTimeout(restore,300);setTimeout(restore,500);setTimeout(restore,800);setTimeout(restore,1200);}
-function shouldSaveForLink(a){if(!a)return false;var href=a.getAttribute('href');if(!href||href.charAt(0)!=='/')return false;if(href.indexOf('/transactions/')===0)return true;if(href.indexOf('/pricing')===0)return true;if(a.closest('[data-testid="app-tab-bar"]'))return true;return false;}
-function resetScrollRestoration(){try{history.scrollRestoration='auto';}catch(e){}}
-if(onCoach()){try{if(typeof window[${JSON.stringify(origKey)}]==='undefined'){window[${JSON.stringify(origKey)}]=history.scrollRestoration;}history.scrollRestoration='manual';}catch(e){}}
-scheduleRestore();
-function onLeavingPointer(e){if(!onCoach())return;var t=e.target;if(!(t instanceof Element))return;var a=t.closest('a[href]');if(shouldSaveForLink(a)){var capturedY=window.scrollY;var existing=readY();var next=capturedY>0?capturedY:(existing!==null&&existing>0?existing:0);suppressZeroSaveUntil=Date.now()+1500;blockScrollSaveUntil=Date.now()+1500;leaveCaptureLock=true;writeCoachHomeY(next);}}
-document.addEventListener('pointerdown',onLeavingPointer,true);
-document.addEventListener('mousedown',onLeavingPointer,true);
-window.addEventListener('pagehide',function(){resetScrollRestoration();});
-window.addEventListener('pageshow',function(){scheduleRestore();});
-window.addEventListener('popstate',function(){scheduleRestore();});
+function applyDemoCoachScrollReset(){syncEpochFromCookie();try{var needs=document.cookie.split(';').some(function(p){return p.trim().indexOf(${JSON.stringify(resetCookie)}+'=')===0;});if(!needs)return false;document.cookie=${JSON.stringify(resetCookie)}+'=; Max-Age=0; path=/';window.scrollTo(0,0);return true;}catch(e){return false;}}
+if(onCoach()){try{if(typeof window[${JSON.stringify(origKey)}]==='undefined'){window[${JSON.stringify(origKey)}]=history.scrollRestoration;}history.scrollRestoration='manual';}catch(e){}if(applyDemoCoachScrollReset()){}else{var y=readY();if(y!==null&&y>0){var max=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);window.scrollTo(0,Math.min(y,max));}}}
 `.trim();
 }

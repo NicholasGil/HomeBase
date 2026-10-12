@@ -34,9 +34,15 @@ describe("redirectToPathFromRequestUrl", () => {
       "/ /evil.com",
       "/%09/evil.com",
       "/%09%09/evil.com",
+      "/coach?next=%09",
+      "/coach?next=%0d%0a",
+      "/%252F%252Fevil.com",
     ]) {
       const response = redirectToPathFromRequestUrl(malicious, request);
-      expect(response.headers.get("location")).toBe(SAFE_REDIRECT_FALLBACK);
+      const location = response.headers.get("location");
+      expect(location).toBe(SAFE_REDIRECT_FALLBACK);
+      expect(location).not.toMatch(/[\r\n]/);
+      expect(location?.startsWith("/")).toBe(true);
     }
   });
 });

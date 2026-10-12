@@ -5,6 +5,16 @@ import { redirect } from "next/navigation";
 
 import { fixtureEntryPath } from "@/lib/demo-copy";
 import {
+  COACH_SCROLL_EPOCH_COOKIE,
+  coachScrollEpochCookieOptions,
+  nextCoachScrollEpoch,
+} from "@/lib/coach-scroll-epoch";
+import {
+  DEMO_COACH_SCROLL_RESET_COOKIE,
+  demoCoachScrollResetCookieOptions,
+  demoCoachScrollResetCookieValue,
+} from "@/lib/demo-coach-scroll-reset";
+import {
   encodeTestSessionCookie,
   fixtureHomePath,
   parseTestSessionCookie,
@@ -39,6 +49,16 @@ export async function startTestSession(input: {
     TEST_SESSION_COOKIE,
     encodeTestSessionCookie(started.session),
     testSessionCookieOptions(),
+  );
+  store.set(
+    COACH_SCROLL_EPOCH_COOKIE,
+    nextCoachScrollEpoch(),
+    coachScrollEpochCookieOptions(),
+  );
+  store.set(
+    DEMO_COACH_SCROLL_RESET_COOKIE,
+    demoCoachScrollResetCookieValue(),
+    demoCoachScrollResetCookieOptions(),
   );
   if (started.session.role === "vendor") {
     store.delete(VENDOR_EXPIRY_COOKIE);

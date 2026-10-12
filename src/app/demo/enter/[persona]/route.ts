@@ -6,7 +6,16 @@ import {
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
 import { DEMO_CHOOSER_PATH } from "@/lib/demo-copy";
-import { DEMO_COACH_SCROLL_RESET_COOKIE } from "@/lib/demo-coach-scroll-reset";
+import {
+  COACH_SCROLL_EPOCH_COOKIE,
+  coachScrollEpochCookieOptions,
+  nextCoachScrollEpoch,
+} from "@/lib/coach-scroll-epoch";
+import {
+  DEMO_COACH_SCROLL_RESET_COOKIE,
+  demoCoachScrollResetCookieOptions,
+  demoCoachScrollResetCookieValue,
+} from "@/lib/demo-coach-scroll-reset";
 import { isDemoEnterPrefetchRequest } from "@/lib/demo-enter-prefetch";
 import { redirectToPathFromRequestUrl } from "@/lib/same-origin-redirect";
 import {
@@ -41,6 +50,10 @@ function redirectToChooser(request: Request) {
   return redirectToPathFromRequestUrl(DEMO_CHOOSER_PATH, request);
 }
 
+/**
+ * Demo-only GET entry: fixture personas, sameSite=lax session cookie, no real accounts.
+ * GET CSRF risk is accepted for this public demo chooser flow.
+ */
 export async function GET(
   request: Request,
   context: { params: Promise<{ persona: string }> },
@@ -81,11 +94,17 @@ export async function GET(
     encodeTestSessionCookie(started.session),
     testSessionCookieOptions(),
   );
-  response.cookies.set(DEMO_COACH_SCROLL_RESET_COOKIE, "1", {
-    path: "/",
-    maxAge: 120,
-    sameSite: "lax",
-  });
+  const scrollEpoch = nextCoachScrollEpoch();
+  response.cookies.set(
+    COACH_SCROLL_EPOCH_COOKIE,
+    scrollEpoch,
+    coachScrollEpochCookieOptions(),
+  );
+  response.cookies.set(
+    DEMO_COACH_SCROLL_RESET_COOKIE,
+    demoCoachScrollResetCookieValue(),
+    demoCoachScrollResetCookieOptions(),
+  );
   if (started.session.role === "vendor") {
     response.cookies.delete(VENDOR_EXPIRY_COOKIE);
   }

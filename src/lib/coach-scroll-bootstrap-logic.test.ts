@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
   COACH_SCROLL_STORAGE_KEY,
-  coachScrollStorageKey,
+  coachScrollStorageKeyForEpoch,
 } from "@/lib/coach-scroll-key";
 import {
   clampCoachScrollTarget,
@@ -19,14 +19,14 @@ describe("coach scroll bootstrap logic", () => {
     expect(isCoachScrollPath("/pricing")).toBe(false);
   });
 
-  it("reads stored scroll offsets keyed by pathname", () => {
-    const coachKey = coachScrollStorageKey("/coach");
+  it("reads stored scroll offsets keyed by pathname and epoch", () => {
+    const coachKey = coachScrollStorageKeyForEpoch("/coach", "42");
     const storage = {
       getItem: (key: string) => (key === coachKey ? "240" : null),
     };
-    expect(readCoachScrollYFromStorage(storage, "/coach")).toBe(240);
+    expect(readCoachScrollYFromStorage(storage, "/coach", "42")).toBe(240);
     expect(
-      readCoachScrollYFromStorage({ getItem: () => "nope" }, "/coach"),
+      readCoachScrollYFromStorage({ getItem: () => "nope" }, "/coach", "42"),
     ).toBeNull();
   });
 
@@ -37,14 +37,18 @@ describe("coach scroll bootstrap logic", () => {
 
   it("restores scroll on coach when session storage has a value", () => {
     const scrollTo = vi.fn();
+    const epoch = "9";
+    const key = coachScrollStorageKeyForEpoch("/coach", epoch);
     const ok = restoreCoachScrollY({
       pathname: "/coach",
       storage: {
-        getItem: () => "320",
+        getItem: (storageKey: string) =>
+          storageKey === key ? "320" : null,
       },
       scrollTo,
       scrollHeight: 2000,
       innerHeight: 812,
+      epoch,
     });
     expect(ok).toBe(true);
     expect(scrollTo).toHaveBeenCalledWith(0, 320);
@@ -58,21 +62,24 @@ describe("coach scroll bootstrap logic", () => {
       scrollTo,
       scrollHeight: 2000,
       innerHeight: 812,
+      epoch: "0",
     });
     expect(scrollTo).not.toHaveBeenCalled();
   });
 });
 
 describe("coachScrollBootstrapScript", () => {
-  it("includes popstate and pageshow listeners for coach restore", () => {
+  it("includes epoch sync and coach-only restore hooks", () => {
     const script = coachScrollBootstrapScript();
     expect(script).toContain(COACH_SCROLL_STORAGE_KEY);
+    expect(script).toContain("syncEpochFromCookie");
+    expect(script).toContain("markEnterStarted");
     expect(script).toContain("popstate");
     expect(script).toContain("pageshow");
     expect(script).toContain("pointerdown");
-    expect(script).toContain("pagehide");
     expect(script).toContain("scrollTo");
-    expect(script).toContain("scheduleRestore");
-    expect(script).toContain("resetScrollRestoration");
+    expect(script).toContain("applyDemoCoachScrollReset");
+    expect(script).toContain("markEnterStarted");
+    expect(script).not.toContain("scheduleRestore");
   });
 });

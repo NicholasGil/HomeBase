@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import type { ConciergeAvailability } from "@/lib/concierge-availability";
 import { CONCIERGE_STARTERS } from "@/lib/concierge-starters";
 import { CONCIERGE_MODEL_UNAVAILABLE_ANSWER } from "../../lib/llm/types";
+import { setCoachAskInputFocused } from "@/lib/coach-mobile-chrome";
 
 export { CONCIERGE_STARTERS };
 
@@ -33,7 +34,7 @@ const MOBILE_COMPOSE_GRID =
 
 /** File-session mobile: chips + Ask fixed above the tab bar; page scrolls. */
 const MOBILE_STICKY_DOCK =
-  "max-md:fixed max-md:inset-x-0 max-md:z-40 max-md:bottom-[calc(var(--tab-bar-height)+env(safe-area-inset-bottom))] max-md:border-t max-md:border-border/70 max-md:bg-card max-md:px-5 max-md:pt-2 max-md:pb-2 max-md:shadow-[0_-8px_24px_-12px_rgba(15,23,42,0.14)]";
+  "max-md:fixed max-md:inset-x-0 max-md:z-40 max-md:bottom-[calc(var(--coach-tab-bar-offset)+env(safe-area-inset-bottom))] max-md:border-t max-md:border-border/70 max-md:bg-card max-md:px-5 max-md:pt-2 max-md:pb-2 max-md:shadow-[0_-8px_24px_-12px_rgba(15,23,42,0.14)]";
 
 const CONCIERGE_SERVER_ERROR_MESSAGE =
   "Coach could not load an answer.";
@@ -175,6 +176,16 @@ export function ConciergeChat({
     }
     answerRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
   }, [answer, mobileStickyDock]);
+
+  useEffect(() => {
+    if (!mobileStickyDock) {
+      setCoachAskInputFocused(false);
+      return;
+    }
+    return () => {
+      setCoachAskInputFocused(false);
+    };
+  }, [mobileStickyDock]);
 
   function showUnavailableAnswer() {
     setAnswer(CONCIERGE_MODEL_UNAVAILABLE_ANSWER.text);
@@ -445,6 +456,16 @@ export function ConciergeChat({
         }
         disabled={coachUnavailable}
         aria-disabled={coachUnavailable}
+        onFocus={() => {
+          if (mobileStickyDock) {
+            setCoachAskInputFocused(true);
+          }
+        }}
+        onBlur={() => {
+          if (mobileStickyDock) {
+            setCoachAskInputFocused(false);
+          }
+        }}
       />
       <Button
         type="submit"

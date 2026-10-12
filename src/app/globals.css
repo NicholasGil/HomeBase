@@ -119,6 +119,7 @@
   --chart-5: oklch(0.4 0.04 50);
   --radius: 0.75rem;
   --tab-bar-height: 4rem;
+  --coach-tab-bar-offset: var(--tab-bar-height);
   /* Sticky app header (py-2 + min-h-11) plus coach main top padding (py-6). */
   --coach-mobile-chrome: calc(3.75rem + 1.5rem);
   --coach-compose-clearance: calc(
@@ -132,7 +133,7 @@
     var(--coach-mobile-dock-height) + env(safe-area-inset-bottom)
   );
   --coach-answer-scroll-margin: calc(
-    var(--coach-mobile-dock-height) + var(--tab-bar-height) +
+    var(--coach-mobile-dock-height) + var(--coach-tab-bar-offset) +
       env(safe-area-inset-bottom)
   );
   --fab-dock-clearance: 0px;
@@ -144,6 +145,10 @@
   --sidebar-accent-foreground: oklch(0.22 0.02 50);
   --sidebar-border: oklch(0.9 0.02 75);
   --sidebar-ring: oklch(0.63 0.21 18);
+}
+
+html[data-coach-ask-focused] {
+  --coach-tab-bar-offset: 0px;
 }
 
 .dark {

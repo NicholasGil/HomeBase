@@ -9,6 +9,7 @@ import {
 import { MoneyFigureView } from "@/components/money-figure-view";
 import { Badge } from "@/components/ui/badge";
 import type { BuyerDashboardView } from "../../convex/lib/dashboardView";
+import { journeyStepProgress } from "../../convex/lib/journeyLogic";
 import { waitingOnDisplayLabel } from "@/lib/waiting-on-label";
 import { cn } from "@/lib/utils";
 
@@ -105,6 +106,9 @@ export function TenSecondHeroGrid({
       ? null
       : (view.contacts.find((c) => c.role === view.next!.assigneeRole)?.name ??
         view.next.assigneeRole);
+  const { step: journeyStep, total: journeyTotal } = journeyStepProgress(
+    view.stages,
+  );
   const coachMobileStack =
     compact &&
     "max-md:grid-cols-1 max-md:[&_[data-testid=ten-second-where]]:order-1 max-md:[&_[data-testid=ten-second-owe]]:order-2 max-md:[&_[data-testid=ten-second-next]]:order-3 max-md:[&_[data-testid=journey-tracker]]:order-4 max-md:[&_[data-testid=ten-second-done]]:order-5 max-md:[&_[data-testid=ten-second-waiting]]:order-6";
@@ -182,6 +186,14 @@ export function TenSecondHeroGrid({
           </>
         ) : (
           <DrillLink href={drill} className="block">
+            {compact ? (
+              <p
+                className="text-eyebrow text-muted-foreground max-md:mb-1 md:hidden"
+                data-testid="coach-journey-step"
+              >
+                Step {journeyStep} of {journeyTotal}
+              </p>
+            ) : null}
             <span className="flex items-center justify-between gap-3">
               <span className="text-eyebrow font-medium uppercase tracking-[0.2em] text-next">
                 Next

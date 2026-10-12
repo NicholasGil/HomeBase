@@ -2,11 +2,20 @@ import type { ConciergeFact } from "../../lib/llm/types";
 import { formatDisplayDateTime } from "../../convex/lib/displayTime";
 import { SEED_CLERK_IDS, SEED_CONCIERGE } from "../../convex/seedPlan";
 import { discoveryEmptyConciergeFacts } from "@/lib/seed-concierge-discovery";
+import type { AuthEnv } from "@/lib/auth-config";
+import {
+  fixtureConciergeInspectionAt,
+  fixtureConciergeShowingAt,
+} from "@/lib/demo-fixture-dates";
 import type { TestBuyerClerkId } from "@/lib/seed-dashboard";
 
 export function seedConciergeFacts(
   clerkId: TestBuyerClerkId,
-  options?: { emptyCoachFile?: boolean },
+  options?: {
+    emptyCoachFile?: boolean;
+    env?: AuthEnv;
+    now?: number;
+  },
 ): ConciergeFact[] {
   if (options?.emptyCoachFile) {
     return discoveryEmptyConciergeFacts();
@@ -20,6 +29,11 @@ export function seedConciergeFacts(
       },
     ];
   }
+  const env = options?.env ?? process.env;
+  const now = options?.now ?? Date.now();
+  const inspectionAt = fixtureConciergeInspectionAt(env, now);
+  const showingAt = fixtureConciergeShowingAt(env, now);
+
   return [
     {
       key: "next",
@@ -28,7 +42,7 @@ export function seedConciergeFacts(
     },
     {
       key: "inspection_when",
-      text: `Inspection is at ${formatDisplayDateTime(SEED_CONCIERGE.inspectionStartsAt)}.`,
+      text: `Inspection is at ${formatDisplayDateTime(inspectionAt)}.`,
       source: "appointments",
     },
     {
@@ -62,7 +76,7 @@ export function seedConciergeFacts(
     },
     {
       key: "first_showing",
-      text: `Leave for the first showing at ${formatDisplayDateTime(SEED_CONCIERGE.showingStartsAt)}.`,
+      text: `Leave for the first showing at ${formatDisplayDateTime(showingAt)}.`,
       source: "appointments",
     },
   ];

@@ -1,6 +1,8 @@
 import type { ConciergeAnswer, ConciergeFact } from "../../lib/llm/types";
 import { formatDisplayDateTime } from "../../convex/lib/displayTime";
-import { SEED_CONCIERGE, SEED_PLAN } from "../../convex/seedPlan";
+import { SEED_PLAN } from "../../convex/seedPlan";
+import { fixtureConciergeInspectionAt } from "@/lib/demo-fixture-dates";
+import { humanizeDemoMissingFragment } from "@/lib/demo-humanize-doc-id";
 
 const AGENT_NAME = SEED_PLAN.agent.name;
 
@@ -21,7 +23,11 @@ export function enrichDemoFileSessionAnswer(
   const normalized = question.trim().toLowerCase();
   const inspectionWhen = fact(facts, "inspection_when");
   const missing = fact(facts, "missing");
-  const missingItem = missing?.text.replace(/^Missing for [^:]+:\s*/i, "") ?? null;
+  const missingRaw =
+    missing?.text.replace(/^Missing for [^:]+:\s*/i, "").replace(/\.$/, "") ??
+    null;
+  const missingItem =
+    missingRaw === null ? null : humanizeDemoMissingFragment(missingRaw);
 
   if (normalized.includes("happen") && normalized.includes("next")) {
     return {
@@ -34,7 +40,7 @@ export function enrichDemoFileSessionAnswer(
   if (normalized.includes("inspection")) {
     const when =
       inspectionWhen?.text ??
-      `Inspection is at ${formatDisplayDateTime(SEED_CONCIERGE.inspectionStartsAt)}.`;
+      `Inspection is at ${formatDisplayDateTime(fixtureConciergeInspectionAt())}.`;
     const bring =
       "Bring photo ID, utility access, and any repair notes you already have.";
     const gap = missingItem
@@ -49,7 +55,7 @@ export function enrichDemoFileSessionAnswer(
 
   if (normalized.includes("missing")) {
     const line = missingItem
-      ? `Still missing for Inspection: ${missingItem}.`
+      ? `Still missing for Inspection: ${missingItem}`
       : "Nothing required is marked missing on this stage.";
     return {
       ...answer,

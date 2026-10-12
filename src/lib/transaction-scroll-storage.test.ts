@@ -66,4 +66,18 @@ describe("transaction scroll storage", () => {
     writeTransactionScrollY(-3.2, path);
     expect(readTransactionScrollY(path)).toBe(0);
   });
+
+  it("returns null for missing or invalid stored values", () => {
+    const path = "/transactions/seed:buyer-a";
+    expect(readTransactionScrollY(path)).toBeNull();
+    store.set(transactionScrollStorageKey(path), "not-a-number");
+    expect(readTransactionScrollY(path)).toBeNull();
+    store.set(transactionScrollStorageKey(path), "");
+    expect(readTransactionScrollY(path)).toBeNull();
+  });
+
+  it("clampTransactionScrollTarget respects document max scroll", () => {
+    expect(clampTransactionScrollTarget(10_000, 900, 812)).toBe(88);
+    expect(clampTransactionScrollTarget(0, 500, 812)).toBe(0);
+  });
 });

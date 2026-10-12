@@ -136,6 +136,14 @@ test("coach file session @375 — pageshow persisted restores saved scroll withi
   await signInAlexWithFile(page);
   await page.evaluate(() => window.scrollTo(0, 372));
   await page.waitForFunction(() => window.scrollY >= 300);
+  await page.waitForFunction(() => {
+    const epoch =
+      sessionStorage.getItem("realtyrise.coach.scrollY.epoch") ?? "0";
+    const key = `realtyrise.coach.scrollY.v1:${epoch}:/coach`;
+    const raw = sessionStorage.getItem(key);
+    const stored = raw === null ? 0 : Number.parseInt(raw, 10);
+    return stored >= 300;
+  });
   const target = await page.evaluate(() => {
     const epoch =
       sessionStorage.getItem("realtyrise.coach.scrollY.epoch") ?? "0";
@@ -162,7 +170,10 @@ test("coach — leaving /coach resets history.scrollRestoration to auto", async 
   page,
 }) => {
   await signInAlexWithFile(page);
-  await page.goto("/search");
+  await page
+    .getByTestId("app-tab-bar")
+    .getByRole("link", { name: "Search" })
+    .click();
   await page.waitForURL(/\/search/);
   await expect
     .poll(() => page.evaluate(() => history.scrollRestoration))

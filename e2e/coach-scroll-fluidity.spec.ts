@@ -250,6 +250,44 @@ test("transactions @375 — second fresh drill after deep visit lands at top wit
   await expectScrollStableNear(page, 0, 4);
 });
 
+test("transactions @375 — re-drill pins top then history back restores deep scroll", async ({
+  page,
+}) => {
+  await signInAlexWithFile(page);
+  await page.getByTestId("ten-second-next").getByRole("link").click();
+  await page.waitForURL(/\/transactions\/seed:buyer-a/);
+  const savedY = await page.evaluate(() => {
+    const target = Math.min(
+      1095,
+      document.documentElement.scrollHeight - window.innerHeight,
+    );
+    window.scrollTo(0, target);
+    return window.scrollY;
+  });
+  expect(savedY).toBeGreaterThan(400);
+  await page
+    .getByTestId("app-tab-bar")
+    .getByRole("link", { name: "Coach", exact: true })
+    .click();
+  await page.waitForURL(/\/coach$/);
+  await page.getByTestId("ten-second-next").getByRole("link").click();
+  await page.waitForURL(/\/transactions\/seed:buyer-a/);
+  await expectScrollStableNear(page, 0, 4);
+  await page.screenshot({
+    path: "proof/coach-scroll-restore/txn-redrill-top-pin-375.png",
+    fullPage: false,
+  });
+  await page.goBack();
+  await page.waitForURL(/\/coach$/);
+  await page.goBack();
+  await page.waitForURL(/\/transactions\/seed:buyer-a/);
+  await expectScrollStableNear(page, savedY, 10);
+  await page.screenshot({
+    path: "proof/coach-scroll-restore/txn-history-back-depth-375.png",
+    fullPage: false,
+  });
+});
+
 test("transactions @375 — leaving for coach keeps manual history.scrollRestoration", async ({
   page,
 }) => {

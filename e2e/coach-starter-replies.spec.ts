@@ -57,6 +57,17 @@ async function expectAnswerBetweenChipsAndAsk(
   expect(composeBox).not.toBeNull();
   expect(chipBox).not.toBeNull();
 
+  const dock = page.getByTestId("concierge-mobile-dock");
+  if (await dock.isVisible()) {
+    const dockBox = await dock.boundingBox();
+    expect(dockBox).not.toBeNull();
+    expect(answerBox!.y + answerBox!.height).toBeLessThanOrEqual(dockBox!.y + 1);
+    await expect(page.getByTestId("concierge-user-question")).toBeVisible();
+    await expect(answer).toBeInViewport();
+    expect(answerBox!.height).toBeGreaterThan(20);
+    return;
+  }
+
   expect(threadBox!.y).toBeGreaterThanOrEqual(chipBox!.y - 2);
   expect(threadBox!.y + threadBox!.height).toBeLessThanOrEqual(
     composeBox!.y - MIN_ASK_CLEARANCE_PX + 1,

@@ -28,14 +28,7 @@ export function CoachReturnHeaderHint({
   }
 
   if (continueLabel.length === 0) {
-    return (
-      <p
-        data-testid="coach-return-continue"
-        className={cn("mt-1 text-small font-medium text-foreground", className)}
-      >
-        Welcome back — pick up where you left off below.
-      </p>
-    );
+    return null;
   }
 
   return (

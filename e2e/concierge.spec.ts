@@ -5,7 +5,7 @@ const DESKTOP = { width: 1280, height: 800 };
 const FAB_SIZE = 56;
 /** Preview fixture: eight dock chips; public demo: three dock chips plus More. */
 function expectedVisibleStarterChipCount() {
-  return process.env.REALTYRISE_DEMO_MODE === "1" ? 4 : 8;
+  return process.env.REALTYRISE_DEMO_MODE === "1" ? 3 : 8;
 }
 
 async function signInAs(page: Page, name: string) {
@@ -22,8 +22,8 @@ function conciergeAnswerInScroll(page: Page) {
 
 async function askCanonicalQuestion(page: Page, label: string) {
   const aliases =
-    label === "When's my inspection?"
-      ? ["When's my inspection?", "When is my inspection?"]
+    label === "When's my inspection?" || label === "When is my inspection?"
+      ? ["When is my inspection?", "When's my inspection?"]
       : [label];
   for (const name of aliases) {
     const chip = page.getByRole("button", { name, exact: true });
@@ -36,11 +36,16 @@ async function askCanonicalQuestion(page: Page, label: string) {
   if (await more.isVisible()) {
     await more.click();
     const sheet = page.getByTestId("concierge-more-starters-sheet");
-    await sheet.getByRole("button", { name: aliases[0], exact: true }).click();
+    const sheetChip = sheet.getByRole("button", { name: aliases[0], exact: true });
+    await expect(sheetChip).toBeVisible();
+    await sheetChip.click();
     return;
   }
-  await page.getByTestId("concierge-question").fill(label);
-  await page.getByTestId("concierge-ask").click();
+  const dockChip = page
+    .getByLabel("Suggested questions")
+    .getByRole("button", { name: aliases[0], exact: true });
+  await expect(dockChip).toBeVisible();
+  await dockChip.click();
 }
 
 async function edges(locator: Locator) {
@@ -71,7 +76,7 @@ test("concierge answers a seed question and refuses another client", async ({
   await page.getByRole("button", { name: "What happens next?" }).click();
   await expect(answer).toContainText("Schedule inspection");
 
-  await askCanonicalQuestion(page, "When's my inspection?");
+  await askCanonicalQuestion(page, "When is my inspection?");
   await expect(answer).toContainText(
     "Inspection is at Tue, Sep 8, 2026, 10:00 AM CDT.",
   );
@@ -127,7 +132,7 @@ test.describe("coach home concierge", () => {
     const expectations: { label: string; snippet: string }[] = [
       { label: "What happens next?", snippet: "Schedule inspection" },
       {
-        label: "When's my inspection?",
+        label: "When is my inspection?",
         snippet: "Inspection is at Tue, Sep 8, 2026, 10:00 AM CDT.",
       },
       { label: "What am I missing?", snippet: "repair_request" },

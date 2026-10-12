@@ -1,0 +1,10 @@
+{
+  "capturedAt": "2026-10-12T03:27:40.978Z",
+  "viewportWidth": 375,
+  "env": {
+    "VERCEL_ENV": "production",
+    "REALTYRISE_DEMO_MODE": "1"
+  },
+  "backScrollRestored": true,
+  "proofDir": "proof/demo-followups-3"
+}

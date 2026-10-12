@@ -1,11 +1,14 @@
 import type { ConciergeAnswer, ConciergeFact } from "../../lib/llm/types";
 import { formatDisplayDateTime } from "../../convex/lib/displayTime";
-import { SEED_PLAN } from "../../convex/seedPlan";
+import { SEED_PLAN, SEED_VENDORS } from "../../convex/seedPlan";
 import { fixtureConciergeInspectionAt } from "@/lib/demo-fixture-dates";
 import { humanizeDemoMissingFragment } from "@/lib/demo-humanize-doc-id";
 import { DEMO_ATTEND_INSPECTION_TITLE } from "@/lib/demo-file-session-view";
 
 const AGENT_NAME = SEED_PLAN.agent.name;
+const DEMO_INSPECTOR_NAME =
+  SEED_VENDORS.find((vendor) => vendor.category === "inspectors")?.name ??
+  "Your inspector";
 
 function fact(facts: readonly ConciergeFact[], key: string) {
   return facts.find((row) => row.key === key) ?? null;
@@ -64,7 +67,7 @@ export function enrichDemoFileSessionAnswer(
         : "";
     return {
       ...answer,
-      text: `${when}\n${bring}${gap}`,
+      text: `${when}\n${DEMO_INSPECTOR_NAME} is scheduled for the visit.\n${bring}${gap}`,
       sources: answer.sources,
     };
   }

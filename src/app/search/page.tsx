@@ -16,6 +16,7 @@ import {
   mustFailClosed,
   ProductionAuthMisconfiguredError,
 } from "@/lib/auth-config";
+import { isDemoMode } from "@/lib/auth-config";
 import { buyerFixtureOsUnlocked } from "@/lib/demo-buyer-os";
 import { fixtureEntryPath } from "@/lib/demo-copy";
 
@@ -26,11 +27,13 @@ async function FixtureSearch({
   savedOnly,
   notice,
   noticePropertyId,
+  polishDemoUi,
 }: {
   query?: string;
   savedOnly: boolean;
   notice?: string;
   noticePropertyId?: string;
+  polishDemoUi?: boolean;
 }) {
   const loaded = await loadFixturePropertySearch(query);
   return (
@@ -40,6 +43,7 @@ async function FixtureSearch({
       savedOnly={savedOnly}
       notice={notice}
       noticePropertyId={noticePropertyId}
+      polishDemoUi={polishDemoUi}
     />
   );
 }
@@ -99,6 +103,7 @@ export default async function SearchPage({
               savedOnly={params.saved === "1"}
               notice={params.notice}
               noticePropertyId={params.propertyId}
+              polishDemoUi={isDemoMode()}
             />
           </QueryErrorBoundary>
         </AppShell>

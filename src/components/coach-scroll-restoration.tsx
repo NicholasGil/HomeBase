@@ -1,13 +1,15 @@
 "use client";
 
-import { useLayoutEffect, useEffect } from "react";
+import { useLayoutEffect, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 
 import { BUYER_COACH_HOME } from "@/lib/buyer-shell";
 import { COACH_SCROLL_STORAGE_KEY } from "@/lib/coach-scroll-key";
-
-const COACH_SCROLL_KEY = COACH_SCROLL_STORAGE_KEY;
-const MAX_RESTORE_ATTEMPTS = 12;
+import {
+  clampCoachScrollTarget,
+  isCoachScrollPath,
+} from "@/lib/coach-scroll-bootstrap-logic";
+import { readCoachScrollY, writeCoachScrollY } from "@/lib/coach-scroll-storage";
 
 function coachPath(pathname: string) {
   return (
@@ -16,85 +18,142 @@ function coachPath(pathname: string) {
   );
 }
 
-function readStoredScrollY(): number | null {
-  const raw = sessionStorage.getItem(COACH_SCROLL_KEY);
-  if (raw === null) {
-    return null;
-  }
-  const y = Number.parseInt(raw, 10);
-  return Number.isFinite(y) ? y : null;
-}
-
-function restoreCoachScroll(y: number) {
-  const maxY = Math.max(
-    0,
-    document.documentElement.scrollHeight - window.innerHeight,
+function applyStoredCoachScroll(y: number) {
+  const target = clampCoachScrollTarget(
+    y,
+    document.documentElement.scrollHeight,
+    window.innerHeight,
   );
-  const target = Math.min(y, maxY);
+  document.documentElement.style.scrollBehavior = "auto";
   window.scrollTo(0, target);
-  return Math.abs(window.scrollY - target) < 2;
+  return target;
 }
 
 export function CoachScrollRestoration() {
   const pathname = usePathname();
+  const onCoach = coachPath(pathname);
+  const restoringRef = useRef(false);
 
   useLayoutEffect(() => {
-    if (!coachPath(pathname)) {
-      return;
-    }
-    const y = readStoredScrollY();
-    if (y === null || y <= 0) {
+    if (!onCoach) {
       return;
     }
 
-    let attempts = 0;
-    let cancelled = false;
+    const previousRestoration = history.scrollRestoration;
+    try {
+      history.scrollRestoration = "auto";
+    } catch {
+      // ignore
+    }
 
-    const tick = () => {
-      if (cancelled) {
-        return;
+    const storedY = readCoachScrollY();
+    if (storedY === null || storedY <= 0) {
+      return () => {
+        try {
+          history.scrollRestoration = previousRestoration;
+        } catch {
+          // ignore
+        }
+      };
+    }
+
+    let userInteracted = false;
+    let resizeListener: (() => void) | null = null;
+    const timeoutIds: number[] = [];
+
+    const stopProgrammaticRestore = () => {
+      userInteracted = true;
+      if (resizeListener !== null) {
+        window.removeEventListener("resize", resizeListener);
+        resizeListener = null;
       }
-      const ok = restoreCoachScroll(y);
-      attempts += 1;
-      if (ok || attempts >= MAX_RESTORE_ATTEMPTS) {
-        return;
+      for (const id of timeoutIds) {
+        window.clearTimeout(id);
       }
-      requestAnimationFrame(tick);
+      timeoutIds.length = 0;
     };
 
-    restoreCoachScroll(y);
-    requestAnimationFrame(() => {
-      requestAnimationFrame(tick);
+    const markUserIntent = () => {
+      if (!restoringRef.current) {
+        stopProgrammaticRestore();
+      }
+    };
+
+    const restore = () => {
+      if (userInteracted) {
+        return;
+      }
+      restoringRef.current = true;
+      applyStoredCoachScroll(storedY);
+      restoringRef.current = false;
+    };
+
+    restore();
+
+    resizeListener = () => {
+      restore();
+    };
+    window.addEventListener("resize", resizeListener);
+
+    timeoutIds.push(
+      window.setTimeout(restore, 0),
+      window.setTimeout(restore, 80),
+    );
+
+    window.addEventListener("wheel", markUserIntent, {
+      passive: true,
+      capture: true,
+    });
+    window.addEventListener("touchstart", markUserIntent, {
+      passive: true,
+      capture: true,
     });
 
-    const onResize = () => {
-      restoreCoachScroll(y);
+    const onPopState = () => {
+      if (isCoachScrollPath(window.location.pathname)) {
+        userInteracted = false;
+        restore();
+      }
     };
-    window.addEventListener("resize", onResize);
-
-    const delayed = window.setTimeout(() => restoreCoachScroll(y), 120);
-    const delayed2 = window.setTimeout(() => restoreCoachScroll(y), 320);
+    window.addEventListener("popstate", onPopState);
 
     return () => {
-      cancelled = true;
-      window.removeEventListener("resize", onResize);
-      window.clearTimeout(delayed);
-      window.clearTimeout(delayed2);
+      stopProgrammaticRestore();
+      window.removeEventListener("wheel", markUserIntent, true);
+      window.removeEventListener("touchstart", markUserIntent, true);
+      window.removeEventListener("popstate", onPopState);
+      try {
+        history.scrollRestoration = previousRestoration;
+      } catch {
+        // ignore
+      }
     };
-  }, [pathname]);
+  }, [pathname, onCoach]);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && "scrollRestoration" in window.history) {
-      window.history.scrollRestoration = "manual";
+    if (!onCoach) {
+      return;
     }
-  }, []);
+    let frame = 0;
+    const onScroll = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => {
+        writeCoachScrollY(window.scrollY);
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.cancelAnimationFrame(frame);
+    };
+  }, [onCoach]);
 
   useEffect(() => {
-    if (!coachPath(pathname)) {
+    if (!onCoach) {
       return;
     }
     const saveScroll = () => {
-      sessionStorage.setItem(COACH_SCROLL_KEY, String(window.scrollY));
+      writeCoachScrollY(window.scrollY);
     };
     const onClick = (event: MouseEvent) => {
       const target = event.target;
@@ -120,7 +179,7 @@ export function CoachScrollRestoration() {
     };
     document.addEventListener("click", onClick, true);
     return () => document.removeEventListener("click", onClick, true);
-  }, [pathname]);
+  }, [pathname, onCoach]);
 
   return null;
 }

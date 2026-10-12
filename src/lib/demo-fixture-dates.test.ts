@@ -4,10 +4,12 @@ import { formatDisplayDateTime } from "../../convex/lib/displayTime";
 import { SEED_CONCIERGE } from "../../convex/seedPlan";
 import {
   DEMO_INSPECTION_DAYS_AHEAD,
+  chicagoLocalToUtc,
   fixtureConciergeInspectionAt,
   fixtureConciergeShowingAt,
   fixtureLenderExpiresAt,
   fixtureOwedTodayAsOf,
+  normalizeChicagoHour,
 } from "@/lib/demo-fixture-dates";
 import { seedConciergeFacts } from "@/lib/seed-concierge";
 import { SEED_CLERK_IDS } from "../../convex/seedPlan";
@@ -22,6 +24,14 @@ const demoProductionEnv = {
 const DEMO_NOW = Date.UTC(2026, 9, 11, 18, 0, 0);
 
 describe("demo fixture dates", () => {
+  it("normalizes ICU midnight hour 24 and 00 for Chicago parsing", () => {
+    expect(normalizeChicagoHour(24)).toBe(0);
+    expect(normalizeChicagoHour(0)).toBe(0);
+    expect(normalizeChicagoHour(13)).toBe(13);
+    const utc = chicagoLocalToUtc(2026, 10, 12, 0, 0);
+    expect(chicagoLocalToUtc(2026, 10, 12, 24, 0)).toBe(utc);
+  });
+
   it("keeps canonical instants when demo mode is off", () => {
     const env = { VERCEL_ENV: "production", NODE_ENV: "production" } as NodeJS.ProcessEnv;
     expect(fixtureConciergeInspectionAt(env, DEMO_NOW)).toBe(

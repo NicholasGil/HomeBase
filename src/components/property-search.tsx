@@ -94,12 +94,15 @@ export function PropertySearch({
   savedOnly,
   notice,
   noticePropertyId,
+  polishDemoUi = false,
 }: {
   denied?: boolean;
   view: FixtureSearchView | null;
   savedOnly?: boolean;
   notice?: string;
   noticePropertyId?: string;
+  /** Public demo: hide internal flag copy and dev-only badges. */
+  polishDemoUi?: boolean;
 }) {
   if (denied || view === null) {
     return (
@@ -123,16 +126,20 @@ export function PropertySearch({
             Property search
           </h2>
           <p className="text-sm text-muted-foreground">
-            Natural language in, ranked sample listings out. FLAG_MLS stays off.
+            {polishDemoUi
+              ? "Natural language in, ranked sample listings out."
+              : "Natural language in, ranked sample listings out. FLAG_MLS stays off."}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Badge variant="quiet" data-testid="search-sample-banner">
             sample data
           </Badge>
-          <Badge variant="quiet" data-testid="search-mls-flag">
-            FLAG_MLS {view.mlsEnabled ? "on" : "off"}
-          </Badge>
+          {polishDemoUi ? null : (
+            <Badge variant="quiet" data-testid="search-mls-flag">
+              FLAG_MLS {view.mlsEnabled ? "on" : "off"}
+            </Badge>
+          )}
         </div>
       </div>
 

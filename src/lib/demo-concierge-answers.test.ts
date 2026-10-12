@@ -21,11 +21,12 @@ describe("enrichDemoFileSessionAnswer", () => {
     expect(next.text.split("\n").length).toBeGreaterThanOrEqual(2);
 
     const inspection = enrichDemoFileSessionAnswer(
-      "When's my inspection?",
+      "When is my inspection?",
       { text: "stub", kind: "answer", sources: ["appointments"] },
       facts,
     );
     expect(inspection.text).toContain("Inspection is at");
+    expect(inspection.text).toContain("Riley Brooks");
     expect(inspection.text).toContain("Bring photo ID");
     expect(inspection.text).toContain("repair request");
     expect(inspection.text).not.toMatch(SNAKE_CASE);
@@ -47,7 +48,7 @@ describe("enrichDemoFileSessionAnswer", () => {
     );
     expect(next.text.toLowerCase()).toContain("attend inspection");
     const inspection = enrichDemoFileSessionAnswer(
-      "When's my inspection?",
+      "When is my inspection?",
       { text: "stub", kind: "answer", sources: ["appointments"] },
       attendFacts,
     );

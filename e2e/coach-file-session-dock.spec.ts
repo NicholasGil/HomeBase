@@ -32,7 +32,7 @@ test("coach file session @375 — typed Ask submits above dock", async ({
   await expect(page).toHaveURL(/\/coach$/);
   const dock = page.getByTestId("concierge-mobile-dock");
   await expect(dock).toBeVisible();
-  const question = "When's my inspection?";
+  const question = "When is my inspection?";
   await page.getByTestId("concierge-question").fill(question);
   await page.getByTestId("concierge-ask").click();
   const answer = page.getByTestId("concierge-answer");

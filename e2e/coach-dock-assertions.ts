@@ -1,6 +1,7 @@
 import { expect, type Page } from "@playwright/test";
 
-const MIN_COMPOSE_TAB_CLEARANCE_PX = 16;
+/** Dock sits flush above the tab bar; allow safe-area gap only. */
+const MIN_COMPOSE_TAB_CLEARANCE_PX = 0;
 
 /** File-session @375: NEXT card must sit fully above the sticky concierge dock. */
 export async function assertNextCardClearsDock(page: Page) {

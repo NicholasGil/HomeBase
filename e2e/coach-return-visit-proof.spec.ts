@@ -31,6 +31,27 @@ async function signInAlexWithFile(page: import("@playwright/test").Page) {
   await expect(page).toHaveURL(/\/coach$/);
 }
 
+test("RET-001 @375 — first visit never shows Welcome back", async ({ page }) => {
+  await signInAlexDiscoveryEmpty(page);
+  await expect(page.getByText(/Welcome back/i)).toHaveCount(0);
+  await expect(page.getByTestId("coach-return-continue")).toHaveCount(0);
+});
+
+test("RET-001 @375 — discovery return shows daily check-in", async ({ page }) => {
+  const starter = COACH_FIRST_SESSION_STARTERS[0];
+  await signInAlexDiscoveryEmpty(page);
+  await page.getByRole("button", { name: starter }).click();
+  await expect(page.getByTestId("concierge-answer")).toHaveAttribute(
+    "data-kind",
+    "answer",
+    { timeout: 15_000 },
+  );
+  await page.goto("/dashboard");
+  await page.goto("/coach");
+  await expect(page.getByTestId("coach-daily-check-in")).toBeVisible();
+  await expect(page.getByText(/Welcome back/i)).toHaveCount(0);
+});
+
 test("RET-002 @375 — return visit without thread shows daily check-in", async ({
   page,
 }) => {
@@ -54,22 +75,19 @@ test("return visit proof @375 — discovery thread, file thread, daily check-in"
   await signInAlexDiscoveryEmpty(page);
   await expect(page.getByTestId("coach-first-session-empty")).toBeVisible();
   await page.getByRole("button", { name: starter }).click();
-  await expect(
-    page
-      .getByTestId("concierge-first-session-thread")
-      .getByTestId("concierge-answer"),
-  ).toHaveAttribute("data-kind", "answer", { timeout: 15_000 });
+  await expect(page.getByTestId("concierge-answer")).toHaveAttribute(
+    "data-kind",
+    "answer",
+    { timeout: 15_000 },
+  );
 
   await page.goto("/dashboard");
   await page.goto("/coach");
-  await expect(page.getByTestId("coach-return-continue")).toBeVisible();
-  await expect(page.getByTestId("coach-daily-check-in")).toHaveCount(0);
+  await expect(page.getByTestId("coach-daily-check-in")).toBeVisible();
+  await expect(page.getByTestId("concierge-user-question")).toBeVisible();
   await expect(page.getByTestId("coach-first-session-empty")).toHaveCount(0);
-  await expect(
-    page
-      .getByTestId("concierge-first-session-thread")
-      .getByTestId("concierge-answer"),
-  ).toBeVisible();
+  await expect(page.getByTestId("concierge-answer")).toBeVisible();
+  await expect(page.getByTestId("concierge-user-question")).toBeVisible();
   await page.screenshot({
     path: path.join(PROOF_DIR, "coach-discovery-return-375.png"),
     fullPage: false,
@@ -92,7 +110,7 @@ test("return visit proof @375 — discovery thread, file thread, daily check-in"
   await expect(page.getByTestId("coach-return-continue")).toContainText(
     fileStarter,
   );
-  await expect(page.getByTestId("coach-daily-check-in")).toHaveCount(0);
+  await expect(page.getByTestId("coach-daily-check-in")).toBeVisible();
   const restoredThread = page.getByTestId("concierge-restored-thread");
   await expect(restoredThread).toBeVisible();
   const restoredAnswer = restoredThread.getByTestId("concierge-answer");

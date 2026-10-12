@@ -105,8 +105,10 @@ export function TenSecondHeroGrid({
   const nextAssigneeLabel =
     view.next === null
       ? null
-      : (view.contacts.find((c) => c.role === view.next!.assigneeRole)?.name ??
-        view.next.assigneeRole);
+      : view.next.assigneeRole === "buyer"
+        ? (buyerName?.split(" ")[0] ?? "You")
+        : (view.contacts.find((c) => c.role === view.next!.assigneeRole)?.name ??
+          view.next.assigneeRole);
   const { step: journeyStep, total: journeyTotal } = journeyStepProgress(
     view.stages,
   );

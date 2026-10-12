@@ -22,7 +22,10 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import type { ConciergeAvailability } from "@/lib/concierge-availability";
-import { CONCIERGE_STARTERS } from "@/lib/concierge-starters";
+import {
+  CONCIERGE_STARTERS,
+  FILE_SESSION_DOCK_PREVIEW_COUNT,
+} from "@/lib/concierge-starters";
 import { CONCIERGE_MODEL_UNAVAILABLE_ANSWER } from "../../lib/llm/types";
 
 export { CONCIERGE_STARTERS };
@@ -42,7 +45,7 @@ const MOBILE_COMPOSE_GRID =
 
 /** File-session mobile: chips + Ask fixed above the tab bar; page scrolls. */
 const MOBILE_STICKY_DOCK =
-  "max-md:fixed max-md:inset-x-0 max-md:z-40 max-md:bottom-[calc(var(--tab-bar-height)+env(safe-area-inset-bottom))] max-md:border-t max-md:border-border/70 max-md:bg-card max-md:px-5 max-md:pt-2 max-md:pb-5 max-md:shadow-[0_-8px_24px_-12px_rgba(15,23,42,0.14)]";
+  "max-md:fixed max-md:inset-x-0 max-md:z-40 max-md:bottom-[calc(var(--tab-bar-height)+env(safe-area-inset-bottom))] max-md:border-t max-md:border-border/70 max-md:bg-card max-md:px-5 max-md:pt-2 max-md:pb-2 max-md:shadow-[0_-8px_24px_-12px_rgba(15,23,42,0.14)]";
 
 const CONCIERGE_SERVER_ERROR_MESSAGE =
   "Coach could not load an answer.";
@@ -77,7 +80,7 @@ export function ConciergeChat({
   className,
   starters = CONCIERGE_STARTERS,
   allStarters,
-  idleHint = "Pick a question above or ask about this transaction. I explain what is on this file; I do not advise.",
+  idleHint = "Tap a starter below or ask about this transaction. I explain what is on this file; I do not advise.",
   questionPlaceholder = "Ask about this transaction",
   availability = "ready",
   /** Renders inside the scroll region (e.g. first-session empty state). */
@@ -136,16 +139,26 @@ export function ConciergeChat({
     pinFirstSessionMobile ||
     (pinRestoredThreadOnMobile && asked !== null && !coachUnavailable);
   const wrapMobileStarters = wrapMobileQuestionStarters;
+  const dockUsesCompactGrid =
+    mobileStickyDockAboveTabBar === true &&
+    allStarters !== undefined &&
+    allStarters.length > starters.length;
   const horizontalScrollChips =
-    !wrapMobileStarters &&
-    (pinMobileChips || !pinFirstSessionMobile);
+    (!wrapMobileStarters &&
+      (dockUsesCompactGrid
+        ? false
+        : mobileStickyDockAboveTabBar !== true &&
+          (pinMobileChips || !pinFirstSessionMobile))) ||
+    (mobileStickyDockAboveTabBar === true &&
+      !dockUsesCompactGrid &&
+      starters.length > FILE_SESSION_DOCK_PREVIEW_COUNT);
   const showPinnedMobileThread =
     (pinFirstSessionMobile || pinRestoredThreadOnMobile) &&
     asked !== null &&
     !coachUnavailable;
   const coachMaxMd = useCoachMaxMdViewport();
   const mobileStickyDock =
-    mobileStickyDockAboveTabBar && coachMaxMd && !coachUnavailable;
+    mobileStickyDockAboveTabBar === true && coachMaxMd && !coachUnavailable;
   const showMoreStartersChip =
     mobileStickyDock &&
     allStarters !== undefined &&
@@ -188,12 +201,17 @@ export function ConciergeChat({
     chipsScrollRef.current.scrollLeft = 0;
   }, [mobileStickyDock, starters]);
 
+  const skipInitialAnswerScrollRef = useRef(initialTurn !== null);
   useEffect(() => {
     if (!mobileStickyDock || answer === null) {
       return;
     }
+    if (skipInitialAnswerScrollRef.current) {
+      skipInitialAnswerScrollRef.current = false;
+      return;
+    }
     answerRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
-  }, [answer, mobileStickyDock]);
+  }, [answer, mobileStickyDock, initialTurn]);
 
   function showUnavailableAnswer() {
     setAnswer(CONCIERGE_MODEL_UNAVAILABLE_ANSWER.text);
@@ -394,6 +412,9 @@ export function ConciergeChat({
           !wrapMobileStarters &&
             !inMoreSheet &&
             "w-max max-md:h-11 max-md:justify-start max-md:whitespace-nowrap",
+          mobileStickyDock &&
+            !inMoreSheet &&
+            "max-md:min-h-11 max-md:min-w-0 max-md:max-w-full max-md:truncate max-md:px-3 max-md:text-xs max-md:leading-snug",
           wrapMobileStarters &&
             "w-max max-w-[min(17.5rem,calc(100vw-3rem))] whitespace-normal",
           (wrapMobileStarters || pinRestoredThreadOnMobile) &&
@@ -428,10 +449,18 @@ export function ConciergeChat({
         className={cn(
           "-mx-5 flex gap-2 px-5 pb-1 md:mx-0",
           wrapMobileStarters && "flex-wrap",
+          mobileStickyDock &&
+            dockUsesCompactGrid &&
+            "max-md:grid max-md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] max-md:items-center max-md:gap-2 max-md:pb-0",
+          mobileStickyDock &&
+            !dockUsesCompactGrid &&
+            "max-md:flex-wrap max-md:gap-2 max-md:pb-0",
           horizontalScrollChips &&
             "max-md:min-w-0 max-md:w-full max-md:max-w-full max-md:flex-nowrap max-md:justify-start max-md:overflow-x-auto max-md:overflow-y-hidden max-md:overscroll-x-contain max-md:[scrollbar-width:none] max-md:[&::-webkit-scrollbar]:hidden",
           horizontalScrollChips &&
             !mobileStickyDock &&
+            !wrapMobileStarters &&
+            !pinFirstSessionMobile &&
             "max-md:[mask-image:linear-gradient(to_right,transparent,black_1.5rem,black_calc(100%-1.5rem),transparent)]",
         )}
       >
@@ -441,15 +470,17 @@ export function ConciergeChat({
           <SheetTrigger
             type="button"
             data-testid="concierge-more-starters"
+            aria-label="More questions"
             disabled={busy || coachUnavailable}
-            className="h-auto min-h-11 w-max shrink-0 rounded-full bg-muted px-4 py-2 text-left text-sm text-foreground hover:bg-muted/80 max-md:h-11 max-md:whitespace-nowrap disabled:pointer-events-none disabled:opacity-50"
+            className="h-auto min-h-11 w-max max-w-[5.5rem] shrink-0 rounded-full bg-muted px-3 py-2 text-left text-sm text-foreground hover:bg-muted/80 max-md:col-span-1 max-md:h-11 max-md:min-w-[3.25rem] max-md:justify-center max-md:px-3 max-md:whitespace-nowrap disabled:pointer-events-none disabled:opacity-50"
           >
-            More questions
+            More
           </SheetTrigger>
           <SheetContent
             side="bottom"
             data-testid="concierge-more-starters-sheet"
-            className="max-h-[min(70vh,28rem)] overflow-y-auto rounded-t-2xl px-5 pb-8"
+            showCloseButton
+            className="max-h-[min(70vh,28rem)] overflow-y-auto rounded-t-2xl px-5 pb-8 [&_[data-slot=sheet-close]]:size-11 [&_[data-slot=sheet-close]]:min-h-11 [&_[data-slot=sheet-close]]:min-w-11"
           >
             <SheetTitle className="text-h3 font-semibold tracking-tight">
               Suggested questions
@@ -475,7 +506,7 @@ export function ConciergeChat({
       className={cn(
         "flex w-full min-w-0 gap-2",
         mobileStickyDock
-          ? "border-0 bg-transparent pt-2 shadow-none"
+          ? "border-0 bg-transparent pt-1.5 shadow-none"
           : "border-t border-border/70 bg-card/95 pt-3 shadow-[0_-8px_24px_-12px_rgba(15,23,42,0.14)] backdrop-blur md:bg-card md:shadow-none md:backdrop-blur-none",
         mobilePinnedLayout && !mobileStickyDock ? "pt-2" : "",
       )}
@@ -545,7 +576,9 @@ export function ConciergeChat({
             data-testid={
               pinRestoredThreadOnMobile && asked !== null
                 ? "concierge-restored-thread"
-                : undefined
+                : pinFirstSessionMobile && asked !== null
+                  ? "concierge-first-session-thread"
+                  : undefined
             }
           >
             {renderConversation({
@@ -560,7 +593,7 @@ export function ConciergeChat({
           {starterChips}
           <div
             data-testid="concierge-compose"
-            className="max-md:pb-4 max-md:[&_form]:pb-0"
+            className="max-md:pb-2 max-md:[&_form]:pb-0"
           >
             {composeForm}
           </div>

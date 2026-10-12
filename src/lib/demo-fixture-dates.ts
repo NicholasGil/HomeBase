@@ -21,6 +21,11 @@ type ChicagoParts = {
   minute: number;
 };
 
+/** Node 20 ICU may format midnight as hour 24 instead of 00. */
+export function normalizeChicagoHour(hour: number): number {
+  return hour === 24 ? 0 : hour;
+}
+
 function chicagoParts(at: number): ChicagoParts {
   const dtf = new Intl.DateTimeFormat("en-US", {
     timeZone: DISPLAY_TIME_ZONE,
@@ -38,7 +43,7 @@ function chicagoParts(at: number): ChicagoParts {
     year: Number.parseInt(parts.year ?? "0", 10),
     month: Number.parseInt(parts.month ?? "0", 10),
     day: Number.parseInt(parts.day ?? "0", 10),
-    hour: Number.parseInt(parts.hour ?? "0", 10),
+    hour: normalizeChicagoHour(Number.parseInt(parts.hour ?? "0", 10)),
     minute: Number.parseInt(parts.minute ?? "0", 10),
   };
 }
@@ -51,6 +56,7 @@ export function chicagoLocalToUtc(
   hour: number,
   minute: number,
 ): number {
+  const targetHour = normalizeChicagoHour(hour);
   const probe = Date.UTC(year, month - 1, day, 12, 0, 0);
   for (let offsetMs = -40 * 3_600_000; offsetMs <= 40 * 3_600_000; offsetMs += 60_000) {
     const candidate = probe + offsetMs;
@@ -59,7 +65,7 @@ export function chicagoLocalToUtc(
       local.year === year &&
       local.month === month &&
       local.day === day &&
-      local.hour === hour &&
+      local.hour === targetHour &&
       local.minute === minute
     ) {
       return candidate;

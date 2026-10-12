@@ -106,7 +106,7 @@ export function CoachHabitConcierge({
         mobileStickyDockAboveTabBar={mobileStickyDockAboveTabBar}
         fileSummaryAboveThread={fileSummaryAboveThread}
         threadHeader={
-          showDailyCheckIn && !threadActive
+          showDailyCheckIn
             ? (
                 <CoachDailyCheckIn
                   stageLabel={stageLabel}

@@ -35,11 +35,6 @@ async function signInAlexWithFile(page: import("@playwright/test").Page) {
   await expect(page).toHaveURL(/\/coach$/);
 }
 
-function conciergeScrollRegion(page: import("@playwright/test").Page) {
-  return page.getByTestId("concierge-scroll-region");
-}
-
-
 async function assertAskCenterHitsButton(page: import("@playwright/test").Page) {
   const ask = page.getByTestId("concierge-compose").getByTestId("concierge-ask");
   await expect(ask).toBeVisible();
@@ -129,7 +124,7 @@ test("coach habit fluidity — chip center hits + scroll-end clearance @375", as
 
   const fileDockStarters = [
     "What happens next?",
-    "When do I leave for my first showing?",
+    "When is my inspection?",
   ] as const;
 
   await signInAlexWithFile(page);
@@ -176,6 +171,18 @@ test("coach habit fluidity — chip center hits + scroll-end clearance @375", as
   await expect(restoredAnswer).toBeInViewport();
 
   for (const label of CONCIERGE_STARTERS) {
+    const more = page.getByTestId("concierge-more-starters");
+    if (await more.isVisible()) {
+      const dockChip = page.getByRole("button", { name: label, exact: true });
+      if ((await dockChip.count()) === 0) {
+        await more.click();
+        const sheet = page.getByTestId("concierge-more-starters-sheet");
+        const sheetChip = sheet.getByRole("button", { name: label, exact: true });
+        await expect(sheetChip).toBeVisible();
+        await page.keyboard.press("Escape");
+        continue;
+      }
+    }
     await assertChipCenterHitsButton(page, label);
   }
   await assertAskCenterHitsButton(page);

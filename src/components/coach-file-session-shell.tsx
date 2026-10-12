@@ -81,7 +81,7 @@ export function CoachFileSessionShell({
         allStarters={allStarters}
         pinStartersAboveScrollOnMobile={pinStartersAboveScrollOnMobile}
         wrapMobileQuestionStarters={wrapMobileQuestionStarters}
-        mobileStickyDockAboveTabBar={!firstSession}
+        mobileStickyDockAboveTabBar
         fileSummaryAboveThread={fileSummaryCompact}
         onThreadActiveChange={onThreadActiveChange}
         scrollIntro={scrollIntro}

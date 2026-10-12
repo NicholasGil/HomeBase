@@ -156,7 +156,12 @@ export function CoachScrollRestoration() {
     restore();
     resizeListener = restore;
     window.addEventListener("resize", resizeListener);
-    timeoutIds.push(window.setTimeout(restore, 0), window.setTimeout(restore, 80));
+    timeoutIds.push(
+      window.setTimeout(restore, 0),
+      window.setTimeout(restore, 80),
+      window.setTimeout(restore, 150),
+      window.setTimeout(restore, 300),
+    );
 
     const onUserScrollIntent = () => {
       if (programmaticScrollRef.current) {

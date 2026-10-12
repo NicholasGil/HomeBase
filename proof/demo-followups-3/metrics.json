@@ -1,7 +1,6 @@
 {
-  "capturedAt": "2026-10-12T05:34:21.138Z",
-  "gitSha": "ef0466109c6893d4affea2839494f16aa7c22076",
-  "gitShaNote": "Parent commit for proof bundle; tip SHA is reported separately in CI/agent summary.",
+  "capturedAt": "2026-10-12T06:18:17.222Z",
+  "gitSha": "2a34e564a47a18c652517efe1e00c6923ecad5bb",
   "viewportWidth": 375,
   "env": {
     "VERCEL_ENV": "production",

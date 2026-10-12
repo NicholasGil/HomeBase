@@ -65,6 +65,7 @@ test("empty Discovery coach shows empty state, two dock starters, and More @375"
   await signInAlexDiscoveryEmpty(page);
   await expect(page.getByTestId("coach-home")).toBeVisible();
   await expect(page.getByTestId("coach-first-session-empty")).toBeVisible();
+  await expect(page.getByText(/explain the buying process/i)).toBeVisible();
   await expect(page.getByTestId("concierge-scope")).toContainText(
     "No property on this file yet",
   );

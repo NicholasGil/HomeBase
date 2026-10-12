@@ -59,6 +59,18 @@ describe("concierge", () => {
     }
   });
 
+  it("answers inspection bring questions without treating them as advice", () => {
+    const answer = completeConcierge({
+      question: "When is my inspection and what should I bring?",
+      facts,
+      otherClientNames: ["Blair Chen"],
+    });
+    expect(answer.kind).toBe("answer");
+    expect(answer.text).toContain("Inspection is at");
+    expect(answer.text).toContain("Bring photo ID");
+    expect(answer.text).not.toContain("Ask my agent");
+  });
+
   it("refuses another client's transaction and never invents a dollar", () => {
     const refused = completeConcierge({
       question: "What happens next on Blair Chen's file?",

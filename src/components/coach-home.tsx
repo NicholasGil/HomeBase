@@ -62,7 +62,8 @@ export function CoachHome({
         aria-label="Personal coach"
         className={cn(
           "flex min-h-0 flex-col overflow-x-hidden rounded-2xl border border-border/80 bg-card shadow-sm",
-          "max-md:max-h-[calc(100dvh-var(--coach-mobile-chrome)-var(--tab-bar-height)-env(safe-area-inset-bottom))] max-md:overflow-y-auto max-md:overscroll-contain",
+          !firstSession &&
+            "max-md:pb-[var(--coach-mobile-dock-clearance)]",
           "md:min-h-[min(70vh,640px)]",
         )}
       >
@@ -149,7 +150,7 @@ export function CoachHome({
             <CoachTenSecondReturnGate
               storageKey={habitStorageKey}
               firstSession={firstSession}
-              className="relative z-0 shrink-0 border-b border-border/70 px-5 py-4"
+              className="relative z-0 shrink-0 overflow-x-hidden border-b border-border/70 px-5 py-4 max-md:min-w-0"
             >
               <TenSecondHeroGrid
                 view={dashboardView}
@@ -162,7 +163,7 @@ export function CoachHome({
           ) : (
             <div
               data-testid="coach-ten-second"
-              className="relative z-0 shrink-0 border-b border-border/70 px-5 py-4"
+              className="relative z-0 shrink-0 overflow-x-hidden border-b border-border/70 px-5 py-4 max-md:min-w-0"
             >
               <TenSecondHeroGrid
                 view={dashboardView}
@@ -191,6 +192,7 @@ export function CoachHome({
             starters={conciergeStarters}
             pinStartersAboveScrollOnMobile={!coachUnavailable}
             wrapMobileQuestionStarters={firstSession}
+            mobileStickyDockAboveTabBar={!firstSession}
             scrollIntro={
               firstSession && !coachUnavailable
                 ? (
@@ -219,7 +221,7 @@ export function CoachHome({
                 : undefined
             }
             questionPlaceholder={
-              firstSession ? "Ask about buying" : undefined
+              firstSession ? "Ask about buying" : "Ask about your file"
             }
           />
         ) : (
@@ -235,6 +237,7 @@ export function CoachHome({
             starters={conciergeStarters}
             pinStartersAboveScrollOnMobile={!coachUnavailable}
             wrapMobileQuestionStarters={firstSession}
+            mobileStickyDockAboveTabBar={!firstSession}
             scrollIntro={
               firstSession && !coachUnavailable
                 ? (
@@ -263,7 +266,7 @@ export function CoachHome({
                 : undefined
             }
             questionPlaceholder={
-              firstSession ? "Ask about buying" : undefined
+              firstSession ? "Ask about buying" : "Ask about your file"
             }
           />
         )}

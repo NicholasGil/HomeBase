@@ -70,6 +70,25 @@ export function answerConcierge(
           kind: "answer",
           sources: [],
         };
+  } else if (
+    normalized.includes("inspection") &&
+    (normalized.includes("bring") || normalized.includes("what to bring"))
+  ) {
+    const bringNote =
+      missing !== null
+        ? ` For this stage, the file still lists ${missing.text.replace(/^Missing for [^:]+:\s*/i, "")}.`
+        : "";
+    answer = inspectionWhen
+      ? {
+          text: `${inspectionWhen.text} Bring photo ID and access to utilities.${bringNote}`,
+          kind: "answer",
+          sources: [inspectionWhen.source, ...(missing ? [missing.source] : [])],
+        }
+      : {
+          text: "No inspection time is on this file.",
+          kind: "answer",
+          sources: [],
+        };
   } else if (normalized.includes("when") && normalized.includes("inspection")) {
     answer = inspectionWhen
       ? {

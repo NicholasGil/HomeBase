@@ -24,22 +24,28 @@ const PERSONA_CLERK_IDS: Record<string, string> = {
   onboarding: SEED_CLERK_IDS.onboardingAgent,
 };
 
-type PageProps = {
-  params: Promise<{ persona: string }>;
-};
-
-export default async function DemoEnterPersonaPage({ params }: PageProps) {
+export async function GET(
+  request: Request,
+  context: { params: Promise<{ persona: string }> },
+) {
   if (!fixtureAllowed() || !isDemoMode()) {
     throw new ProductionAuthMisconfiguredError();
   }
 
-  const { persona } = await params;
+  const { persona } = await context.params;
   const clerkId = PERSONA_CLERK_IDS[persona];
   if (clerkId === undefined) {
     redirect(DEMO_CHOOSER_PATH);
   }
 
-  const started = startTestSessionDecision(clerkId, process.env);
+  const url = new URL(request.url);
+  const simulateConciergeServerError =
+    url.searchParams.get("simulateConciergeServerError") === "1" &&
+    persona === "buyer-coach";
+
+  const started = startTestSessionDecision(clerkId, process.env, {
+    simulateConciergeServerError,
+  });
   if (!started.ok) {
     redirect(DEMO_CHOOSER_PATH);
   }

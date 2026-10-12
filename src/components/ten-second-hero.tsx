@@ -113,10 +113,11 @@ export function TenSecondHeroGrid({
     <div
       data-testid="ten-second-hero"
       className={cn(
-        "grid gap-2.5 lg:gap-x-8 lg:gap-y-6",
+        "grid min-w-0 max-w-full gap-2.5 lg:gap-x-8 lg:gap-y-6",
         compact ? "px-0 pt-0 pb-1 lg:px-0" : "px-5 pt-2.5 pb-5 lg:px-6 lg:py-6",
         at.grid,
         coachMobileStack,
+        compact && "max-md:overflow-x-hidden",
       )}
     >
       <div

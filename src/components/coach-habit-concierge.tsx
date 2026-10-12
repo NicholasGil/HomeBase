@@ -26,6 +26,7 @@ export function CoachHabitConcierge({
   starters,
   pinStartersAboveScrollOnMobile,
   wrapMobileQuestionStarters,
+  mobileStickyDockAboveTabBar,
   scrollIntro,
   idleHint,
   questionPlaceholder,
@@ -40,6 +41,7 @@ export function CoachHabitConcierge({
   starters?: readonly string[];
   pinStartersAboveScrollOnMobile?: boolean;
   wrapMobileQuestionStarters?: boolean;
+  mobileStickyDockAboveTabBar?: boolean;
   scrollIntro?: ReactNode;
   idleHint?: string;
   questionPlaceholder?: string;
@@ -84,6 +86,7 @@ export function CoachHabitConcierge({
         starters={starters}
         pinStartersAboveScrollOnMobile={pinStartersAboveScrollOnMobile}
         wrapMobileQuestionStarters={wrapMobileQuestionStarters}
+        mobileStickyDockAboveTabBar={mobileStickyDockAboveTabBar}
         pinRestoredThreadOnMobile={
           !firstSession && repeatVisit && initialTurn !== null
         }

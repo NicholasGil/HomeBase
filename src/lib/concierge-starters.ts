@@ -13,4 +13,8 @@ export const CONCIERGE_STARTERS = [
   "When do I leave for my first showing?",
 ] as const;
 
-export const FILE_SESSION_CONCIERGE_STARTERS = CONCIERGE_STARTERS.slice(0, 3);
+export const FILE_SESSION_CONCIERGE_STARTERS = [
+  "What happens next?",
+  "When is my inspection and what should I bring?",
+  "What am I missing?",
+] as const;

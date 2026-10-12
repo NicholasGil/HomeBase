@@ -30,6 +30,13 @@ const MOBILE_COMPOSE_DOCK =
 const MOBILE_COMPOSE_GRID =
   "max-md:row-start-3 max-md:-mx-5 max-md:px-5 max-md:pb-[env(safe-area-inset-bottom)]";
 
+/** File-session mobile: chips + Ask fixed above the tab bar; page scrolls. */
+const MOBILE_STICKY_DOCK =
+  "max-md:fixed max-md:inset-x-0 max-md:z-40 max-md:bottom-[calc(var(--tab-bar-height)+env(safe-area-inset-bottom))] max-md:border-t max-md:border-border/70 max-md:bg-card max-md:px-5 max-md:pt-2 max-md:pb-2 max-md:shadow-[0_-8px_24px_-12px_rgba(15,23,42,0.14)]";
+
+const CONCIERGE_SERVER_ERROR_MESSAGE =
+  "Coach could not load an answer. Try again.";
+
 const COACH_MOBILE_MQ = "(max-width: 767px)";
 
 function subscribeCoachMobileMq(onChange: () => void) {
@@ -70,6 +77,8 @@ export function ConciergeChat({
   wrapMobileQuestionStarters = false,
   /** File-session return: pin restored Ask/answer above Ask on 375. */
   pinRestoredThreadOnMobile = false,
+  /** File session @375: sticky chips + Ask above tab bar; document scroll only. */
+  mobileStickyDockAboveTabBar = false,
   showAgentLinkWhenUnavailable = true,
   initialTurn = null,
   onTurnComplete,
@@ -83,6 +92,7 @@ export function ConciergeChat({
   pinStartersAboveScrollOnMobile?: boolean;
   wrapMobileQuestionStarters?: boolean;
   pinRestoredThreadOnMobile?: boolean;
+  mobileStickyDockAboveTabBar?: boolean;
   showAgentLinkWhenUnavailable?: boolean;
   initialTurn?: ConciergePersistedTurn | null;
   onTurnComplete?: (turn: ConciergePersistedTurn) => void;
@@ -92,6 +102,7 @@ export function ConciergeChat({
   const [answer, setAnswer] = useState<string | null>(initialTurn?.answer ?? null);
   const [kind, setKind] = useState<string | null>(initialTurn?.kind ?? null);
   const [busy, setBusy] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const pinnedThreadRef = useRef<HTMLDivElement>(null);
 
   const coachUnavailable = availability === "model_key_missing";
@@ -108,9 +119,12 @@ export function ConciergeChat({
     asked !== null &&
     !coachUnavailable;
   const coachMaxMd = useCoachMaxMdViewport();
-  const mobileReplyGrid = showPinnedMobileThread;
+  const mobileStickyDock =
+    mobileStickyDockAboveTabBar && coachMaxMd && !coachUnavailable;
+  const mobileReplyGrid = showPinnedMobileThread && !mobileStickyDock;
   const mobilePinnedLayout =
-    mobileReplyGrid || (pinMobileChips && coachMaxMd);
+    !mobileStickyDock &&
+    (mobileReplyGrid || (pinMobileChips && coachMaxMd));
   const pinnedThreadTestId =
     showPinnedMobileThread && pinRestoredThreadOnMobile
       ? "concierge-restored-thread"
@@ -161,6 +175,7 @@ export function ConciergeChat({
       return;
     }
     setBusy(true);
+    setErrorMessage(null);
     setAsked(nextQuestion);
     setAnswer(null);
     const result = await askConcierge({ question: nextQuestion });
@@ -172,6 +187,10 @@ export function ConciergeChat({
           CONCIERGE_MODEL_UNAVAILABLE_ANSWER.text,
           CONCIERGE_MODEL_UNAVAILABLE_ANSWER.kind,
         );
+      } else if (result.reason === "SERVER_ERROR") {
+        setErrorMessage(CONCIERGE_SERVER_ERROR_MESSAGE);
+        setAnswer(null);
+        setKind(null);
       } else {
         const refuseText = "You cannot ask the concierge.";
         setAnswer(refuseText);
@@ -211,6 +230,15 @@ export function ConciergeChat({
         ) : null}
         {busy ? (
           <p className="text-sm text-muted-foreground">Checking this file…</p>
+        ) : null}
+        {errorMessage ? (
+          <p
+            role="alert"
+            data-testid="concierge-error"
+            className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+          >
+            {errorMessage}
+          </p>
         ) : null}
         {answer !== null ? (
           <ConciergeAnswerView
@@ -309,6 +337,88 @@ export function ConciergeChat({
     </div>
   );
 
+  const composeForm = (
+    <form
+      className={cn(
+        "flex w-full min-w-0 gap-2",
+        mobileStickyDock
+          ? "border-0 bg-transparent pt-2 shadow-none"
+          : "border-t border-border/70 bg-card/95 pt-3 shadow-[0_-8px_24px_-12px_rgba(15,23,42,0.14)] backdrop-blur md:bg-card md:shadow-none md:backdrop-blur-none",
+        mobilePinnedLayout && !mobileStickyDock ? "pt-2" : "",
+      )}
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (coachUnavailable || question.trim().length === 0) {
+          return;
+        }
+        void submit(question);
+      }}
+    >
+      <input
+        data-testid="concierge-question"
+        className="relative z-10 min-h-11 min-w-0 flex-1 rounded-full border bg-background px-4 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 max-md:text-[0.8125rem] disabled:cursor-not-allowed disabled:opacity-60"
+        value={question}
+        onChange={(event) => setQuestion(event.target.value)}
+        placeholder={
+          coachUnavailable
+            ? "AI coach unavailable on this deployment"
+            : questionPlaceholder
+        }
+        disabled={coachUnavailable}
+        aria-disabled={coachUnavailable}
+      />
+      <Button
+        type="submit"
+        data-testid="concierge-ask"
+        className="relative z-20 h-11 shrink-0 rounded-full px-5 max-md:pointer-events-auto"
+        disabled={coachUnavailable || busy}
+        aria-disabled={
+          coachUnavailable || busy || question.trim().length === 0
+        }
+        title={coachUnavailable ? CHIP_DISABLED_REASON : undefined}
+      >
+        Ask
+      </Button>
+    </form>
+  );
+
+  if (mobileStickyDock) {
+    return (
+      <section
+        data-testid="concierge"
+        data-concierge-availability={availability}
+        data-coach-mobile-dock="sticky"
+        aria-label="Transaction concierge"
+        className={cn("flex min-h-0 flex-col max-md:min-w-0", className)}
+      >
+        <div
+          data-testid="concierge-scroll-region"
+          className="flex flex-col gap-3 py-4 max-md:overflow-visible max-md:py-3"
+        >
+          {scrollIntro && asked === null ? (
+            <div className="shrink-0">{scrollIntro}</div>
+          ) : null}
+          <div aria-live="polite" className="flex flex-col gap-3">
+            {renderConversation({
+              omitUserBubble: pinRestoredThreadOnMobile && asked !== null,
+            })}
+          </div>
+        </div>
+        <div
+          data-testid="concierge-mobile-dock"
+          className={cn(MOBILE_STICKY_DOCK, "max-md:min-w-0")}
+        >
+          {starterChips}
+          <div data-testid="concierge-compose">{composeForm}</div>
+        </div>
+        <div
+          className="max-md:h-[var(--coach-mobile-dock-clearance)] md:hidden"
+          aria-hidden
+        />
+      </section>
+    );
+  }
+
   return (
     <section
       data-testid="concierge"
@@ -383,45 +493,7 @@ export function ConciergeChat({
         )}
         data-testid="concierge-compose"
       >
-        <form
-          className={cn(
-            "flex w-full min-w-0 gap-2 border-t border-border/70 bg-card/95 shadow-[0_-8px_24px_-12px_rgba(15,23,42,0.14)] backdrop-blur md:bg-card md:shadow-none md:backdrop-blur-none",
-            mobilePinnedLayout ? "pt-2" : "pt-3",
-          )}
-          onSubmit={(event) => {
-            event.preventDefault();
-            if (coachUnavailable || question.trim().length === 0) {
-              return;
-            }
-            void submit(question);
-          }}
-        >
-          <input
-            data-testid="concierge-question"
-            className="relative z-10 min-h-11 min-w-0 flex-1 rounded-full border bg-background px-4 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 max-md:text-[0.8125rem] disabled:cursor-not-allowed disabled:opacity-60"
-            value={question}
-            onChange={(event) => setQuestion(event.target.value)}
-            placeholder={
-              coachUnavailable
-                ? "AI coach unavailable on this deployment"
-                : questionPlaceholder
-            }
-            disabled={coachUnavailable}
-            aria-disabled={coachUnavailable}
-          />
-          <Button
-            type="submit"
-            data-testid="concierge-ask"
-            className="relative z-20 h-11 shrink-0 rounded-full px-5 max-md:pointer-events-auto"
-            disabled={coachUnavailable || busy}
-            aria-disabled={
-              coachUnavailable || busy || question.trim().length === 0
-            }
-            title={coachUnavailable ? CHIP_DISABLED_REASON : undefined}
-          >
-            Ask
-          </Button>
-        </form>
+        {composeForm}
       </div>
     </section>
   );

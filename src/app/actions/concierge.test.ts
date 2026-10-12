@@ -61,6 +61,19 @@ describe("askConcierge", () => {
     expect(result).toEqual({ ok: false, reason: "FORBIDDEN" });
   });
 
+  it("returns SERVER_ERROR when fixture simulates concierge failure", async () => {
+    getTestSessionMock.mockResolvedValue({
+      clerkId: SEED_CLERK_IDS.buyerA,
+      name: "Alex",
+      role: "buyer",
+      transactionId: "seed:buyer-a",
+      simulateConciergeServerError: true,
+    });
+
+    const result = await ask("What happens next?");
+    expect(result).toEqual({ ok: false, reason: "SERVER_ERROR" });
+  });
+
   it("returns MODEL_KEY_NOT_CONFIGURED when fixture simulates missing key", async () => {
     getTestSessionMock.mockResolvedValue({
       clerkId: SEED_CLERK_IDS.buyerA,

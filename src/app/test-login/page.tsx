@@ -67,6 +67,16 @@ export default function TestLoginPage() {
           </form>
           <form
             action={startTestSessionFromForm}
+            data-testid="sign-in-alex-concierge-server-error"
+          >
+            <input type="hidden" name="clerkId" value={SEED_CLERK_IDS.buyerA} />
+            <input type="hidden" name="simulateConciergeServerError" value="1" />
+            <Button type="submit" variant="outline" className="w-full">
+              Alex Rivera — concierge server error (500)
+            </Button>
+          </form>
+          <form
+            action={startTestSessionFromForm}
             data-testid="sign-in-alex-coach-unavailable"
           >
             <input type="hidden" name="clerkId" value={SEED_CLERK_IDS.buyerA} />

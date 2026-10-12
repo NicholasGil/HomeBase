@@ -28,10 +28,13 @@ export type TestBuyerSession = {
   emptyCoachFile?: boolean;
   /** Fixture-only: exercise live-path fail-closed when no model key is set. */
   simulateModelKeyMissing?: boolean;
+  /** Fixture-only: concierge action returns SERVER_ERROR (proof + tests). */
+  simulateConciergeServerError?: boolean;
 };
 
 const EMPTY_COACH_FILE_MARKER = "empty";
 const SIMULATE_NO_MODEL_MARKER = "nomodel";
+const SIMULATE_CONCIERGE_ERROR_MARKER = "concierge500";
 
 export type TestVendorSession = {
   clerkId: typeof SEED_CLERK_IDS.lender;
@@ -104,6 +107,9 @@ function buyerSessionMarkers(session: TestBuyerSession): string[] {
   if (session.simulateModelKeyMissing) {
     markers.push(SIMULATE_NO_MODEL_MARKER);
   }
+  if (session.simulateConciergeServerError) {
+    markers.push(SIMULATE_CONCIERGE_ERROR_MARKER);
+  }
   return markers;
 }
 
@@ -122,13 +128,18 @@ function parseBuyerSessionMarkers(marker: string | undefined) {
   return {
     emptyCoachFile: parts.includes(EMPTY_COACH_FILE_MARKER),
     simulateModelKeyMissing: parts.includes(SIMULATE_NO_MODEL_MARKER),
+    simulateConciergeServerError: parts.includes(SIMULATE_CONCIERGE_ERROR_MARKER),
   };
 }
 
 export function startTestSessionDecision(
   clerkId: string,
   env: AuthEnv = process.env,
-  options?: { emptyCoachFile?: boolean; simulateModelKeyMissing?: boolean },
+  options?: {
+    emptyCoachFile?: boolean;
+    simulateModelKeyMissing?: boolean;
+    simulateConciergeServerError?: boolean;
+  },
 ): { ok: true; session: TestSession } | { ok: false; reason: "FORBIDDEN" } {
   if (!fixtureAllowed(env)) {
     return { ok: false, reason: "FORBIDDEN" };
@@ -189,6 +200,8 @@ export function startTestSessionDecision(
       transactionId: SEED_TRANSACTION_IDS[clerkId],
       emptyCoachFile: options?.emptyCoachFile === true,
       simulateModelKeyMissing: options?.simulateModelKeyMissing === true,
+      simulateConciergeServerError:
+        options?.simulateConciergeServerError === true,
     },
   };
 }
@@ -206,11 +219,12 @@ export function parseTestSessionCookie(
   if (clerkId === undefined || clerkId.length === 0) {
     return null;
   }
-  const { emptyCoachFile, simulateModelKeyMissing } =
+  const { emptyCoachFile, simulateModelKeyMissing, simulateConciergeServerError } =
     parseBuyerSessionMarkers(marker);
   const started = startTestSessionDecision(clerkId, env, {
     emptyCoachFile,
     simulateModelKeyMissing,
+    simulateConciergeServerError,
   });
   return started.ok ? started.session : null;
 }

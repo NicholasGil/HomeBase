@@ -56,7 +56,7 @@ export async function AppShell({
           >
             RealtyRise
           </Link>
-          <div className="ml-auto flex min-w-0 flex-1 items-center justify-end gap-1 sm:gap-2">
+          <div className="ml-auto flex min-w-0 flex-1 items-center justify-end gap-2 sm:gap-2">
             <DemoShellBadge />
             {nav}
             {liveNav ? (

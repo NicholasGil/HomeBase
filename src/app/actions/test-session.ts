@@ -23,10 +23,12 @@ export async function startTestSession(input: {
   clerkId: string;
   emptyCoachFile?: boolean;
   simulateModelKeyMissing?: boolean;
+  simulateConciergeServerError?: boolean;
 }) {
   const started = startTestSessionDecision(input.clerkId, process.env, {
     emptyCoachFile: input.emptyCoachFile,
     simulateModelKeyMissing: input.simulateModelKeyMissing,
+    simulateConciergeServerError: input.simulateConciergeServerError,
   });
   if (!started.ok) {
     return started;
@@ -51,10 +53,13 @@ export async function startTestSessionFromForm(formData: FormData) {
   const emptyCoachFile = formData.get("emptyCoachFile") === "1";
   const simulateModelKeyMissing =
     formData.get("simulateModelKeyMissing") === "1";
+  const simulateConciergeServerError =
+    formData.get("simulateConciergeServerError") === "1";
   const started = await startTestSession({
     clerkId,
     emptyCoachFile,
     simulateModelKeyMissing,
+    simulateConciergeServerError,
   });
   if (!started.ok) {
     redirect(fixtureEntryPath());

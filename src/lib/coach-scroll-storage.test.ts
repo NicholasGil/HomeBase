@@ -53,9 +53,15 @@ describe("coach scroll storage", () => {
     ).toBe("280");
   });
 
-  it("persists zero when leaving coach from the top", () => {
+  it("does not clobber positive depth with accidental zero write", () => {
     writeCoachScrollY(365, "/coach");
     writeCoachScrollY(0, "/coach");
+    expect(readCoachScrollY("/coach")).toBe(365);
+  });
+
+  it("persists zero when forced after user scroll-to-top", () => {
+    writeCoachScrollY(365, "/coach");
+    writeCoachScrollY(0, "/coach", { forceZero: true });
     expect(readCoachScrollY("/coach")).toBe(0);
     expect(
       store.get(coachScrollStorageKeyForEpoch("/coach", "1")),

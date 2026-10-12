@@ -33,17 +33,33 @@ export function readCoachScrollY(pathname: string): number | null {
   }
 }
 
-export function writeCoachScrollY(y: number, pathname: string): void {
+export function writeCoachScrollY(
+  y: number,
+  pathname: string,
+  options?: { forceZero?: boolean },
+): void {
   if (coachScrollEnterSaveBlocked()) {
     return;
   }
   syncCoachScrollEpochFromCookie();
+  const rounded = Math.max(0, Math.round(y));
+  if (rounded <= 0 && !options?.forceZero) {
+    const existing = readCoachScrollY(pathname);
+    if (existing !== null && existing > 0) {
+      return;
+    }
+  }
   const key = coachScrollStorageKey(pathname);
   try {
-    sessionStorage.setItem(key, String(Math.max(0, Math.round(y))));
+    sessionStorage.setItem(key, String(rounded));
   } catch {
     // Private mode / quota — ignore.
   }
+}
+
+/** Persona enter / explicit reset — may write zero even when depth was positive. */
+export function clearCoachScrollY(pathname: string): void {
+  writeCoachScrollY(0, pathname, { forceZero: true });
 }
 
 export function documentHasDemoCoachScrollResetCookie(): boolean {
@@ -83,8 +99,21 @@ export function applyCoachPersonaEnterClear(pathname: string): {
       // ignore
     }
   }
-  writeCoachScrollY(0, pathname);
+  clearCoachScrollY(pathname);
   return { cleared: true, epochChanged: sync.changed };
+}
+
+/** Pointerdown leave save — never clobber a positive stored depth with zero. */
+export function persistCoachScrollOnLeave(
+  scrollY: number,
+  lastCoachScrollY: number,
+  pathname: string,
+): void {
+  const y = coachScrollYForLeavePersist(scrollY, lastCoachScrollY);
+  if (y <= 0) {
+    return;
+  }
+  writeCoachScrollY(y, pathname);
 }
 
 export function normalizeCoachNavPath(path: string): string {

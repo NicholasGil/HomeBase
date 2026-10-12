@@ -203,10 +203,39 @@ test("coach @375 — leaving from top restores zero on return", async ({
     );
   });
   expect(storedAfterLeave).toBe("0");
-  await page.goto("/coach");
+  await page
+    .getByTestId("app-tab-bar")
+    .getByRole("link", { name: "Coach", exact: true })
+    .click();
   await page.waitForURL(/\/coach$/);
   await expect(page.getByTestId("coach-ten-second")).toBeVisible();
   await expectScrollStableNear(page, 0, 10);
+});
+
+test("transactions @375 — fresh drill navigation lands at top within 4px", async ({
+  page,
+}) => {
+  await signInAlexWithFile(page);
+  await scrollCoachTo(page, 387);
+  await page.getByTestId("ten-second-next").getByRole("link").click();
+  await page.waitForURL(/\/transactions\//);
+  await expectScrollStableNear(page, 0, 4);
+});
+
+test("transactions @375 — leaving for coach keeps manual history.scrollRestoration", async ({
+  page,
+}) => {
+  await signInAlexWithFile(page);
+  await page.getByTestId("ten-second-next").getByRole("link").click();
+  await page.waitForURL(/\/transactions\//);
+  await page
+    .getByTestId("app-tab-bar")
+    .getByRole("link", { name: "Coach", exact: true })
+    .click();
+  await page.waitForURL(/\/coach$/);
+  await expect
+    .poll(() => page.evaluate(() => history.scrollRestoration))
+    .toBe("manual");
 });
 
 test("transactions @375 — deep scroll survives Search tab back forward back", async ({

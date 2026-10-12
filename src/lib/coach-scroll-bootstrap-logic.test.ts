@@ -1,7 +1,6 @@
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
-
 import { describe, expect, it, vi } from "vitest";
+
+import { coachScrollRestoreOnPageShow } from "@/lib/coach-scroll-pageshow";
 
 import {
   COACH_SCROLL_STORAGE_KEY,
@@ -88,13 +87,12 @@ describe("coachScrollBootstrapScript", () => {
     expect(script).toContain("e.persisted");
   });
 
-  it("coach scroll restoration client registers pageshow bfcache restore", () => {
-    const source = readFileSync(
-      resolve(process.cwd(), "src/components/coach-scroll-restoration.tsx"),
-      "utf8",
+  it("pageshow bfcache restore gate matches client handler", () => {
+    expect(coachScrollRestoreOnPageShow({ persisted: true }, "/coach")).toBe(
+      true,
     );
-    expect(source).toContain("pageshow");
-    expect(source).toContain("event.persisted");
-    expect(source).toContain("popstate");
+    expect(coachScrollRestoreOnPageShow({ persisted: false }, "/coach")).toBe(
+      false,
+    );
   });
 });

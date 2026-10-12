@@ -52,12 +52,7 @@ test("coach file session @375 — scroll survives browser back for 1s", async ({
   const scrollBefore = await page.evaluate(() => window.scrollY);
   expect(scrollBefore).toBeGreaterThanOrEqual(300);
 
-  const txHref = await page.evaluate(() => {
-    const link = document.querySelector('a[href^="/transactions/"]');
-    return link?.getAttribute("href") ?? null;
-  });
-  expect(txHref).not.toBeNull();
-  await page.goto(txHref!);
+  await page.getByTestId("ten-second-next").getByRole("link").click();
   await page.waitForURL(/\/transactions\//);
   await page.goBack();
   await page.waitForURL(/\/coach$/);
@@ -78,6 +73,7 @@ test("coach file session @375 — tab return avoids a zero scroll frame", async 
   const savedY = await page.evaluate(() => window.scrollY);
   expect(savedY).toBeGreaterThanOrEqual(300);
 
+  // Tab-bar navigation (prod build; no page.goto) — zero-frame sampling below.
   await page
     .getByTestId("app-tab-bar")
     .getByRole("link", { name: "Search" })
@@ -98,6 +94,39 @@ test("coach file session @375 — tab return avoids a zero scroll frame", async 
   expect(samples.at(-1)).toBeGreaterThanOrEqual(300);
   for (const y of samples) {
     expect(Math.abs(y - savedY)).toBeLessThanOrEqual(10);
+  }
+});
+
+test("coach file session @375 — bfcache back restores saved scroll within 10px", async ({
+  page,
+}) => {
+  await signInAlexWithFile(page);
+  await page.evaluate(() => window.scrollTo(0, 372));
+  await page.waitForTimeout(150);
+  const savedY = await page.evaluate(() => window.scrollY);
+  expect(savedY).toBeGreaterThanOrEqual(300);
+
+  await page.evaluate(() => {
+    (window as unknown as { __coachPageShowPersisted?: boolean }).__coachPageShowPersisted =
+      undefined;
+    window.addEventListener(
+      "pageshow",
+      (event) => {
+        (window as unknown as { __coachPageShowPersisted?: boolean }).__coachPageShowPersisted =
+          event.persisted;
+      },
+      { once: true },
+    );
+  });
+  await page.getByTestId("ten-second-next").getByRole("link").click();
+  await page.waitForURL(/\/transactions\//);
+  await page.goBack();
+  await page.waitForURL(/\/coach$/);
+
+  for (let i = 0; i < 10; i += 1) {
+    const y = await page.evaluate(() => window.scrollY);
+    expect(y).toBeGreaterThanOrEqual(savedY - 10);
+    await page.waitForTimeout(100);
   }
 });
 

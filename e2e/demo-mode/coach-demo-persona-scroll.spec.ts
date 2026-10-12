@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+import { scrollCoachDeep } from "../helpers/coach-scroll-deep";
+
 test.use({
   viewport: { width: 375, height: 812 },
   hasTouch: true,
@@ -11,17 +13,6 @@ async function expectCoachOpensAtTop(page: import("@playwright/test").Page) {
   await page.waitForFunction(() => window.scrollY <= 10, undefined, {
     timeout: 8000,
   });
-}
-
-async function scrollCoachDeep(page: import("@playwright/test").Page, y = 380) {
-  await page.evaluate((target) => {
-    const max = Math.max(
-      0,
-      document.documentElement.scrollHeight - window.innerHeight,
-    );
-    window.scrollTo(0, Math.min(target, max));
-  }, y);
-  await page.waitForFunction(() => window.scrollY >= 120);
 }
 
 test("demo persona via chooser does not carry file coach scroll", async ({

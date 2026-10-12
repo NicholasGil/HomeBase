@@ -1,13 +1,10 @@
 import { writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
-const FIRST_SESSION_STARTERS = [
-  "What happens next?",
-  "What am I missing for this stage?",
-  "What's already on my file?",
-] as const;
+import { discoveryDockPreviewLabels } from "../src/lib/concierge-dock-chips";
+import { scrollCoachConciergeToEnd } from "./coach-dock-assertions";
 
 const TIP_SHA = process.env.FLUIDITY_TIP_SHA ?? "96c68c7";
 const REPORT_PATH = path.join(
@@ -26,10 +23,6 @@ async function signInAlexDiscoveryEmpty(page: import("@playwright/test").Page) {
   await page.goto("/test-login");
   await page.getByTestId("sign-in-alex-discovery-empty").getByRole("button").click();
   await expect(page).toHaveURL(/\/coach$/);
-}
-
-function conciergeScrollRegion(page: import("@playwright/test").Page) {
-  return page.getByTestId("concierge-scroll-region");
 }
 
 test("fluidity measure @375 — write report", async ({ page }) => {
@@ -53,21 +46,24 @@ test("fluidity measure @375 — write report", async ({ page }) => {
 
   const chips = page.getByLabel("Suggested questions").getByRole("button");
   const chipCount = await chips.count();
+  const moreVisible = await page.getByTestId("concierge-more-starters").isVisible();
   results.push({
-    section: "1b Exactly 3 starters",
-    pass: chipCount === 3,
-    detail: `count=${chipCount}`,
+    section: "1b Two dock starters + More",
+    pass: chipCount === 3 && moreVisible,
+    detail: `count=${chipCount}, more=${moreVisible}`,
   });
 
+  const dockLabels = discoveryDockPreviewLabels();
   const starterLabels: string[] = [];
-  for (const label of FIRST_SESSION_STARTERS) {
+  for (const label of dockLabels) {
     const visible = await page.getByRole("button", { name: label }).isVisible();
     starterLabels.push(`${label}: visible=${visible}`);
   }
   const labelsMatch =
     chipCount === 3 &&
+    moreVisible &&
     (await Promise.all(
-      FIRST_SESSION_STARTERS.map((l) =>
+      dockLabels.map((l) =>
         page.getByRole("button", { name: l }).isVisible(),
       ),
     )).every(Boolean);
@@ -79,7 +75,7 @@ test("fluidity measure @375 — write report", async ({ page }) => {
 
   const tapTargets: { label: string; w: number; h: number; pass: boolean }[] = [];
   let tapPass = true;
-  for (const label of FIRST_SESSION_STARTERS) {
+  for (const label of dockLabels) {
     const chip = page.getByRole("button", { name: label });
     const box = await chip.boundingBox();
     const w = box ? Math.round(box.width) : 0;
@@ -96,16 +92,13 @@ test("fluidity measure @375 — write report", async ({ page }) => {
       .join("; "),
   });
 
-  const scroll = conciergeScrollRegion(page);
-  await scroll.evaluate((el) => {
-    el.scrollTop = el.scrollHeight;
-  });
+  await scrollCoachConciergeToEnd(page);
 
   const compose = page.getByTestId("concierge-compose");
   const composeBox = await compose.boundingBox();
   const clearances: { label: string; clearancePx: number; pass: boolean }[] = [];
   let clearancePass = true;
-  for (const label of FIRST_SESSION_STARTERS) {
+  for (const label of dockLabels) {
     const chip = page.getByRole("button", { name: label });
     const chipBox = await chip.boundingBox();
     const bottom = chipBox ? chipBox.y + chipBox.height : 0;

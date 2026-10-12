@@ -1,9 +1,10 @@
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 import { COACH_FIRST_SESSION_STARTERS } from "../src/lib/coach-first-session";
+import { tapConciergeStarter } from "./concierge-dock-helpers";
 
 const PROOF_DIR = "proof/coach-starter-replies";
 const MIN_ASK_CLEARANCE_PX = 16;
@@ -57,6 +58,17 @@ async function expectAnswerBetweenChipsAndAsk(
   expect(composeBox).not.toBeNull();
   expect(chipBox).not.toBeNull();
 
+  const dock = page.getByTestId("concierge-mobile-dock");
+  if (await dock.isVisible()) {
+    const dockBox = await dock.boundingBox();
+    expect(dockBox).not.toBeNull();
+    expect(answerBox!.y + answerBox!.height).toBeLessThanOrEqual(dockBox!.y + 1);
+    await expect(page.getByTestId("concierge-user-question")).toBeVisible();
+    await expect(answer).toBeInViewport();
+    expect(answerBox!.height).toBeGreaterThan(20);
+    return;
+  }
+
   expect(threadBox!.y).toBeGreaterThanOrEqual(chipBox!.y - 2);
   expect(threadBox!.y + threadBox!.height).toBeLessThanOrEqual(
     composeBox!.y - MIN_ASK_CLEARANCE_PX + 1,
@@ -76,7 +88,7 @@ test.describe("coach first-session starter replies", () => {
       page,
     }) => {
       await signInAlexDiscoveryEmpty(page);
-      await page.getByRole("button", { name: label }).click();
+      await tapConciergeStarter(page, label);
 
       const thread = page.getByTestId("concierge-first-session-thread");
       const answer = thread.getByTestId("concierge-answer");

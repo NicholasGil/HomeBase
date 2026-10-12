@@ -1,0 +1,41 @@
+{
+  "baseURL": "http://localhost:3000",
+  "viewport": {
+    "width": 375,
+    "height": 812
+  },
+  "deviceScaleFactor": 2,
+  "gitSha": "456e546bec1c9ca5416e0c0f55710a7f3f039e1d",
+  "shots": [
+    {
+      "targetY": 90,
+      "savedY": 90,
+      "afterTab": 90,
+      "tabReturn": "/workspace/proof/coach-scroll-restore/y90-tab-return-375.png"
+    },
+    {
+      "targetY": 90,
+      "savedY": 90,
+      "afterSearchThenCoach": 90,
+      "searchThenCoach": "/workspace/proof/coach-scroll-restore/y90-search-then-coach-375.png",
+      "searchThenCoachCoachScrollY": 90
+    },
+    {
+      "targetY": 387,
+      "savedY": 387,
+      "afterTab": 387,
+      "tabReturn": "/workspace/proof/coach-scroll-restore/y387-tab-return-375.png"
+    },
+    {
+      "targetY": 387,
+      "savedY": 387,
+      "afterSearchThenCoach": 387,
+      "searchThenCoach": "/workspace/proof/coach-scroll-restore/y387-search-then-coach-375.png",
+      "searchThenCoachCoachScrollY": 387
+    }
+  ],
+  "txnProof": {
+    "redrillTopPin": "/workspace/proof/coach-scroll-restore/txn-redrill-top-pin-375.png",
+    "historyBackDepth": "/workspace/proof/coach-scroll-restore/txn-history-back-depth-375.png"
+  }
+}

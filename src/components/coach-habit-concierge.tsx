@@ -1,8 +1,15 @@
 "use client";
 
-import { useEffect, useSyncExternalStore, type ReactNode } from "react";
+import {
+  useCallback,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 
-import { ConciergeChat } from "@/components/concierge-chat";
+import {
+  ConciergeChat,
+  type ConciergeDockChipPreset,
+} from "@/components/concierge-chat";
 import { CoachDailyCheckIn } from "@/components/coach-daily-check-in";
 import {
   getCoachHabitSessionServerSnapshot,
@@ -24,6 +31,8 @@ export function CoachHabitConcierge({
   availability,
   showAgentLinkWhenUnavailable,
   starters,
+  allStarters,
+  dockChipPreset,
   pinStartersAboveScrollOnMobile,
   wrapMobileQuestionStarters,
   mobileStickyDockAboveTabBar,
@@ -41,6 +50,8 @@ export function CoachHabitConcierge({
   availability?: ConciergeAvailability;
   showAgentLinkWhenUnavailable?: boolean;
   starters?: readonly string[];
+  allStarters?: readonly string[];
+  dockChipPreset?: ConciergeDockChipPreset;
   pinStartersAboveScrollOnMobile?: boolean;
   wrapMobileQuestionStarters?: boolean;
   mobileStickyDockAboveTabBar?: boolean;
@@ -60,16 +71,16 @@ export function CoachHabitConcierge({
   const returnWithThread = repeatVisit && hasCoachThread(habitSnapshot);
   const hideColdOpenEmpty =
     firstSession && returnWithThread && initialTurn !== null;
-
   function handleTurnComplete(turn: CoachHabitTurn) {
     persistCoachHabitSessionTurn(storageKey, turn);
   }
 
-  useEffect(() => {
-    if (initialTurn !== null) {
-      onThreadActiveChange?.(true);
-    }
-  }, [initialTurn, onThreadActiveChange]);
+  const handleThreadActiveChange = useCallback(
+    (active: boolean) => {
+      onThreadActiveChange?.(active);
+    },
+    [onThreadActiveChange],
+  );
 
   return (
     <div
@@ -81,33 +92,35 @@ export function CoachHabitConcierge({
         className,
       )}
     >
-      {showDailyCheckIn ? (
-        <CoachDailyCheckIn
-          stageLabel={stageLabel}
-          firstName={firstName}
-          className="shrink-0"
-        />
-      ) : null}
       <ConciergeChat
         key={initialTurn?.asked ?? "idle"}
         className="min-h-0 flex-1 px-0 pb-0 pt-0"
         availability={availability}
         showAgentLinkWhenUnavailable={showAgentLinkWhenUnavailable}
         starters={starters}
+        allStarters={allStarters}
+        dockChipPreset={dockChipPreset}
         pinStartersAboveScrollOnMobile={pinStartersAboveScrollOnMobile}
         wrapMobileQuestionStarters={wrapMobileQuestionStarters}
         mobileStickyDockAboveTabBar={mobileStickyDockAboveTabBar}
         fileSummaryAboveThread={fileSummaryAboveThread}
-        onThreadActiveChange={onThreadActiveChange}
+        threadHeader={
+          showDailyCheckIn
+            ? (
+                <CoachDailyCheckIn
+                  stageLabel={stageLabel}
+                  firstName={firstName}
+                  className="shrink-0"
+                />
+              )
+            : null
+        }
+        onThreadActiveChange={handleThreadActiveChange}
         pinRestoredThreadOnMobile={
           !firstSession && repeatVisit && initialTurn !== null
         }
         scrollIntro={hideColdOpenEmpty ? undefined : scrollIntro}
-        idleHint={
-          returnWithThread && firstSession
-            ? "Your last answer is below — tap a starter or keep asking."
-            : idleHint
-        }
+        idleHint={idleHint}
         questionPlaceholder={questionPlaceholder}
         initialTurn={initialTurn}
         onTurnComplete={handleTurnComplete}

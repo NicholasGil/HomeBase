@@ -1,8 +1,14 @@
 import type { ConciergeAnswer, ConciergeFact } from "../../lib/llm/types";
 import { formatDisplayDateTime } from "../../convex/lib/displayTime";
-import { SEED_CONCIERGE, SEED_PLAN } from "../../convex/seedPlan";
+import { SEED_PLAN, SEED_VENDORS } from "../../convex/seedPlan";
+import { fixtureConciergeInspectionAt } from "@/lib/demo-fixture-dates";
+import { humanizeDemoMissingFragment } from "@/lib/demo-humanize-doc-id";
+import { DEMO_ATTEND_INSPECTION_TITLE } from "@/lib/demo-file-session-view";
 
 const AGENT_NAME = SEED_PLAN.agent.name;
+const DEMO_INSPECTOR_NAME =
+  SEED_VENDORS.find((vendor) => vendor.category === "inspectors")?.name ??
+  "Your inspector";
 
 function fact(facts: readonly ConciergeFact[], key: string) {
   return facts.find((row) => row.key === key) ?? null;
@@ -21,9 +27,27 @@ export function enrichDemoFileSessionAnswer(
   const normalized = question.trim().toLowerCase();
   const inspectionWhen = fact(facts, "inspection_when");
   const missing = fact(facts, "missing");
-  const missingItem = missing?.text.replace(/^Missing for [^:]+:\s*/i, "") ?? null;
+  const missingRaw =
+    missing?.text.replace(/^Missing for [^:]+:\s*/i, "").replace(/\.$/, "") ??
+    null;
+  const missingItem =
+    missingRaw === null ? null : humanizeDemoMissingFragment(missingRaw);
+
+  const nextFact = fact(facts, "next");
+  const attendInspectionNext =
+    nextFact?.text.includes(DEMO_ATTEND_INSPECTION_TITLE) === true;
 
   if (normalized.includes("happen") && normalized.includes("next")) {
+    if (attendInspectionNext) {
+      const when =
+        inspectionWhen?.text ??
+        `Inspection is at ${formatDisplayDateTime(fixtureConciergeInspectionAt())}.`;
+      return {
+        ...answer,
+        text: `Your next step is ${DEMO_ATTEND_INSPECTION_TITLE.toLowerCase()} — ${when.replace(/\.$/, "")}.\nYou're in the Inspection stage; ${AGENT_NAME} already scheduled the visit.`,
+        sources: answer.sources,
+      };
+    }
     return {
       ...answer,
       text: `${AGENT_NAME} is assigned to schedule your inspection — that's the open next task on this file.\nYou're in the Inspection stage; nothing else is queued ahead of that.`,
@@ -34,22 +58,23 @@ export function enrichDemoFileSessionAnswer(
   if (normalized.includes("inspection")) {
     const when =
       inspectionWhen?.text ??
-      `Inspection is at ${formatDisplayDateTime(SEED_CONCIERGE.inspectionStartsAt)}.`;
+      `Inspection is at ${formatDisplayDateTime(fixtureConciergeInspectionAt())}.`;
     const bring =
       "Bring photo ID, utility access, and any repair notes you already have.";
-    const gap = missingItem
-      ? `\nThe file still needs ${missingItem} before this stage clears.`
-      : "";
+    const gap =
+      !attendInspectionNext && missingItem
+        ? `\nThe file still needs ${missingItem} before this stage clears.`
+        : "";
     return {
       ...answer,
-      text: `${when}\n${bring}${gap}`,
+      text: `${when}\n${DEMO_INSPECTOR_NAME} is scheduled for the visit.\n${bring}${gap}`,
       sources: answer.sources,
     };
   }
 
   if (normalized.includes("missing")) {
     const line = missingItem
-      ? `Still missing for Inspection: ${missingItem}.`
+      ? `Still missing for Inspection: ${missingItem}`
       : "Nothing required is marked missing on this stage.";
     return {
       ...answer,

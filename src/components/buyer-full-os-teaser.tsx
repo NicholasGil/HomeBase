@@ -16,7 +16,7 @@ export function BuyerFullOsTeaser({ className }: { className?: string }) {
       data-testid="demo-full-os-teaser"
       className={cn(
         "rounded-2xl border border-border/80 bg-card px-4 py-4 shadow-sm md:px-5 md:py-5",
-        "pb-[calc(var(--tab-bar-height)+env(safe-area-inset-bottom)+0.5rem)] md:pb-5",
+        "pb-2 md:pb-5",
         className,
       )}
     >

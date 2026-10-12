@@ -5,6 +5,7 @@ import { useCallback, useState, type ReactNode } from "react";
 import { CoachFileSummaryCompact } from "@/components/coach-file-summary-compact";
 import { CoachHabitConcierge } from "@/components/coach-habit-concierge";
 import { CoachTenSecondReturnGate } from "@/components/coach-ten-second-return-gate";
+import type { ConciergeDockChipPreset } from "@/components/concierge-chat";
 import type { ConciergeAvailability } from "@/lib/concierge-availability";
 import type { BuyerDashboardView } from "../../convex/lib/dashboardView";
 import { cn } from "@/lib/utils";
@@ -21,6 +22,8 @@ export function CoachFileSessionShell({
   availability,
   showAgentLinkWhenUnavailable,
   starters,
+  allStarters,
+  dockChipPreset,
   pinStartersAboveScrollOnMobile,
   wrapMobileQuestionStarters,
   scrollIntro,
@@ -38,6 +41,8 @@ export function CoachFileSessionShell({
   availability?: ConciergeAvailability;
   showAgentLinkWhenUnavailable?: boolean;
   starters?: readonly string[];
+  allStarters?: readonly string[];
+  dockChipPreset?: ConciergeDockChipPreset;
   pinStartersAboveScrollOnMobile?: boolean;
   wrapMobileQuestionStarters?: boolean;
   scrollIntro?: ReactNode;
@@ -76,9 +81,11 @@ export function CoachFileSessionShell({
         availability={availability}
         showAgentLinkWhenUnavailable={showAgentLinkWhenUnavailable}
         starters={starters}
+        allStarters={allStarters}
+        dockChipPreset={dockChipPreset}
         pinStartersAboveScrollOnMobile={pinStartersAboveScrollOnMobile}
         wrapMobileQuestionStarters={wrapMobileQuestionStarters}
-        mobileStickyDockAboveTabBar={!firstSession}
+        mobileStickyDockAboveTabBar
         fileSummaryAboveThread={fileSummaryCompact}
         onThreadActiveChange={onThreadActiveChange}
         scrollIntro={scrollIntro}

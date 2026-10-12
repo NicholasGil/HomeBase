@@ -9,6 +9,8 @@ import {
 import { MoneyFigureView } from "@/components/money-figure-view";
 import { Badge } from "@/components/ui/badge";
 import type { BuyerDashboardView } from "../../convex/lib/dashboardView";
+import { journeyStepProgress } from "../../convex/lib/journeyLogic";
+import { coachFileNextDisplayLabel } from "@/lib/demo-file-session-view";
 import { waitingOnDisplayLabel } from "@/lib/waiting-on-label";
 import { cn } from "@/lib/utils";
 
@@ -103,8 +105,14 @@ export function TenSecondHeroGrid({
   const nextAssigneeLabel =
     view.next === null
       ? null
-      : (view.contacts.find((c) => c.role === view.next!.assigneeRole)?.name ??
-        view.next.assigneeRole);
+      : view.next.assigneeRole === "buyer"
+        ? (buyerName?.split(" ")[0] ?? "You")
+        : (view.contacts.find((c) => c.role === view.next!.assigneeRole)?.name ??
+          view.next.assigneeRole);
+  const { step: journeyStep, total: journeyTotal } = journeyStepProgress(
+    view.stages,
+  );
+  const nextTitle = coachFileNextDisplayLabel(view);
   const coachMobileStack =
     compact &&
     "max-md:grid-cols-1 max-md:[&_[data-testid=ten-second-where]]:order-1 max-md:[&_[data-testid=ten-second-owe]]:order-2 max-md:[&_[data-testid=ten-second-next]]:order-3 max-md:[&_[data-testid=journey-tracker]]:order-4 max-md:[&_[data-testid=ten-second-done]]:order-5 max-md:[&_[data-testid=ten-second-waiting]]:order-6";
@@ -118,6 +126,8 @@ export function TenSecondHeroGrid({
         at.grid,
         coachMobileStack,
         compact && "max-md:overflow-x-hidden",
+        compact &&
+          "max-md:[&_[data-testid=ten-second-done]]:hidden max-md:[&_[data-testid=ten-second-waiting]]:hidden",
       )}
     >
       <div
@@ -167,7 +177,7 @@ export function TenSecondHeroGrid({
         data-testid="ten-second-next"
         className={cn(
           "rounded-xl bg-sand px-4 py-3 lg:px-5 lg:py-6",
-          compact && "max-md:px-3 max-md:py-2",
+          compact && "max-md:px-3 max-md:py-1.5",
           at.next,
         )}
       >
@@ -182,6 +192,14 @@ export function TenSecondHeroGrid({
           </>
         ) : (
           <DrillLink href={drill} className="block">
+            {compact ? (
+              <p
+                className="text-eyebrow text-muted-foreground max-md:mb-1 md:hidden"
+                data-testid="coach-journey-step"
+              >
+                Step {journeyStep} of {journeyTotal}
+              </p>
+            ) : null}
             <span className="flex items-center justify-between gap-3">
               <span className="text-eyebrow font-medium uppercase tracking-[0.2em] text-next">
                 Next
@@ -194,7 +212,7 @@ export function TenSecondHeroGrid({
                 compact ? "text-h3" : "text-h2 lg:text-h1",
               )}
             >
-              {view.next.title}
+              {nextTitle}
             </span>
           </DrillLink>
         )}
@@ -204,7 +222,7 @@ export function TenSecondHeroGrid({
         data-testid="ten-second-owe"
         className={cn(
           "rounded-xl bg-sky px-4 py-3 lg:px-5 lg:py-6",
-          compact && "min-h-11",
+          compact && "min-h-0 max-md:px-3 max-md:py-2",
           at.owe,
         )}
       >

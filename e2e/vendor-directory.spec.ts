@@ -1,4 +1,6 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
+
+import { DEFAULT_FEATURE_FLAGS } from "../src/lib/flags";
 
 test("pipeline route shows locked upsell instead of vendor directory", async ({
   page,
@@ -44,7 +46,7 @@ test("vendor portal is one assigned file and expires", async ({ page }) => {
     "seed:buyer-a",
   );
   await expect(page.getByTestId("vendor-assignment-stage")).toContainText(
-    "inspection",
+    "Inspection",
   );
   await expect(page.getByText("Blair Chen")).toHaveCount(0);
   await expect(page.getByText("seed:buyer-b")).toHaveCount(0);
@@ -55,8 +57,7 @@ test("vendor portal is one assigned file and expires", async ({ page }) => {
   await expect(page.getByTestId("vendor-assignment")).toHaveCount(0);
 });
 
-test("feature flags stay off", async () => {
-  const { DEFAULT_FEATURE_FLAGS } = await import("../src/lib/flags");
+test("feature flags stay off", () => {
   expect(DEFAULT_FEATURE_FLAGS.FLAG_VENDOR_COMP).toBe(false);
 });
 

@@ -1,7 +1,9 @@
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
 
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
+
+import { assertComposeClearsTabBar } from "./coach-dock-assertions";
 
 const PROOF_DIR = path.join("proof", "design-holes");
 const VIEWPORT = { width: 375, height: 812 };
@@ -28,20 +30,6 @@ async function signInAlex(page: import("@playwright/test").Page) {
   await page.goto("/test-login");
   await page.getByRole("button", { name: "Sign in as Alex Rivera" }).click();
   await expect(page).toHaveURL(/\/coach$/);
-}
-
-async function assertComposeClearsTabBar(
-  page: import("@playwright/test").Page,
-) {
-  const compose = page.getByTestId("concierge-compose");
-  const tabBar = page.getByTestId("app-tab-bar");
-  const composeBox = await compose.boundingBox();
-  const tabBox = await tabBar.boundingBox();
-  expect(composeBox).not.toBeNull();
-  expect(tabBox).not.toBeNull();
-  const clearance = tabBox!.y - (composeBox!.y + composeBox!.height);
-  expect(clearance).toBeGreaterThanOrEqual(MIN_FAB_CLEARANCE_PX);
-  return clearance;
 }
 
 test("design holes proof @375 — screenshots + clearance", async ({ page }) => {

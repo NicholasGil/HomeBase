@@ -25,25 +25,6 @@ function dockTop(page) {
   });
 }
 
-async function askAndChipsVisible(page) {
-  return page.evaluate(() => {
-    const dock = document.querySelector('[data-testid="concierge-mobile-dock"]');
-    const ask = document.querySelector('[data-testid="concierge-ask"]');
-    const tab = document.querySelector('[data-testid="app-tab-bar"]');
-    if (!dock || !ask) return false;
-    const tabTop = tab?.getBoundingClientRect().top ?? window.innerHeight;
-    const askRect = ask.getBoundingClientRect();
-    const hit = document.elementFromPoint(
-      askRect.left + askRect.width / 2,
-      askRect.top + askRect.height / 2,
-    );
-    return (
-      askRect.bottom <= tabTop &&
-      hit?.closest('[data-testid="concierge-ask"]') !== null
-    );
-  });
-}
-
 async function answerReadable(page) {
   const top = await dockTop(page);
   if (top === null) return false;
@@ -145,10 +126,6 @@ async function main() {
     .click();
   await page.getByTestId("concierge-answer").waitFor();
   const answerReadableAfter = await answerReadable(page);
-  const summaryPresent = await page
-    .getByTestId("coach-file-summary-compact")
-    .isVisible()
-    .catch(() => false);
   await page.screenshot({
     path: path.join(OUT, "coach-after-answer-375.png"),
     fullPage: false,

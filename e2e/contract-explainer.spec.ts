@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("Ask my agent routes the section to the licensee thread", async ({
   page,

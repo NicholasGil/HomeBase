@@ -16,6 +16,8 @@
 /test-results/
 /blob-report/
 /playwright/.cache/
+**/trace.zip
+proof/**/e2e-tab-return-run/
 
 # next.js
 /.next/

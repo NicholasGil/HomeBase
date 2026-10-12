@@ -1,0 +1,10 @@
+{
+  "capturedAt": "2026-10-12T01:22:06.830Z",
+  "viewportWidth": 375,
+  "env": {
+    "VERCEL_ENV": "production",
+    "REALTYRISE_DEMO_MODE": "1"
+  },
+  "backScrollRestored": true,
+  "tabHiddenOnAskFocus": true
+}

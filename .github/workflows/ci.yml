@@ -35,3 +35,20 @@ jobs:
       - run: npm run test:e2e
         env:
           CI: true
+
+  playwright-demo:
+    name: playwright (demo mode)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e:demo
+        env:
+          CI: true
+          PLAYWRIGHT_DEMO_SUITE: "1"

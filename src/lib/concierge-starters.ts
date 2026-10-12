@@ -15,6 +15,9 @@ export const CONCIERGE_STARTERS = [
 
 export const FILE_SESSION_CONCIERGE_STARTERS = [
   "What happens next?",
-  "When's my inspection?",
+  "When is my inspection?",
   "What am I missing?",
 ] as const;
+
+/** Mobile demo dock @375: two preview chips plus More. */
+export const FILE_SESSION_DOCK_PREVIEW_COUNT = 2;

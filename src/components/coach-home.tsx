@@ -4,7 +4,14 @@ import { CoachFileSessionShell } from "@/components/coach-file-session-shell";
 import { CoachHabitConcierge } from "@/components/coach-habit-concierge";
 import { CoachReturnHeaderHint } from "@/components/coach-return-header-hint";
 import { ConciergeChat } from "@/components/concierge-chat";
-import { FILE_SESSION_CONCIERGE_STARTERS } from "@/lib/concierge-starters";
+import {
+  CONCIERGE_STARTERS,
+} from "@/lib/concierge-starters";
+import {
+  discoveryDockPreviewLabels,
+  fileSessionDockPreviewLabels,
+} from "@/lib/concierge-dock-chips";
+import type { ConciergeDockChipPreset } from "@/components/concierge-chat";
 import { BuyerFullOsTeaser } from "@/components/buyer-full-os-teaser";
 import {
   BuyerLockedUpsellRail,
@@ -28,6 +35,9 @@ import { cn } from "@/lib/utils";
 import { MessageCircle } from "lucide-react";
 import type { BuyerDashboardView } from "../../convex/lib/dashboardView";
 
+const FILE_SESSION_CONCIERGE_IDLE_HINT =
+  "Tap a starter below or ask about this transaction. I explain what is on this file; I do not advise.";
+
 export function CoachHome({
   scope,
   buyerName,
@@ -49,16 +59,29 @@ export function CoachHome({
   const firstName = buyerName.split(" ")[0] ?? buyerName;
   const showTenSecond = dashboardView !== null && !firstSession;
   const demoOsOpen = buyerFixtureOsUnlocked();
+  const demoFileSessionDock = !firstSession && buyerFixtureOsUnlocked();
   const conciergeStarters = firstSession
+    ? discoveryDockPreviewLabels()
+    : demoFileSessionDock
+      ? fileSessionDockPreviewLabels()
+      : CONCIERGE_STARTERS;
+  const conciergeAllStarters = firstSession
     ? COACH_FIRST_SESSION_STARTERS
-    : FILE_SESSION_CONCIERGE_STARTERS;
+    : demoFileSessionDock
+      ? CONCIERGE_STARTERS
+      : undefined;
+  const dockChipPreset: ConciergeDockChipPreset | undefined = firstSession
+    ? "discovery"
+    : demoFileSessionDock
+      ? "file-demo"
+      : undefined;
 
   return (
     <div
       data-testid="coach-home"
       className={cn(
         "grid gap-8 lg:grid-cols-[minmax(0,1fr)_min(100%,18rem)] lg:items-start",
-        !firstSession && "max-md:pb-[var(--coach-mobile-page-clearance)]",
+        habitStorageKey && "max-md:pb-[var(--coach-mobile-page-clearance)]",
       )}
     >
       <section
@@ -74,6 +97,7 @@ export function CoachHome({
           className={cn(
             "shrink-0 border-b border-border/70 px-5 pt-5 pb-4",
             firstSession && "max-md:pt-4 max-md:pb-3",
+            showTenSecond && "max-md:pt-4 max-md:pb-2",
           )}
         >
           <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
@@ -107,7 +131,7 @@ export function CoachHome({
             </p>
           ) : null}
           {showTenSecond ? (
-            <h1 className="mt-1 text-h3 font-semibold tracking-tight text-foreground md:text-h2">
+            <h1 className="mt-1 hidden text-h3 font-semibold tracking-tight text-foreground max-md:sr-only md:block md:text-h2">
               Your coach
             </h1>
           ) : null}
@@ -173,13 +197,14 @@ export function CoachHome({
             availability={availability}
             showAgentLinkWhenUnavailable={!firstSession}
             starters={conciergeStarters}
+            allStarters={conciergeAllStarters}
+            dockChipPreset={dockChipPreset}
             pinStartersAboveScrollOnMobile={!coachUnavailable}
-            wrapMobileQuestionStarters={firstSession}
+            wrapMobileQuestionStarters={false}
             scrollIntro={
               firstSession && !coachUnavailable
                 ? (
                     <EmptyState
-                      testId="coach-first-session-empty"
                       icon={MessageCircle}
                       title="Coach is on"
                       description={
@@ -197,11 +222,11 @@ export function CoachHome({
                   )
                 : undefined
             }
-            idleHint={
-              firstSession ? "Tap a starter or type a question." : undefined
-            }
             questionPlaceholder={
               firstSession ? "Ask about buying" : "Ask about your file"
+            }
+            idleHint={
+              firstSession ? undefined : FILE_SESSION_CONCIERGE_IDLE_HINT
             }
           />
         ) : null}
@@ -234,9 +259,11 @@ export function CoachHome({
             availability={availability}
             showAgentLinkWhenUnavailable={!firstSession}
             starters={conciergeStarters}
+            allStarters={conciergeAllStarters}
+            dockChipPreset={dockChipPreset}
             pinStartersAboveScrollOnMobile={!coachUnavailable}
-            wrapMobileQuestionStarters={firstSession}
-            mobileStickyDockAboveTabBar={!firstSession}
+            wrapMobileQuestionStarters={false}
+            mobileStickyDockAboveTabBar
             scrollIntro={
               firstSession && !coachUnavailable
                 ? (
@@ -259,13 +286,11 @@ export function CoachHome({
                   )
                 : undefined
             }
-            idleHint={
-              firstSession
-                ? "Tap a starter or type a question."
-                : undefined
-            }
             questionPlaceholder={
               firstSession ? "Ask about buying" : "Ask about your file"
+            }
+            idleHint={
+              firstSession ? undefined : FILE_SESSION_CONCIERGE_IDLE_HINT
             }
           />
         ) : null}
@@ -280,9 +305,11 @@ export function CoachHome({
             availability={availability}
             showAgentLinkWhenUnavailable={!firstSession}
             starters={conciergeStarters}
+            allStarters={conciergeAllStarters}
+            dockChipPreset={dockChipPreset}
             pinStartersAboveScrollOnMobile={!coachUnavailable}
-            wrapMobileQuestionStarters={firstSession}
-            mobileStickyDockAboveTabBar={!firstSession}
+            wrapMobileQuestionStarters={false}
+            mobileStickyDockAboveTabBar
             scrollIntro={
               firstSession && !coachUnavailable
                 ? (
@@ -305,13 +332,11 @@ export function CoachHome({
                   )
                 : undefined
             }
-            idleHint={
-              firstSession
-                ? "Tap a starter or type a question."
-                : undefined
-            }
             questionPlaceholder={
               firstSession ? "Ask about buying" : "Ask about your file"
+            }
+            idleHint={
+              firstSession ? undefined : FILE_SESSION_CONCIERGE_IDLE_HINT
             }
           />
         ) : null}

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 import {
   COMMAND_CENTER_CLIENT_COUNT,
@@ -15,7 +15,7 @@ test("agent sees eight clients with exceptions first", async ({ page }) => {
     "agent",
   );
   await expect(
-    page.getByTestId("app-nav").getByRole("link", { name: "Command center" }),
+    page.getByTestId("app-nav").getByRole("link", { name: "Command", exact: true }),
   ).toBeVisible();
   await expect(page.getByTestId("command-center")).toBeVisible();
   await expect(page.getByTestId("command-center-roster")).toBeVisible();

@@ -11,11 +11,14 @@ export function SearchQueryPill({
   value,
   onChange,
   name,
+  submitVariant = "next",
 }: {
   defaultValue?: string;
   value?: string;
   onChange?: (value: string) => void;
   name?: string;
+  /** Public demo uses primary (dark) instead of coral `next`. */
+  submitVariant?: "default" | "next";
 }) {
   return (
     <div className={searchPillClassName}>
@@ -42,7 +45,7 @@ export function SearchQueryPill({
       />
       <Button
         type="submit"
-        variant="next"
+        variant={submitVariant}
         className="rounded-full px-5"
         data-testid="search-submit"
       >

@@ -1,9 +1,10 @@
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
 
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 import { COACH_FIRST_SESSION_STARTERS } from "../src/lib/coach-first-session";
+import { tapConciergeStarter } from "./concierge-dock-helpers";
 import { BUYER_LOCKED_OS_PAYMENT_DISCLAIMER } from "../src/lib/buyer-shell";
 
 const PROOF_DIR = path.join("proof", "critiquito-holes");
@@ -86,7 +87,7 @@ test("critiquito holes proof @375 — design queue post-#56", async ({ page }) =
 
   await signInAlexDiscoveryEmpty(page);
   const starter = COACH_FIRST_SESSION_STARTERS[0];
-  await page.getByRole("button", { name: starter }).click();
+  await tapConciergeStarter(page, starter);
   await expect(
     page
       .getByTestId("concierge-first-session-thread")

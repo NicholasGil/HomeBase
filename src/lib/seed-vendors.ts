@@ -7,6 +7,7 @@ import {
 } from "../../convex/seedPlan";
 import { categoriesForStage } from "../../convex/lib/vendors";
 import { isDemoMode, type AuthEnv } from "@/lib/auth-config";
+import { fixtureLenderExpiresAt } from "@/lib/demo-fixture-dates";
 import { SEED_TRANSACTION_IDS } from "@/lib/test-session";
 
 export type SeedVendor = (typeof SEED_VENDORS)[number];
@@ -55,7 +56,7 @@ export function seedLenderAssignment(env: AuthEnv = process.env) {
     category: "lenders" as const,
     scope: demo ? ("loan_commitment" as const) : ("preapproval" as const),
     status: "active" as const,
-    expiresAt: Date.UTC(2026, 9, 30),
+    expiresAt: fixtureLenderExpiresAt(env),
     compensationModel: "none" as const,
     transaction: {
       transactionId: SEED_TRANSACTION_IDS[SEED_CLERK_IDS.buyerA],

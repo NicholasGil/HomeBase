@@ -3,6 +3,8 @@ import Link from "next/link";
 import { transactionHref } from "@/components/buyer-dashboard-view";
 import { MoneyFigureView } from "@/components/money-figure-view";
 import type { BuyerDashboardView } from "../../convex/lib/dashboardView";
+import { journeyStepProgress } from "../../convex/lib/journeyLogic";
+import { coachFileNextDisplayLabel } from "@/lib/demo-file-session-view";
 import { cn } from "@/lib/utils";
 
 /** Mobile file-session thread: keep stage, due today, and next visible above answers. */
@@ -13,8 +15,10 @@ export function CoachFileSummaryCompact({
   view: BuyerDashboardView;
   className?: string;
 }) {
-  const nextLabel = view.next?.title ?? "No open task";
+  const nextLabel =
+    view.next === null ? "No open task" : coachFileNextDisplayLabel(view);
   const owed = view.owedToday;
+  const { step, total } = journeyStepProgress(view.stages);
 
   return (
     <div
@@ -25,10 +29,18 @@ export function CoachFileSummaryCompact({
       )}
     >
       <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
-        <p className="font-medium text-foreground">{view.where.label}</p>
+        <div className="min-w-0">
+          <p className="font-medium text-foreground">{view.where.label}</p>
+          <p
+            className="text-eyebrow text-muted-foreground"
+            data-testid="coach-journey-step"
+          >
+            Step {step} of {total}
+          </p>
+        </div>
         <Link
           href={transactionHref(view.transactionId)}
-          className="text-eyebrow font-medium text-muted-foreground underline-offset-2 hover:underline"
+          className="inline-flex min-h-11 items-center px-2 text-eyebrow font-medium text-muted-foreground underline-offset-2 hover:underline"
         >
           View file
         </Link>

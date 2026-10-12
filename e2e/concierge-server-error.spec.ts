@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test.use({
   viewport: { width: 375, height: 812 },
@@ -13,7 +13,6 @@ test("concierge shows error and re-enables Ask on server failure @375", async ({
   await page.getByTestId("sign-in-alex-concierge-server-error").click();
   await expect(page).toHaveURL(/\/coach$/);
 
-  await page.getByTestId("concierge-ask").click();
   await page.getByTestId("concierge-question").fill("What happens next?");
   await page.getByTestId("concierge-ask").click();
 

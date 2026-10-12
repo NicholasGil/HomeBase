@@ -7,7 +7,10 @@ import {
   type ConciergeScope,
 } from "@/components/concierge-sheet";
 import type { ConciergeAvailability } from "@/lib/concierge-availability";
+import { CoachScrollBootstrap } from "@/components/coach-scroll-bootstrap";
+import { TransactionScrollPopBootstrap } from "@/components/transaction-scroll-pop-bootstrap";
 import { CoachScrollRestoration } from "@/components/coach-scroll-restoration";
+import { TransactionScrollRestoration } from "@/components/transaction-scroll-restoration";
 import { MobileTabBar } from "@/components/mobile-tab-bar";
 import { BUYER_COACH_HOME } from "@/lib/buyer-shell";
 import type { AppNavLink } from "@/lib/app-nav";
@@ -29,7 +32,10 @@ export function CoachAwareMain({
 
   return (
     <>
+      <CoachScrollBootstrap />
+      <TransactionScrollPopBootstrap />
       <CoachScrollRestoration />
+      <TransactionScrollRestoration />
       <main
         className={cn(
           "mx-auto max-w-5xl px-5 py-10",

@@ -17,6 +17,13 @@ const eslintConfig = defineConfig([
     "playwright-report/**",
     "test-results/**",
   ]),
+  {
+    files: ["e2e/**"],
+    rules: {
+      // Playwright fixture callbacks use a param often named `use`; not React's use().
+      "react-hooks/rules-of-hooks": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

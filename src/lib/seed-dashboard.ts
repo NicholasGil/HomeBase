@@ -5,6 +5,15 @@ import {
   SEED_PLAN,
   seedTransactionStatus,
 } from "../../convex/seedPlan";
+import {
+  fixtureInspectionDeadlineAt,
+  fixtureOwedTodayAsOf,
+} from "@/lib/demo-fixture-dates";
+import {
+  demoBookedInspectionTasks,
+  isDemoBuyerAClerk,
+} from "@/lib/demo-file-session-view";
+import { isDemoMode } from "@/lib/auth-config";
 
 export type TestBuyerClerkId =
   | (typeof SEED_CLERK_IDS)["buyerA"]
@@ -51,6 +60,16 @@ export function seedDashboardForClerkId(clerkId: string): BuyerDashboardView {
   }
   const current = SEED_PLAN.stages.find((stage) => stage.key === buyer.stage);
 
+  const owedAsOf = fixtureOwedTodayAsOf();
+  const inspectionDueAt = fixtureInspectionDeadlineAt();
+  const baseTasks = buyer.tasks.map((task) => ({ ...task }));
+  const tasks =
+    isDemoMode() &&
+    isDemoBuyerAClerk(clerkId) &&
+    buyer.stage === "inspection"
+      ? demoBookedInspectionTasks(baseTasks)
+      : baseTasks;
+
   return summarizeBuyerDashboard({
     transactionId,
     stage: buyer.stage,
@@ -60,16 +79,18 @@ export function seedDashboardForClerkId(clerkId: string): BuyerDashboardView {
       amountCents: buyer.owedToday.amountCents,
       currency: buyer.owedToday.currency,
       provenance: buyer.owedToday.provenance,
-      asOf: 0,
+      asOf: owedAsOf,
       label: buyer.owedToday.label,
     },
     propertyAddress: buyer.property,
-    tasks: buyer.tasks.map((task) => ({ ...task })),
+    tasks,
     stages: SEED_PLAN.stages,
     deadlines:
-      buyer.stage === "inspection"
-        ? [{ label: "Inspection due", at: 0 }]
-        : [],
+      buyer.stage === "inspection" && inspectionDueAt > 0
+        ? [{ label: "Inspection due", at: inspectionDueAt }]
+        : buyer.stage === "inspection"
+          ? [{ label: "Inspection due", at: 0 }]
+          : [],
     contacts: [{ name: SEED_PLAN.agent.name, role: "agent" }],
   });
 }

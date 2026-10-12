@@ -1,7 +1,7 @@
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
 
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 const PROOF_DIR = path.join("proof", "agent-cc-tensec");
 const VIEWPORT = { width: 375, height: 812 };
@@ -48,7 +48,9 @@ test("agent-cc tensec proof @375 — TS-001…003 + ACC-001", async ({ page }) =
   await expect(page.getByTestId("ten-second-done")).toContainText(
     "Sign purchase agreement",
   );
-  await expect(page.getByTestId("ten-second-waiting")).toContainText("agent");
+  await expect(page.getByTestId("ten-second-waiting")).toContainText(
+    "Casey Holt",
+  );
   await expect(page.getByTestId("ten-second-owe")).toContainText("$450.00");
   await page.screenshot({
     path: path.join(PROOF_DIR, "01-buyer-alex-coach-tensec-375.png"),

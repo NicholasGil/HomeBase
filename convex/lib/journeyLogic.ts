@@ -54,6 +54,15 @@ export function openBlockingTasks<T extends TaskLike>(
   );
 }
 
+export function journeyStepProgress(
+  stages: readonly JourneyStageView[],
+): { step: number; total: number } {
+  const sorted = sortStages(stages);
+  const currentIndex = sorted.findIndex((stage) => stage.state === "current");
+  const step = currentIndex === -1 ? 1 : currentIndex + 1;
+  return { step, total: sorted.length };
+}
+
 export function nextStageAfter(
   stages: readonly StageLike[],
   currentKey: string,

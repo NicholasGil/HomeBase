@@ -1,0 +1,70 @@
+{
+  "capturedAt": "2026-10-12T02:51:54.533Z",
+  "viewportWidth": 375,
+  "env": {
+    "VERCEL_ENV": "production",
+    "REALTYRISE_DEMO_MODE": "1"
+  },
+  "typedAskSubmits": true,
+  "backScrollRestoredPopstate": true,
+  "backScrollRestoredTab": true,
+  "noTopFlash": true,
+  "pages": {
+    "home": {
+      "path": "/",
+      "scrollWidth": 375,
+      "consoleErrorCount": 0,
+      "consoleErrors": [],
+      "http4xxCount": 0,
+      "http4xx": []
+    },
+    "demo": {
+      "path": "/demo",
+      "scrollWidth": 375,
+      "consoleErrorCount": 0,
+      "consoleErrors": [],
+      "http4xxCount": 0,
+      "http4xx": []
+    },
+    "coach": {
+      "path": "/coach",
+      "scrollWidth": 375,
+      "consoleErrorCount": 0,
+      "consoleErrors": [],
+      "http4xxCount": 0,
+      "http4xx": []
+    },
+    "vendor": {
+      "path": "/vendor",
+      "scrollWidth": 375,
+      "consoleErrorCount": 0,
+      "consoleErrors": [],
+      "http4xxCount": 0,
+      "http4xx": []
+    },
+    "agent": {
+      "path": "/agent",
+      "scrollWidth": 375,
+      "consoleErrorCount": 0,
+      "consoleErrors": [],
+      "http4xxCount": 0,
+      "http4xx": []
+    },
+    "pricing": {
+      "path": "/pricing",
+      "scrollWidth": 375,
+      "consoleErrorCount": 0,
+      "consoleErrors": [],
+      "http4xxCount": 0,
+      "http4xx": []
+    },
+    "brokerage_onboarding": {
+      "path": "/brokerage/onboarding",
+      "scrollWidth": 375,
+      "consoleErrorCount": 0,
+      "consoleErrors": [],
+      "http4xxCount": 0,
+      "http4xx": []
+    }
+  }
+}

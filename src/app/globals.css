@@ -126,8 +126,8 @@
   );
   /* Scroll-end spacer so max vertical scroll clears the docked Ask row. */
   --coach-compose-inset: calc(2.75rem + 1rem);
-  /* File-session mobile dock: chip row + Ask (above tab bar), ~117px. */
-  --coach-mobile-dock-height: 117px;
+  /* Mobile coach dock: 2 chips + More + Ask (measured @375 ≈132px). */
+  --coach-mobile-dock-height: 132px;
   --coach-mobile-page-clearance: calc(
     var(--coach-mobile-dock-height) + env(safe-area-inset-bottom)
   );

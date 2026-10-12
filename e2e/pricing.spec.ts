@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 import { BUYER_LOCKED_OS_PAYMENT_DISCLAIMER } from "../src/lib/buyer-shell";
 

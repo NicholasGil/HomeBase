@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   assertReplaceableStages,
   decorateStages,
+  journeyStepProgress,
   nextStageAfter,
   openBlockingTasks,
 } from "./journeyLogic";
@@ -21,6 +22,11 @@ describe("journey logic", () => {
       "current",
       "upcoming",
     ]);
+  });
+
+  it("reports journey step index from decorated stages", () => {
+    const view = decorateStages(stages, "inspection");
+    expect(journeyStepProgress(view)).toEqual({ step: 2, total: 3 });
   });
 
   it("treats open and blocked blocking tasks as holds", () => {

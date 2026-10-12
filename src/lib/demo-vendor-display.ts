@@ -38,7 +38,7 @@ export function formatFixtureVendorExpiry(ms: number): string {
   }).format(new Date(ms));
 }
 
-export function fixtureVendorTaskLabel(scope: string, _stage: string): string {
+export function fixtureVendorTaskLabel(scope: string): string {
   if (scope === "loan_commitment") {
     return "Confirm loan commitment";
   }

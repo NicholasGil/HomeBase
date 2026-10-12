@@ -1,10 +1,8 @@
-import { expect, type Locator, type Page, test } from "@playwright/test";
+import { expect, type Locator, type Page, test } from "./fixtures";
 
 const MOBILE = { width: 375, height: 812 };
 const DESKTOP = { width: 1280, height: 800 };
 const FAB_SIZE = 56;
-const SUGGESTION_CHIPS = 8;
-
 async function signInAs(page: Page, name: string) {
   await page.goto("/test-login");
   await page.getByRole("button", { name: `Sign in as ${name}` }).click();
@@ -15,6 +13,34 @@ function conciergeAnswerInScroll(page: Page) {
   return page
     .getByTestId("concierge-scroll-region")
     .getByTestId("concierge-answer");
+}
+
+async function askCanonicalQuestion(page: Page, label: string) {
+  const aliases =
+    label === "When's my inspection?" || label === "When is my inspection?"
+      ? ["When is my inspection?", "When's my inspection?"]
+      : [label];
+  for (const name of aliases) {
+    const chip = page.getByRole("button", { name, exact: true });
+    if ((await chip.count()) > 0) {
+      await chip.first().click();
+      return;
+    }
+  }
+  const more = page.getByTestId("concierge-more-starters");
+  if (await more.isVisible()) {
+    await more.click();
+    const sheet = page.getByTestId("concierge-more-starters-sheet");
+    const sheetChip = sheet.getByRole("button", { name: aliases[0], exact: true });
+    await expect(sheetChip).toBeVisible();
+    await sheetChip.click();
+    return;
+  }
+  const dockChip = page
+    .getByLabel("Suggested questions")
+    .getByRole("button", { name: aliases[0], exact: true });
+  await expect(dockChip).toBeVisible();
+  await dockChip.click();
 }
 
 async function edges(locator: Locator) {
@@ -45,7 +71,7 @@ test("concierge answers a seed question and refuses another client", async ({
   await page.getByRole("button", { name: "What happens next?" }).click();
   await expect(answer).toContainText("Schedule inspection");
 
-  await page.getByRole("button", { name: "When is my inspection?" }).click();
+  await askCanonicalQuestion(page, "When is my inspection?");
   await expect(answer).toContainText(
     "Inspection is at Tue, Sep 8, 2026, 10:00 AM CDT.",
   );
@@ -61,7 +87,7 @@ test("concierge answers a seed question and refuses another client", async ({
 });
 
 test.describe("coach home concierge", () => {
-  test("shows transaction scope, eight chips, and locked upsell rail", async ({
+  test("shows transaction scope, suggestion chips, and locked upsell rail", async ({
     page,
   }) => {
     await signInAs(page, "Alex Rivera");
@@ -77,7 +103,7 @@ test.describe("coach home concierge", () => {
     await expect(scope).toContainText("Personal coach");
 
     const chips = page.getByLabel("Suggested questions").getByRole("button");
-    await expect(chips).toHaveCount(SUGGESTION_CHIPS);
+    await expect(chips).toHaveCount(8);
     for (const chip of await chips.all()) {
       const box = await chip.boundingBox();
       expect(box).not.toBeNull();
@@ -87,6 +113,36 @@ test.describe("coach home concierge", () => {
     await expect(page.getByTestId("locked-upsell-rail")).toBeVisible();
     await expect(page.getByTestId("locked-upsell-rail-summary")).toBeHidden();
     await expect(page.getByTestId("locked-upsell-search")).toBeVisible();
+  });
+
+  test("answers all eight canonical questions on the file session", async ({
+    page,
+  }) => {
+    await signInAs(page, "Alex Rivera");
+    const answer = conciergeAnswerInScroll(page);
+
+    const expectations: { label: string; snippet: string }[] = [
+      { label: "What happens next?", snippet: "Schedule inspection" },
+      {
+        label: "When is my inspection?",
+        snippet: "Inspection is at Tue, Sep 8, 2026, 10:00 AM CDT.",
+      },
+      { label: "What am I missing?", snippet: "repair_request" },
+      { label: "How much cash will I need?", snippet: "$450.00" },
+      { label: "What did the inspection find?", snippet: "Roof and HVAC" },
+      { label: "What changed in the counteroffer?", snippet: "$430,000.00" },
+      { label: "Who is my lender?", snippet: "Jordan Hale" },
+      {
+        label: "When do I leave for my first showing?",
+        snippet: "Leave for the first showing at Sat, Sep 5, 2026, 2:00 PM CDT.",
+      },
+    ];
+
+    for (const { label, snippet } of expectations) {
+      await askCanonicalQuestion(page, label);
+      await expect(answer).toHaveAttribute("data-kind", "answer");
+      await expect(answer).toContainText(snippet);
+    }
   });
 
   test("coach tours learn more opens the locked tours gate", async ({ page }) => {
@@ -106,7 +162,7 @@ test.describe("coach home concierge", () => {
     await signInAs(page, "Alex Rivera");
     await expect(page.getByTestId("concierge")).toBeVisible();
 
-    await page.getByRole("button", { name: "How much cash will I need?" }).click();
+    await askCanonicalQuestion(page, "How much cash will I need?");
     const answer = conciergeAnswerInScroll(page);
     await expect(answer).toHaveAttribute("data-kind", "answer");
     await expect(answer.locator("[data-provenance='title_issued']")).toBeVisible();

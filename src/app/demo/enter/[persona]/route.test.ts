@@ -1,0 +1,255 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import {
+  TEST_SESSION_COOKIE,
+  TEST_SESSION_MAX_AGE_SECONDS,
+} from "@/lib/test-session";
+import { VENDOR_EXPIRY_COOKIE } from "@/lib/vendor-access";
+
+describe("GET /demo/enter/[persona]", () => {
+  beforeEach(() => {
+    vi.resetModules();
+    vi.unstubAllEnvs();
+  });
+
+  async function loadGet() {
+    const mod = await import("./route");
+    return mod.GET;
+  }
+
+  it("throws when demo mode is on but Clerk keys are configured in production", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("REALTYRISE_DEMO_MODE", "1");
+    vi.stubEnv("CLERK_SECRET_KEY", "sk_test");
+    vi.stubEnv("NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", "pk_test");
+
+    const GET = await loadGet();
+    await expect(
+      GET(new Request("http://localhost/demo/enter/buyer-coach"), {
+        params: Promise.resolve({ persona: "buyer-coach" }),
+      }),
+    ).rejects.toMatchObject({ name: "ProductionAuthMisconfiguredError" });
+  });
+
+  it("throws when demo mode is off even if fixtures are allowed locally", async () => {
+    vi.stubEnv("VERCEL_ENV", "development");
+    vi.stubEnv("REALTYRISE_DEMO_MODE", "0");
+
+    const GET = await loadGet();
+    await expect(
+      GET(new Request("http://localhost/demo/enter/agent"), {
+        params: Promise.resolve({ persona: "agent" }),
+      }),
+    ).rejects.toMatchObject({ name: "ProductionAuthMisconfiguredError" });
+  });
+
+  it("throws when both fixture and demo gates are closed", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("REALTYRISE_DEMO_MODE", "0");
+
+    const GET = await loadGet();
+    await expect(
+      GET(new Request("http://localhost/demo/enter/vendor"), {
+        params: Promise.resolve({ persona: "vendor" }),
+      }),
+    ).rejects.toMatchObject({ name: "ProductionAuthMisconfiguredError" });
+  });
+
+  it("throws when both gates are closed even for prefetch requests", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("REALTYRISE_DEMO_MODE", "0");
+
+    const GET = await loadGet();
+    await expect(
+      GET(
+        new Request("http://localhost/demo/enter/buyer-coach", {
+          headers: { Purpose: "prefetch" },
+        }),
+        {
+          params: Promise.resolve({ persona: "buyer-coach" }),
+        },
+      ),
+    ).rejects.toMatchObject({ name: "ProductionAuthMisconfiguredError" });
+  });
+
+  it("redirects unknown persona to the demo chooser without setting a cookie", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("REALTYRISE_DEMO_MODE", "1");
+    vi.stubEnv("CLERK_SECRET_KEY", "");
+    vi.stubEnv("NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", "");
+
+    const GET = await loadGet();
+    const response = await GET(
+      new Request("http://localhost/demo/enter/not-a-persona"),
+      {
+        params: Promise.resolve({ persona: "not-a-persona" }),
+      },
+    );
+
+    expect(response.status).toBeGreaterThanOrEqual(300);
+    expect(response.status).toBeLessThan(400);
+    expect(response.headers.get("location")).toBe("/demo");
+    expect(response.cookies.get(TEST_SESSION_COOKIE)).toBeUndefined();
+  });
+
+  it("returns 204 without a cookie for Chrome prerender Sec-Purpose", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("REALTYRISE_DEMO_MODE", "1");
+    vi.stubEnv("CLERK_SECRET_KEY", "");
+    vi.stubEnv("NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", "");
+
+    const GET = await loadGet();
+    const response = await GET(
+      new Request("http://localhost/demo/enter/buyer-coach", {
+        headers: { "Sec-Purpose": "prefetch;prerender" },
+      }),
+      {
+        params: Promise.resolve({ persona: "buyer-coach" }),
+      },
+    );
+
+    expect(response.status).toBe(204);
+    expect(response.cookies.get(TEST_SESSION_COOKIE)).toBeUndefined();
+  });
+
+  it("returns 204 without a cookie for private prefetch Sec-Purpose", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("REALTYRISE_DEMO_MODE", "1");
+    vi.stubEnv("CLERK_SECRET_KEY", "");
+    vi.stubEnv("NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", "");
+
+    const GET = await loadGet();
+    const response = await GET(
+      new Request("http://localhost/demo/enter/buyer-coach", {
+        headers: { "Sec-Purpose": "prefetch;anonymous-client-ip" },
+      }),
+      {
+        params: Promise.resolve({ persona: "buyer-coach" }),
+      },
+    );
+
+    expect(response.status).toBe(204);
+    expect(response.cookies.get(TEST_SESSION_COOKIE)).toBeUndefined();
+  });
+
+  it("returns 204 without a cookie for next-router-prefetch requests", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("REALTYRISE_DEMO_MODE", "1");
+    vi.stubEnv("CLERK_SECRET_KEY", "");
+    vi.stubEnv("NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", "");
+
+    const GET = await loadGet();
+    const response = await GET(
+      new Request("http://localhost/demo/enter/buyer-coach", {
+        headers: { "next-router-prefetch": "1" },
+      }),
+      {
+        params: Promise.resolve({ persona: "buyer-coach" }),
+      },
+    );
+
+    expect(response.status).toBe(204);
+    expect(response.cookies.get(TEST_SESSION_COOKIE)).toBeUndefined();
+  });
+
+  it("returns 204 without a cookie for prefetch requests", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("REALTYRISE_DEMO_MODE", "1");
+    vi.stubEnv("CLERK_SECRET_KEY", "");
+    vi.stubEnv("NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", "");
+
+    const GET = await loadGet();
+    const response = await GET(
+      new Request("http://localhost/demo/enter/buyer-coach", {
+        headers: { Purpose: "prefetch" },
+      }),
+      {
+        params: Promise.resolve({ persona: "buyer-coach" }),
+      },
+    );
+
+    expect(response.status).toBe(204);
+    expect(response.cookies.get(TEST_SESSION_COOKIE)).toBeUndefined();
+  });
+
+  it("sets the test-session cookie and redirects buyer-coach to /coach", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("REALTYRISE_DEMO_MODE", "1");
+    vi.stubEnv("CLERK_SECRET_KEY", "");
+    vi.stubEnv("NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", "");
+
+    const GET = await loadGet();
+    const response = await GET(
+      new Request("http://localhost/demo/enter/buyer-coach"),
+      {
+        params: Promise.resolve({ persona: "buyer-coach" }),
+      },
+    );
+
+    expect(response.status).toBeGreaterThanOrEqual(300);
+    expect(response.status).toBeLessThan(400);
+    expect(response.headers.get("location")).toBe("/coach");
+    const cookie = response.cookies.get(TEST_SESSION_COOKIE);
+    expect(cookie?.value).toMatch(/^clerk_buyer_a/);
+    expect(cookie?.maxAge).toBe(TEST_SESSION_MAX_AGE_SECONDS);
+    expect(cookie?.secure).toBe(true);
+    expect(cookie?.httpOnly).toBe(true);
+    expect(cookie?.sameSite).toBe("lax");
+  });
+
+  it("clears vendor expiry cookie when entering as vendor", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("REALTYRISE_DEMO_MODE", "1");
+    vi.stubEnv("CLERK_SECRET_KEY", "");
+    vi.stubEnv("NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", "");
+
+    const GET = await loadGet();
+    const response = await GET(
+      new Request("http://localhost/demo/enter/vendor"),
+      {
+        params: Promise.resolve({ persona: "vendor" }),
+      },
+    );
+
+    expect(response.headers.get("location")).toBe("/vendor");
+    expect(response.cookies.get(VENDOR_EXPIRY_COOKIE)?.value).toBe("");
+  });
+
+  it("redirects with a root-relative Location on the request host (not hardcoded localhost)", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("REALTYRISE_DEMO_MODE", "1");
+    vi.stubEnv("CLERK_SECRET_KEY", "");
+    vi.stubEnv("NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", "");
+
+    const GET = await loadGet();
+    const response = await GET(
+      new Request("https://realtyrise.app/demo/enter/buyer-coach"),
+      {
+        params: Promise.resolve({ persona: "buyer-coach" }),
+      },
+    );
+
+    expect(response.headers.get("location")).toBe("/coach");
+  });
+
+  it("redirects buyer-discovery to /coach with discovery-empty session marker", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("REALTYRISE_DEMO_MODE", "1");
+    vi.stubEnv("CLERK_SECRET_KEY", "");
+    vi.stubEnv("NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", "");
+
+    const GET = await loadGet();
+    const response = await GET(
+      new Request("http://localhost/demo/enter/buyer-discovery"),
+      {
+        params: Promise.resolve({ persona: "buyer-discovery" }),
+      },
+    );
+
+    expect(response.headers.get("location")).toBe("/coach");
+    const cookie = response.cookies.get(TEST_SESSION_COOKIE);
+    expect(cookie?.value).toContain("empty");
+  });
+});

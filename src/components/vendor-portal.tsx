@@ -113,10 +113,7 @@ function AssignmentPanel({
 }) {
   const demo = isDemoMode();
   const fileLabel = fixtureVendorFileLabel(assignment);
-  const taskLabel = fixtureVendorTaskLabel(
-    assignment.scope,
-    assignment.transaction.stage,
-  );
+  const taskLabel = fixtureVendorTaskLabel(assignment.scope);
   const stageLabel = fixtureVendorStageLabel(assignment.transaction.stage);
 
   return (
